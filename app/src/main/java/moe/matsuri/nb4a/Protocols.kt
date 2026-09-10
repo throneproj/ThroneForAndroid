@@ -97,7 +97,10 @@ object Protocols {
                 is MieruBean -> sb.append(":u=").append(b.username)
                     .append(":p=").append(b.password)
 
-                is HttpBean, is SOCKSBean -> sb.append(":u=").append(b.username)
+                is HttpBean -> sb.append(":u=").append(b.username)
+                    .append(":p=").append(b.password)
+
+                is SOCKSBean -> sb.append(":u=").append(b.username)
                     .append(":p=").append(b.password)
             }
             return sb.toString()
