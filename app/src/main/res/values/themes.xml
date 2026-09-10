@@ -630,8 +630,9 @@
         <item name="cardElevatedSurfaceColor">@color/card_elevated_verdant_mint</item>
     </style>
 
-    <!-- AMOLED 纯黑 overlay：夜间模式下经 Theme.apply/applyDialog 叠加，仅覆盖背景/表面/卡片提升色 -->
-    <style name="Theme.SagerNet.Amoled">
+    <!-- AMOLED 纯黑 overlay：夜间模式下经 Theme.apply/applyDialog 叠加，仅覆盖背景/表面/卡片提升色。
+         parent="" 显式断开点号命名的隐式继承（否则会整包叠加 Theme.SagerNet 基础主题，锁死主题色） -->
+    <style name="Theme.SagerNet.Amoled" parent="">
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:colorBackground">@android:color/black</item>
         <item name="colorSurface">@android:color/black</item>
