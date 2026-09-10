@@ -40,12 +40,13 @@ class B64DecodeTest {
     @Test
     fun decodesUrlSafeAlphabet() {
         // 标准字母表 "+/8=" 与 URL-safe "-_8"（缺 padding）解码结果一致
+        // 位序列：62(111110) 63(111111) 60(111100) → 0xFB 0xFF
         val standard = Util.b64Decode("+/8=")
         val urlSafe = Util.b64Decode("-_8")
 
         assertArrayEquals(standard, urlSafe)
         assertEquals(0xFB, standard[0].toInt() and 0xFF)
-        assertEquals(0xFC, standard[1].toInt() and 0xFF)
+        assertEquals(0xFF, standard[1].toInt() and 0xFF)
     }
 
     @Test
@@ -58,8 +59,9 @@ class B64DecodeTest {
 
     @Test
     fun throwsReadableErrorOnInvalidInput() {
+        // 5 个合法字符：标准/URL 解码器因长度模 4 余 1 失败，MIME 解码器因悬挂字符失败
         val exception = assertThrows(IllegalStateException::class.java) {
-            Util.b64Decode("!!!not-base64!!!")
+            Util.b64Decode("abcde")
         }
 
         assertEquals("Cannot decode base64", exception.message)
@@ -68,7 +70,9 @@ class B64DecodeTest {
     @Test
     fun roundTripsWithUrlSafeEncoder() {
         val original = "sample-payload-with-url-unsafe-chars-+/="
-        val encoded = Util.b64EncodeUrlSafe(original)
+        // b64EncodeUrlSafe 依赖 Android Base64（JVM 桩不可用），此处用 java 编码器构造输入
+        val encoded = java.util.Base64.getUrlEncoder().withoutPadding()
+            .encodeToString(original.toByteArray())
         val decoded = String(Util.b64Decode(encoded))
 
         assertEquals(original, decoded)

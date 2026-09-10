@@ -2,23 +2,21 @@ package io.nekohasekai.sagernet.ktx
 
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ParseProxiesTest {
 
-    private fun vmessLink(name: String, id: String): String {
-        val json = "{\"v\":\"2\",\"ps\":\"$name\",\"add\":\"srv.example.com\"," +
-                "\"port\":\"443\",\"id\":\"$id\",\"aid\":\"0\",\"net\":\"tcp\"," +
-                "\"type\":\"none\",\"host\":\"\",\"path\":\"\",\"tls\":\"\"}"
-        return "vmess://" + java.util.Base64.getEncoder().encodeToString(json.toByteArray())
+    // 使用 vless 标准 URL 格式构造测试链接（vmess JSON 路径依赖 Android TextUtils，JVM 不可测）
+    private fun vlessLink(name: String, id: String): String {
+        return "vless://$id@srv.example.com:443?encryption=none&type=tcp&security=tls" +
+                "&sni=srv.example.com#$name"
     }
 
     @Test
     fun multipleLinksOnSingleLineAreSplitByScheme() = runBlocking {
-        val text = vmessLink("node1", "00000000-0000-0000-0000-000000000001") +
-                " " + vmessLink("node2", "00000000-0000-0000-0000-000000000002")
+        val text = vlessLink("node1", "00000000-0000-0000-0000-000000000001") +
+                " " + vlessLink("node2", "00000000-0000-0000-0000-000000000002")
 
         val beans = parseProxies(text)
 
@@ -31,7 +29,7 @@ class ParseProxiesTest {
 
     @Test
     fun mixedTextWithSubscriptionLinkDoesNotInterruptParsing() = runBlocking {
-        val text = vmessLink("node1", "00000000-0000-0000-0000-000000000001") + "\n" +
+        val text = vlessLink("node1", "00000000-0000-0000-0000-000000000001") + "\n" +
                 "clash://install-config?url=https%3A%2F%2Fexample.com%2Fsub"
 
         val beans = parseProxies(text)
@@ -52,8 +50,8 @@ class ParseProxiesTest {
     @Test
     fun lineParseResultIsPreferredWhenCountsEqual() = runBlocking {
         // 每行一条链接：行级解析与链接级解析结果数量一致，应采用行级结果
-        val text = vmessLink("node1", "00000000-0000-0000-0000-000000000001") + "\n" +
-                vmessLink("node2", "00000000-0000-0000-0000-000000000002")
+        val text = vlessLink("node1", "00000000-0000-0000-0000-000000000001") + "\n" +
+                vlessLink("node2", "00000000-0000-0000-0000-000000000002")
 
         val beans = parseProxies(text)
 
@@ -62,7 +60,7 @@ class ParseProxiesTest {
 
     @Test
     fun blankLinesAreIgnored() = runBlocking {
-        val text = "\n" + vmessLink("node1", "00000000-0000-0000-0000-000000000001") + "\n\n"
+        val text = "\n" + vlessLink("node1", "00000000-0000-0000-0000-000000000001") + "\n\n"
 
         val beans = parseProxies(text)
 
@@ -71,8 +69,8 @@ class ParseProxiesTest {
 
     @Test
     fun malformedLinkInMixedTextIsSkippedNotThrown() = runBlocking {
-        val text = vmessLink("node1", "00000000-0000-0000-0000-000000000001") + "\n" +
-                "vmess://not-a-valid-base64!!!"
+        val text = vlessLink("node1", "00000000-0000-0000-0000-000000000001") + "\n" +
+                "vmess://not a valid link"
 
         val beans = parseProxies(text)
 
