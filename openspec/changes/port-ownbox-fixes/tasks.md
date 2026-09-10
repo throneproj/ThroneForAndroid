@@ -46,7 +46,7 @@
 - [x] 6.2 `themes.xml` 新增 `Theme.SagerNet.Amoled` overlay style；`global_preferences.xml` 增加 SwitchPreference；`values/strings.xml` 与 `values-zh-rCN/-rHK/-rTW`（及其他现有语言目录按需）补充可翻译文案
 - [x] 6.3 执行设计决策 7 的评估：确认 T4A 是否存在 MaterialCardView 主题 attr 解析崩溃路径；存在则补 `themes.xml` attr 映射，不存在则记录"跳过"结论
   - 评估结论：跳过。T4A 所有承载布局的 Activity/Dialog 均经 `ThemedActivity` 应用继承 `Theme.MaterialComponents.DayNight` 的 `Theme.SagerNet*` 主题（manifest 中 `Theme.SagerNet`/`Theme.SagerNet.Dialog`/`Theme.Start` 皆继承 MaterialComponents，`colorSurface`/`textAppearanceBody*` 等 attr 由父主题完整解析）；仅有的三个 `Theme.Translucent.NoTitleBar` Activity（QuickToggle/QuickEnable/QuickDisable 快捷方式）不加载含 MaterialCardView 的布局。不存在对端同型崩溃路径，无需补 attr 映射。
-- [ ] 6.4 提交批次五并推送，触发 CI；真机场景：夜间模式开/关 AMOLED 开关各截一张主要页面（主列表、设置、Dialog），预期纯黑生效/恢复原样，备份导出 JSON 中含 `amoledTheme` 键
+- [x] 6.4 提交批次五并推送，触发 CI；真机场景：夜间模式开/关 AMOLED 开关各截一张主要页面（主列表、设置、Dialog），预期纯黑生效/恢复原样，备份导出 JSON 中含 `amoledTheme` 键
 
 ## 7. 批次六：geoip/geosite 版本获取优化
 
