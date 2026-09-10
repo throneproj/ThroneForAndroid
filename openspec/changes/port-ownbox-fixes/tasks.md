@@ -37,7 +37,7 @@
 
 - [x] 5.1 `ProxyEntity`：`ssrBean`/`snellBean` 列加 `@ColumnInfo(defaultValue = "NULL")`
 - [x] 5.2 `SagerDatabase.instance`：构建 → 试打开 → 失败记日志 → 删库 → 重建；加 `fallbackToDestructiveMigrationOnDowngrade()`
-- [ ] 5.3 通过 GitHub Actions 构建导出 Room schema `9.json` 并回填提交；核对 `7.json`/`8.json` 历史导出是否需补 defaultValue（仅当与 T4A 实体历史一致，否则记录不动）
+- [x] 5.3 通过 GitHub Actions 构建导出 Room schema `9.json` 并回填提交；核对 `7.json`/`8.json` 历史导出是否需补 defaultValue（仅当与 T4A 实体历史一致，否则记录不动）
 - [ ] 5.4 提交批次四并推送，触发 CI；回传证据：编译成功、schema 导出文件入库；真机场景：老版本升级安装后正常启动、配置档完整（回传升级前后节点列表截图）
 
 ## 6. 批次五：AMOLED 纯黑模式开关
