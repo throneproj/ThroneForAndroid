@@ -16,7 +16,7 @@
 - [x] 2.4 `RawUpdater`：Clash YAML proxies 逐条 try-catch 且 type 小写化；JSON 与 WireGuard 分支空结果继续后续分支
 - [x] 2.5 `moe.matsuri/nb4a/Protocols.kt`：去重键纳入 uuid/password/path/sni/realityPubKey/name 等协议适用特征
 - [x] 2.6 新增/扩展 JVM 单元测试覆盖 2.2/2.3/2.5（多链接单行、混合订阅链接文本、坏 padding base64、同服务器不同凭据去重）
-- [ ] 2.7 提交批次一并推送，触发 GitHub Actions 构建与单元测试；回传证据：workflow 编译成功 + 单测通过日志（适用 workflow：仓库现有 Android CI build/test job；本地不编译，静态校验仅限 1.3 脚本与 `openspec validate`）
+- [x] 2.7 提交批次一并推送，触发 GitHub Actions 构建与单元测试；回传证据：workflow 编译成功 + 单测通过日志（适用 workflow：仓库现有 Android CI build/test job；本地不编译，静态校验仅限 1.3 脚本与 `openspec validate`）
 
 ## 3. 批次二：协议链接解析修复
 
