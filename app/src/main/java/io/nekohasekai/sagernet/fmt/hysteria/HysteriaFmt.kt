@@ -357,10 +357,13 @@ fun buildSingBoxOutboundHysteriaBean(bean: HysteriaBean): SingBoxOptions.SingBox
 }
 
 fun hopPortsToSingboxList(s: String): List<String> {
-    return s.split(",").mapNotNull {
-        val pRange = it.replace("-", ":")
-        if (pRange.split(":").size == 2) {
-            pRange
+    // 规范化端口跳跃列表：统一区间分隔符、去除空白、校验数字，非法片段丢弃；
+    // sing-box 要求 "min:max" 冒号区间格式
+    return s.split(",").mapNotNull { raw ->
+        val range = raw.trim().replace("-", ":")
+        val parts = range.split(":").map { it.trim() }
+        if (parts.size == 2 && parts[0].toIntOrNull() != null && parts[1].toIntOrNull() != null) {
+            "${parts[0]}:${parts[1]}"
         } else {
             null
         }

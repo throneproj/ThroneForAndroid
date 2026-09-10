@@ -20,10 +20,10 @@
 
 ## 3. 批次二：协议链接解析修复
 
-- [ ] 3.1 `V2RayFmt.kt`/`TrojanFmt.kt`：fragment 剥离 + URL-decode 节点名、`toHttpUrlOrNull` + 可读错误、Kitsunebi 分支同步修复
-- [ ] 3.2 `SnellFmt.kt`：标准解析失败时 regex 回退（psk@host:port、query 别名、fragment 节点名）；移植对端 `SnellFmtTest.kt` 用例并适配 T4A Bean
-- [ ] 3.3 `HysteriaFmt.kt` `hopPortsToSingboxList`：区间分隔符规范化、trim、数字校验、非法片段丢弃
-- [ ] 3.4 `WireGuardFmt.kt`：新增 `wireguard://`/`awg://` URI 解析（base64 整配置回退、AWG 参数识别、兼容前缀命名），并按 T4A `parseProxies`/`RawUpdater` scheme 分发结构挂接
+- [x] 3.1 `V2RayFmt.kt`/`TrojanFmt.kt`：fragment 剥离 + URL-decode 节点名、`toHttpUrlOrNull` + 可读错误、Kitsunebi 分支同步修复
+- [x] 3.2 `SnellFmt.kt`：标准解析失败时 regex 回退（psk@host:port、query 别名、fragment 节点名）；移植对端 `SnellFmtTest.kt` 用例并适配 T4A Bean
+- [x] 3.3 `HysteriaFmt.kt` `hopPortsToSingboxList`：区间分隔符规范化、trim、数字校验、非法片段丢弃
+- [x] 3.4 `WireGuardFmt.kt`：新增 `wireguard://`/`awg://` URI 解析（base64 整配置回退、AWG 参数识别、兼容前缀命名），并按 T4A `parseProxies`/`RawUpdater` scheme 分发结构挂接
 - [ ] 3.5 提交批次二并推送，触发 CI；回传证据：编译成功 + 新增单测通过；真机场景（可后置到 8.2）：导入带中文 fragment 的 vless 链接、非标准 snell 链接、awg:// 链接各一条，节点正常生成并可连接
 
 ## 4. 批次三：TLS fragment 发射方式（条件项）

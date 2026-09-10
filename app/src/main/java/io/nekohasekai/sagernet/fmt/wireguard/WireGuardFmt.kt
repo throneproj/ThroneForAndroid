@@ -5,12 +5,19 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import moe.matsuri.nb4a.SingBoxOptions
+import moe.matsuri.nb4a.utils.Util
 import moe.matsuri.nb4a.utils.listByLineOrComma
 import org.ini4j.Ini
+import java.net.URLDecoder
 import java.io.StringReader
 
 private const val BASE64_ALPHABET =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+// AWG（AmneziaWG）混淆参数键：当前内核暂不支持发射，仅识别并以兼容标记命名
+private val AWG_PARAM_KEYS = setOf("jc", "jmin", "jmax", "s1", "s2", "h1", "h2", "h3", "h4")
+
+private const val AWG_COMPAT_PREFIX = "[AWG-Compat]"
 
 fun parseWireGuardConfig(conf: String): List<WireGuardBean> {
     val ini = Ini().apply {
@@ -52,7 +59,89 @@ fun parseWireGuardConfig(conf: String): List<WireGuardBean> {
         }.applyDefaultValues()
     }
     if (beans.isEmpty()) error("Empty available peer list")
+
+    // AWG 混淆参数检测：存在时以兼容标记命名，提示该配置含暂不支持的混淆参数
+    val hasAwgParams = iface.keySet().any { it.lowercase() in AWG_PARAM_KEYS }
+    if (hasAwgParams) {
+        beans.forEach { bean ->
+            bean.name = if (bean.name.isNullOrBlank()) {
+                AWG_COMPAT_PREFIX
+            } else {
+                "$AWG_COMPAT_PREFIX ${bean.name}"
+            }
+        }
+    }
     return beans
+}
+
+// wireguard:// 与 awg:// 分享链接解析：
+// 形式一为 base64 编码的整段配置回退，形式二为 privkey@host:port?query#name
+fun parseWireGuardLink(link: String): List<WireGuardBean> {
+    val isAwg = link.startsWith("awg://", ignoreCase = true)
+    val body = link.substringAfter("://", "")
+    if (body.isBlank()) error("invalid wireguard link $link")
+
+    // 形式一：base64 编码的整段 WireGuard 配置
+    if (!body.contains('@') && !body.contains('?')) {
+        val payload = body.substringBefore('#')
+        val conf = runCatching { String(Util.b64Decode(payload)).trim() }.getOrNull()
+        if (conf != null && conf.contains("[Interface]")) {
+            val rawName = body.substringAfter('#', "")
+            val beans = parseWireGuardConfig(conf)
+            if (rawName.isNotBlank()) {
+                val name = runCatching { URLDecoder.decode(rawName, "UTF-8") }.getOrDefault(rawName)
+                beans.forEach { if (it.name.isNullOrBlank()) it.name = name }
+            }
+            return beans
+        }
+        error("invalid wireguard link $link")
+    }
+
+    // 形式二：privkey@host:port?query#name
+    val mainPart = body.substringBefore('#')
+    val rawName = body.substringAfter('#', "")
+    val query = if (mainPart.contains('?')) mainPart.substringAfter('?') else ""
+    val authority = if (mainPart.contains('?')) mainPart.substringBefore('?') else mainPart
+
+    val atIndex = authority.lastIndexOf('@')
+    if (atIndex <= 0) error("invalid wireguard link $link")
+    val privateKey = authority.substring(0, atIndex)
+    val (serverAddress, serverPort) = parseEndpoint(authority.substring(atIndex + 1))
+        ?: error("invalid wireguard endpoint in $link")
+
+    val params = HashMap<String, String>()
+    for (pair in query.split('&')) {
+        if (pair.isBlank()) continue
+        val key = pair.substringBefore('=').trim().lowercase()
+        val value = pair.substringAfter('=', "")
+        params[key] = runCatching { URLDecoder.decode(value, "UTF-8") }.getOrDefault(value)
+    }
+
+    val peerPublicKey = params["publickey"] ?: params["public-key"]
+        ?: error("missing peer public key in $link")
+
+    val hasAwgParams = params.keys.any { it.lowercase() in AWG_PARAM_KEYS }
+
+    val bean = WireGuardBean().applyDefaultValues().apply {
+        privateKey = privateKey
+        serverAddress = serverAddress
+        serverPort = serverPort
+        peerPublicKey = peerPublicKey
+        peerPreSharedKey = params["presharedkey"] ?: params["pre-shared-key"] ?: ""
+        localAddress = params["address"]?.split(',')
+            ?.joinToString("\n") { it.trim() }
+            ?.takeIf { it.isNotEmpty() } ?: ""
+        mtu = params["mtu"]?.toIntOrNull() ?: 1420
+        persistentKeepaliveInterval = params["keepalive"]?.toIntOrNull() ?: 0
+        reserved = params["reserved"] ?: ""
+        name = if (rawName.isEmpty()) "" else runCatching {
+            URLDecoder.decode(rawName, "UTF-8")
+        }.getOrDefault(rawName)
+        if (isAwg || hasAwgParams) {
+            name = if (name.isBlank()) AWG_COMPAT_PREFIX else "$AWG_COMPAT_PREFIX $name"
+        }
+    }
+    return listOf(bean)
 }
 
 private fun parseEndpoint(value: String): Pair<String, Int>? {

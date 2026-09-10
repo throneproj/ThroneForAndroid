@@ -17,6 +17,7 @@ import io.nekohasekai.sagernet.fmt.tuic.parseTuic
 import io.nekohasekai.sagernet.fmt.juicity.parseJuicity
 import io.nekohasekai.sagernet.fmt.trojan_go.parseTrojanGo
 import io.nekohasekai.sagernet.fmt.v2ray.parseV2Ray
+import io.nekohasekai.sagernet.fmt.wireguard.parseWireGuardLink
 import moe.matsuri.nb4a.proxy.anytls.parseAnytls
 import moe.matsuri.nb4a.utils.JavaUtil.gson
 import moe.matsuri.nb4a.utils.Util
@@ -111,7 +112,8 @@ val KNOWN_LINK_SCHEMES = listOf(
     "socks://", "socks4://", "socks4a://", "socks5://",
     "vmess://", "vless://", "trojan://", "trojan-go://",
     "ss://", "ssr://", "naive+", "hysteria://", "hysteria2://", "hy2://",
-    "tuic://", "juicity://", "snell://", "anytls://"
+    "tuic://", "juicity://", "snell://", "anytls://",
+    "wireguard://", "awg://"
 )
 
 fun countKnownSchemes(line: String): Int {
@@ -278,6 +280,13 @@ suspend fun parseProxies(text: String): List<AbstractBean> {
             Logs.d("Try parse anytls link: $this")
             runCatching {
                 entities.add(parseAnytls(this))
+            }.onFailure {
+                Logs.w(it)
+            }
+        } else if (startsWith("wireguard://") || startsWith("awg://")) {
+            Logs.d("Try parse wireguard link: $this")
+            runCatching {
+                entities.addAll(parseWireGuardLink(this))
             }.onFailure {
                 Logs.w(it)
             }

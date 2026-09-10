@@ -10,8 +10,9 @@ import moe.matsuri.nb4a.SingBoxOptions.*
 import moe.matsuri.nb4a.utils.NGUtil
 import moe.matsuri.nb4a.utils.listByLineOrComma
 import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
+import java.net.URLDecoder
 
 private val supportedKcpHeaderType = arrayOf(
     "none", "srtp", "utp", "wechat-video", "dtls", "wireguard", "dns"
@@ -52,19 +53,33 @@ fun StandardV2RayBean.setTLS(boolean: Boolean) {
 }
 
 fun parseV2Ray(link: String): StandardV2RayBean {
+    // 先剥离 #fragment 并 URL-decode 作为节点名候选，避免异常 fragment 干扰 URL 解析
+    val fragmentIndex = link.indexOf('#')
+    var linkBody = link
+    var displayName = ""
+    if (fragmentIndex >= 0) {
+        val rawName = link.substring(fragmentIndex + 1)
+        displayName = runCatching { URLDecoder.decode(rawName, "UTF-8") }.getOrDefault(rawName)
+        linkBody = link.substring(0, fragmentIndex)
+    }
+
     // Try parse stupid formats first
 
-    if (!link.contains("?")) {
+    if (!linkBody.contains("?")) {
         try {
-            return parseV2RayN(link)
+            val parsed = parseV2RayN(linkBody)
+            if (parsed.name.isNullOrBlank() && displayName.isNotBlank()) parsed.name = displayName
+            return parsed
         } catch (e: Exception) {
             Logs.i("try v2rayN: " + e.readableMessage)
         }
     }
 
-    if (link.startsWith("vmess://")) {
+    if (linkBody.startsWith("vmess://")) {
         try {
-            return tryResolveVmess4Kitsunebi(link)
+            val parsed = tryResolveVmess4Kitsunebi(linkBody)
+            if (parsed.name.isNullOrBlank() && displayName.isNotBlank()) parsed.name = displayName
+            return parsed
         } catch (e: Exception) {
             Logs.i("try Kitsunebi: " + e.readableMessage)
         }
@@ -72,8 +87,9 @@ fun parseV2Ray(link: String): StandardV2RayBean {
 
     // "std" format
 
-    val bean = VMessBean().apply { if (link.startsWith("vless://")) alterId = -1 }
-    val url = link.replace("vmess://", "https://").replace("vless://", "https://").toHttpUrl()
+    val bean = VMessBean().apply { if (linkBody.startsWith("vless://")) alterId = -1 }
+    val url = linkBody.replace("vmess://", "https://").replace("vless://", "https://")
+        .toHttpUrlOrNull() ?: error("invalid v2ray link $link")
 
     if (url.password.isNotBlank()) {
         // https://github.com/v2fly/v2fly-github-io/issues/26 (rarely use)
@@ -160,6 +176,7 @@ fun parseV2Ray(link: String): StandardV2RayBean {
         // also vless format
         bean.parseDuckSoft(url)
     }
+    if (bean.name.isNullOrBlank() && displayName.isNotBlank()) bean.name = displayName
 
     return bean
 }
@@ -366,7 +383,8 @@ private fun tryResolveVmess4Kitsunebi(server: String): VMessBean {
         encryption = arr21[0]
         if (indexSplit < 0) return@apply
 
-        val url = ("https://localhost/path?" + server.substringAfter("?")).toHttpUrl()
+        val url = ("https://localhost/path?" + server.substringAfter("?")).toHttpUrlOrNull()
+            ?: error("invalid kitsunebi query")
         url.queryParameter("remarks")?.apply { name = this }
         url.queryParameter("alterId")?.apply { alterId = this.toInt() }
         url.queryParameter("path")?.apply { path = this }
