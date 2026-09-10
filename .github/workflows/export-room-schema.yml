@@ -1,0 +1,42 @@
+name: Export Room Schema
+
+# 一次性工具 workflow：手动触发，构建时由 Room KSP 导出 schema JSON 并上传为
+# artifact（room-schema）。取回 9.json 回填仓库后本文件可删除。
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    name: Export Room Schema
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Install Golang
+        uses: actions/setup-go@v6
+        with:
+          go-version: ^1.24
+      - name: Native Build
+        run: ./run lib core
+      - name: Gradle Build
+        env:
+          BUILD_PLUGIN: none
+        run: |
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
+          echo "ndk.dir=${ANDROID_HOME}/ndk/25.0.8775105" >> local.properties
+          export LOCAL_PROPERTIES="${{ secrets.LOCAL_PROPERTIES }}"
+          ./run init action gradle
+          ./gradlew app:assembleOssDebug
+      - name: Upload Room Schema
+        uses: actions/upload-artifact@v5
+        with:
+          name: room-schema
+          path: app/schemas/
+          if-no-files-found: error
+          retention-days: 1
