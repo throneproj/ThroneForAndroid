@@ -38,6 +38,8 @@
 
 4. **TLS fragment 发射方式**：设为**条件项**。实施前先联网核对 sing-box 官方 v1.13.16 源码/文档中 TLS options 是否支持 `fragment`/`record_fragment`/`fragment_fallback_delay` 字段（对端提交信息称其为修复，且该字段族自 sing-box 1.12 起进入官方 schema）。核对通过则替换旧式"direct outbound + 路由规则"发射并删除 `TAG_FRAGMENT` 相关路径；不支持则放弃本项并在本文件记录结论，不阻塞其他批次。
    - 备选：保留旧式发射——否决，旧式依赖 direct outbound + 路由规则组合，对端实测存在不生效场景。
+   - **核对结论（1.1，已联网核实）**：**支持，批次四实施**。依据：sing-box 官方仓库 tag `v1.13.16` 的 `option/tls.go` 中 `OutboundTLSOptions` 结构体明确声明 `Fragment bool`（json `fragment`）、`FragmentFallbackDelay badoption.Duration`（json `fragment_fallback_delay`）、`RecordFragment bool`（json `record_fragment`）三个字段，均为代理 outbound TLS 选项内联字段（来源：https://github.com/SagerNet/sing-box/blob/v1.13.16/option/tls.go ）。
+   - **go.sum 复核结论（1.2）**：`git ls-files libcore/` 无 `go.sum`，`libcore/.gitignore` 已显式忽略该文件（注释注明由 CI 构建时 `go mod tidy` 现场生成）。对端"删除陈旧 go.sum"修复在 T4A 无对应对象，不做代码改动。
 
 5. **数据库稳定性**：
    - `ProxyEntity` 两个可空 Bean 列加 `@ColumnInfo(defaultValue = "NULL")`。
