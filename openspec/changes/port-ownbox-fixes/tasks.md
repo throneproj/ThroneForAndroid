@@ -50,7 +50,7 @@
 
 ## 7. 批次六：geoip/geosite 版本获取优化
 
-- [ ] 7.1 `buildScript/lib/assets.sh`：`get_latest_release` 改为 302 Location 解析优先 → `GITHUB_TOKEN` API → 原始 API；版本号为空时回退 `releases/latest/download` 直链；保持下游 `xz -9` 与变量布局不变
+- [x] 7.1 `buildScript/lib/assets.sh`：`get_latest_release` 改为 302 Location 解析优先 → `GITHUB_TOKEN` API → 原始 API；版本号为空时回退 `releases/latest/download` 直链；保持下游 `xz -9` 与变量布局不变
 - [ ] 7.2 提交批次六并推送，触发含 assets 步骤的 workflow（preview/release）；回传证据：assets 步骤日志显示版本获取成功且无 API 限流错误（本地无法验证网络行为，注明原因）
 
 ## 8. 收尾与规范同步
