@@ -61,7 +61,9 @@ fun parseWireGuardConfig(conf: String): List<WireGuardBean> {
     if (beans.isEmpty()) error("Empty available peer list")
 
     // AWG 混淆参数检测：存在时以兼容标记命名，提示该配置含暂不支持的混淆参数
-    val hasAwgParams = iface.keySet().any { it.lowercase() in AWG_PARAM_KEYS }
+    val hasAwgParams = conf.lineSequence().any { line ->
+        line.substringBefore('=').trim().lowercase() in AWG_PARAM_KEYS
+    }
     if (hasAwgParams) {
         beans.forEach { bean ->
             bean.name = if (bean.name.isNullOrBlank()) {
@@ -123,10 +125,10 @@ fun parseWireGuardLink(link: String): List<WireGuardBean> {
     val hasAwgParams = params.keys.any { it.lowercase() in AWG_PARAM_KEYS }
 
     val bean = WireGuardBean().applyDefaultValues().apply {
-        privateKey = privateKey
-        serverAddress = serverAddress
-        serverPort = serverPort
-        peerPublicKey = peerPublicKey
+        this.privateKey = privateKey
+        this.serverAddress = serverAddress
+        this.serverPort = serverPort
+        this.peerPublicKey = peerPublicKey
         peerPreSharedKey = params["presharedkey"] ?: params["pre-shared-key"] ?: ""
         localAddress = params["address"]?.split(',')
             ?.joinToString("\n") { it.trim() }

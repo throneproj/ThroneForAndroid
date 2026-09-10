@@ -72,7 +72,7 @@ private fun parseSnellFallback(url: String): SnellBean {
     return SnellBean().apply {
         serverAddress = host
         serverPort = port
-        psk = psk.unUrlSafe()
+        this.psk = psk.unUrlSafe()
         name = if (rawName.isEmpty()) "" else runCatching {
             URLDecoder.decode(rawName, "UTF-8")
         }.getOrDefault(rawName)
