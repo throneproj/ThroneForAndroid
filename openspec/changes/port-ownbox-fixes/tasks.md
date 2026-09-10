@@ -10,12 +10,12 @@
 
 ## 2. 批次一：订阅下载与文本解析健壮化
 
-- [ ] 2.1 `RawUpdater`：实现候选 UA 链回退下载（自定义 UA → 现行默认 UA → `clash-meta` → `v2rayN/7.8.2` → `sing-box/1.14.0`），成功即停；跨候选保留最后一次非空 `Subscription-Userinfo` 与 `content-disposition`；移除 H3 直连尝试；注释为中性描述
-- [ ] 2.2 `ktx/Formats.kt` `parseProxies`：scheme 感知切分（18 种协议 scheme 计数）、单链接才触发订阅跳转语义、行解析结果优先；保留 T4A 现有 `sn://` 分支
-- [ ] 2.3 `moe/matsuri/nb4a/utils/Util.b64Decode`：trim/去空白/补 padding/`URL_SAFE` flag/cleaned+padded 双轮尝试
-- [ ] 2.4 `RawUpdater`：Clash YAML proxies 逐条 try-catch 且 type 小写化；JSON 与 WireGuard 分支空结果继续后续分支
-- [ ] 2.5 `moe.matsuri/nb4a/Protocols.kt`：去重键纳入 uuid/password/path/sni/realityPubKey/name 等协议适用特征
-- [ ] 2.6 新增/扩展 JVM 单元测试覆盖 2.2/2.3/2.5（多链接单行、混合订阅链接文本、坏 padding base64、同服务器不同凭据去重）
+- [x] 2.1 `RawUpdater`：实现候选 UA 链回退下载（自定义 UA → 现行默认 UA → `clash-meta` → `v2rayN/7.8.2` → `sing-box/1.14.0`），成功即停；跨候选保留最后一次非空 `Subscription-Userinfo` 与 `content-disposition`；移除 H3 直连尝试；注释为中性描述
+- [x] 2.2 `ktx/Formats.kt` `parseProxies`：scheme 感知切分（18 种协议 scheme 计数）、单链接才触发订阅跳转语义、行解析结果优先；保留 T4A 现有 `sn://` 分支
+- [x] 2.3 `moe/matsuri/nb4a/utils/Util.b64Decode`：trim/去空白/补 padding/`URL_SAFE` flag/cleaned+padded 双轮尝试
+- [x] 2.4 `RawUpdater`：Clash YAML proxies 逐条 try-catch 且 type 小写化；JSON 与 WireGuard 分支空结果继续后续分支
+- [x] 2.5 `moe.matsuri/nb4a/Protocols.kt`：去重键纳入 uuid/password/path/sni/realityPubKey/name 等协议适用特征
+- [x] 2.6 新增/扩展 JVM 单元测试覆盖 2.2/2.3/2.5（多链接单行、混合订阅链接文本、坏 padding base64、同服务器不同凭据去重）
 - [ ] 2.7 提交批次一并推送，触发 GitHub Actions 构建与单元测试；回传证据：workflow 编译成功 + 单测通过日志（适用 workflow：仓库现有 Android CI build/test job；本地不编译，静态校验仅限 1.3 脚本与 `openspec validate`）
 
 ## 3. 批次二：协议链接解析修复

@@ -39,7 +39,6 @@ import org.json.JSONObject
 import org.json.JSONTokener
 import org.yaml.snakeyaml.TypeDescription
 import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.error.YAMLException
 import androidx.core.net.toUri
 
 @Suppress("EXPERIMENTAL_API_USAGE")
@@ -64,33 +63,70 @@ object RawUpdater : GroupUpdater() {
                 ?: error(app.getString(R.string.no_proxies_found_in_subscription))
         } else {
 
-            val response = Libcore.newHttpClient().apply {
-                            tryProxyOutbound()
-                            tryH3Direct()
-                when (DataStore.appTLSVersion) {
-                    "1.3" -> restrictedTLS()
-                }
-            }.newRequest().apply {
-                if (DataStore.allowInsecureOnRequest) {
-                    allowInsecure()
-                }
-                setURL(subscription.link)
-                setUserAgent(subscription.customUserAgent.takeIf { it.isNotBlank() } ?: USER_AGENT)
-            }.execute()
-            proxies = parseRaw(Util.getStringBox(response.contentString))
-                ?: error(app.getString(R.string.no_proxies_found))
+            // 候选 UA 链：订阅自定义 UA 优先，其后依次尝试常见客户端 UA，
+            // 直到某个候选下载并解析出非空节点列表为止
+            val candidateUserAgents = buildList {
+                subscription.customUserAgent.takeIf { it.isNotBlank() }?.let { add(it) }
+                add(USER_AGENT)
+                add("clash-meta")
+                add("v2rayN/7.8.2")
+                add("sing-box/1.14.0")
+            }
 
-            subscription.subscriptionUserinfo =
-                Util.getStringBox(response.getHeader("Subscription-Userinfo"))
+            var lastError: Throwable? = null
+            var lastUserinfo = ""
+            var lastDisposition = ""
+            proxies = emptyList()
+
+            for (candidate in candidateUserAgents) {
+                try {
+                    val response = Libcore.newHttpClient().apply {
+                        tryProxyOutbound()
+                        when (DataStore.appTLSVersion) {
+                            "1.3" -> restrictedTLS()
+                        }
+                    }.newRequest().apply {
+                        if (DataStore.allowInsecureOnRequest) {
+                            allowInsecure()
+                        }
+                        setURL(subscription.link)
+                        setUserAgent(candidate)
+                    }.execute()
+                    val parsed = parseRaw(Util.getStringBox(response.contentString))
+                    if (parsed.isNullOrEmpty()) {
+                        throw IllegalStateException("no proxies found with UA: $candidate")
+                    }
+                    proxies = parsed
+
+                    // 跨候选保留最后一次非空的流量信息与远端文件名
+                    Util.getStringBox(response.getHeader("Subscription-Userinfo"))
+                        .takeIf { it.isNotBlank() }?.let { lastUserinfo = it }
+                    if (proxyGroup.name?.startsWith("Subscription #") == true) {
+                        val remoteName = Util.getStringBox(response.getHeader("content-disposition"))
+                        if (remoteName.isNotBlank()) {
+                            lastDisposition = remoteName
+                        }
+                    }
+                    break
+                } catch (e: SubscriptionFoundException) {
+                    throw e
+                } catch (e: Throwable) {
+                    lastError = e
+                    Logs.d("Subscription download failed with UA $candidate: ${e.message}")
+                }
+            }
+
+            if (proxies.isEmpty()) {
+                throw (lastError ?: error(app.getString(R.string.no_proxies_found)))
+            }
+
+            subscription.subscriptionUserinfo = lastUserinfo
 
             // 修改默认名字
-            if (proxyGroup.name?.startsWith("Subscription #") == true) {
-                var remoteName = Util.getStringBox(response.getHeader("content-disposition"))
+            if (proxyGroup.name?.startsWith("Subscription #") == true && lastDisposition.isNotBlank()) {
+                val remoteName = Util.decodeFilename(lastDisposition)
                 if (remoteName.isNotBlank()) {
-                    remoteName = Util.decodeFilename(remoteName)
-                    if (remoteName.isNotBlank()) {
-                        proxyGroup.name = remoteName
-                    }
+                    proxyGroup.name = remoteName
                 }
             }
         }
@@ -265,7 +301,10 @@ object RawUpdater : GroupUpdater() {
                 ))) {
                     // Note: YAML numbers parsed as "Long"
 
-                    when (proxy["type"] as String) {
+                    // 逐条容错：单条节点解析失败仅记录日志，不影响其余节点；type 匹配不区分大小写
+                    val type = proxy["type"]?.toString()?.lowercase() ?: continue
+                    try {
+                    when (type) {
                         "socks5" -> {
                             proxies.add(SOCKSBean().apply {
                                 serverAddress = proxy["server"] as String
@@ -344,7 +383,7 @@ object RawUpdater : GroupUpdater() {
                         }
 
                         "vmess", "vless", "trojan" -> {
-                            val bean = when (proxy["type"] as String) {
+                            val bean = when (type) {
                                 "vmess" -> VMessBean()
                                 "vless" -> VMessBean().apply {
                                     alterId = -1 // make it VLESS
@@ -784,6 +823,9 @@ object RawUpdater : GroupUpdater() {
                             proxies.add(bean)
                         }
                     }
+                    } catch (e: Exception) {
+                        Logs.w(e)
+                    }
                 }
 
                 // Fix ent
@@ -801,18 +843,25 @@ object RawUpdater : GroupUpdater() {
                         }
                     }
                 }
-                return proxies
-            } catch (e: YAMLException) {
+                // 解析结果为空时继续尝试后续解析分支
+                if (proxies.isNotEmpty()) {
+                    return proxies
+                }
+            } catch (e: Exception) {
                 Logs.w(e)
             }
         } else if (text.contains("[Interface]")) {
             // wireguard
             try {
-                proxies.addAll(parseWireGuardConfig(text).map {
+                val wgProxies = parseWireGuardConfig(text).map {
                     if (fileName.isNotBlank()) it.name = fileName.removeSuffix(".conf")
                     it
-                })
-                return proxies
+                }
+                // 解析结果为空时继续尝试后续解析分支
+                if (wgProxies.isNotEmpty()) {
+                    proxies.addAll(wgProxies)
+                    return proxies
+                }
             } catch (e: Exception) {
                 Logs.w(e)
             }
@@ -820,7 +869,11 @@ object RawUpdater : GroupUpdater() {
 
         try {
             val json = JSONTokener(text).nextValue()
-            return parseJSON(json)
+            val jsonProxies = parseJSON(json)
+            // 解析结果为空时继续尝试后续解析分支
+            if (jsonProxies.isNotEmpty()) {
+                return jsonProxies
+            }
         } catch (ignored: Exception) {
         }
 

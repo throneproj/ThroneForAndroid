@@ -21,51 +21,56 @@ object Logs {
         return runCatching { DataStore.logLevel >= required }.getOrDefault(true)
     }
 
+    // JNI 通道在 JVM 单元测试环境不可用，输出失败时静默忽略，不影响业务流程
+    private fun printLog(line: String) {
+        runCatching { Libcore.nekoLogPrintln(line) }
+    }
+
     fun d(message: String) {
         if (!enabled(3)) return
-        Libcore.nekoLogPrintln("[Debug] [${mkTag()}] $message")
+        printLog("[Debug] [${mkTag()}] $message")
     }
 
     fun d(message: String, exception: Throwable) {
         if (!enabled(3)) return
-        Libcore.nekoLogPrintln("[Debug] [${mkTag()}] $message" + "\n" + exception.stackTraceToString())
+        printLog("[Debug] [${mkTag()}] $message" + "\n" + exception.stackTraceToString())
     }
 
     fun i(message: String) {
         if (!enabled(2)) return
-        Libcore.nekoLogPrintln("[Info] [${mkTag()}] $message")
+        printLog("[Info] [${mkTag()}] $message")
     }
 
     fun i(message: String, exception: Throwable) {
         if (!enabled(2)) return
-        Libcore.nekoLogPrintln("[Info] [${mkTag()}] $message" + "\n" + exception.stackTraceToString())
+        printLog("[Info] [${mkTag()}] $message" + "\n" + exception.stackTraceToString())
     }
 
     fun w(message: String) {
         if (!enabled(1)) return
-        Libcore.nekoLogPrintln("[Warning] [${mkTag()}] $message")
+        printLog("[Warning] [${mkTag()}] $message")
     }
 
     fun w(message: String, exception: Throwable) {
         if (!enabled(1)) return
-        Libcore.nekoLogPrintln("[Warning] [${mkTag()}] $message" + "\n" + exception.stackTraceToString())
+        printLog("[Warning] [${mkTag()}] $message" + "\n" + exception.stackTraceToString())
     }
 
     fun w(exception: Throwable) {
         if (!enabled(1)) return
-        Libcore.nekoLogPrintln("[Warning] [${mkTag()}] " + exception.stackTraceToString())
+        printLog("[Warning] [${mkTag()}] " + exception.stackTraceToString())
     }
 
     fun e(message: String) {
-        Libcore.nekoLogPrintln("[Error] [${mkTag()}] $message")
+        printLog("[Error] [${mkTag()}] $message")
     }
 
     fun e(message: String, exception: Throwable) {
-        Libcore.nekoLogPrintln("[Error] [${mkTag()}] $message" + "\n" + exception.stackTraceToString())
+        printLog("[Error] [${mkTag()}] $message" + "\n" + exception.stackTraceToString())
     }
 
     fun e(exception: Throwable) {
-        Libcore.nekoLogPrintln("[Error] [${mkTag()}] " + exception.stackTraceToString())
+        printLog("[Error] [${mkTag()}] " + exception.stackTraceToString())
     }
 
 }

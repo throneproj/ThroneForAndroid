@@ -106,16 +106,54 @@ fun String.decodeBase64UrlSafe(): String {
 
 class SubscriptionFoundException(val link: String) : RuntimeException()
 
+// 已知协议 scheme 前缀，用于识别同一行中的多个分享链接
+val KNOWN_LINK_SCHEMES = listOf(
+    "socks://", "socks4://", "socks4a://", "socks5://",
+    "vmess://", "vless://", "trojan://", "trojan-go://",
+    "ss://", "ssr://", "naive+", "hysteria://", "hysteria2://", "hy2://",
+    "tuic://", "juicity://", "snell://", "anytls://"
+)
+
+fun countKnownSchemes(line: String): Int {
+    var count = 0
+    for (scheme in KNOWN_LINK_SCHEMES) {
+        var index = line.indexOf(scheme)
+        while (index >= 0) {
+            count++
+            index = line.indexOf(scheme, index + scheme.length)
+        }
+    }
+    return count
+}
+
 suspend fun parseProxies(text: String): List<AbstractBean> {
-    val links = text.split('\n').flatMap { it.trim().split(' ') }
-    val linksByLine = text.split('\n').map { it.trim() }
+    // scheme 感知切分：仅当一行中出现多个已知协议链接时才按空白进一步切分
+    val links = ArrayList<String>()
+    val linksByLine = ArrayList<String>()
+    for (rawLine in text.split('\n')) {
+        val line = rawLine.trim()
+        if (line.isEmpty()) continue
+        linksByLine.add(line)
+        if (countKnownSchemes(line) > 1) {
+            line.split(Regex("\\s+")).filterTo(links) { it.isNotBlank() }
+        } else {
+            links.add(line)
+        }
+    }
+
+    // 仅当整段文本为单条链接时才允许触发订阅跳转语义
+    val isSingleLink = links.size == 1 && linksByLine.size == 1
 
     val entities = ArrayList<AbstractBean>()
     val entitiesByLine = ArrayList<AbstractBean>()
 
-    fun String.parseLink(entities: ArrayList<AbstractBean>) {
+    fun String.parseLink(entities: ArrayList<AbstractBean>, allowSubscriptionJump: Boolean) {
         if (startsWith("clash://install-config?") || startsWith("sn://subscription?")) {
-            throw SubscriptionFoundException(this)
+            if (allowSubscriptionJump) {
+                throw SubscriptionFoundException(this)
+            }
+            // 混合多节点文本中的订阅跳转链接直接跳过
+            return
         }
 
         if (startsWith("sn://")) {
@@ -141,14 +179,16 @@ suspend fun parseProxies(text: String): List<AbstractBean> {
                 entities.add(parseHttp(this))
             }.onFailure {
                 Logs.w(it)
-                val clashUrl = HttpUrl.Builder()
-                    .scheme("https")
-                    .host("install-config")
-                    .addQueryParameter("url", this)
-                    .build()
-                    .toString()
-                    .replaceFirst("https://", "clash://")
-                throw (SubscriptionFoundException(clashUrl))
+                if (allowSubscriptionJump) {
+                    val clashUrl = HttpUrl.Builder()
+                        .scheme("https")
+                        .host("install-config")
+                        .addQueryParameter("url", this)
+                        .build()
+                        .toString()
+                        .replaceFirst("https://", "clash://")
+                    throw (SubscriptionFoundException(clashUrl))
+                }
             }
         } else if (startsWith("vmess://")) {
             Logs.d("Try parse v2ray link: $this")
@@ -245,21 +285,14 @@ suspend fun parseProxies(text: String): List<AbstractBean> {
     }
 
     for (link in links) {
-        link.parseLink(entities)
+        link.parseLink(entities, isSingleLink)
     }
     for (link in linksByLine) {
-        link.parseLink(entitiesByLine)
+        link.parseLink(entitiesByLine, isSingleLink)
     }
-//    var isBadLink = false
-    if (entities.onEach { it.initializeDefaultValues() }.size == entitiesByLine.onEach { it.initializeDefaultValues() }.size) run test@{
-        entities.forEachIndexed { index, bean ->
-            val lineBean = entitiesByLine[index]
-            if (bean == lineBean && bean.displayName() != lineBean.displayName()) {
-//                isBadLink = true
-                return@test
-            }
-        }
-    }
+    entities.forEach { it.initializeDefaultValues() }
+    entitiesByLine.forEach { it.initializeDefaultValues() }
+    // 行级解析结果优先，仅当按链接切分解析出更多节点时才采用链接级结果
     return if (entities.size > entitiesByLine.size) entities else entitiesByLine
 }
 

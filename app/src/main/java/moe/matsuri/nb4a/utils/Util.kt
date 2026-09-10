@@ -61,23 +61,36 @@ object Util {
     }
 
     fun b64Decode(b: String): ByteArray {
-        var ret: ByteArray? = null
+        // 预处理：去除首尾与内部空白（含换行），容忍粘贴产生的格式噪声
+        val trimmed = b.trim().replace(Regex("\\s+"), "")
 
-        // padding 自动处理，不用理
-        // URLSafe 需要替换这两个，不要用 URL_SAFE 否则处理非 Safe 的时候会乱码
-        val str = b.replace("-", "+").replace("_", "/")
+        // 双轮候选：先保留 URL-safe 字符原样解码，再替换为标准字符后解码；
+        // 每轮各尝试按长度自动补 padding 的变体
+        val cleaned = trimmed.replace("-", "+").replace("_", "/")
+        val candidates = LinkedHashSet<String>()
+        for (candidate in listOf(trimmed, cleaned)) {
+            candidates.add(candidate)
+            when (candidate.length % 4) {
+                2 -> candidates.add(candidate + "==")
+                3 -> candidates.add(candidate + "=")
+            }
+        }
 
-        val flags = listOf(
-            Base64.DEFAULT, // 多行
-            Base64.NO_WRAP, // 单行
+        // 使用 java.util.Base64（经 core library desugaring 支持 minSdk 21）：
+        // 标准 / URL-safe / MIME 宽松三种字母表依次尝试
+        val decoders = listOf(
+            java.util.Base64.getDecoder(),
+            java.util.Base64.getUrlDecoder(),
+            java.util.Base64.getMimeDecoder(),
         )
 
-        for (flag in flags) {
-            try {
-                ret = Base64.decode(str, flag)
-            } catch (_: Exception) {
+        for (candidate in candidates) {
+            for (decoder in decoders) {
+                try {
+                    return decoder.decode(candidate)
+                } catch (_: Exception) {
+                }
             }
-            if (ret != null) return ret
         }
 
         throw IllegalStateException("Cannot decode base64")
