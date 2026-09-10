@@ -29,6 +29,15 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ^1.25
+      - name: Go Module Cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/go/pkg/mod
+          key: go-mod-${{ runner.os }}-${{ hashFiles('libcore/go.mod') }}
+          restore-keys: |
+            go-mod-${{ runner.os }}-
       - name: Native Build
         if: steps.cache.outputs.cache-hit != 'true'
         run: ./run lib core

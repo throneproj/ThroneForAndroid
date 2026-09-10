@@ -6,6 +6,7 @@
 
 - [x] 1.1 联网核对 sing-box 官方 v1.13.16（tag v1.13.16，github.com/SagerNet/sing-box）TLS options 是否支持 `fragment`/`record_fragment`/`fragment_fallback_delay` 字段，把结论与依据回写 design.md 决策 4（支持→批次四实施；不支持→记录放弃）
 - [x] 1.2 复核 `libcore/` 目录无已提交 `go.sum`（`libcore/.gitignore` 已忽略；预期结论：对端 go.sum 修复无对应对象，仅记录，不改代码）
+- [ ] 1.2.5 完善 action 加速：三个含 libcore 构建的 workflow（ci/preview/release）在 `Install Golang` 之后、`Native Build` 之前新增 `actions/cache` 缓存 Go module 下载目录（`~/go/pkg/mod`，key 基于 `hashFiles('libcore/go.mod')` + runner OS），使 LibCore AAR 缓存未命中时不再全量重新下载 Go 依赖；提交并推送触发 CI，回传证据：缓存未命中路径下构建成功且 Go 模块缓存生效（restore 日志）
 - [x] 1.3 新增 `tools/diagnostics/check_no_brand_comments.py`（uv 工作流）：扫描 `app/`、`libcore/`、`buildScript/`、`buildSrc/` 源码注释与字符串字面量中不含 "OwnBox" 字样，语法合法；`uv run tools/diagnostics/check_no_brand_comments.py` 退出码 0
 
 ## 2. 批次一：订阅下载与文本解析健壮化
