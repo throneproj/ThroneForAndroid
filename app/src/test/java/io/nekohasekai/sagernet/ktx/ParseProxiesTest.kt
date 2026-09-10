@@ -69,8 +69,9 @@ class ParseProxiesTest {
 
     @Test
     fun malformedLinkInMixedTextIsSkippedNotThrown() = runBlocking {
+        // 未闭合的 IPv6 括号使标准 URL 解析确定失败
         val text = vlessLink("node1", "00000000-0000-0000-0000-000000000001") + "\n" +
-                "vmess://not a valid link"
+                "vless://[invalid"
 
         val beans = parseProxies(text)
 
