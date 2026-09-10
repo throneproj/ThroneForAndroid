@@ -54,7 +54,6 @@ const val TAG_PROXY = "proxy"
 const val TAG_DIRECT = "direct"
 const val TAG_BYPASS = "bypass"
 const val TAG_BLOCK = "block"
-const val TAG_FRAGMENT = "fragment"
 const val TAG_DNS_HOSTS = "dns-hosts"
 
 const val LOCALHOST = "127.0.0.1"
@@ -93,6 +92,18 @@ internal fun SingBoxOption.detourTo(nextTag: String) {
     }
 
     _hack_config_map["detour"] = nextTag
+}
+
+// sing-box 的 fragment_fallback_delay 要求带单位的时长字符串（如 "10ms"）；
+// fragmentInterval 以区间形式存储（如 "10-20"，单位毫秒），取区间首值并补全单位。
+private const val DEFAULT_FRAGMENT_FALLBACK_DELAY = "10ms"
+
+private fun tlsFragmentFallbackDelay(): String {
+    val first = DataStore.fragmentInterval
+        .split(',', '-', ' ')
+        .map { it.trim() }
+        .firstOrNull { it.isNotEmpty() } ?: return DEFAULT_FRAGMENT_FALLBACK_DELAY
+    return if (first.toDoubleOrNull() != null) "${first}ms" else first
 }
 
 internal data class ChainHopTag(
@@ -271,7 +282,7 @@ fun buildConfig(
     val trafficMap = HashMap<String, List<ProxyEntity>>()
     val tagMap = HashMap<Long, String>()
     val globalOutbounds = HashMap<Long, String>()
-    val readableNames = mutableSetOf(TAG_DIRECT, TAG_BYPASS, TAG_BLOCK, TAG_FRAGMENT, TAG_MIXED, TAG_PROXY)
+    val readableNames = mutableSetOf(TAG_DIRECT, TAG_BYPASS, TAG_BLOCK, TAG_MIXED, TAG_PROXY)
     val group = SagerDatabase.groupDao.getById(proxy.groupId)
 
     fun ProxyEntity.resolveChainInternal(): MutableList<ProxyEntity> {
@@ -697,7 +708,14 @@ fun buildConfig(
                         val outboundMap = currentOutbound.asMap()
                         val tlsOptions = outboundMap["tls"] as? Map<*, *>
                         if (tlsOptions?.get("enabled") == true) {
-                            currentOutbound._hack_config_map["detour"] = TAG_FRAGMENT
+                            // sing-box 1.13 起代理 outbound 的 TLS 选项支持内联分片字段；
+                            // 旧式 direct outbound 的 fragment 字段已被移除，继续发射会
+                            // 因 DisallowUnknownFields 导致配置解析失败。
+                            currentOutbound._hack_config_map["tls"] = mapOf(
+                                "fragment" to true,
+                                "record_fragment" to true,
+                                "fragment_fallback_delay" to tlsFragmentFallbackDelay(),
+                            )
                         }
                     }
                 }
@@ -765,14 +783,6 @@ fun buildConfig(
 
                             // no chain rule and not outbound, so need to set to direct
                             if (index == profileList.lastIndex) {
-                                if (DataStore.enableTLSFragment) {
-                                    route.rules.add(Rule_DefaultOptions().apply {
-                                        network = listOf("tcp")
-                                        inbound = listOf(tag)
-                                        outbound = TAG_FRAGMENT
-                                    })
-                                }
-
                                 route.rules.add(Rule_DefaultOptions().apply {
                                     inbound = listOf(tag)
                                     outbound = TAG_DIRECT
@@ -1074,18 +1084,6 @@ fun buildConfig(
                     _hack_config_map["network_strategy"] = "default"
                 }
             })
-        }
-
-        if (DataStore.enableTLSFragment) {
-            val fragmentOutbound = Outbound().apply {
-                tag = TAG_FRAGMENT
-                type = "direct"
-                _hack_config_map["fragment"] = Fragment().apply {
-                    length = DataStore.fragmentLength
-                    interval = DataStore.fragmentInterval
-                }.asMap()
-            }
-            outbounds.add(fragmentOutbound)
         }
 
         fun isExclusiveCustomHost(host: String): Boolean {

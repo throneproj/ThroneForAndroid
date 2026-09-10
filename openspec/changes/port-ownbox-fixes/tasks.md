@@ -28,7 +28,8 @@
 
 ## 4. 批次三：TLS fragment 发射方式（条件项）
 
-- [ ] 4.1 依据 1.1 结论执行：若官方 1.13.16 支持新字段，`ConfigBuilder` 将 fragment 发射改为代理 outbound TLS 内联 `fragment`/`record_fragment`/`fragment_fallback_delay`（delay 取 `fragmentInterval` 区间首值），删除独立 fragment outbound 与相关路由规则路径；若不支持，在本任务勾选时注明"已放弃"并跳过 4.2 的真机项
+- [x] 4.1 依据 1.1 结论执行：若官方 1.13.16 支持新字段，`ConfigBuilder` 将 fragment 发射改为代理 outbound TLS 内联 `fragment`/`record_fragment`/`fragment_fallback_delay`（delay 取 `fragmentInterval` 区间首值），删除独立 fragment outbound 与相关路由规则路径；若不支持，在本任务勾选时注明"已放弃"并跳过 4.2 的真机项
+  - 实施记录：1.1 结论为"支持"，已实施。`ConfigBuilder.kt` 在 needGlobal 且启用 TLS 分片时代理 outbound TLS 启用时，经 `_hack_config_map["tls"]` 深合并内联 `fragment=true`/`record_fragment=true`/`fragment_fallback_delay`（取 `fragmentInterval` 区间首值，纯数字补 `ms` 单位——sing-box `badoption.Duration` 要求带单位时长）；删除 `TAG_FRAGMENT` 常量、独立 fragment direct outbound 及 external mapping 入站的 fragment 路由规则。联网复核补充依据：sing-box v1.13.16 `option/direct.go` 已无 fragment 字段且使用 `UnmarshalDisallowUnknownFields`，旧式发射在该版本会直接导致配置解析失败。
 - [ ] 4.2 提交批次三并推送，触发 CI 编译；真机场景：启用 TLS 分片访问被 SNI 阻断的站点，预期连接成功且生成配置中含内联 fragment 字段（回传生成配置片段与连接结果；条件项不适用时注明原因）
 
 ## 5. 批次四：配置档数据库稳定性
