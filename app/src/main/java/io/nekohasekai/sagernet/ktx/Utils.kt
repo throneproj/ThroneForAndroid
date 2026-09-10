@@ -81,10 +81,16 @@ val Throwable.readableMessage
  * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
  */
 
-private val socketGetFileDescriptor = Socket::class.java.getDeclaredMethod("getFileDescriptor\$")
+// 延迟初始化：反射目标在非 Android 运行时（如 JVM 单元测试）不存在，
+// 提前初始化会导致整个文件级类初始化失败
+private val socketGetFileDescriptor by lazy {
+    Socket::class.java.getDeclaredMethod("getFileDescriptor\$")
+}
 val Socket.fileDescriptor get() = socketGetFileDescriptor.invoke(this) as FileDescriptor
 
-private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
+private val getInt by lazy {
+    FileDescriptor::class.java.getDeclaredMethod("getInt$")
+}
 val FileDescriptor.int get() = getInt.invoke(this) as Int
 
 suspend fun <T> HttpURLConnection.useCancellable(block: suspend HttpURLConnection.() -> T): T {

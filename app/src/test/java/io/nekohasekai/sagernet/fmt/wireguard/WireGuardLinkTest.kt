@@ -61,7 +61,7 @@ class WireGuardLinkTest {
         assertEquals(1, beans.size)
         assertEquals("5.6.7.8", beans[0].serverAddress)
         assertEquals(51820, beans[0].serverPort)
-        assertEquals("priv-key-abc", beans[0].privateKey)
+        assertEquals("priv-abc", beans[0].privateKey)
         assertEquals("pub-key", beans[0].peerPublicKey)
     }
 
