@@ -246,6 +246,8 @@
     <string name="theme">主题颜色</string>
     <string name="use_system_theme">使用系统主题色</string>
     <string name="use_system_theme_summary">使用系统 Monet 动态取色 (Android 12+)</string>
+    <string name="amoled_theme">OLED 纯黑模式</string>
+    <string name="amoled_theme_summary">夜间模式下使用纯黑背景</string>
     <string name="extra_headers">附加标头</string>
     <string name="username">用户名</string>
     <string name="key_opt">密码 (可选)</string>

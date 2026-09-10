@@ -26,6 +26,12 @@
             app:key="nightTheme"
             app:title="@string/night_mode"
             app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:defaultValue="false"
+            app:icon="@drawable/ic_baseline_contrast_24"
+            app:key="amoledTheme"
+            app:summary="@string/amoled_theme_summary"
+            app:title="@string/amoled_theme" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:defaultValue=""
             app:entries="@array/language_entries"

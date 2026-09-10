@@ -16,6 +16,8 @@
     <string name="theme">Theme</string>
     <string name="use_system_theme">Use system theme</string>
     <string name="use_system_theme_summary">Use system Monet colors (Android 12+)</string>
+    <string name="amoled_theme">OLED black theme</string>
+    <string name="amoled_theme_summary">Use pure black background in night mode</string>
     <string name="document">Document</string>
     <string name="group_default">Ungrouped</string>
     <string name="quick_toggle">Toggle</string>

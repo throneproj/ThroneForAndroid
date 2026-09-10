@@ -38,10 +38,19 @@ object Theme {
 
     fun apply(context: Context) {
         context.setTheme(getTheme())
+        applyAmoledOverlay(context)
     }
 
     fun applyDialog(context: Context) {
         context.setTheme(getDialogTheme())
+        applyAmoledOverlay(context)
+    }
+
+    // 夜间模式下启用 AMOLED 纯黑开关时，在既有主题之上叠加纯黑 overlay
+    private fun applyAmoledOverlay(context: Context) {
+        if (DataStore.amoledTheme && usingNightMode()) {
+            context.theme.applyStyle(R.style.Theme_SagerNet_Amoled, true)
+        }
     }
 
     fun getTheme(): Int {

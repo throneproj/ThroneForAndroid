@@ -13,6 +13,7 @@ object Key {
     const val APP_THEME = "appTheme"
     const val USE_SYSTEM_THEME = "useSystemTheme"
     const val NIGHT_THEME = "nightTheme"
+    const val AMOLED_THEME = "amoledTheme"
     const val APP_LANGUAGE = "appLanguage"
     const val SERVICE_MODE = "serviceMode"
     const val MODE_VPN = "vpn"

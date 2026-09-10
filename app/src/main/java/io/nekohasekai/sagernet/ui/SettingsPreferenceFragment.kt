@@ -73,6 +73,12 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             Theme.applyNightTheme()
             true
         }
+        // AMOLED 纯黑开关：切换后重启以重新叠加/移除 overlay
+        findPreference<SwitchPreference>(Key.AMOLED_THEME)!!
+            .setOnPreferenceChangeListener { _, _ ->
+                needRestart()
+                true
+            }
         val appLanguage = findPreference<SimpleMenuPreference>(Key.APP_LANGUAGE)!!
         appLanguage.setOnPreferenceChangeListener { _, newValue ->
             AppLocale.apply(newValue as String)

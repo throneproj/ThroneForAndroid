@@ -328,5 +328,7 @@
     <color name="card_elevated_yellow">#FFFDEF</color>
     <color name="card_elevated_black">#EEEEEE</color>
     <color name="card_elevated_verdant_mint">#EBF9F3</color>
+    <!-- AMOLED 纯黑 overlay 的立体卡片提升表面色（近黑） -->
+    <color name="card_elevated_amoled">#121212</color>
 
 </resources>
