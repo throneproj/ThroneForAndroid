@@ -9,6 +9,7 @@ import dev.matrix.roomigrant.GenerateRoomMigrations
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.fmt.KryoConverters
+import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.fmt.gson.GsonConverters
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -31,18 +32,34 @@ import kotlinx.coroutines.launch
 abstract class SagerDatabase : RoomDatabase() {
 
     companion object {
-        @OptIn(DelicateCoroutinesApi::class)
-        @Suppress("EXPERIMENTAL_API_USAGE")
-        val instance by lazy {
-            SagerNet.application.getDatabasePath(Key.DB_PROFILE).parentFile?.mkdirs()
+
+        private fun buildProfileDatabase(): SagerDatabase =
             Room.databaseBuilder(SagerNet.application, SagerDatabase::class.java, Key.DB_PROFILE)
 //                .addMigrations(*SagerDatabase_Migrations.build())
                 .setJournalMode(JournalMode.TRUNCATE)
                 .allowMainThreadQueries()
                 .enableMultiInstanceInvalidation()
                 .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigrationOnDowngrade()
                 .setQueryExecutor { GlobalScope.launch { it.run() } }
                 .build()
+
+        @OptIn(DelicateCoroutinesApi::class)
+        @Suppress("EXPERIMENTAL_API_USAGE")
+        val instance by lazy {
+            SagerNet.application.getDatabasePath(Key.DB_PROFILE).parentFile?.mkdirs()
+            val db = buildProfileDatabase()
+            // 先试打开：数据库文件损坏时首次访问会抛异常，此时记录原始错误、
+            // 删除损坏文件并重建空库，让应用可以继续启动而不是陷入崩溃循环。
+            try {
+                db.openHelper.writableDatabase
+            } catch (e: Exception) {
+                Logs.e(e)
+                runCatching { db.close() }
+                SagerNet.application.deleteDatabase(Key.DB_PROFILE)
+                return@lazy buildProfileDatabase()
+            }
+            db
         }
 
         val groupDao get() = instance.groupDao()

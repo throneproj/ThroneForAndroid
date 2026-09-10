@@ -67,7 +67,8 @@ data class ProxyEntity(
     var socksBean: SOCKSBean? = null,
     var httpBean: HttpBean? = null,
     var ssBean: ShadowsocksBean? = null,
-    var ssrBean: ShadowsocksRBean? = null,
+    // 声明 NULL 默认值，使实体列声明与导出 schema 一致，避免升级迁移因默认值缺失而失败
+    @ColumnInfo(defaultValue = "NULL") var ssrBean: ShadowsocksRBean? = null,
     var vmessBean: VMessBean? = null,
     var trojanBean: TrojanBean? = null,
     var trojanGoBean: TrojanGoBean? = null,
@@ -83,7 +84,7 @@ data class ProxyEntity(
     var chainBean: ChainBean? = null,
     var nekoBean: NekoBean? = null,
     var configBean: ConfigBean? = null,
-    var snellBean: SnellBean? = null,
+    @ColumnInfo(defaultValue = "NULL") var snellBean: SnellBean? = null,
 ) : Serializable() {
 
     companion object {
