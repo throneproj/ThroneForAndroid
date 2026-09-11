@@ -4,8 +4,8 @@
 
 ## 1. 前置核查（外部 API 复核）
 
-- [ ] 1.1 联网核对 sing-box 官方 v1.13.16（tag v1.13.16，github.com/SagerNet/sing-box）：Hysteria 与 TUIC outbound options 是否含 `udp_fragment` 字段；DNS rule 是否支持 `query_type` + `action: reject`；route rule 是否支持 `ip_version` + `action: reject`。结论与依据回写 design.md 决策 6（全部支持→批次三/五按计划实施；个别不支持→对应单项记录放弃）
-- [ ] 1.2 复核 Android `VpnService.Builder.addAddress/addRoute` 官方文档对 IPv6 路由的行为约束，结论回写 design.md 决策 3
+- [x] 1.1 联网核对 sing-box 官方 v1.13.16（tag v1.13.16，github.com/SagerNet/sing-box）：Hysteria 与 TUIC outbound options 是否含 `udp_fragment` 字段；DNS rule 是否支持 `query_type` + `action: reject`；route rule 是否支持 `ip_version` + `action: reject`。结论与依据回写 design.md 决策 6（全部支持→批次三/五按计划实施；个别不支持→对应单项记录放弃）
+- [x] 1.2 复核 Android `VpnService.Builder.addAddress/addRoute` 官方文档对 IPv6 路由的行为约束，结论回写 design.md 决策 3
 
 ## 2. 批次一：数据库备份兜底 + UI 防崩溃杂项
 

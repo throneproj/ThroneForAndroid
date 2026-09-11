@@ -34,8 +34,14 @@
 2. **数据库备份兜底**：在 T4A 现有"试打开 → 失败删库重建"路径中，于删库前将原库文件复制为 `<db>.bak_<System.currentTimeMillis()>`（同目录）；备份失败仅记日志、不阻断重建。不引入对端 Room v10 迁移。
    - 备选：引入 Room v10 + balancerBean——否决（负载均衡不在批准范围）。
 
-3. **IPv6 泄露修复**：完整移植对端方案（VpnService 常驻 v6 地址/路由 + ConfigBuilder AAAA reject/ipv4_only/fakeip 适配）。该方案不依赖 1.14 特有字段：`dns.strategy`、`query_type`、`ip_version`、`action: reject` 均为 1.13.16 官方 schema 字段（实施前按决策 6 联网复核一次）。注意 T4A 与对端 tun `address` 生成结构一致（合并 `address` 字段），可直接对齐。
+3. **IPv6 泄露修复**：完整移植对端方案（VpnService 常驻 v6 地址/路由 + ConfigBuilder AAAA reject/ipv4_only/fakeip 适配）。该方案不依赖 1.14 特有字段：`dns.strategy`、`query_type`、`ip_version`、`action: reject` 均为 1.13.16 官方 schema 字段（已按决策 6 联网复核确认）。注意 T4A 与对端 tun `address` 生成结构一致（合并 `address` 字段），可直接对齐。
    - 备选：仅加 route reject 不加 v6 虚拟地址——否决，对端实测存在系统旁路物理网卡路径，必须让系统完整接管。
+   - **Android 官方文档复核结论（任务 1.2，developer.android.com/reference/android/net/VpnService.Builder，2026-08 版）**：
+     - `addAddress`/`addRoute` 自 API 14 起均支持 IPv4 与 IPv6 地址/路由，无版本限制；
+     - 关键行为约束（`allowFamily` 文档）：**默认情况下，若 VPN 未添加任何某一地址族（IPv4/IPv6）的 address、route 或 DNS server，则该族的全部出站流量被系统阻断；只要添加了任一项，该族流量即被允许进入 VPN**；
+     - `addAddress`/`addRoute`/`addDnsServer` 均会"隐式允许"对应地址族流量进入 VPN（implicit allow，见各方法文档）；
+     - `allowFamily(AF_INET6)` 的语义是"不添加任何 v6 配置项也放行该族流量，流量将 fall-through 到底层物理网络"——这正是泄露路径，本方案**不调用** `allowFamily`；
+     - 结论：为 DISABLE 模式常驻添加 IPv6 虚拟地址（/126）与路由（`2000::/3` 或 `::/0` + `fc00::/7`）符合官方语义——添加后系统将 v6 流量完整路由进 VPN tun（由内核 reject/ipv4_only 策略兜底），杜绝 fall-through 到物理网卡的旁路泄露；方案与官方文档行为一致，按计划实施。
 
 4. **协议修复的取舍门禁**：逐项核对 sing-box v1.13.16 官方 schema 后实施：
    - **纳入**：Hysteria `getFirstPort` 兼容 `-` 分隔、SNI 空回退 serverAddress、h2 alpn 从 bean 解析、`udp_fragment`（1.13.16 Hysteria/TUIC outbound 均有该字段，实施前联网复核）；TUIC SNI 回退 + `disableSNI` 尊重；SS v2ray-plugin `mux=0`；V2Ray query sanitize 双重回退、`net=` 参数、kcp headerType 回退 none、xhttp extra 转换失败回退原文。
@@ -44,10 +50,12 @@
 5. **批量更新并发化**：`GroupUpdater.executeUpdate` 改 `supervisorScope` + 判空 + 静默后台失败；`GroupFragment` 批量入口改 `supervisorScope + async/awaitAll` 并发 + 逐个 try-catch + 汇总提示（经 `safeSnackbar`）。并发度沿用对端（一次性全部 async，订阅数量级通常 < 20，无需限流）。
    - 备选：信号量限流——否决，增加复杂度且对端实测无并发压力问题。
 
-6. **外部 API 复核清单**（实施首步联网完成，结论回写本文件）：
-   - sing-box v1.13.16 `option/hysteria.go`/`option/tuic.go` 是否含 `udp_fragment` 字段；
-   - sing-box v1.13.16 DNS rule `query_type` + `action: reject`、route rule `ip_version` + `action: reject` 字段支持；
-   - Android `VpnService.Builder.addAddress/addRoute` 对 IPv6 的行为（官方文档）。
+6. **外部 API 复核清单**（已联网完成，结论如下；依据为 github.com/SagerNet/sing-box tag `v1.13.16` 原始源码与 developer.android.com 官方文档）：
+   - **Hysteria/TUIC outbound `udp_fragment`：支持。** `option/hysteria.go` 的 `HysteriaOutboundOptions` 与 `option/tuic.go` 的 `TUICOutboundOptions` 均内嵌 `DialerOptions`（`option/outbound.go`），其中声明 `UDPFragment *bool \`json:"udp_fragment,omitempty"\``。即 `udp_fragment` 是 dialer 层通用字段，Hysteria/TUIC outbound 均可直接发射该字段。批次五（6.1/6.2）按计划实施。
+   - **DNS rule `query_type` + `action: reject`：支持。** `option/rule_dns.go` 的 `RawDefaultDNSRule` 含 `QueryType badoption.Listable[DNSQueryType] \`json:"query_type,omitempty"\``；`option/rule_action.go` 的 `DNSRuleAction` 支持 `C.RuleActionTypeReject`（`action: "reject"`，可选 `method: default/drop/reply`）。批次二（3.2）AAAA reject 规则按计划实施。
+   - **Route rule `ip_version` + `action: reject`：支持。** `option/rule.go` 的 `RawDefaultRule` 含 `IPVersion int \`json:"ip_version,omitempty"\``；`RuleAction` 同样支持 `action: "reject"`。批次二（3.2）`ip_version=6 reject` 规则按计划实施。
+   - **Android `VpnService.Builder.addAddress/addRoute` IPv6 行为**：结论已回写决策 3（支持 IPv4/IPv6 双栈；未添加某族配置时该族流量默认被阻断，添加任一项即隐式放行进入 VPN；`allowFamily` 才是 fall-through 泄露路径，方案不使用）。
+   - **总体结论：全部支持 → 批次二/五按计划实施，无放弃项。**
 
 7. **剪贴板去重**：`MainActivity` 导入路径读取目标分组（`selectedGroupForImport()`）与当前分组的 `subscription.deduplication`，任一为 true 才 `deduplicateProxies()`；`dedupKey()`/`deduplicateProxies()` 作为 `Formats.kt` 扩展函数实现（内部复用 `Protocols.Deduplication`）。`Protocols.Deduplication` 重构为按协议字段 + `finalPort`（Hysteria 取 `getFirstPort`），name 不再参与。
 
