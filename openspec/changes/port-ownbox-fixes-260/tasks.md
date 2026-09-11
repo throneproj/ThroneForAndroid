@@ -12,7 +12,7 @@
 - [x] 2.1 `SagerDatabase`：试打开失败路径中，删库前将原库文件复制为 `<db>.bak_<timestamp>`（同目录）；备份失败仅记日志、不阻断重建
 - [x] 2.2 `ktx/Utils.kt`：`Fragment.snackbar` 三级回退（activity → `MessageStore.getCurrentActivity()` → decorView）+ 新增 `safeSnackbar`（Toast 兜底）；`getColorAttr` try-catch + attribute 缺失返回透明色
 - [x] 2.3 `BackupFragment`/`GroupFragment` 导出路径改用安全 resolver（context → MessageStore → application）；`ToolbarFragment` toolbar 判空
-- [ ] 2.4 提交批次一并推送，触发 GitHub Actions 构建与单元测试；回传证据：workflow 编译成功 + 单测通过（适用 workflow：仓库现有 Android CI build/test job；本地不编译）
+- [x] 2.4 提交批次一并推送，触发 GitHub Actions 构建与单元测试；回传证据：workflow 编译成功 + 单测通过（适用 workflow：仓库现有 Android CI build/test job；本地不编译）
 
 ## 3. 批次二：IPv6 泄露修复全套
 
