@@ -51,7 +51,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
         val binding = LayoutAboutBinding.bind(view)
 
         ViewCompat.setOnApplyWindowInsetsListener(view, ListListener)
-        toolbar.setTitle(R.string.menu_about)
+        toolbar?.setTitle(R.string.menu_about)
 
         binding.license.maxLines = LICENSE_COLLAPSED_MAX_LINES
         var isLicenseExpanded = false

@@ -46,9 +46,9 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
         activity = requireActivity() as MainActivity
 
         ViewCompat.setOnApplyWindowInsetsListener(view, ListListener)
-        toolbar.setTitle(R.string.menu_group)
-        toolbar.inflateMenu(R.menu.add_group_menu)
-        toolbar.setOnMenuItemClickListener(this)
+        toolbar?.setTitle(R.string.menu_group)
+        toolbar?.inflateMenu(R.menu.add_group_menu)
+        toolbar?.setOnMenuItemClickListener(this)
 
         groupListView = view.findViewById(R.id.group_list)
         updateBottomPadding()
@@ -146,7 +146,10 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                     val profiles = SagerDatabase.proxyDao.getByGroup(selectedGroup.id)
                     val links = profiles.joinToString("\n") { it.toStdLink(compact = true) }
                     try {
-                        (requireActivity() as MainActivity).contentResolver.openOutputStream(
+                        // 宿主缺失时逐级回退（Fragment context → 前台 Activity → 应用级 Context）
+                        val resolverContext =
+                            context ?: MessageStore.getCurrentActivity() ?: app
+                        resolverContext.contentResolver.openOutputStream(
                             data
                         )!!.bufferedWriter().use {
                             it.write(links)

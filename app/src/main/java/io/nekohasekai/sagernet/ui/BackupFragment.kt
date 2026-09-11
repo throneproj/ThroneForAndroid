@@ -86,7 +86,9 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
         if (data != null) {
             runOnDefaultDispatcher {
                 try {
-                    requireActivity().contentResolver.openOutputStream(data)!!.use { os ->
+                    // 宿主缺失时逐级回退（Fragment context → 前台 Activity → 应用级 Context）
+                    val resolverContext = context ?: MessageStore.getCurrentActivity() ?: app
+                    resolverContext.contentResolver.openOutputStream(data)!!.use { os ->
                         os.write(backupData)
                     }
                     onMainDispatcher {

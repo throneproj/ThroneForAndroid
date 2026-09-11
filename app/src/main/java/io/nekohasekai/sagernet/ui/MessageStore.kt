@@ -15,6 +15,9 @@ object MessageStore {
         currentActivity = WeakReference(activity)
     }
 
+    /** 当前记录的前台 Activity（可能已销毁，调用方需自行判断可用性）。 */
+    fun getCurrentActivity(): Activity? = currentActivity?.get()
+
     fun showMessage(message: String) {
         val activity = currentActivity?.get() ?: return
         try {

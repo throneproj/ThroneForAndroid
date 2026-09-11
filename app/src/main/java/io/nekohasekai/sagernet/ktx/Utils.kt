@@ -16,6 +16,8 @@ import android.system.Os
 import android.system.OsConstants
 import android.util.TypedValue
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
@@ -31,12 +33,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.processphoenix.ProcessPhoenix
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
+import com.google.android.material.snackbar.Snackbar
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.aidl.ISagerNetService
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.SagerConnection
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ui.MainActivity
+import io.nekohasekai.sagernet.ui.MessageStore
 import io.nekohasekai.sagernet.ui.ThemedActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -221,8 +225,57 @@ fun View.crossFadeFrom(other: View) {
 }
 
 
-fun Fragment.snackbar(textId: Int) = (requireActivity() as MainActivity).snackbar(textId)
-fun Fragment.snackbar(text: CharSequence) = (requireActivity() as MainActivity).snackbar(text)
+/**
+ * 三级回退解析提示宿主：Fragment 宿主 Activity → MessageStore 记录的前台 Activity
+ * → 前台窗口 decorView。宿主已 detach/销毁时不再因 requireActivity() 崩溃。
+ */
+fun Fragment.snackbar(textId: Int) = snackbar(getString(textId))
+
+fun Fragment.snackbar(text: CharSequence): Snackbar {
+    // 一级：Fragment 宿主 Activity
+    (activity as? MainActivity)?.takeIf { it.window != null }?.let { host ->
+        try {
+            return host.snackbar(text)
+        } catch (e: Exception) {
+            Logs.w(e)
+        }
+    }
+    // 二级：MessageStore 记录的前台 Activity
+    (MessageStore.getCurrentActivity() as? MainActivity)?.takeIf { it.window != null }
+        ?.let { host ->
+            try {
+                return host.snackbar(text)
+            } catch (e: Exception) {
+                Logs.w(e)
+            }
+        }
+    // 三级：可用 Activity 的 decorView（不依赖 MainActivity 内部布局）
+    (activity ?: MessageStore.getCurrentActivity())?.window?.decorView
+        ?.findViewById<View>(android.R.id.content)?.let { decorView ->
+            try {
+                return Snackbar.make(decorView, text, Snackbar.LENGTH_LONG)
+            } catch (e: Exception) {
+                Logs.w(e)
+            }
+        }
+    // 兜底：绑定到独立容器，Snackbar 不会展示但保证不崩溃；
+    // 需要用户可见反馈的后台流程应改用 safeSnackbar（Toast 兜底）。
+    return Snackbar.make(FrameLayout(app), text, Snackbar.LENGTH_LONG)
+}
+
+/** snackbar 的安全封装：宿主完全不可用时以 Toast 兜底，绝不抛出异常。 */
+fun Fragment.safeSnackbar(text: CharSequence) {
+    val host = activity as? MainActivity ?: MessageStore.getCurrentActivity() as? MainActivity
+    if (host != null && host.window != null) {
+        try {
+            host.snackbar(text).show()
+            return
+        } catch (e: Exception) {
+            Logs.w(e)
+        }
+    }
+    Toast.makeText(app, text, Toast.LENGTH_LONG).show()
+}
 
 fun ThemedActivity.startFilesForResult(
     launcher: ActivityResultLauncher<String>, input: String
@@ -290,9 +343,16 @@ fun Context.getColour(@ColorRes colorRes: Int): Int {
 }
 
 fun Context.getColorAttr(@AttrRes resId: Int): Int {
-    return ContextCompat.getColor(this, TypedValue().also {
-        theme.resolveAttribute(resId, it, true)
-    }.resourceId)
+    // attribute 缺失或解析失败时返回透明色，避免资源解析异常导致崩溃
+    return try {
+        val typedValue = TypedValue()
+        if (theme.resolveAttribute(resId, typedValue, true)) {
+            ContextCompat.getColor(this, typedValue.resourceId)
+        } else 0
+    } catch (e: Exception) {
+        Logs.w(e)
+        0
+    }
 }
 
 val isExpert: Boolean by lazy { BuildConfig.DEBUG || DataStore.isExpert }

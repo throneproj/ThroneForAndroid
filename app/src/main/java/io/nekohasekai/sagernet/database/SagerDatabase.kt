@@ -11,6 +11,7 @@ import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.fmt.KryoConverters
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.fmt.gson.GsonConverters
+import java.io.File
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -56,10 +57,30 @@ abstract class SagerDatabase : RoomDatabase() {
             } catch (e: Exception) {
                 Logs.e(e)
                 runCatching { db.close() }
+                backupCorruptedDatabase()
                 SagerNet.application.deleteDatabase(Key.DB_PROFILE)
                 return@lazy buildProfileDatabase()
             }
             db
+        }
+
+        /**
+         * 删库重建前将原库文件备份为同目录下带时间戳的副本，降低数据丢失面。
+         * 备份失败仅记录日志，不阻断删库重建流程。
+         */
+        private fun backupCorruptedDatabase() {
+            runCatching {
+                val dbFile = SagerNet.application.getDatabasePath(Key.DB_PROFILE)
+                if (dbFile.exists()) {
+                    val backupFile = File(
+                        dbFile.parentFile, dbFile.name + ".bak_" + System.currentTimeMillis()
+                    )
+                    dbFile.copyTo(backupFile, overwrite = false)
+                    Logs.i("Corrupted database backed up as ${backupFile.name}")
+                }
+            }.onFailure {
+                Logs.w("Failed to backup corrupted database before rebuild", it)
+            }
         }
 
         val groupDao get() = instance.groupDao()

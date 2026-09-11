@@ -28,10 +28,10 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
     @SuppressLint("RestrictedApi", "WrongConstant")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        toolbar.setTitle(R.string.menu_log)
+        toolbar?.setTitle(R.string.menu_log)
 
-        toolbar.inflateMenu(R.menu.logcat_menu)
-        toolbar.setOnMenuItemClickListener(this)
+        toolbar?.inflateMenu(R.menu.logcat_menu)
+        toolbar?.setOnMenuItemClickListener(this)
 
         binding = LayoutLogcatBinding.bind(view)
 

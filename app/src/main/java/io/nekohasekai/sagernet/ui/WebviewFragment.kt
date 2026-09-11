@@ -26,9 +26,9 @@ class WebviewFragment : ToolbarFragment(R.layout.layout_webview), Toolbar.OnMenu
         super.onViewCreated(view, savedInstanceState)
 
         // layout
-        toolbar.setTitle(R.string.menu_dashboard)
-        toolbar.inflateMenu(R.menu.yacd_menu)
-        toolbar.setOnMenuItemClickListener(this)
+        toolbar?.setTitle(R.string.menu_dashboard)
+        toolbar?.inflateMenu(R.menu.yacd_menu)
+        toolbar?.setOnMenuItemClickListener(this)
 
         val binding = LayoutWebviewBinding.bind(view)
 

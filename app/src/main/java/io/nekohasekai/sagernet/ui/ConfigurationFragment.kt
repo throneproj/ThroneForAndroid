@@ -329,18 +329,18 @@ class ConfigurationFragment @JvmOverloads constructor(
         super.onViewCreated(view, savedInstanceState)
 
         if (!select) {
-            toolbar.inflateMenu(R.menu.add_profile_menu)
-            toolbar.menu.findItem(R.id.action_global_mode)?.isChecked = DataStore.globalMode
-            toolbar.setOnMenuItemClickListener(this)
+            toolbar?.inflateMenu(R.menu.add_profile_menu)
+            toolbar?.menu?.findItem(R.id.action_global_mode)?.isChecked = DataStore.globalMode
+            toolbar?.setOnMenuItemClickListener(this)
         } else {
-            toolbar.setTitle(titleRes)
-            toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
-            toolbar.setNavigationOnClickListener {
+            toolbar?.setTitle(titleRes)
+            toolbar?.setNavigationIcon(R.drawable.ic_navigation_close)
+            toolbar?.setNavigationOnClickListener {
                 requireActivity().finish()
             }
         }
 
-        val searchView = toolbar.findViewById<SearchView>(R.id.action_search)
+        val searchView = toolbar?.findViewById<SearchView>(R.id.action_search)
         if (searchView != null) {
             searchView.setOnQueryTextListener(this)
             searchView.maxWidth = Int.MAX_VALUE
@@ -370,7 +370,7 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
         }.attach()
 
-        toolbar.setOnClickListener {
+        toolbar?.setOnClickListener {
             val fragment = getCurrentGroupFragment()
 
             if (fragment != null) {
@@ -1259,7 +1259,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                                 }
                                 val hideTab = groupList.size < 2
                                 tabLayout.isGone = hideTab
-                                toolbar.elevation = if (hideTab) 0F else dp2px(4).toFloat()
+                                toolbar?.elevation = if (hideTab) 0F else dp2px(4).toFloat()
                                 if (!select) {
                                     groupPager.registerOnPageChangeCallback(updateSelectedCallback)
                                 }
@@ -1499,7 +1499,7 @@ class ConfigurationFragment @JvmOverloads constructor(
             if (select) return
 
             val pf = requireParentFragment() as? ToolbarFragment ?: return
-            val menu = pf.toolbar.menu
+            val menu = pf.toolbar?.menu ?: return
             val origin = menu.findItem(R.id.action_order_origin)
             val byName = menu.findItem(R.id.action_order_by_name)
             val byDelay = menu.findItem(R.id.action_order_by_delay)
