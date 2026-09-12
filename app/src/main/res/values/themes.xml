@@ -639,7 +639,7 @@
         <item name="cardElevatedSurfaceColor">@color/card_elevated_white</item>
 
         <!-- 白底上使用深色文字/图标 -->
-        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Light.ActionBar</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.ActionBar</item>
         <item name="tabTextColor">#99000000</item>
         <item name="tabSelectedTextColor">@color/black</item>
         <item name="tabIndicatorColor">@color/black</item>
