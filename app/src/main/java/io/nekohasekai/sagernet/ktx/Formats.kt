@@ -18,6 +18,7 @@ import io.nekohasekai.sagernet.fmt.juicity.parseJuicity
 import io.nekohasekai.sagernet.fmt.trojan_go.parseTrojanGo
 import io.nekohasekai.sagernet.fmt.v2ray.parseV2Ray
 import io.nekohasekai.sagernet.fmt.wireguard.parseWireGuardLink
+import moe.matsuri.nb4a.Protocols
 import moe.matsuri.nb4a.proxy.anytls.parseAnytls
 import moe.matsuri.nb4a.utils.JavaUtil.gson
 import moe.matsuri.nb4a.utils.Util
@@ -308,4 +309,15 @@ suspend fun parseProxies(text: String): List<AbstractBean> {
 fun <T : Serializable> T.applyDefaultValues(): T {
     initializeDefaultValues()
     return this
+}
+
+// Deduplication
+
+fun AbstractBean.dedupKey(): String {
+    return Protocols.Deduplication(this, javaClass.toString()).hash()
+}
+
+fun List<AbstractBean>.deduplicateProxies(): List<AbstractBean> {
+    val seen = HashSet<String>()
+    return filter { seen.add(it.dedupKey()) }
 }

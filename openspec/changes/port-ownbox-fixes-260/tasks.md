@@ -29,9 +29,9 @@
 
 ## 5. 批次四：剪贴板去重修正 + 去重键重构
 
-- [ ] 5.1 `moe/matsuri/nb4a/Protocols.kt`：`Deduplication` 键重构为按协议字段（uuid/password/sni/pubKey/privateKey/peerPublicKey/localAddress/credentials 等）+ `finalPort`（Hysteria 取 `getFirstPort`），name 不参与哈希
-- [ ] 5.2 `ktx/Formats.kt`：新增 `dedupKey()`/`deduplicateProxies()` 扩展函数（复用 `Protocols.Deduplication`）；`ui/MainActivity.kt` 剪贴板导入仅当目标/当前分组 `subscription.deduplication == true` 时去重
-- [ ] 5.3 新增/扩展 JVM 单元测试：去重三场景（同服务器不同凭据保留、同名不同凭据保留、完全相同合并）
+- [x] 5.1 `moe/matsuri/nb4a/Protocols.kt`：`Deduplication` 键重构为按协议字段（uuid/password/sni/pubKey/privateKey/peerPublicKey/localAddress/credentials 等）+ `finalPort`（Hysteria 取 `getFirstPort`），name 不参与哈希
+- [x] 5.2 `ktx/Formats.kt`：新增 `dedupKey()`/`deduplicateProxies()` 扩展函数（复用 `Protocols.Deduplication`）；`ui/MainActivity.kt` 剪贴板导入仅当目标/当前分组 `subscription.deduplication == true` 时去重（T4A 对应物为 `ui/ConfigurationFragment.kt` 的 `import()`，剪贴板/文件导入共用该路径）
+- [x] 5.3 新增/扩展 JVM 单元测试：去重三场景（同服务器不同凭据保留、同名不同凭据保留、完全相同合并）
 - [ ] 5.4 提交批次四并推送，触发 CI；回传证据：编译成功 + 新增单测通过
 
 ## 6. 批次五：协议连通性兼容修复

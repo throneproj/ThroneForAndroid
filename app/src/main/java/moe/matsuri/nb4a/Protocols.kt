@@ -6,6 +6,7 @@ import io.nekohasekai.sagernet.database.ProxyEntity.Companion.TYPE_NEKO
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
+import io.nekohasekai.sagernet.fmt.hysteria.getFirstPort
 import io.nekohasekai.sagernet.fmt.juicity.JuicityBean
 import io.nekohasekai.sagernet.fmt.mieru.MieruBean
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
@@ -37,12 +38,18 @@ object Protocols {
             if (bean is ConfigBean) {
                 return bean.config
             }
-            // 去重键在服务器地址与端口之外纳入协议凭据与关键传输特征，
-            // 避免同一服务器上凭据不同的节点被错误合并
+            // 去重键在服务器地址与最终端口之外纳入协议凭据与关键传输特征，
+            // 节点名不参与哈希：同服务器凭据不同的节点不会被错误合并，
+            // 同名凭据不同的节点也不会被漏合并
+            val finalPort = if (bean is HysteriaBean) {
+                // Hysteria 多端口节点取首个端口作为最终端口
+                getFirstPort(bean.serverPorts ?: "")
+            } else {
+                bean.serverPort
+            }
             val sb = StringBuilder()
-                .append(bean.serverAddress).append(':').append(bean.serverPort)
+                .append(bean.serverAddress).append(':').append(finalPort)
                 .append(':').append(type)
-            bean.name?.let { sb.append(":n=").append(it) }
             when (val b = bean) {
                 is TrojanBean -> sb.append(":p=").append(b.password)
                     .append(":sni=").append(b.sni)
@@ -67,7 +74,6 @@ object Protocols {
                 is HysteriaBean -> sb.append(":a=").append(b.authPayloadType)
                     .append(":").append(b.authPayload)
                     .append(":o=").append(b.obfuscation)
-                    .append(":ports=").append(b.serverPorts)
 
                 is TuicBean -> sb.append(":u=").append(b.uuid)
                     .append(":t=").append(b.token)
@@ -90,9 +96,12 @@ object Protocols {
                 is WireGuardBean -> sb.append(":pk=").append(b.privateKey)
                     .append(":pk=").append(b.peerPublicKey)
                     .append(":psk=").append(b.peerPreSharedKey)
+                    .append(":la=").append(b.localAddress)
 
                 is SSHBean -> sb.append(":u=").append(b.username)
+                    .append(":at=").append(b.authType)
                     .append(":k=").append(b.privateKey)
+                    .append(":hk=").append(b.publicKey)
 
                 is MieruBean -> sb.append(":u=").append(b.username)
                     .append(":p=").append(b.password)

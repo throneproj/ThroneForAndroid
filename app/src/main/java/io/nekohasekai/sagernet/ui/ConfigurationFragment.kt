@@ -76,6 +76,7 @@ import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.SubscriptionFoundException
 import io.nekohasekai.sagernet.ktx.alert
 import io.nekohasekai.sagernet.ktx.app
+import io.nekohasekai.sagernet.ktx.deduplicateProxies
 import io.nekohasekai.sagernet.ktx.dp2px
 import io.nekohasekai.sagernet.ktx.getColorAttr
 import io.nekohasekai.sagernet.ktx.getColour
@@ -515,14 +516,20 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     suspend fun import(proxies: List<AbstractBean>) {
         val targetId = DataStore.selectedGroupForImport()
-        for (proxy in proxies) {
+        // 仅当目标分组或当前分组的订阅显式启用去重时才去重，
+        // 避免剪贴板/文件导入被无条件强制合并
+        val targetGroup = SagerDatabase.groupDao.getById(targetId)
+        val shouldDeduplicate = targetGroup?.subscription?.deduplication == true ||
+                DataStore.currentGroup().subscription?.deduplication == true
+        val toImport = if (shouldDeduplicate) proxies.deduplicateProxies() else proxies
+        for (proxy in toImport) {
             ProfileManager.createProfile(targetId, proxy)
         }
         onMainDispatcher {
             DataStore.editingGroup = targetId
             snackbar(
                 requireContext().resources.getQuantityString(
-                    R.plurals.added, proxies.size, proxies.size
+                    R.plurals.added, toImport.size, toImport.size
                 )
             ).show()
         }
