@@ -645,6 +645,15 @@
         <item name="tabIndicatorColor">@color/black</item>
         <item name="tabRippleColor">@color/black</item>
         <item name="whiteOrTextPrimary">@color/black</item>
+
+        <!-- colorPrimary 为白色的场景下，"主色上的内容"与各类着色回退为深色 -->
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="selectedColorPrimary">@color/black</item>
+        <item name="itemShapeFillColor">@color/color_white_theme_nav_fill</item>
+        <item name="accentOrTextSecondary">?android:textColorSecondary</item>
+        <item name="accentOrTextPrimary">?android:textColorPrimary</item>
+        <item name="primaryOrTextSecondary">?android:textColorSecondary</item>
+        <item name="primaryOrTextPrimary">?android:textColorPrimary</item>
     </style>
 
     <style name="Theme.SagerNet.Dialog.White" parent="Theme.SagerNet.Dialog">
@@ -655,6 +664,14 @@
         <item name="colorMaterial300">@color/color_white_theme_300</item>
         <item name="cardElevatedSurfaceColor">@color/card_elevated_white</item>
         <item name="whiteOrTextPrimary">@color/black</item>
+
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="selectedColorPrimary">@color/black</item>
+        <item name="itemShapeFillColor">@color/color_white_theme_nav_fill</item>
+        <item name="accentOrTextSecondary">?android:textColorSecondary</item>
+        <item name="accentOrTextPrimary">?android:textColorPrimary</item>
+        <item name="primaryOrTextSecondary">?android:textColorSecondary</item>
+        <item name="primaryOrTextPrimary">?android:textColorPrimary</item>
     </style>
 
     <!-- AMOLED 纯黑 overlay：夜间模式下经 Theme.apply/applyDialog 叠加，仅覆盖背景/表面/卡片提升色。

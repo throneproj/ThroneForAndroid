@@ -191,13 +191,19 @@ class CustomIconFragment : NamedFragment(R.layout.layout_custom_icon) {
         } catch (e: Throwable) {
             Color.parseColor("#1976D2")
         }
+        // 主色上的文字/图标色：多数主题为白色，纯白主题下为深色
+        val onPrimaryColor = try {
+            context.getColorAttr(com.google.android.material.R.attr.colorOnPrimary)
+        } catch (e: Throwable) {
+            Color.WHITE
+        }
 
         if (active) {
             binding.cardSimulatedTile.setCardBackgroundColor(primaryColor)
-            binding.tvSimulatedTileName.setTextColor(Color.WHITE)
-            binding.tvSimulatedTileState.setTextColor(Color.WHITE)
+            binding.tvSimulatedTileName.setTextColor(onPrimaryColor)
+            binding.tvSimulatedTileState.setTextColor(onPrimaryColor)
             binding.tvSimulatedTileState.setText(R.string.custom_icon_tile_state_active)
-            binding.ivSimulatedTileIcon.imageTintList = ColorStateList.valueOf(Color.WHITE)
+            binding.ivSimulatedTileIcon.imageTintList = ColorStateList.valueOf(onPrimaryColor)
         } else {
             // Inactive 状态：仿 Android 真实 QS Tile 关闭状态
             val inactiveBgColor = if (isNight) Color.parseColor("#2D3038") else Color.parseColor("#E2E2E6")
