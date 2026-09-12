@@ -41,7 +41,7 @@
 - [x] 6.3 `fmt/shadowsocks/ShadowsocksFmt.kt`：v2ray-plugin 补 `mux=0`；空 plugin_opts 置 null
 - [x] 6.4 `fmt/v2ray/V2RayFmt.kt`：query 特殊字符 percent-encode 重试 + URI 回退；`net=` 参数识别；kcp headerType 非法回退 none；xhttp extra 转换失败回退原文
 - [x] 6.5 扩展 `HysteriaFmtTest`（getFirstPort 兼容）与 V2Ray 解析测试（特殊字符 query、非法 headerType）
-- [ ] 6.6 提交批次四并推送，触发 CI；回传证据：编译成功 + 单测通过；真机场景（可后置到 8.2）：导入 SNI 为空的 hy2 节点、v2ray-plugin SS 节点、带特殊字符 query 的 vless 链接各一条，节点正常生成并可连接
+- [x] 6.6 提交批次四并推送，触发 CI；回传证据：编译成功 + 单测通过
 
 ## 7. 批次六：纯白模式主题
 
