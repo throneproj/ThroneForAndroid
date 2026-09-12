@@ -102,6 +102,20 @@ class ColorPickerPreference
                 addView(view)
             }
 
+            // 纯白主题选项：色板末位追加白色圆点（themeId 与 Theme.WHITE 对应）
+            val whiteThemeId = io.nekohasekai.sagernet.utils.Theme.WHITE
+            addView(
+                getNekoImageViewAtColor(
+                    context.getColor(R.color.color_white_theme), 64, 0
+                ).apply {
+                    setOnClickListener {
+                        persistInt(whiteThemeId)
+                        dialog.dismiss()
+                        callChangeListener(whiteThemeId)
+                    }
+                }
+            )
+
         }
 
         dialog = MaterialAlertDialogBuilder(context).setTitle(title)

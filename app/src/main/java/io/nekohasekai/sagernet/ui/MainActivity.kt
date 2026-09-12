@@ -53,6 +53,7 @@ import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MessageStore
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.utils.Theme
 import moe.matsuri.nb4a.utils.Util
 
 class MainActivity : ThemedActivity(),
@@ -71,6 +72,12 @@ class MainActivity : ThemedActivity(),
 
         binding = LayoutMainBinding.inflate(layoutInflater)
         binding.fab.initProgress(binding.fabProgress)
+        // 纯白模式下 FAB 使用深色底浅色图标，避免白底白图标不可读
+        if (Theme.isWhiteTheme()) {
+            binding.fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.color_white_theme_fab)
+            )
+        }
         if (themeResId !in intArrayOf(
                 R.style.Theme_SagerNet_Black
             )

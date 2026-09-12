@@ -3,6 +3,7 @@ package io.nekohasekai.sagernet.utils
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
+import android.util.TypedValue
 import androidx.appcompat.app.AppCompatDelegate
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
@@ -33,6 +34,7 @@ object Theme {
     const val BLUE_GREY = 20
     const val BLACK = 21
     const val VERDANT_MINT = 22
+    const val WHITE = 23
 
     private fun defaultTheme() = PINK_SSR
 
@@ -94,6 +96,9 @@ object Theme {
             BLUE_GREY -> R.style.Theme_SagerNet_BlueGrey
             BLACK -> R.style.Theme_SagerNet_Black
             VERDANT_MINT -> R.style.Theme_SagerNet_VerdantMint
+            WHITE ->
+                // 纯白主题仅在非夜间模式生效，夜间模式回退纯黑主题避免纯白底色
+                if (usingNightMode()) R.style.Theme_SagerNet_Black else R.style.Theme_SagerNet_White
             else -> getTheme(defaultTheme())
         }
     }
@@ -123,8 +128,25 @@ object Theme {
             BLUE_GREY -> R.style.Theme_SagerNet_Dialog_BlueGrey
             BLACK -> R.style.Theme_SagerNet_Dialog_Black
             VERDANT_MINT -> R.style.Theme_SagerNet_Dialog_VerdantMint
+            WHITE ->
+                if (usingNightMode()) R.style.Theme_SagerNet_Dialog_Black else R.style.Theme_SagerNet_Dialog_White
             else -> getDialogTheme(defaultTheme())
         }
+    }
+
+    // 纯白主题是否处于生效状态（夜间模式自动回退纯黑主题）
+    fun isWhiteTheme(): Boolean {
+        return DataStore.appTheme == WHITE && !usingNightMode()
+    }
+
+    // 当前主题主要颜色：纯白模式返回白色，其余从应用主题读取 colorPrimary
+    fun getPrimaryColor(): Int {
+        if (isWhiteTheme()) {
+            return 0xFFFFFFFF.toInt()
+        }
+        val typedValue = TypedValue()
+        app.theme.resolveAttribute(R.attr.colorPrimary, typedValue, true)
+        return typedValue.data
     }
 
     var currentNightMode = -1

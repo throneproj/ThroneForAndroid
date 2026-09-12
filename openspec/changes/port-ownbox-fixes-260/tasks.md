@@ -45,9 +45,9 @@
 
 ## 7. 批次六：纯白模式主题
 
-- [ ] 7.1 `utils/Theme.kt`：新增 `WHITE` 主题常量与 `isWhiteTheme()`/`getPrimaryColor()`；沿用现有 `appTheme` 持久化键（新 ID 入枚举即可）
-- [ ] 7.2 `values/themes.xml` 新增纯白主题 style；`ColorPickerPreference` 预设色板加入纯白项；`values/strings.xml` 与 `values-zh-rCN/-rHK/-rTW` 等语言目录补充可翻译文案
-- [ ] 7.3 `ThemedActivity`（系统栏图标深色）、`ToolbarFragment`（工具栏白底深字深图标）、`MainActivity`（FAB 深色底浅色图标）适配；主题变更生效沿用现有 `needRestart()` 机制
+- [x] 7.1 `utils/Theme.kt`：新增 `WHITE` 主题常量与 `isWhiteTheme()`/`getPrimaryColor()`；沿用现有 `appTheme` 持久化键（新 ID 入枚举即可）
+- [x] 7.2 `values/themes.xml` 新增纯白主题 style；`ColorPickerPreference` 预设色板加入纯白项（色板无文字，与其他色卡一致，不新增文案）
+- [x] 7.3 `ThemedActivity`（系统栏图标深色）、`ToolbarFragment`（工具栏白底深字深图标）、`MainActivity`（FAB 深色底浅色图标）适配；主题变更生效沿用现有 `needRestart()` 机制
 - [ ] 7.4 提交批次五并推送，触发 CI；真机场景（可后置到 8.2）：非夜间模式选择纯白主题，重启后工具栏/FAB/系统栏呈纯白外观且图标可读；夜间模式下不出现纯白底色
 
 ## 8. 收尾与规范同步
