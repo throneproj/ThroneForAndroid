@@ -2325,7 +2325,9 @@ class ConfigurationFragment @JvmOverloads constructor(
                 val ctx = card.context
                 val surface = ctx.getColorAttr(R.attr.colorSurface)
                 if (DataStore.profileCardStyle == 1) {
-                    val primary = ctx.getColorAttr(R.attr.colorPrimary)
+                    // 描边模式选中态用 selectedColorPrimary：多数主题等同 colorPrimary，
+                    // 纯白主题下为深色，避免白色描边不可见
+                    val primary = ctx.getColorAttr(R.attr.selectedColorPrimary)
                     selectedIndicator.isVisible = false
                     card.cardElevation = 0f
                     card.strokeWidth = ctx.resources.getDimensionPixelSize(
