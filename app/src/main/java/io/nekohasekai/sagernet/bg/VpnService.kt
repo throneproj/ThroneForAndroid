@@ -121,13 +121,11 @@ class VpnService : BaseVpnService(),
         val builder = Builder().setConfigureIntent(SagerNet.configureIntent(this))
             .setSession(getString(R.string.app_name))
             .setMtu(DataStore.mtu)
-        val ipv6Mode = DataStore.ipv6Mode
-
         // address
         builder.addAddress(PRIVATE_VLAN4_CLIENT, 30)
-        if (ipv6Mode != IPv6Mode.DISABLE) {
-            builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
-        }
+        // 即使禁用 IPv6 也常驻 v6 虚拟地址：让系统完整接管 IPv6 流量进入 tun，
+        // 避免未添加 v6 配置时流量经物理网卡旁路泄露
+        builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
         builder.addDnsServer(PRIVATE_VLAN4_ROUTER)
 
         // route
@@ -139,14 +137,13 @@ class VpnService : BaseVpnService(),
             builder.addRoute(PRIVATE_VLAN4_ROUTER, 32)
             builder.addRoute(FAKEDNS_VLAN4_CLIENT, 15)
             // https://issuetracker.google.com/issues/149636790
-            if (ipv6Mode != IPv6Mode.DISABLE) {
-                builder.addRoute("2000::", 3)
-            }
+            // 禁用 IPv6 时同样常驻 v6 路由（公网段 + ULA 段），由内核策略拒绝 v6 流量
+            builder.addRoute("2000::", 3)
+            builder.addRoute("fc00::", 7)
         } else {
             builder.addRoute("0.0.0.0", 0)
-            if (ipv6Mode != IPv6Mode.DISABLE) {
-                builder.addRoute("::", 0)
-            }
+            builder.addRoute("::", 0)
+            builder.addRoute("fc00::", 7)
         }
 
         updateUnderlyingNetwork(builder)

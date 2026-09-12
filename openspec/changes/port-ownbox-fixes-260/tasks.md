@@ -16,8 +16,8 @@
 
 ## 3. 批次二：IPv6 泄露修复全套
 
-- [ ] 3.1 `bg/VpnService.kt`：IPv6Mode.DISABLE 时仍始终添加 IPv6 虚拟地址（/126）与路由（`2000::/3` 或 `::/0`，另加 `fc00::/7`）
-- [ ] 3.2 `fmt/ConfigBuilder.kt`（ipv6Mode == DISABLE）：`dns.strategy = "ipv4_only"`、`autoDnsDomainStrategy` 强制 `ipv4_only`、链路 `defaultServerDomainStrategy` 强制 `ipv4_only`；DNS 规则头部插入 AAAA reject；route 规则头部插入 `ip_version=6 reject`；fakeip 去 `inet6_range` 且 query_type 仅 `A`；tun `address` 不因 DISABLE 省略 v6 虚拟地址
+- [x] 3.1 `bg/VpnService.kt`：IPv6Mode.DISABLE 时仍始终添加 IPv6 虚拟地址（/126）与路由（`2000::/3` 或 `::/0`，另加 `fc00::/7`）
+- [x] 3.2 `fmt/ConfigBuilder.kt`（ipv6Mode == DISABLE）：`dns.strategy = "ipv4_only"`、`autoDnsDomainStrategy` 强制 `ipv4_only`、链路 `defaultServerDomainStrategy` 强制 `ipv4_only`；DNS 规则头部插入 AAAA reject；route 规则头部插入 `ip_version=6 reject`；fakeip 去 `inet6_range` 且 query_type 仅 `A`；tun `address` 不因 DISABLE 省略 v6 虚拟地址
 - [ ] 3.3 提交批次二并推送，触发 CI 编译；真机场景（可后置到 8.2）：禁用 IPv6 模式下连接节点、访问网页、执行 URL 测试，预期正常且无 v6 泄露（回传连接与访问截图）
 
 ## 4. 批次三：批量订阅更新并发化 + RawUpdater 健壮化

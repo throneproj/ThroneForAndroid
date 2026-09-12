@@ -431,6 +431,8 @@ fun buildConfig(
             servers = mutableListOf()
             rules = mutableListOf()
             independent_cache = true
+            // 禁用 IPv6 时全局 DNS 策略强制 ipv4_only
+            if (ipv6Mode == IPv6Mode.DISABLE) strategy = "ipv4_only"
         }
 
         fun autoDnsDomainStrategy(s: String): String? {
@@ -465,8 +467,9 @@ fun buildConfig(
                 // 改由路由规则动作实现（见下方 route.rules 构建处）；
                 // inet4_address/inet6_address 与 endpoint_independent_nat 已于 1.12 移除（构造函数硬报错），
                 // address 为合并后的新字段。
+                // 禁用 IPv6 时仍保留 v6 虚拟地址：与 VpnService 常驻 v6 路由配合，
+                // 让系统完整接管 IPv6 流量进入 tun（由内核 reject 策略兜底）
                 address = when (ipv6Mode) {
-                    IPv6Mode.DISABLE -> listOf(VpnService.PRIVATE_VLAN4_CLIENT + "/28")
                     IPv6Mode.ONLY -> listOf(VpnService.PRIVATE_VLAN6_CLIENT + "/126")
                     else -> listOf(
                         VpnService.PRIVATE_VLAN4_CLIENT + "/28",
@@ -538,7 +541,10 @@ fun buildConfig(
             val chainTag = "c-$chainId"
             var muxApplied = false
 
-            val defaultServerDomainStrategy = SingBoxOptionsUtil.domainStrategy("server")
+            // 禁用 IPv6 时链路域名解析策略强制 ipv4_only，
+            // 避免节点服务器域名被解析出 IPv6 地址后经物理网卡直连泄露
+            val defaultServerDomainStrategy = if (ipv6Mode == IPv6Mode.DISABLE) "ipv4_only"
+            else SingBoxOptionsUtil.domainStrategy("server")
 
             profileList.forEachIndexed { index, proxyEntity ->
                 val bean = proxyEntity.requireBean()
@@ -1202,12 +1208,20 @@ fun buildConfig(
                 source_ip_cidr = listOf("224.0.0.0/3", "ff00::/8")
                 action = "reject"
             })
+            // 禁用 IPv6：在路由规则最前拒绝所有 IPv6 流量（与 DNS AAAA reject 配合）
+            if (ipv6Mode == IPv6Mode.DISABLE) {
+                route.rules.add(0, Rule_DefaultOptions().apply {
+                    ip_version = 6
+                    action = "reject"
+                })
+            }
             // FakeDNS obj
             if (useFakeDns) {
                 dns.fakeip = DNSFakeIPOptions().apply {
                     enabled = true
                     inet4_range = "198.18.0.0/15"
-                    inet6_range = "fc00::/18"
+                    // 禁用 IPv6 时不生成 inet6_range，fakeip 仅处理 A 记录
+                    if (ipv6Mode != IPv6Mode.DISABLE) inet6_range = "fc00::/18"
                 }
                 dns.servers.add(DNSServerOptions().apply {
                     address = "fakeip"
@@ -1218,7 +1232,7 @@ fun buildConfig(
                     inbound = listOf("tun-in")
                     server = "dns-fake"
                     disable_cache = true
-                    query_type = listOf("A", "AAAA")
+                    query_type = if (ipv6Mode == IPv6Mode.DISABLE) listOf("A") else listOf("A", "AAAA")
                 })
             }
             if (dnsHosts.isNotEmpty()) {
@@ -1258,6 +1272,14 @@ fun buildConfig(
                 dns.rules.add(0, DNSRule_DefaultOptions().apply {
                     makeSingBoxRule(hosts)
                     server = serverTag
+                })
+            }
+
+            // 禁用 IPv6：在 DNS 规则最前拒绝所有 AAAA 查询，杜绝 v6 解析结果泄露
+            if (ipv6Mode == IPv6Mode.DISABLE) {
+                dns.rules.add(0, DNSRule_DefaultOptions().apply {
+                    query_type = listOf("AAAA")
+                    action = "reject"
                 })
             }
         }

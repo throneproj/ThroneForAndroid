@@ -4728,6 +4728,8 @@ public class SingBoxOptions {
 
         public Boolean invert;
 
+        public String action;
+
         public String server;
 
         public Boolean disable_cache;
