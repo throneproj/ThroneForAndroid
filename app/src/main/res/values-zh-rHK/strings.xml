@@ -20,6 +20,7 @@
     <string name="group_status_empty_subscription">尚未更新</string>
     <string name="group_no_difference">%s: 沒有變化</string>
     <string name="group_updated">%s: 更新了 %d 個代理</string>
+    <string name="batch_update_summary">批量更新完成：%1$d 個成功，%2$d 個失敗</string>
     <string name="group_added">已新增：
 \n%s</string>
     <string name="group_changed">已更新：

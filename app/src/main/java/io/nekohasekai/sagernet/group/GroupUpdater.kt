@@ -131,19 +131,24 @@ abstract class GroupUpdater {
         }
 
         suspend fun executeUpdate(proxyGroup: ProxyGroup, byUser: Boolean): Boolean {
-            return coroutineScope {
-                if (!updating.add(proxyGroup.id)) cancel()
+            // supervisorScope：单个订阅更新失败不取消整批更新
+            return supervisorScope {
+                // 重复触发同一订阅时安全返回 false，不抛出取消异常
+                if (!updating.add(proxyGroup.id)) return@supervisorScope false
                 GroupManager.postReload(proxyGroup.id)
 
-                val subscription = proxyGroup.subscription!!
+                val subscription = proxyGroup.subscription ?: run {
+                    Logs.w("Group ${proxyGroup.id} has no subscription, skip update")
+                    finishUpdate(proxyGroup)
+                    return@supervisorScope false
+                }
                 val connected = DataStore.serviceState.connected
                 val userInterface = GroupManager.userInterface
 
                 if (byUser && (subscription.link?.startsWith("http://") == true || subscription.updateWhenConnectedOnly) && !connected) {
                     if (userInterface == null || !userInterface.confirm(app.getString(R.string.update_subscription_warning))) {
                         finishUpdate(proxyGroup)
-                        cancel()
-                        return@coroutineScope true
+                        return@supervisorScope true
                     }
                 }
 
@@ -152,7 +157,8 @@ abstract class GroupUpdater {
                     true
                 } catch (e: Throwable) {
                     Logs.w(e)
-                    userInterface?.onUpdateFailure(proxyGroup, e.readableMessage)
+                    // 后台自动更新失败静默（仅记录日志），用户手动触发才报告错误
+                    if (byUser) userInterface?.onUpdateFailure(proxyGroup, e.readableMessage)
                     finishUpdate(proxyGroup)
                     false
                 }

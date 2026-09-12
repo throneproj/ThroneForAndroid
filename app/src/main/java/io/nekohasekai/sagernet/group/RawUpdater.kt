@@ -33,6 +33,7 @@ import moe.matsuri.nb4a.Protocols
 import moe.matsuri.nb4a.proxy.anytls.AnyTLSBean
 import moe.matsuri.nb4a.proxy.config.ConfigBean
 import moe.matsuri.nb4a.utils.JavaUtil
+import moe.matsuri.nb4a.utils.NGUtil
 import moe.matsuri.nb4a.utils.Util
 import org.json.JSONArray
 import org.json.JSONObject
@@ -76,22 +77,43 @@ object RawUpdater : GroupUpdater() {
             var lastError: Throwable? = null
             var lastUserinfo = ""
             var lastDisposition = ""
+            var lastProfileTitle = ""
             proxies = emptyList()
 
             for (candidate in candidateUserAgents) {
                 try {
-                    val response = Libcore.newHttpClient().apply {
-                        tryProxyOutbound()
-                        when (DataStore.appTLSVersion) {
-                            "1.3" -> restrictedTLS()
-                        }
-                    }.newRequest().apply {
-                        if (DataStore.allowInsecureOnRequest) {
-                            allowInsecure()
-                        }
-                        setURL(subscription.link)
-                        setUserAgent(candidate)
-                    }.execute()
+                    val response = try {
+                        Libcore.newHttpClient().apply {
+                            tryProxyOutbound()
+                            when (DataStore.appTLSVersion) {
+                                "1.3" -> restrictedTLS()
+                            }
+                        }.newRequest().apply {
+                            if (DataStore.allowInsecureOnRequest) {
+                                allowInsecure()
+                            }
+                            setURL(subscription.link)
+                            setUserAgent(candidate)
+                        }.execute()
+                    } catch (proxyError: Throwable) {
+                        if (!DataStore.serviceState.connected) throw proxyError
+                        // 连接状态下代理路径失败，回退直连重试同一候选 UA
+                        Logs.d(
+                            "Subscription download via proxy failed with UA $candidate, " +
+                                "fallback to direct: ${proxyError.message}"
+                        )
+                        Libcore.newHttpClient().apply {
+                            when (DataStore.appTLSVersion) {
+                                "1.3" -> restrictedTLS()
+                            }
+                        }.newRequest().apply {
+                            if (DataStore.allowInsecureOnRequest) {
+                                allowInsecure()
+                            }
+                            setURL(subscription.link)
+                            setUserAgent(candidate)
+                        }.execute()
+                    }
                     val parsed = parseRaw(Util.getStringBox(response.contentString))
                     if (parsed.isNullOrEmpty()) {
                         throw IllegalStateException("no proxies found with UA: $candidate")
@@ -101,6 +123,18 @@ object RawUpdater : GroupUpdater() {
                     // 跨候选保留最后一次非空的流量信息与远端文件名
                     Util.getStringBox(response.getHeader("Subscription-Userinfo"))
                         .takeIf { it.isNotBlank() }?.let { lastUserinfo = it }
+                    // 捕获订阅标题响应头（支持 base64: 前缀解码），用于默认分组命名
+                    val profileTitle = Util.getStringBox(response.getHeader("profile-title"))
+                        .takeIf { it.isNotBlank() }
+                        ?: Util.getStringBox(response.getHeader("x-profile-title"))
+                            .takeIf { it.isNotBlank() }
+                    if (profileTitle != null) {
+                        lastProfileTitle = if (profileTitle.startsWith("base64:")) {
+                            NGUtil.decode(profileTitle.removePrefix("base64:"))
+                        } else {
+                            profileTitle
+                        }
+                    }
                     if (proxyGroup.name?.startsWith("Subscription #") == true) {
                         val remoteName = Util.getStringBox(response.getHeader("content-disposition"))
                         if (remoteName.isNotBlank()) {
@@ -122,9 +156,9 @@ object RawUpdater : GroupUpdater() {
 
             subscription.subscriptionUserinfo = lastUserinfo
 
-            // 修改默认名字
-            if (proxyGroup.name?.startsWith("Subscription #") == true && lastDisposition.isNotBlank()) {
-                val remoteName = Util.decodeFilename(lastDisposition)
+            // 修改默认名字：优先使用 Profile-Title 响应头，其次 content-disposition 文件名
+            if (proxyGroup.name?.startsWith("Subscription #") == true) {
+                val remoteName = lastProfileTitle.ifBlank { Util.decodeFilename(lastDisposition) }
                 if (remoteName.isNotBlank()) {
                     proxyGroup.name = remoteName
                 }
@@ -194,19 +228,38 @@ object RawUpdater : GroupUpdater() {
 
         Logs.d("Unique profiles: ${nameMap.size}")
 
-        val toDelete = ArrayList<ProxyEntity>()
-        val toReplace = exists.mapNotNull { entity ->
-            val name = entity.displayName()
-            if (nameMap.contains(name)) name to entity else let {
-                toDelete.add(entity)
-                null
+        // 熔断器：既有节点数不少于 10 且本次拉取数低于既有的 70% 时跳过删除，
+        // 防止订阅源异常返回导致节点被批量清空
+        val circuitBreak = exists.size >= 10 && proxies.size < exists.size * 0.7
+        if (circuitBreak) {
+            Logs.w(
+                "Subscription diff circuit breaker tripped: " +
+                    "exists=${exists.size}, fetched=${proxies.size}, skip deletion"
+            )
+        }
+
+        // 按顺序匹配既有实体（indexOfFirst + 移除），保持 userOrder 随订阅顺序稳定更新
+        val existsList = exists.toMutableList()
+        val toReplace = LinkedHashMap<String, ProxyEntity>()
+        for (name in nameMap.keys) {
+            val index = existsList.indexOfFirst { it.displayName() == name }
+            if (index != -1) {
+                toReplace[name] = existsList.removeAt(index)
             }
-        }.toMap()
+        }
+        val toDelete = ArrayList<ProxyEntity>()
+        if (circuitBreak) {
+            // 熔断时未匹配的既有实体保持原样，不删除
+            Logs.d("Skipped deletion of ${existsList.size} unmatched profiles")
+        } else {
+            toDelete.addAll(existsList)
+        }
 
         Logs.d("toDelete profiles: ${toDelete.size}")
         Logs.d("toReplace profiles: ${toReplace.size}")
 
         val toUpdate = ArrayList<ProxyEntity>()
+        val toInsert = ArrayList<ProxyEntity>()
         val added = mutableListOf<String>()
         val updated = mutableMapOf<String, String>()
         val deleted = toDelete.map { it.displayName() }
@@ -244,16 +297,24 @@ object RawUpdater : GroupUpdater() {
                 }
             } else {
                 changed++
-                SagerDatabase.proxyDao.addProxy(
+                // 先收集待插入实体，循环结束后统一入库
+                toInsert.add(
                     ProxyEntity(
                         groupId = proxyGroup.id, userOrder = userOrder
                     ).apply {
                         putBean(bean)
-                    })
+                    }
+                )
                 added.add(name)
                 Logs.d("Inserted profile: $name")
             }
             userOrder++
+        }
+
+        if (toInsert.isNotEmpty()) {
+            SagerDatabase.proxyDao.insert(toInsert).also {
+                Logs.d("Inserted profiles: ${it.size}")
+            }
         }
 
         SagerDatabase.proxyDao.updateProxy(toUpdate).also {

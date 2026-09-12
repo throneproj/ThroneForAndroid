@@ -29,6 +29,7 @@
     <string name="group_status_proxies_subscription">%d 个配置 | 更新于 %s</string>
     <string name="group_no_difference">%s: 没有变化</string>
     <string name="group_updated">%s: 更新了 %d 个节点</string>
+    <string name="batch_update_summary">批量更新完成：%1$d 个成功，%2$d 个失败</string>
     <string name="group_show_diff">变化</string>
     <string name="group_delete_confirm_prompt">您确定要删除这个分组吗\?</string>
     <string name="group_added">新增:

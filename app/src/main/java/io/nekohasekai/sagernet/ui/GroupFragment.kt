@@ -26,7 +26,10 @@ import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.widget.ListListener
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.supervisorScope
 import moe.matsuri.nb4a.utils.Util
 import moe.matsuri.nb4a.utils.toBytesString
 import java.lang.NumberFormatException
@@ -124,11 +127,28 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                 MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.confirm)
                     .setMessage(R.string.update_all_subscription)
                     .setPositiveButton(R.string.yes) { _, _ ->
-                        SagerDatabase.groupDao.allGroups()
-                            .filter { it.type == GroupType.SUBSCRIPTION }
-                            .forEach {
-                                GroupUpdater.startUpdate(it, true)
+                        runOnDefaultDispatcher {
+                            val groups = SagerDatabase.groupDao.allGroups()
+                                .filter { it.type == GroupType.SUBSCRIPTION }
+                            // supervisorScope + 并发更新：单个订阅失败不影响其余订阅
+                            val results = supervisorScope {
+                                groups.map { group ->
+                                    async {
+                                        try {
+                                            GroupUpdater.executeUpdate(group, true)
+                                        } catch (e: Throwable) {
+                                            Logs.w(e)
+                                            false
+                                        }
+                                    }
+                                }.awaitAll()
                             }
+                            val success = results.count { it }
+                            val failure = results.size - success
+                            onMainDispatcher {
+                                safeSnackbar(getString(R.string.batch_update_summary, success, failure))
+                            }
+                        }
                     }
                     .setNegativeButton(R.string.no, null)
                     .show()

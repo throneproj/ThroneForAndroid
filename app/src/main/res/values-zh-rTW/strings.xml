@@ -28,6 +28,7 @@
     <string name="group_status_proxies_subscription">%d 個代理 | 更新於 %s</string>
     <string name="group_no_difference">%s: 沒有變化</string>
     <string name="group_updated">%s: 更新了 %d 個代理</string>
+    <string name="batch_update_summary">批次更新完成：%1$d 個成功，%2$d 個失敗</string>
     <string name="group_show_diff">變化</string>
     <string name="group_delete_confirm_prompt">您真的希望刪除這個群組嗎？</string>
     <string name="group_added">新增：
