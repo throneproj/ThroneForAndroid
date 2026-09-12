@@ -116,7 +116,13 @@ fun buildSingBoxOutboundShadowsocksBean(bean: ShadowsocksBean): SingBoxOptions.O
         method = bean.method
         if (bean.plugin.isNotBlank()) {
             plugin = bean.plugin.substringBefore(";")
-            plugin_opts = bean.plugin.substringAfter(";")
+            var opts = bean.plugin.substringAfter(";")
+            // v2ray-plugin 强制补 mux=0，避免握手异常
+            if (plugin == "v2ray-plugin" && !opts.contains("mux=")) {
+                opts = if (opts.isBlank()) "mux=0" else "$opts;mux=0"
+            }
+            // 空 plugin_opts 置 null，避免发射空字符串字段
+            plugin_opts = opts.ifBlank { null }
             if (plugin == "none") {
                 plugin = null
                 plugin_opts = null

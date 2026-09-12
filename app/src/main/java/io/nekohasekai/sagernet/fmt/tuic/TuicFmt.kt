@@ -77,13 +77,15 @@ fun buildSingBoxOutboundTuicBean(bean: TuicBean): SingBoxOptions.Outbound_TUICOp
         uuid = bean.uuid
         password = bean.token
         congestion_control = bean.congestionController
+        udp_fragment = true
         when (bean.udpRelayMode) {
             "quic" -> udp_relay_mode = "quic"
         }
         zero_rtt_handshake = bean.reduceRTT
         tls = SingBoxOptions.OutboundTLSOptions().apply {
-            if (bean.sni.isNotBlank()) {
-                server_name = bean.sni
+            // SNI 为空时回退服务器地址；disableSNI 时不发送 server_name
+            if (!bean.disableSNI) {
+                server_name = bean.sni.ifBlank { bean.serverAddress }
             }
             if (bean.alpn.isNotBlank()) {
                 alpn = bean.alpn.listByLineOrComma()

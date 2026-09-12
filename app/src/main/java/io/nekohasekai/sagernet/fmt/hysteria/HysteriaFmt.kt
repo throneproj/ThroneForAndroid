@@ -264,7 +264,9 @@ fun isMultiPort(hyAddr: String): Boolean {
 }
 
 fun getFirstPort(portStr: String): Int {
-    return portStr.substringBefore(":").substringBefore(",").toIntOrNull() ?: 443
+    // 兼容 "443,8000-9000" 与 "1000-2000" 等多端口写法，取首个端口
+    return portStr.substringBefore(":").substringBefore(",")
+        .substringBefore("-").toIntOrNull() ?: 443
 }
 
 fun HysteriaBean.canUseSingBox(): Boolean {
@@ -277,6 +279,7 @@ fun buildSingBoxOutboundHysteriaBean(bean: HysteriaBean): SingBoxOptions.SingBox
         1 -> SingBoxOptions.Outbound_HysteriaOptions().apply {
             type = "hysteria"
             server = bean.serverAddress
+            udp_fragment = true
             val port = bean.serverPorts.toIntOrNull()
             if (port != null) {
                 server_port = port
@@ -299,9 +302,8 @@ fun buildSingBoxOutboundHysteriaBean(bean: HysteriaBean): SingBoxOptions.SingBox
                 recv_window_conn = bean.connectionReceiveWindow.toLong()
             }
             tls = SingBoxOptions.OutboundTLSOptions().apply {
-                if (bean.sni.isNotBlank()) {
-                    server_name = bean.sni
-                }
+                // SNI 为空时回退服务器地址，保证 TLS 握手可完成
+                server_name = bean.sni.ifBlank { bean.serverAddress }
                 if (bean.alpn.isNotBlank()) {
                     alpn = bean.alpn.listByLineOrComma()
                 }
@@ -316,6 +318,7 @@ fun buildSingBoxOutboundHysteriaBean(bean: HysteriaBean): SingBoxOptions.SingBox
         2 -> SingBoxOptions.Outbound_Hysteria2Options().apply {
             type = "hysteria2"
             server = bean.serverAddress
+            udp_fragment = true
             val port = bean.serverPorts.toIntOrNull()
             if (port != null) {
                 server_port = port
@@ -340,10 +343,11 @@ fun buildSingBoxOutboundHysteriaBean(bean: HysteriaBean): SingBoxOptions.SingBox
 //                recv_window_conn = bean.connectionReceiveWindow.toLong()
 //            }
             tls = SingBoxOptions.OutboundTLSOptions().apply {
-                if (bean.sni.isNotBlank()) {
-                    server_name = bean.sni
+                // SNI 为空时回退服务器地址；alpn 从节点配置解析，不再硬编码 h3
+                server_name = bean.sni.ifBlank { bean.serverAddress }
+                if (bean.alpn.isNotBlank()) {
+                    alpn = bean.alpn.listByLineOrComma()
                 }
-                alpn = listOf("h3")
                 if (bean.caText.isNotBlank()) {
                     certificate = bean.caText
                 }

@@ -12,6 +12,7 @@ import moe.matsuri.nb4a.utils.listByLineOrComma
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
+import java.net.URI
 import java.net.URLDecoder
 
 private val supportedKcpHeaderType = arrayOf(
@@ -88,8 +89,7 @@ fun parseV2Ray(link: String): StandardV2RayBean {
     // "std" format
 
     val bean = VMessBean().apply { if (linkBody.startsWith("vless://")) alterId = -1 }
-    val url = linkBody.replace("vmess://", "https://").replace("vless://", "https://")
-        .toHttpUrlOrNull() ?: error("invalid v2ray link $link")
+    val url = parseV2RayHttpUrl(linkBody) ?: error("invalid v2ray link $link")
 
     if (url.password.isNotBlank()) {
         // https://github.com/v2fly/v2fly-github-io/issues/26 (rarely use)
@@ -168,7 +168,8 @@ fun parseV2Ray(link: String): StandardV2RayBean {
                     bean.xhttpMode = normalizeXhttpMode(it)
                 }
                 url.queryParameter("extra")?.let {
-                    bean.xhttpExtra = XhttpExtraConverter.xrayToSingBox(it)
+                    // 转换失败时回退原文，避免整条链接解析失败
+                    bean.xhttpExtra = runCatching { XhttpExtraConverter.xrayToSingBox(it) }.getOrDefault(it)
                 }
             }
         }
@@ -179,6 +180,46 @@ fun parseV2Ray(link: String): StandardV2RayBean {
     if (bean.name.isNullOrBlank() && displayName.isNotBlank()) bean.name = displayName
 
     return bean
+}
+
+// okhttp HttpUrl 拒绝 query 中的 { } " 空格 | \ ^ < > ` 等字符：
+// 先逐字符 percent-encode 后重试，仍失败再退 java.net.URI 宽松解析
+private fun parseV2RayHttpUrl(linkBody: String): HttpUrl? {
+    val httpsUrl = linkBody.replace("vmess://", "https://").replace("vless://", "https://")
+    httpsUrl.toHttpUrlOrNull()?.let { return it }
+
+    val encoded = buildString {
+        for (ch in httpsUrl) {
+            if (ch.code <= 0x20 || ch.code >= 0x7F ||
+                ch == '"' || ch == '{' || ch == '}' || ch == '|' ||
+                ch == '\\' || ch == '^' || ch == '<' || ch == '>' || ch == '`'
+            ) {
+                append('%')
+                append(ch.code.toString(16).uppercase().padStart(2, '0'))
+            } else {
+                append(ch)
+            }
+        }
+    }
+    encoded.toHttpUrlOrNull()?.let { return it }
+
+    return runCatching {
+        val uri = URI(encoded)
+        val host = uri.host ?: return@runCatching null
+        HttpUrl.Builder()
+            .scheme("https")
+            .host(host)
+            .port(if (uri.port == -1) 443 else uri.port)
+            .encodedPath(uri.rawPath?.ifBlank { "/" } ?: "/")
+            .apply {
+                uri.rawUserInfo?.let { info ->
+                    encodedUsername(info.substringBefore(":"))
+                    if (info.contains(":")) encodedPassword(info.substringAfter(":", ""))
+                }
+                uri.rawQuery?.let { encodedQuery(it) }
+            }
+            .build()
+    }.getOrNull()
 }
 
 // https://github.com/XTLS/Xray-core/issues/91
@@ -198,7 +239,8 @@ fun StandardV2RayBean.parseDuckSoft(url: HttpUrl) {
         path = url.pathSegments.joinToString("/")
     }
 
-    type = url.queryParameter("type") ?: "tcp"
+    // 兼容部分机场用 net= 代替 type= 声明传输层
+    type = url.queryParameter("type") ?: url.queryParameter("net") ?: "tcp"
     if (type == "h2" || url.queryParameter("headerType") == "http") type = "http"
 
     security = url.queryParameter("security")
@@ -260,8 +302,13 @@ fun StandardV2RayBean.parseDuckSoft(url: HttpUrl) {
             }
             url.queryParameter("headerType")?.let {
                 if (it.isNotBlank()) {
-                    if (it !in supportedKcpHeaderType) error("unsupported headerType")
-                    headerType = it
+                    if (it !in supportedKcpHeaderType) {
+                        // 非法 headerType 回退 none，不再解析失败
+                        Logs.w("unsupported kcp headerType: $it, fallback to none")
+                        headerType = "none"
+                    } else {
+                        headerType = it
+                    }
                 }
             }
             url.queryParameter("mtu")?.let {
@@ -317,7 +364,8 @@ fun StandardV2RayBean.parseDuckSoft(url: HttpUrl) {
                 xhttpMode = normalizeXhttpMode(it)
             }
             url.queryParameter("extra")?.let {
-                xhttpExtra = XhttpExtraConverter.xrayToSingBox(it)
+                // 转换失败时回退原文，避免整条链接解析失败
+                xhttpExtra = runCatching { XhttpExtraConverter.xrayToSingBox(it) }.getOrDefault(it)
             }
         }
     }
