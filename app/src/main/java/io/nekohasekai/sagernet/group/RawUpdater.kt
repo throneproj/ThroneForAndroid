@@ -312,9 +312,8 @@ object RawUpdater : GroupUpdater() {
         }
 
         if (toInsert.isNotEmpty()) {
-            SagerDatabase.proxyDao.insert(toInsert).also {
-                Logs.d("Inserted profiles: ${it.size}")
-            }
+            SagerDatabase.proxyDao.insert(toInsert)
+            Logs.d("Inserted profiles: ${toInsert.size}")
         }
 
         SagerDatabase.proxyDao.updateProxy(toUpdate).also {
