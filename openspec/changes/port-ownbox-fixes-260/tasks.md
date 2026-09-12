@@ -25,7 +25,7 @@
 - [x] 4.1 `group/GroupUpdater.kt`：`executeUpdate` 改 `supervisorScope`；`subscription` 判空；后台失败静默（仅 `byUser` 报错）；重复触发返回 false
 - [x] 4.2 `ui/GroupFragment.kt`：批量更新改 `supervisorScope + async/awaitAll` 并发 + 逐个 try-catch + 成功/失败汇总（经 safeSnackbar）
 - [x] 4.3 `group/RawUpdater.kt`：diff 熔断器（exists >= 10 且 fetched < exists*70% 时跳过删除）；顺序匹配保持 userOrder 稳定；toInsert 先收集后入库；代理拉取失败回退直连重试；捕获 `Profile-Title`/`X-Profile-Title` 头（含 base64: 解码）
-- [ ] 4.4 提交批次三并推送，触发 CI；回传证据：编译成功；真机场景（可后置到 8.2）：多订阅批量更新（含一个坏订阅），预期其余订阅正常更新且显示汇总提示
+- [x] 4.4 提交批次三并推送，触发 CI；回传证据：编译成功；真机场景（可后置到 8.2）：多订阅批量更新（含一个坏订阅），预期其余订阅正常更新且显示汇总提示
 
 ## 5. 批次四：剪贴板去重修正 + 去重键重构
 
