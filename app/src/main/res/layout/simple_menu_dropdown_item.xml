@@ -22,4 +22,5 @@
     android:minWidth="120dp"
     android:paddingEnd="16dp"
     android:paddingStart="16dp"
-    android:singleLine="true" />
+    android:singleLine="true"
+    android:textColor="?android:attr/textColorPrimary" />

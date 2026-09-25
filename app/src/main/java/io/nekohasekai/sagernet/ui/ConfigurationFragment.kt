@@ -1,5 +1,6 @@
 package io.nekohasekai.sagernet.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.KeyEvent
@@ -147,6 +148,9 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
     private var shownGroupId = 0L
     private var query = ""
 
+    /** A toolbar long press waiting for its tab's first load: group id to profile id. */
+    private var pendingReveal: Pair<Long, Long>? = null
+
     var testState = TestUiState()
         private set
     private var subscriptionStates: Map<Long, Int> = emptyMap()
@@ -228,7 +232,10 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         applyGroups(GroupRepo.all(), initialGroupId())
         mediator = TabLayoutMediator(tabLayout, pager) { tab, position ->
             pagerAdapter.groups.getOrNull(position)?.let { tab.text = tabLabel(it) }
-            tab.view.setOnLongClickListener { true }
+            tab.view.setOnLongClickListener {
+                if (!select) pagerAdapter.groups.getOrNull(tab.position)?.let(::editGroup)
+                true
+            }
         }.also { it.attach() }
         pager.registerOnPageChangeCallback(pageCallback)
         onPageShown()
@@ -296,6 +303,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         mediator = null
         selection.finish()
         lists.clear()
+        pendingReveal = null
         searchView = null
         super.onDestroyView()
     }
@@ -342,6 +350,34 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         }
         // a tap on the toolbar brings the selected profile into view (or goes back to the top)
         toolbar.setOnClickListener { currentList()?.scrollToProfile(pickedOrSelectedId()) }
+        toolbar.setOnLongClickListener {
+            showActiveProfile()
+            true
+        }
+    }
+
+    /**
+     * The toolbar's long press: the selected (picked) profile in whichever tab holds it. Without one, while searching
+     * or selecting, or when its group has no tab, it does what the tap does.
+     */
+    private fun showActiveProfile() {
+        val id = pickedOrSelectedId()
+        val owner = viewLifecycleOwnerLiveData.value ?: return
+        if (id <= 0L || query.isNotEmpty() || selection.active) {
+            currentList()?.scrollToProfile(id)
+            return
+        }
+        owner.lifecycleScope.launch {
+            val groupId = withContext(Dispatchers.IO) { ProfileManager.getProfile(id)?.groupId } ?: 0L
+            val index = pagerAdapter.indexOf(groupId)
+            if (index < 0 || query.isNotEmpty() || selection.active) {
+                currentList()?.scrollToProfile(id)
+                return@launch
+            }
+            if (pager.currentItem != index) pager.setCurrentItem(index, false)
+            val list = listFor(groupId)
+            if (list != null && list.adapter.loaded) list.revealProfile(id) else pendingReveal = groupId to id
+        }
     }
 
     /** The navigation icon in the toolbar's colours (the white theme draws it dark, as ToolbarFragment does). */
@@ -394,6 +430,13 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
 
     private fun tabLabel(group: ProxyGroup): String =
         if (group.archive) getString(R.string.profiles_tab_archived, group.displayName()) else group.displayName()
+
+    /** A tab's long press: the group editor, as the groups screen opens it. */
+    private fun editGroup(group: ProxyGroup) {
+        startActivity(Intent(requireContext(), GroupSettingsActivity::class.java).apply {
+            putExtra(GroupSettingsActivity.EXTRA_GROUP_ID, group.id)
+        })
+    }
 
     private fun initialGroupId(): Long = if (select && pickedGroup > 0) pickedGroup else GroupRepo.currentId()
 
@@ -458,6 +501,14 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
     fun listFor(groupId: Long): ProfileListFragment? = lists.firstOrNull { it.groupId == groupId }
 
     fun currentList(): ProfileListFragment? = listFor(currentGroupId)
+
+    /** The profile a toolbar long press left for [groupId]'s list to show on its first load, 0 for none. */
+    fun takePendingReveal(groupId: Long): Long {
+        val (group, profile) = pendingReveal ?: return 0L
+        if (group != groupId) return 0L
+        pendingReveal = null
+        return profile
+    }
 
     /** A list scrolled by [dy] (0 after a layout): the current tab's hides and shows the header in a compact height. */
     fun onListScrolled(list: ProfileListFragment, dy: Int) {

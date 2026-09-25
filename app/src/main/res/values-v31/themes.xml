@@ -5,7 +5,6 @@
         <item name="colorPrimary">@color/monet_primary</item>
         <item name="colorPrimaryDark">@color/monet_primary_variant</item>
         <item name="colorAccent">@color/monet_secondary</item>
-        <item name="colorMaterial100">@color/monet_material_100</item>
         <item name="cardElevatedSurfaceColor">@color/monet_card_elevated</item>
     </style>
 
@@ -13,7 +12,6 @@
         <item name="colorPrimary">@color/monet_primary</item>
         <item name="colorPrimaryDark">@color/monet_primary_variant</item>
         <item name="colorAccent">@color/monet_secondary</item>
-        <item name="colorMaterial100">@color/monet_material_100</item>
         <item name="cardElevatedSurfaceColor">@color/monet_card_elevated</item>
     </style>
 

@@ -208,18 +208,24 @@ class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
         }
     }
 
-    /** First data of the view: the desktop's scroll_last_profile, the picked or selected profile otherwise. */
+    /**
+     * First data of the view: the profile a toolbar long press is looking for, the desktop's scroll_last_profile, the
+     * picked or selected profile otherwise.
+     */
     internal fun onFirstLoad() {
         val host = host ?: return
         val layoutManager = list.layoutManager as? LinearLayoutManager ?: return
         val stored = adapter.group?.scrollLastProfile ?: -1
         savedScroll = stored
+        val revealed = host.takePendingReveal(groupId)
         val target = when {
+            revealed > 0 -> adapter.displayedIds.indexOf(revealed)
             host.select -> adapter.displayedIds.indexOf(host.pickedOrSelectedId())
             stored >= 0 -> stored.coerceAtMost(adapter.itemCount - 1)
             else -> adapter.displayedIds.indexOf(host.pickedOrSelectedId())
         }
-        if (target > 0) layoutManager.scrollToPositionWithOffset(target, 0)
+        // the long press's row even when it is the first: a page restored from its saved state starts where it was
+        if (target > 0 || (target == 0 && revealed > 0)) layoutManager.scrollToPositionWithOffset(target, 0)
     }
 
     /** show_group's scroll_last_profile = firstVisibleRow(), stored when the tab is left or the screen pauses. */
@@ -246,6 +252,18 @@ class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
             list.smoothScrollToPosition(index)
         } else {
             list.smoothScrollToPosition(0)
+        }
+    }
+
+    /** Brings [profileId] into view: on screen just far enough to show it whole, from further away to the top. */
+    fun revealProfile(profileId: Long) {
+        val layoutManager = list.layoutManager as? LinearLayoutManager ?: return
+        val index = adapter.displayedIds.indexOf(profileId)
+        if (index < 0) return
+        if (index in layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()) {
+            list.smoothScrollToPosition(index)
+        } else {
+            layoutManager.scrollToPositionWithOffset(index, 0)
         }
     }
 

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="preference_simple_menu_background">#303030</color>
     <!-- Default thin card border: about 12% white -->
     <color name="card_stroke">#29FFFFFF</color>
 

@@ -17,12 +17,14 @@
 package moe.matsuri.nb4a.ui
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import androidx.core.graphics.ColorUtils
 import androidx.preference.DropDownPreference
 import androidx.preference.PreferenceViewHolder
 import io.nekohasekai.sagernet.R
@@ -48,7 +50,7 @@ open class SimpleMenuPreference
         super.onBindViewHolder(holder)
         val mSpinner = holder.itemView.findViewById<Spinner>(R.id.spinner)
         mSpinner.layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
-        mSpinner.setPopupBackgroundResource(R.drawable.bg_spinner_dropdown)
+        mSpinner.setPopupBackgroundResource(R.drawable.bg_popup_menu)
     }
 
     override fun createAdapter(): ArrayAdapter<CharSequence?> {
@@ -70,8 +72,8 @@ open class SimpleMenuPreference
 
         var currentPosition = -1
 
-        private val radius = 12f * context.resources.displayMetrics.density
-        private val selectedColor = context.getColorAttr(R.attr.colorMaterial100)
+        private val radius = context.resources.getDimension(R.dimen.popup_corner_radius)
+        private val selectedColor = selectedFill(context)
 
         private val topDrawable = GradientDrawable().apply {
             setColor(selectedColor)
@@ -108,4 +110,32 @@ open class SimpleMenuPreference
             return view
         }
     }
+}
+
+/**
+ * The selected row's fill over the popup's surface: the theme's primary, stronger on a dark surface, or the text
+ * colour where the primary would not show (the white theme by day, the black one at night), faded until the text keeps
+ * 4.5:1. It stays translucent, so the popup's border still shows along the row.
+ */
+private fun selectedFill(context: Context): Int {
+    val surface = ColorUtils.setAlphaComponent(context.getColorAttr(R.attr.colorSurface), 0xFF)
+    val text = context.getColorAttr(android.R.attr.textColorPrimary)
+    val dark = ColorUtils.calculateLuminance(surface) < 0.5
+    var fill = ColorUtils.setAlphaComponent(context.getColorAttr(R.attr.colorPrimary), if (dark) 0x66 else 0x48)
+    // CIE76 ΔE under 6: the tint reads as the surface itself
+    if (labDistance(ColorUtils.compositeColors(fill, surface), surface) < 6) {
+        fill = ColorUtils.setAlphaComponent(text, 0x1F)
+    }
+    while (Color.alpha(fill) > 0x0A &&
+        ColorUtils.calculateContrast(text, ColorUtils.compositeColors(fill, surface)) < 4.5
+    ) {
+        fill = ColorUtils.setAlphaComponent(fill, Color.alpha(fill) - 0x0A)
+    }
+    return fill
+}
+
+private fun labDistance(a: Int, b: Int): Double {
+    val labA = DoubleArray(3).also { ColorUtils.colorToLAB(a, it) }
+    val labB = DoubleArray(3).also { ColorUtils.colorToLAB(b, it) }
+    return ColorUtils.distanceEuclidean(labA, labB)
 }
