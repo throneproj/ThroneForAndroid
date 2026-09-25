@@ -350,6 +350,8 @@ class MainActivity : ThemedActivity(),
         binding.fab.animate().cancel()
         if (showControls) {
             binding.fab.show()
+            // a start error shown on another screen sits at the bottom, where the FAB now comes back
+            errorBar?.takeIf { it.isShown && it.anchorView == null }?.anchorAboveFab()
         } else {
             binding.fab.hideProgress()
             binding.fabProgress.hide()
@@ -446,11 +448,15 @@ class MainActivity : ThemedActivity(),
 
     override fun snackbarInternal(text: CharSequence): Snackbar {
         return Snackbar.make(binding.coordinator, text, Snackbar.LENGTH_LONG).apply {
-            if (binding.fab.isShown) {
-                anchorView = binding.fab
-            }
-            // TODO
+            if (binding.fab.visibility == View.VISIBLE) anchorAboveFab()
         }
+    }
+
+    // Visibility, not isShown: the saved start error is shown from the first onResume, before the window is attached.
+    // The layout listener places the bar once the FAB has been laid out.
+    private fun Snackbar.anchorAboveFab() {
+        anchorView = binding.fab
+        isAnchorViewLayoutListenerEnabled = true
     }
 
     override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) {

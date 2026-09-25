@@ -33,6 +33,8 @@
             app:trackCornerRadius="@dimen/mtrl_progress_track_thickness"
             app:trackThickness="8dp" />
 
+        <!-- Anchored to the bar, the FAB must not dodge snackbars: the dodge offset fights the anchor and
+             strands the FAB over the bar's status line (#47). "top" only because "none" becomes bottom. -->
         <io.nekohasekai.sagernet.widget.ServiceButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
@@ -42,6 +44,7 @@
             android:nextFocusDown="@+id/stats"
             app:backgroundTint="?colorPrimary"
             app:layout_anchor="@id/stats"
+            app:layout_dodgeInsetEdges="top"
             app:pressedTranslationZ="6dp"
             app:srcCompat="@drawable/ic_service_idle" />
 
