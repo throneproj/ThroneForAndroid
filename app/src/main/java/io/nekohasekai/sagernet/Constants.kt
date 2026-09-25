@@ -60,6 +60,7 @@ object Key {
     const val HWID_FALLBACK = "hwidFallback"
     const val WIFI_PERMISSION_ASKED = "wifiPermissionAsked"
     const val SERVICE_ERROR = "serviceError"
+    const val SERVICE_ERROR_DNS = "serviceErrorDns"
 
     const val WEBDAV_SERVER = "webdavServer"
     const val WEBDAV_USERNAME = "webdavUsername"

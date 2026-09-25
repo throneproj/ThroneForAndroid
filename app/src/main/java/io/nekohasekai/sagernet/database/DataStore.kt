@@ -52,6 +52,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var wifiPermissionAsked by configurationStore.boolean(Key.WIFI_PERMISSION_ASKED)
     /** Why the last start failed, until the next start or until the user dismisses it. */
     var serviceError by configurationStore.string(Key.SERVICE_ERROR)
+    /** [serviceError] asks for a working Direct DNS, so it offers the DNS settings instead of the logs. */
+    var serviceErrorDns by configurationStore.boolean(Key.SERVICE_ERROR_DNS)
     var groupLayoutMode by configurationStore.stringToInt(Key.GROUP_LAYOUT_MODE) { 0 }
 
     var networkChangeResetConnections by configurationStore.boolean(Key.NETWORK_CHANGE_RESET_CONNECTIONS) { true }

@@ -15,6 +15,7 @@ import io.nekohasekai.sagernet.aidl.ISagerNetService
 import io.nekohasekai.sagernet.aidl.ISagerNetServiceCallback
 import io.nekohasekai.sagernet.appwidget.Widgets
 import io.nekohasekai.sagernet.bg.autoselector.AutoSelectorRuntime
+import io.nekohasekai.sagernet.bg.proto.LocalDnsFailedException
 import io.nekohasekai.sagernet.bg.proto.ProxyInstance
 import io.nekohasekai.sagernet.bg.proto.exitsThroughVpn
 import io.nekohasekai.sagernet.bg.proto.urlTestCurrent
@@ -466,9 +467,15 @@ class BaseService {
             }
         }
 
-        /** A start that failed: MainActivity keeps showing [message] until the next start, also on a later visit. */
-        fun failRunner(message: String) {
-            if (data.state != State.Stopping) DataStore.serviceError = message
+        /**
+         * A start that failed: MainActivity keeps showing [message] until the next start, also on a later visit, and
+         * offers the DNS settings with it when [dnsSettings].
+         */
+        fun failRunner(message: String, dnsSettings: Boolean = false) {
+            if (data.state != State.Stopping) {
+                DataStore.serviceError = message
+                DataStore.serviceErrorDns = dnsSettings
+            }
             stopRunner(false, message)
         }
 
@@ -576,7 +583,10 @@ class BaseService {
                 data.closeReceiverRegistered = true
             }
 
-            if (DataStore.serviceError.isNotEmpty()) DataStore.serviceError = ""
+            if (DataStore.serviceError.isNotEmpty()) {
+                DataStore.serviceError = ""
+                DataStore.serviceErrorDns = false
+            }
             data.changeState(State.Connecting)
             // startForeground before anything can stop the service (see the link above).
             val title = ServiceNotification.genTitle(profile)
@@ -600,6 +610,12 @@ class BaseService {
                 } catch (_: CancellationException) { // if the job was cancelled, it is canceller's responsibility to call stopRunner
                 } catch (_: UnknownHostException) {
                     failRunner(getString(R.string.invalid_server))
+                } catch (exc: LocalDnsFailedException) {
+                    failRunner(
+                        if (exc.servers.isEmpty()) getString(R.string.local_dns_failed_system)
+                        else getString(R.string.local_dns_failed, exc.servers),
+                        dnsSettings = true,
+                    )
                 } catch (exc: Throwable) {
                     // gomobile surfaces Go errors as go.Universe$proxyerror: message only, no stack worth logging
                     if (exc.javaClass.name.endsWith("proxyerror")) {

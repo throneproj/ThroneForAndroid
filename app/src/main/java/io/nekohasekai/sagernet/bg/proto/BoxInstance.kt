@@ -47,6 +47,7 @@ abstract class BoxInstance(
             box.start()
         } catch (error: Throwable) {
             Logs.w("box start failed for profile ${profile.id}: ${error.message}")
+            box.localDNSFailure()?.let { throw LocalDnsFailedException(it.servers, error) }
             throw error
         }
         CoreRuntime.attachRunning(box, profile.id)
@@ -58,6 +59,9 @@ abstract class BoxInstance(
     }
 
 }
+
+/** A start that failed on the local DNS server; [servers] are the network's DNS servers it asked, empty for Android's resolver. */
+class LocalDnsFailedException(val servers: String, cause: Throwable) : Exception(cause.message, cause)
 
 internal fun CoreConfig.toStartOptions(autoSelector: AutoSelectorBuild? = null): StartOptions = StartOptions().apply {
     coreConfig = this@toStartOptions.coreConfig

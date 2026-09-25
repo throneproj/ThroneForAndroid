@@ -45,6 +45,7 @@ import io.nekohasekai.sagernet.ktx.launchCustomTab
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ui.profile.ProfileTextImport
 import io.nekohasekai.sagernet.ui.route.RouteImports
+import io.nekohasekai.sagernet.ui.settings.DnsSettingsFragment
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MessageStore
@@ -421,18 +422,26 @@ class MainActivity : ThemedActivity(),
     private var errorBar: Snackbar? = null
     private var errorShown = ""
 
-    /** A failed start stays until the next start, Logs or a swipe; the service keeps it for a later visit. */
+    /** A failed start stays until the next start, its action or a swipe; the service keeps it for a later visit. */
     private fun showServiceError(message: String) {
         if (errorBar?.isShownOrQueued == true && errorShown == message) return
         errorShown = message
-        errorBar = snackbar(message).setDuration(Snackbar.LENGTH_INDEFINITE)
-            .setAction(R.string.menu_log) { displayFragmentWithId(R.id.nav_logcat) }
-            .addCallback(object : Snackbar.Callback() {
-                override fun onDismissed(transientBottomBar: Snackbar, event: Int) {
-                    if (event == DISMISS_EVENT_SWIPE || event == DISMISS_EVENT_ACTION) DataStore.serviceError = ""
+        val bar = snackbar(message).setDuration(Snackbar.LENGTH_INDEFINITE)
+        if (DataStore.serviceErrorDns) {
+            bar.setAction(R.string.settings_dns) {
+                openSettingsScreen(DnsSettingsFragment::class.java.name, getString(R.string.settings_dns))
+            }
+        } else {
+            bar.setAction(R.string.menu_log) { displayFragmentWithId(R.id.nav_logcat) }
+        }
+        errorBar = bar.addCallback(object : Snackbar.Callback() {
+            override fun onDismissed(transientBottomBar: Snackbar, event: Int) {
+                if (event == DISMISS_EVENT_SWIPE || event == DISMISS_EVENT_ACTION) {
+                    DataStore.serviceError = ""
+                    DataStore.serviceErrorDns = false
                 }
-            })
-            .also { it.show() }
+            }
+        }).also { it.show() }
     }
 
     override fun snackbarInternal(text: CharSequence): Snackbar {
