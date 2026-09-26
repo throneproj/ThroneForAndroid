@@ -338,6 +338,10 @@ internal class ChainBuilder(
         return ingressTag
     }
 
+    /** resolvesHostnamesViaDnsRules (generate.cpp:1334-1338). */
+    private fun resolvesHostnamesViaDnsRules(hop: Hop): Boolean =
+        hop.outbound.isEndpoint() || TypeAccess.asSocks(hop.outbound)?.version == 4
+
     /**
      * buildSingboxChain (:1321-1369). Hop idx gets `<prefix>-<startSuffix+idx>` (idx 0 is `proxy` for the main
      * chain) and, when linked, `detour` to the next tag: the exit is dialed through the next hop, and so on until the
@@ -363,6 +367,10 @@ internal class ChainBuilder(
             if (TypeAccess.realmActive(hop.outbound)) obj["domain_resolver"] = jsonObjectOf("server" to Tags.DNS_DIRECT)
             if (nextTag.isNotEmpty() && opts.link) obj["detour"] = nextTag
             if (opts.warpWrap && idx == 0) obj["detour"] = Tags.WARP_BYPASS
+            // A detour gets the server hostname unresolved; endpoints look it up via DNS rules, which end at dns-remote over the proxy.
+            if (nextTag.isNotEmpty() && opts.link && !hop.outbound.isEndpoint() && !obj.contains("domain_resolver") &&
+                resolvesHostnamesViaDnsRules(hops[idx + 1])
+            ) obj["domain_resolver"] = directDomainResolver(ctx)
             if (hop.outbound.isEndpoint()) state.endpoints.add(obj) else state.outbounds.add(obj)
         }
     }

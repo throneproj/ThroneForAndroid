@@ -1,8 +1,14 @@
 package io.nekohasekai.sagernet.outbound.config
 
+import io.nekohasekai.sagernet.outbound.BuildContext
 import io.nekohasekai.sagernet.outbound.QtStrings
 import io.nekohasekai.sagernet.outbound.json.JsonObject
+import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
 import io.nekohasekai.sagernet.outbound.link.Hosts
+
+/** directDomainResolver (generate.cpp:788-790). */
+internal fun directDomainResolver(ctx: BuildContext): JsonObject =
+    jsonObjectOf("server" to Tags.DNS_DIRECT, "strategy" to ctx.directDomainStrategy())
 
 /** The desktop's DNS address syntax (buildDnsObj, generate.cpp:780-841) and the DoH upgrade table (:843-863). */
 internal object DnsServers {

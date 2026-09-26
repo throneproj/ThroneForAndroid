@@ -379,7 +379,7 @@ class ConfigGenerator @JvmOverloads constructor(
         // A running tun owns the OS resolver, so the sidecar resolves against the probe box's dns-direct instead.
         val route = jsonObjectOf(
             "auto_detect_interface" to true,
-            "default_domain_resolver" to jsonObjectOf("server" to Tags.DNS_DIRECT, "strategy" to ctx.directDomainStrategy()),
+            "default_domain_resolver" to directDomainResolver(ctx),
         )
         if (routeRules.isNotEmpty()) route["rules"] = routeRules
         state.coreConfig["route"] = route
@@ -905,7 +905,7 @@ class ConfigGenerator @JvmOverloads constructor(
             else -> OutboundIds.toName(defaultOutbound)
         }
         if (settings.trafficStats) routeObj["find_process"] = true
-        routeObj["default_domain_resolver"] = jsonObjectOf("server" to Tags.DNS_DIRECT, "strategy" to buildContext.directDomainStrategy())
+        routeObj["default_domain_resolver"] = directDomainResolver(buildContext)
         if (settings.vpnMode) routeObj["auto_detect_interface"] = true
         state.coreConfig["route"] = routeObj
     }
