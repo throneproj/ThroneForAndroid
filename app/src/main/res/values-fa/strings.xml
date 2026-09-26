@@ -237,7 +237,6 @@
     <string name="app_tls_version">نسخه TLS </string>
     <string name="hop_interval">مدت زمان Port hopping (به ثانیه)</string>
     <string name="utls_fingerprint">اثر انگشت uTLS</string>
-    <string name="set_panel_url">تعیین لینک صفحه</string>
     <string name="enable_clash_api">فعال کردن Clash API</string>
     <string name="log_level">سطح ثبت آمار</string>
     <string name="xtls_flow">Flow (VLESS دستورالعمل فرعی)</string>

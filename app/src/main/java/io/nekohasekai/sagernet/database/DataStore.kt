@@ -54,6 +54,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var serviceError by configurationStore.string(Key.SERVICE_ERROR)
     /** [serviceError] asks for a working Direct DNS, so it offers the DNS settings instead of the logs. */
     var serviceErrorDns by configurationStore.boolean(Key.SERVICE_ERROR_DNS)
+    /** [serviceError] is about Xray's geoip.dat / geosite.dat, so it offers the geo asset settings instead. */
+    var serviceErrorGeo by configurationStore.boolean(Key.SERVICE_ERROR_GEO)
     var groupLayoutMode by configurationStore.stringToInt(Key.GROUP_LAYOUT_MODE) { 0 }
 
     var networkChangeResetConnections by configurationStore.boolean(Key.NETWORK_CHANGE_RESET_CONNECTIONS) { true }
@@ -80,8 +82,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var bypass by configurationStore.boolean(Key.BYPASS_MODE) { true }
     var individual by configurationStore.string(Key.INDIVIDUAL)
     var httpProxyBypass by configurationStore.string(Key.HTTP_PROXY_BYPASS) { "" }
-
-    var yacdURL by configurationStore.string(Key.YACD_URL) { "http://127.0.0.1:9090/ui" }
 
     var webdavServer: String?
         get() = configurationStore.getString(Key.WEBDAV_SERVER)
@@ -261,8 +261,11 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         }
         set(value) = SettingsRegistry.CORE_BOX_API_SECRET.write(configurationStore, value)
 
+    var coreBoxApiPort by SettingsRegistry.CORE_BOX_API_PORT
     var coreDnsInPort by SettingsRegistry.CORE_DNS_IN_PORT
     var xrayVlessPreference by SettingsRegistry.XRAY_VLESS_PREFERENCE
+    var xrayGeoipUrl by SettingsRegistry.XRAY_GEOIP_URL
+    var xrayGeositeUrl by SettingsRegistry.XRAY_GEOSITE_URL
     var skipCert by SettingsRegistry.SKIP_CERT
     var useMozillaCerts by SettingsRegistry.USE_MOZILLA_CERTS
     var enableNtp by SettingsRegistry.ENABLE_NTP
@@ -273,6 +276,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     /** core_box_clash_api is on: a positive port. */
     val clashApiEnabled: Boolean get() = coreBoxClashApi > 0
+
+    /** core_box_api_port is on: the sing-box API serves the dashboard on that loopback port. */
+    val apiDashboardEnabled: Boolean get() = coreBoxApiPort > 0
 
     // ------------------------------------------------------------------------------------------------ old cache, DO NOT ADD
 

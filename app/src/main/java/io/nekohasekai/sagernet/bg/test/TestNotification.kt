@@ -1,5 +1,6 @@
 package io.nekohasekai.sagernet.bg.test
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -7,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
@@ -14,6 +16,7 @@ import io.nekohasekai.sagernet.bg.CoreForeground
 import io.nekohasekai.sagernet.bg.proto.SpeedTestSnapshot
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
+import io.nekohasekai.sagernet.utils.PlatformNotifications
 import kotlinx.coroutines.delay
 
 /** The progress notification of a running session ("<kind> · <scope>", n / N, Stop), shown through [CoreForeground]. */
@@ -28,6 +31,10 @@ internal class TestNotification(private val session: TestSession) {
     @Volatile
     private var speedLine = ""
 
+    /** The geo asset download in flight, empty when none. */
+    @Volatile
+    private var assetLine = ""
+
     private var receiver: BroadcastReceiver? = null
 
     fun start() {
@@ -41,6 +48,7 @@ internal class TestNotification(private val session: TestSession) {
             Logs.w(e)
         }
         CoreForeground.acquire(REASON, build())
+        runCatching { NotificationManagerCompat.from(app).cancel(WARNING_TAG, WARNING_ID) }
     }
 
     fun changed() {
@@ -55,6 +63,11 @@ internal class TestNotification(private val session: TestSession) {
         dirty = true
     }
 
+    fun asset(line: String) {
+        assetLine = line
+        dirty = true
+    }
+
     /** Posts the latest state at most once per [REFRESH_MS] until cancelled. */
     suspend fun refreshLoop() {
         while (true) {
@@ -65,10 +78,28 @@ internal class TestNotification(private val session: TestSession) {
         }
     }
 
-    fun finish() {
+    /** Ends the progress; [assetProblems] (profiles left untested for a geo asset) stay behind as a warning. */
+    fun finish(assetProblems: Collection<String>) {
         receiver?.let { runCatching { app.unregisterReceiver(it) } }
         receiver = null
         CoreForeground.release(REASON)
+        if (assetProblems.isNotEmpty()) warnAssets(assetProblems)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun warnAssets(problems: Collection<String>) {
+        val text = problems.take(MAX_WARNED_PROBLEMS).joinToString("\n\n")
+        val notification = NotificationCompat.Builder(app, PlatformNotifications.CHANNEL_WARNINGS)
+            .setSmallIcon(R.drawable.ic_notification_warning)
+            .setContentTitle(app.getString(R.string.xray_geo_test_warning_title))
+            .setContentText(text.substringBefore('\n'))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setContentIntent(SagerNet.configureIntent(app))
+            .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+            .build()
+        runCatching { NotificationManagerCompat.from(app).notify(WARNING_TAG, WARNING_ID, notification) }
+            .onFailure { Logs.w(it) }
     }
 
     private fun build(): Notification {
@@ -87,7 +118,7 @@ internal class TestNotification(private val session: TestSession) {
             session.kind == TestSpec.KIND_SPEED -> app.getString(R.string.test_engine_progress, done, total)
             else -> app.getString(R.string.test_engine_progress_counts, done, total, session.okCount, session.failedCount)
         }
-        val text = listOf(speedLine, progress).filter { it.isNotEmpty() }.joinToString("\n")
+        val text = listOf(assetLine, speedLine, progress).filter { it.isNotEmpty() }.joinToString("\n")
         val stop = PendingIntent.getBroadcast(
             app, 0, Intent(ACTION_STOP).setPackage(app.packageName),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
@@ -112,5 +143,8 @@ internal class TestNotification(private val session: TestSession) {
         const val REASON = "tests"
         private const val ACTION_STOP = "io.nekohasekai.sagernet.TEST_STOP"
         private const val REFRESH_MS = 1000L
+        private const val WARNING_TAG = "tests"
+        private const val WARNING_ID = 1
+        private const val MAX_WARNED_PROBLEMS = 3
     }
 }

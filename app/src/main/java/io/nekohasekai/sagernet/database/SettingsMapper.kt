@@ -106,6 +106,7 @@ object SettingsMapper {
             enableDnsRouting = DataStore.enableDnsRouting,
             enableTunRouting = DataStore.enableTunRouting,
             trafficStats = DataStore.enableStats,
+            apiPort = DataStore.coreBoxApiPort,
             apiSecret = DataStore.coreBoxApiSecret,
             clashApiEnabled = clashApi > 0,
             clashApiListen = DataStore.coreBoxClashListenAddr,

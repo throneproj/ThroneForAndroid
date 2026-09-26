@@ -37,15 +37,21 @@ internal class SpeedTestRunner(private val session: TestSession) {
     suspend fun run(profiles: List<ProxyEntity>) {
         for (slice in profiles.chunked(if (countryOnly) TEST_BATCH_SIZE else 1)) {
             if (session.cancelled) break
+            val excluded = session.screenXrayFullConfigs(slice)
+            for (entry in excluded) session.reportSpeedUnmeasured(entry.profileId, entry.reason)
+            val left = excluded.mapTo(HashSet()) { it.profileId }
+            val ids = slice.map { it.id }.filter { it !in left }
+            if (ids.isEmpty()) continue
             val names = slice.associate { it.id to it.displayName() }
-            val generated = CoreConfigs.buildTest(slice.map { it.id })
+            val generated = CoreConfigs.buildTest(ids)
             if (!generated.ok) {
                 val error = generated.error ?: "config generation failed"
                 Logs.w("Failed to build batch test config: $error")
-                slice.forEach { session.reportSpeedUnmeasured(it.id, error) }
+                ids.forEach { session.reportSpeedUnmeasured(it, error) }
                 continue
             }
             for ((id, reason) in generated.skipped) session.reportSpeedUnmeasured(id, reason)
+            session.ensureSharedXrayAssets(generated.xrayConfig)
             for (probe in TestProbe.plan(generated)) {
                 runProbe(probe.request(), probe.profileIds, probe::profileOf, names, null)
             }
@@ -119,7 +125,9 @@ internal class SpeedTestRunner(private val session: TestSession) {
         if (failure != null) {
             Logs.w(failure)
             traffic.flush()
-            profileIds.forEach { session.reportSpeedUnmeasured(it, failure.readableMessage) }
+            profileIds.forEach {
+                session.reportSpeedUnmeasured(it, session.startFailure(names[it].orEmpty(), failure.readableMessage))
+            }
             return@coroutineScope
         }
         for (result in results) report(result, profileOf, names, reported)

@@ -126,7 +126,10 @@ class TestingSettingsFragment : SettingsScreenFragment(R.xml.settings_testing) {
     }
 }
 
-/** Logging, statistics, Clash API, Xray import preference, certificate defaults and the NTP client. */
+/**
+ * Logging, statistics, the Clash API, the sing-box API that serves the dashboard, Xray import preference,
+ * certificate defaults and the NTP client.
+ */
 class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
 
     override fun bind() {
@@ -162,6 +165,7 @@ class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
         )
 
         bindClashApi()
+        bindApiDashboard()
         bindNtp()
     }
 
@@ -189,7 +193,6 @@ class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
             val on = newValue as Boolean
             DataStore.coreBoxClashApi = if (on) portValue() else -portValue()
             sync(on)
-            (activity as? MainActivity)?.refreshNavMenu(on)
             needReload()
             true
         }
@@ -205,6 +208,56 @@ class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
         }
         checkText(listen.key, R.string.invalid_address) { it.isNotEmpty() }
         checkText(secret.key, R.string.invalid_value) { true }
+    }
+
+    /**
+     * core_box_api_port, sign-encoded like core_box_clash_api; it also shows the dashboard in the drawer. The secret is
+     * never stored empty (sing-box reads that as no authentication): clearing it makes a new random one.
+     */
+    private fun bindApiDashboard() {
+        val enabled = pref<SwitchPreference>(KEY_API_ENABLED)
+        val port = pref<EditTextPreference>(KEY_API_PORT)
+        val secret = pref<EditTextPreference>(SettingsRegistry.CORE_BOX_API_SECRET.key)
+        fun portValue() = abs(DataStore.coreBoxApiPort).takeIf { it > 0 } ?: abs(SettingsRegistry.CORE_BOX_API_PORT.default)
+        fun sync(on: Boolean) {
+            port.isEnabled = on
+            secret.isEnabled = on
+        }
+
+        enabled.isChecked = DataStore.apiDashboardEnabled
+        port.text = portValue().toString()
+        port.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+        port.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
+        secret.text = DataStore.coreBoxApiSecret
+        secret.summaryProvider = GroupSettingsActivity.PasswordSummaryProvider
+        sync(enabled.isChecked)
+
+        enabled.setOnPreferenceChangeListener { _, newValue ->
+            val on = newValue as Boolean
+            DataStore.coreBoxApiPort = if (on) portValue() else -portValue()
+            sync(on)
+            (activity as? MainActivity)?.refreshNavMenu(on)
+            needReload()
+            true
+        }
+        port.setOnPreferenceChangeListener { _, newValue ->
+            val value = newValue?.toString()?.trim()?.toIntOrNull()
+            if (value == null || !SettingValidators.isPort(value)) {
+                toast(R.string.invalid_port, newValue?.toString().orEmpty())
+                return@setOnPreferenceChangeListener false
+            }
+            DataStore.coreBoxApiPort = if (enabled.isChecked) value else -value
+            needReload()
+            true
+        }
+        secret.setOnPreferenceChangeListener { _, newValue ->
+            val value = newValue?.toString()?.trim().orEmpty()
+            // Reading an empty secret back generates and saves a new one.
+            if (value.isEmpty()) DataStore.coreBoxApiSecret = ""
+            secret.text = value.ifEmpty { DataStore.coreBoxApiSecret }
+            needReload()
+            false
+        }
     }
 
     private fun bindNtp() {
@@ -235,5 +288,7 @@ class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
     private companion object {
         const val KEY_CLASH_ENABLED = "coreClashApiEnabled"
         const val KEY_CLASH_PORT = "coreClashApiPort"
+        const val KEY_API_ENABLED = "coreApiDashboardEnabled"
+        const val KEY_API_PORT = "coreApiDashboardPort"
     }
 }

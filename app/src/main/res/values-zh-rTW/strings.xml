@@ -242,7 +242,6 @@
     <string name="app_tls_version">訂閱最低 TLS 版本</string>
     <string name="hop_interval">埠跳躍間隔(秒)</string>
     <string name="utls_fingerprint">uTLS 指紋</string>
-    <string name="set_panel_url">設定面板 URL</string>
     <string name="enable_clash_api">啟用 Clash API</string>
     <string name="log_level">日誌級別</string>
     <string name="xtls_flow">Flow（VLESS 子協議）</string>

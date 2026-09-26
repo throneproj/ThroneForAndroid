@@ -307,11 +307,19 @@ object SettingsRegistry {
     @JvmField val CORE_BOX_CLASH_API = int("core_box_clash_api", -9090) { it in -65535..65535 }
     @JvmField val CORE_BOX_CLASH_LISTEN_ADDR = string("core_box_clash_listen_addr", LOOPBACK_ADDRESS) { it.isNotBlank() }
     @JvmField val CORE_BOX_CLASH_API_SECRET = string("core_box_clash_api_secret", "")
+    /**
+     * The sing-box API / dashboard port, sign-encoded like core_box_clash_api (at most 0 is off). Android serves the
+     * dashboard by default, where it stands in for the desktop's stats panels (desktop -9091).
+     */
+    @JvmField val CORE_BOX_API_PORT = int("core_box_api_port", 9091) { it in -65535..65535 }
     /** Generated on first use when empty (SettingsRepo.cpp:15-19). */
     @JvmField val CORE_BOX_API_SECRET = string("core_box_api_secret", "")
     @JvmField val CORE_DNS_IN_PORT = int("core_dns_in_port", 5533, SettingValidators::isPort)
     /** 0 XHTTP only, 1 XHTTP and Reality, 2 all VLESS (Const.hpp:70-75). */
     @JvmField val XRAY_VLESS_PREFERENCE = int("xray_vless_preference", 1) { it in 0..2 }
+    /** Where geoip.dat / geosite.dat come from when an Xray config needs them (SettingsRepo.h:305-307). */
+    @JvmField val XRAY_GEOIP_URL = string("xray_geoip_url", "https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat")
+    @JvmField val XRAY_GEOSITE_URL = string("xray_geosite_url", "https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat")
     @JvmField val SKIP_CERT = bool("skip_cert", false)
     @JvmField val USE_MOZILLA_CERTS = bool("use_mozilla_certs", false)
     @JvmField val ENABLE_NTP = bool("enable_ntp", false)
@@ -328,19 +336,24 @@ object SettingsRegistry {
         Key.SHOW_DIRECT_SPEED, Key.SHOW_GROUP_IN_NOTIFICATION, Key.NOTIFICATION_ACTIONS,
         Key.USE_SYSTEM_THEME, Key.APP_THEME, Key.NIGHT_THEME, Key.AMOLED_THEME, Key.APP_LANGUAGE,
         Key.ALWAYS_SHOW_ADDRESS, Key.GROUP_LAYOUT_MODE,
-        Key.HIDE_FROM_RECENT_APPS, Key.LOG_BUF_SIZE, Key.APP_TLS_VERSION, Key.YACD_URL,
+        Key.HIDE_FROM_RECENT_APPS, Key.LOG_BUF_SIZE, Key.APP_TLS_VERSION,
         Key.WEBDAV_SERVER, Key.WEBDAV_USERNAME, Key.WEBDAV_PASSWORD, Key.WEBDAV_PATH,
         Key.PROFILE_CURRENT, Key.PROFILE_ID, Key.PREVIEW_HINT_DISMISSED_VERSION,
         Key.UPDATE_CHECK_AUTO, Key.UPDATE_SKIPPED_VERSION_CODE, Key.RESUME_AFTER_UPDATE, Key.BATTERY_PROMPT_SHOWN,
         Key.LOG_EXPORT_REDACT, Key.HWID_FALLBACK, Key.WIFI_PERMISSION_ASKED, Key.SERVICE_ERROR,
+        Key.SERVICE_ERROR_DNS, Key.SERVICE_ERROR_GEO,
     )
 
-    /** Keys a backup never exports and a restore never overwrites (R10 §8.3). */
+    /**
+     * Keys a backup never exports and a restore never overwrites (R10 §8.3). core_box_api_port is one: the desktop
+     * keeps it off by default and Android on, so neither side's backup should flip the other's dashboard.
+     */
     @JvmField
     val DEVICE_LOCAL_KEYS: Set<String> = setOf(
         Key.WEBDAV_SERVER, Key.WEBDAV_USERNAME, Key.WEBDAV_PASSWORD, Key.WEBDAV_PATH,
         Key.BATTERY_PROMPT_SHOWN, Key.HWID_FALLBACK, Key.RESUME_AFTER_UPDATE, Key.UPDATE_SKIPPED_VERSION_CODE,
-        Key.WIFI_PERMISSION_ASKED, Key.SERVICE_ERROR,
+        Key.WIFI_PERMISSION_ASKED, Key.SERVICE_ERROR, Key.SERVICE_ERROR_DNS, Key.SERVICE_ERROR_GEO,
+        CORE_BOX_API_PORT.key,
     )
 
     // ------------------------------------------------------------------------------------------------ lookup

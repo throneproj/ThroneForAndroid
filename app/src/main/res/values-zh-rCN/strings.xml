@@ -242,7 +242,6 @@
     <string name="tuic_congestion_controller">拥塞控制</string>
     <string name="tuic_udp_relay_mode">UDP 转发模式</string>
     <string name="menu_dashboard">sing-box 仪表板</string>
-    <string name="set_panel_url">设置面板 URL</string>
     <string name="enable_clash_api">启用 Clash API</string>
     <string name="xtls_flow">Flow（VLESS 子协议）</string>
     <string name="need_restart">重新启动应用程序以应用更改</string>

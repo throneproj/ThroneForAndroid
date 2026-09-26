@@ -21,7 +21,7 @@ import io.nekohasekai.sagernet.route.RuleType
  *
  * Not generated on Android (desktop-only or out of scope): raw route profiles, the `hijack` / `hijack-dns`
  * inbounds, route_exclude_address_set, TLS spoof, extra cores, auxiliary VPN endpoints and the OpenVPN /
- * OpenConnect tunnel DNS servers, the L3 bridge, the api dashboard and Tailscale profiles.
+ * OpenConnect tunnel DNS servers, the L3 bridge and Tailscale profiles.
  */
 class ConfigGenerator @JvmOverloads constructor(
     private val profiles: ProfileProvider,
@@ -979,12 +979,34 @@ class ConfigGenerator @JvmOverloads constructor(
         state.coreConfig["experimental"] = experimental
     }
 
-    /** buildServicesSection (:2160-2185): the core builds the traffic tracker from the mere presence of an api service. */
+    /**
+     * buildServicesSection (:2186-2212): the core builds the traffic tracker from the mere presence of an api service;
+     * with a port it also serves the sing-box dashboard. Unlike the desktop, which installs the dashboard itself, the
+     * core downloads it on first use, so that fetch goes through `proxy` rather than a possibly blocked direct route.
+     */
     private fun buildServicesSection(state: BuildState) {
-        if (state.forTest || !settings.trafficStats) return
-        state.coreConfig["services"] = JsonArray.of(
-            jsonObjectOf("type" to "api", "listen" to "127.0.0.1", "listen_port" to 0, "secret" to settings.apiSecret),
+        if (state.forTest) return
+        val dashboard = settings.apiPort > 0
+        if (!dashboard && !settings.trafficStats) return
+        val api = jsonObjectOf(
+            "type" to "api",
+            "listen" to "127.0.0.1",
+            "listen_port" to if (dashboard) settings.apiPort else 0,
+            "secret" to settings.apiSecret,
         )
+        if (dashboard) {
+            // Defaults to "*", i.e. any page the user visits could reach loopback.
+            api["access_control_allow_origin"] = JsonArray.of("http://127.0.0.1:${settings.apiPort}")
+            // apiDashboardDir (generate.h:10-11), not the Clash external_ui dir; relative to the core's working dir.
+            val options = jsonObjectOf("enabled" to true, "path" to "sb-dashboard")
+            // The core refuses a detour to a `direct` outbound without dial options; direct is its default anyway.
+            val proxied = (state.outbounds + state.endpoints).any {
+                it is JsonObject && it.string("tag") == Tags.PROXY && it.string("type") != "direct"
+            }
+            if (proxied) options["http_client"] = jsonObjectOf("detour" to Tags.PROXY)
+            api["dashboard"] = options
+        }
+        state.coreConfig["services"] = JsonArray.of(api)
     }
 
     /** buildXrayConfig (:2189-2221): one socks inbound and routing rule per Xray ingress, no dns object. */

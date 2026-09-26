@@ -2,15 +2,20 @@ package io.nekohasekai.sagernet.bg.proto
 
 import io.nekohasekai.sagernet.bg.AbstractInstance
 import io.nekohasekai.sagernet.bg.CoreRuntime
+import io.nekohasekai.sagernet.bg.XrayGeoAssets
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.ktx.isLoopbackPortFree
 import io.nekohasekai.sagernet.ktx.mkPort
 import io.nekohasekai.sagernet.outbound.config.AutoSelectorBuild
 import io.nekohasekai.sagernet.outbound.config.GeneratedConfig
 import io.throneproj.mobile.Instance
 import io.throneproj.mobile.Mobile
 import io.throneproj.mobile.StartOptions
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 abstract class BoxInstance(
     val profile: ProxyEntity
@@ -29,6 +34,13 @@ abstract class BoxInstance(
     protected open fun buildConfig() {
         // random_inbound_port: a fresh port per start, saved so the app's own requests reach it (mainwindow_setup.cpp:193-196).
         if (DataStore.randomInboundPort) DataStore.inboundSocksPort = mkPort()
+        // The dashboard is on by default, so another app holding its port must not fail the start: it moves, and the
+        // dashboard screen follows the saved port.
+        if (DataStore.apiDashboardEnabled && !isLoopbackPortFree(DataStore.coreBoxApiPort)) {
+            val port = mkPort()
+            Logs.w("sing-box API port ${DataStore.coreBoxApiPort} is in use, the dashboard moves to $port")
+            DataStore.coreBoxApiPort = port
+        }
         config = CoreConfigs.buildMain(profile)
     }
 
@@ -39,7 +51,34 @@ abstract class BoxInstance(
     open suspend fun init() {
         buildConfig()
         core = CoreConfig.from(config, listOf(CoreConfig.TAG_PROXY))
+        CoreRuntime.applyLogLevel(config.coreConfig)
+        ensureXrayAssets()
         loadConfig()
+    }
+
+    /** The geo asset downloads the start waits for; null once they are over. */
+    protected open suspend fun onAssetProgress(progress: XrayGeoAssets.Progress?) {}
+
+    /**
+     * Fetches the data files the Xray configs about to start read (geoip: / geosite: rules) and that are missing;
+     * throws [XrayGeoAssets.DownloadException] naming what could not be had.
+     */
+    private suspend fun ensureXrayAssets() {
+        val configs = listOfNotNull(config.xrayConfig) + config.xrayFullConfigs
+        if (configs.isEmpty()) return
+        val missing = withContext(Dispatchers.IO) { XrayGeoAssets.missing(XrayGeoAssets.needed(configs)) }
+        if (missing.isEmpty()) return
+        val failures = try {
+            XrayGeoAssets.ensure(missing) { onAssetProgress(it) }
+        } finally {
+            withContext(NonCancellable) { runCatching { onAssetProgress(null) } }
+        }
+        if (failures.isNotEmpty()) {
+            throw XrayGeoAssets.DownloadException(
+                failures.values.joinToString("\n"),
+                fetchable = failures.keys.any { it in XrayGeoAssets.FILES },
+            )
+        }
     }
 
     override fun launch() {

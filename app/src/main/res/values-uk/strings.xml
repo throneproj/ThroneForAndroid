@@ -231,7 +231,6 @@
     <string name="app_tls_version">Мінімальна версія TLS для підписки</string>
     <string name="hop_interval">Інтервал зміни портів (секунди)</string>
     <string name="utls_fingerprint">Відбиток uTLS</string>
-    <string name="set_panel_url">Встановити URL панелі</string>
     <string name="enable_clash_api">Увімкнути Clash API</string>
     <string name="log_level">Рівень журналу</string>
     <string name="xtls_flow">Flow (підпротокол VLESS)</string>

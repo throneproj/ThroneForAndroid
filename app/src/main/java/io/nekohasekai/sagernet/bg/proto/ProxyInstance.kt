@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.bg.proto
 
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.ServiceNotification
+import io.nekohasekai.sagernet.bg.XrayGeoAssets
 import io.nekohasekai.sagernet.bg.autoselector.AutoSelectorRuntime
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.SagerDatabase
@@ -49,6 +50,10 @@ class ProxyInstance(profile: ProxyEntity, var service: BaseService.Interface? = 
     override suspend fun init() {
         AutoSelectorRuntime.beforeStart(this)
         super.init()
+    }
+
+    override suspend fun onAssetProgress(progress: XrayGeoAssets.Progress?) {
+        service?.data?.notification?.postStartProgress(progress?.let(XrayGeoAssets::progressText), progress?.percent ?: -1)
     }
 
     override fun launch() {

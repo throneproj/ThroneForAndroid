@@ -185,7 +185,6 @@
 <string name="service_proxy">Прокси-сервис</string>
 <string name="service_subscription">Служба обновления подписки</string>
 <string name="service_vpn">VPN-сервис</string>
-<string name="set_panel_url">Установить URL панель</string>
 <string name="settings">Настройки</string>
 <string name="share">Поделиться</string>
 <string name="share_qr_nfc">QR-код</string>
