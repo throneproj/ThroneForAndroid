@@ -64,7 +64,7 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
         private val LIST_KEYS = listOf(
             "domain_suffix", "domain", "ip_cidr", "rule_set", "package_name", "network_type", "domain_keyword",
             "domain_regex", "source_ip_cidr", "port", "port_range", "source_port", "source_port_range", "inbound",
-            "process_name", "process_path", "process_path_regex", "wifi_ssid", "wifi_bssid",
+            "package_name_regex", "process_name", "process_path", "process_path_regex", "wifi_ssid", "wifi_bssid",
         )
         private val BOOL_KEYS = listOf(
             "sniff_override_dest", "ip_is_private", "source_ip_is_private", "invert", "no_drop", "network_is_expensive",
@@ -74,8 +74,8 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
         private val ADVANCED_KEYS = listOf(
             "domain_keyword", "domain_regex", "ip_is_private", "source_ip_cidr", "source_ip_is_private", "port",
             "port_range", "source_port", "source_port_range", "network", "protocol", "ip_version", "inbound", "invert",
-            "override_address", "override_port", "no_drop", "process_name", "process_path", "process_path_regex",
-            "network_is_expensive", "wifi_ssid", "wifi_bssid",
+            "override_address", "override_port", "no_drop", "package_name_regex", "process_name", "process_path",
+            "process_path_regex", "network_is_expensive", "wifi_ssid", "wifi_bssid",
         )
 
         /** Android names apps by package, never by process: these show only when a desktop rule brought a value. */

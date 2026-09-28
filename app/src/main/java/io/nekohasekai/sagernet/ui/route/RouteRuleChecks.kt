@@ -115,6 +115,7 @@ internal object RouteRuleChecks {
         entries(R.string.route_rule_override_port, listOf(rule.override_port), ::isPort)
         regexes(R.string.route_rule_domain_regex, rule.domain_regex)
         regexes(R.string.route_rule_process_path_regex, rule.process_path_regex)
+        regexes(R.string.route_rule_package_name_regex, rule.package_name_regex)
         return out
     }
 

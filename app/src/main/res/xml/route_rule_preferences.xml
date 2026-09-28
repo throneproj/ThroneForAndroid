@@ -155,6 +155,10 @@
             app:summary="@string/route_rule_no_drop_sum"
             app:title="@string/route_rule_no_drop" />
         <EditTextPreference
+            app:dialogMessage="@string/route_rule_package_name_regex_hint"
+            app:key="package_name_regex"
+            app:title="@string/route_rule_package_name_regex" />
+        <EditTextPreference
             app:dialogMessage="@string/route_rule_lines_hint"
             app:key="process_name"
             app:title="@string/route_rule_process_name" />

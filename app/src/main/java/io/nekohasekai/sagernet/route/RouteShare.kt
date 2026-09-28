@@ -21,9 +21,9 @@ object RouteShare {
         "name", "type", "outbound", "action", "ip_version", "network", "protocol", "inbound", "domain", "domain_suffix",
         "domain_keyword", "domain_regex", "source_ip_cidr", "source_ip_is_private", "ip_cidr", "ip_is_private",
         "source_port", "source_port_range", "port", "port_range", "process_name", "process_path", "process_path_regex",
-        "package_name", "network_type", "network_is_expensive", "wifi_ssid", "wifi_bssid", "rule_set", "invert",
-        "method", "reject_method", "no_drop", "override_address", "override_port", "tls_spoof", "tls_spoof_method",
-        "override_destination", "strategy", "sniffers",
+        "package_name", "package_name_regex", "network_type", "network_is_expensive", "wifi_ssid", "wifi_bssid",
+        "rule_set", "invert", "method", "reject_method", "no_drop", "override_address", "override_port", "tls_spoof",
+        "tls_spoof_method", "override_destination", "strategy", "sniffers",
     )
 
     class Imported(val profile: RouteProfile?, val fatal: String, val warnings: List<String>, val legacyArray: Boolean)
@@ -226,7 +226,7 @@ object RouteShare {
         else -> ""
     }
 
-    /** set_field_value (RouteRule.cpp:480-600) plus Android's network_type and network_is_expensive. */
+    /** set_field_value (RouteRule.cpp:480-600) plus Android's package_name_regex, network_type and network_is_expensive. */
     private fun setField(rule: RouteRule, key: String, values: List<String>) {
         val scalar = values.firstOrNull()?.trim() ?: ""
         val list = values.map { it.trim() }.filterTo(ArrayList()) { it.isNotEmpty() }
@@ -251,6 +251,7 @@ object RouteShare {
             "process_path" -> rule.process_path = list
             "process_path_regex" -> rule.process_path_regex = list
             "package_name" -> rule.package_name = list
+            "package_name_regex" -> rule.package_name_regex = list
             "network_type" -> rule.network_type = list
             "network_is_expensive" -> rule.network_is_expensive = scalar == "true"
             "wifi_ssid" -> rule.wifi_ssid = list

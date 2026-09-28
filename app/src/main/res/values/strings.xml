@@ -753,7 +753,7 @@
         <item quantity="one">%d rule was left out because its server profile no longer exists.</item>
         <item quantity="other">%d rules were left out because their server profiles no longer exist.</item>
     </plurals>
-    <string name="route_export_package_note">Some rules use conditions only Android supports. The desktop skips rules with network type or metered network when it imports this link, and rules that match apps never match there.</string>
+    <string name="route_export_package_note">Some rules use conditions only Android supports. The desktop skips rules with network type, metered network or package name regex when it imports this link, and rules that match apps never match there.</string>
     <string name="route_import_title">Import routing profile</string>
     <string name="route_import_prompt">Add this routing profile?\n\nName: %s</string>
     <string name="route_import_note">Note:</string>
@@ -899,6 +899,8 @@
     <string name="route_rule_override_port">Override port</string>
     <string name="route_rule_no_drop">No drop</string>
     <string name="route_rule_no_drop_sum">Keep the reject method instead of switching to drop after repeated rejects</string>
+    <string name="route_rule_package_name_regex">Package name regex</string>
+    <string name="route_rule_package_name_regex_hint">Apps whose package name matches one of these also count as listed in Apps. One regular expression per line (Go RE2 syntax), e.g. ^com\\.google\\.</string>
     <string name="route_rule_process_name">Process name (desktop only)</string>
     <string name="route_rule_process_path">Process path (desktop only)</string>
     <string name="route_rule_process_path_regex">Process path regex (desktop only)</string>

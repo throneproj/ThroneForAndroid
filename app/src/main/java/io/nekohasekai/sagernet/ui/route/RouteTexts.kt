@@ -82,6 +82,7 @@ internal object RouteTexts {
         list("app", rule.package_name) {
             if (it == RouteRule.UNKNOWN_PACKAGE) context.getString(R.string.route_rule_unknown_apps) else appLabels[it] ?: it
         }
+        list("app regex", rule.package_name_regex)
         list("process", rule.process_name)
         list("path", rule.process_path)
         list("path regex", rule.process_path_regex)

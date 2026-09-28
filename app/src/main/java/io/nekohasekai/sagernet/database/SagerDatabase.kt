@@ -22,10 +22,11 @@ import kotlinx.coroutines.launch
         ProxyGroup::class, ProxyEntity::class, RouteProfileEntity::class, RouteRuleEntity::class,
         SettingEntry::class, MarkerEntity::class,
     ],
-    version = 13,
+    version = 14,
     autoMigrations = [
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 12, to = 13),
+        AutoMigration(from = 13, to = 14),
     ]
 )
 @TypeConverters(value = [SubscriptionOptions.Converter::class])

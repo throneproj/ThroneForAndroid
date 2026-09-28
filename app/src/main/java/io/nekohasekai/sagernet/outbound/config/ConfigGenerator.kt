@@ -933,7 +933,8 @@ class ConfigGenerator @JvmOverloads constructor(
      * get_route_rules(false, outboundMap) (RouteProfile.cpp:593-628) with get_rule_json (RouteRule.cpp:82-190): simple
      * rules without a condition are skipped and the adblock reject goes in front of the first `route` rule, else last.
      * Endpoint rules are skipped (no auxiliary endpoints on Android), rule-level TLS spoof is dropped (D8) and a rule
-     * whose apps include unidentified ones becomes a logical rule ([RouteRule.toConfigJson]).
+     * whose apps include unidentified ones, or that has both apps and package regexes, becomes a logical rule
+     * ([RouteRule.toConfigJson]).
      */
     private fun getRouteRules(state: BuildState, route: RouteProfile): JsonArray {
         val out = JsonArray()
