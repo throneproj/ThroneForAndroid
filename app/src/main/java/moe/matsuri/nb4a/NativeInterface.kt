@@ -84,6 +84,9 @@ class NativeInterface : PlatformInterface {
         }
     }
 
+    // Below API 29 the core finds the owner's uid through procfs and asks for its packages here.
+    override fun packageNamesByUid(uid: Int): StringIterator = packageNamesOf(uid).toStringIterator()
+
     private fun packageNamesOf(uid: Int): List<String> {
         if (uid <= 1000) return listOf("android")
         PackageCache.awaitLoadSync()
@@ -109,6 +112,7 @@ class NativeInterface : PlatformInterface {
         var name: String? = null
         var index: Int = Int.MIN_VALUE
         var network: Network? = null
+        var isExpensive: Boolean = false
     }
 
     private val ifaceReportStates = Collections.synchronizedMap(
@@ -127,6 +131,7 @@ class NativeInterface : PlatformInterface {
         state.name = null
         state.index = Int.MIN_VALUE
         state.network = null
+        state.isExpensive = false
         listener.updateDefaultInterface("", -1, false, false)
     }
 
@@ -149,19 +154,21 @@ class NativeInterface : PlatformInterface {
                 Thread.sleep(100)
                 return@repeat
             }
-            // Capability-change storms repeat the same interface; skip them without a JNI round trip.
-            if (state.name == linkProperties.interfaceName && state.index == interfaceIndex && state.network == network) {
-                return
-            }
-            val changed = state.name != null
-            state.name = linkProperties.interfaceName
-            state.index = interfaceIndex
-            state.network = network
             val capabilities = SagerNet.connectivity.getNetworkCapabilities(network)
             val isExpensive = capabilities?.let {
                 it.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
                     !it.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
             } ?: false
+            val sameInterface = state.name == linkProperties.interfaceName && state.index == interfaceIndex &&
+                state.network == network
+            // Capability-change storms repeat the same interface; skip them without a JNI round trip. A metering change
+            // alone (a Wi-Fi marked metered) is still reported so the core re-reads its interfaces, but is no switch.
+            if (sameInterface && state.isExpensive == isExpensive) return
+            val changed = !sameInterface && state.name != null
+            state.name = linkProperties.interfaceName
+            state.index = interfaceIndex
+            state.network = network
+            state.isExpensive = isExpensive
             listener.updateDefaultInterface(linkProperties.interfaceName, interfaceIndex, isExpensive, false)
             if (changed) onDefaultInterfaceChanged(network)
             return

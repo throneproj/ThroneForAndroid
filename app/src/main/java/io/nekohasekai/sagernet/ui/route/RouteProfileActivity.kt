@@ -133,7 +133,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
                     }
                 } ?: return@withContext null
                 nameRules(p)
-                Triple(p, RouteServers.names(p.rules.map { it.outbound_id }), appLabels(p.rules.flatMap { it.package_name }))
+                Triple(p, RouteServers.names(p.rules.map { it.outbound_id }), appLabels(labelledPackages(p.rules)))
             }
             if (loaded == null) {
                 finish()
@@ -157,6 +157,10 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         PackageCache.awaitLoadSync()
         return packages.distinct().associateWith { PackageCache.loadLabel(it) }
     }
+
+    /** The packages the rules' summaries name, without the unknown-app entry. */
+    private fun labelledPackages(rules: List<RouteRule>): List<String> =
+        rules.flatMap { rule -> rule.package_name.filter { it != RouteRule.UNKNOWN_PACKAGE } }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun refreshAll() {
@@ -316,7 +320,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
     /** Loads the server and app names a changed rule shows but the editor does not know yet. */
     private fun resolveNames(rule: RouteRule) {
         val server = rule.outbound_id.takeIf { it > 0 && it !in model.servers }
-        val packages = rule.package_name.filter { it !in model.appLabels }
+        val packages = labelledPackages(listOf(rule)).filter { it !in model.appLabels }
         if (server == null && packages.isEmpty()) return
         lifecycleScope.launch {
             val (servers, labels) = withContext(Dispatchers.IO) {
@@ -369,7 +373,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
                 if (p.name.isBlank()) p.name = copy.name
                 nameRules(p)
                 val (servers, labels) = withContext(Dispatchers.IO) {
-                    RouteServers.names(p.rules.map { it.outbound_id }) to appLabels(p.rules.flatMap { it.package_name })
+                    RouteServers.names(p.rules.map { it.outbound_id }) to appLabels(labelledPackages(p.rules))
                 }
                 model.servers = servers
                 model.appLabels = labels

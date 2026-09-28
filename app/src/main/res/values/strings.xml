@@ -755,7 +755,7 @@
         <item quantity="one">%d rule was left out because its server profile no longer exists.</item>
         <item quantity="other">%d rules were left out because their server profiles no longer exist.</item>
     </plurals>
-    <string name="route_export_package_note">Rules that match apps only work on Android. The desktop ignores the app condition, so there such a rule matches every connection.</string>
+    <string name="route_export_package_note">Some rules use conditions only Android supports. The desktop skips rules with network type or metered network when it imports this link, and rules that match apps never match there.</string>
     <string name="route_import_title">Import routing profile</string>
     <string name="route_import_prompt">Add this routing profile?\n\nName: %s</string>
     <string name="route_import_note">Note:</string>
@@ -842,6 +842,7 @@
     <string name="route_summary_private_source_ip">private source IP</string>
     <string name="route_summary_no_conditions">all connections</string>
     <string name="route_summary_inverted">inverted</string>
+    <string name="route_summary_metered">metered network</string>
     <string name="route_rule_title">Route rule</string>
     <string name="route_rule_reorder">Drag to reorder</string>
     <string name="route_rule_category_rule">Rule</string>
@@ -862,6 +863,15 @@
     <string name="route_rule_ip_cidr_hint">One address or CIDR per line, e.g. 10.0.0.0/8</string>
     <string name="route_rule_rule_sets">Rule-sets</string>
     <string name="route_rule_apps">Apps</string>
+    <string name="route_rule_unknown_apps">Unknown apps</string>
+    <string name="route_rule_unknown_apps_desc">Connections whose app cannot be identified</string>
+    <string name="route_rule_network_type">Network type</string>
+    <string name="route_rule_network_type_wifi">Wi-Fi</string>
+    <string name="route_rule_network_type_cellular">Mobile data</string>
+    <string name="route_rule_network_type_ethernet">Ethernet</string>
+    <string name="route_rule_network_type_other">Other</string>
+    <string name="route_rule_network_is_expensive">Metered network</string>
+    <string name="route_rule_network_is_expensive_sum">Match only while the current network is metered, like mobile data or a Wi-Fi marked as metered</string>
     <string name="route_rule_advanced">Advanced</string>
     <string name="route_rule_advanced_count">Advanced (%d set)</string>
     <string name="route_rule_advanced_show">Show the other conditions and options</string>
@@ -1642,6 +1652,7 @@
     <string name="backup_warn_dropped_profiles">%d profiles without any group were skipped.</string>
     <string name="backup_warn_unlisted_profiles">%d profiles missing from their group\'s list were added at its end.</string>
     <string name="backup_warn_orphan_rules">%d rules of missing routing profiles were skipped.</string>
+    <string name="backup_warn_unsupported_rules">%1$d routing rules were skipped because they use fields this app does not support (%2$s).</string>
     <string name="backup_warn_raw_routes">%d raw routing profiles from Throne desktop are kept read-only; Android cannot use them.</string>
     <string name="backup_warn_lan_access">The backup lets other devices connect (inbound address %s); this was turned off. Turn it on again in the inbound settings if you need it.</string>
 

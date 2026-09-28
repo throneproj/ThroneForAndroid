@@ -7,7 +7,7 @@ import io.nekohasekai.sagernet.outbound.json.JsonValues
 import io.nekohasekai.sagernet.outbound.json.JsonWriter
 import io.nekohasekai.sagernet.outbound.link.Base64Strict
 
-/** The desktop's route share formats (RouteProfile.cpp:395-580). */
+/** The desktop's route share formats (RouteProfile.cpp:438-627). */
 object RouteShare {
     const val ROUTE_LINK_PREFIX = "throne://route/"
     const val REMOTE_ROUTE_LINK_PREFIX = "throne://remoteroute/"
@@ -16,11 +16,21 @@ object RouteShare {
     /** Keys whose numbers the desktop writes (port lists, ip_version, override_port) and must read back (D12). */
     private val NUMERIC_KEYS = setOf("port", "source_port", "ip_version", "override_port")
 
+    /** The keys a rule object may carry: name, type and outbound besides the ones [setField] reads. */
+    private val RULE_KEYS = setOf(
+        "name", "type", "outbound", "action", "ip_version", "network", "protocol", "inbound", "domain", "domain_suffix",
+        "domain_keyword", "domain_regex", "source_ip_cidr", "source_ip_is_private", "ip_cidr", "ip_is_private",
+        "source_port", "source_port_range", "port", "port_range", "process_name", "process_path", "process_path_regex",
+        "package_name", "network_type", "network_is_expensive", "wifi_ssid", "wifi_bssid", "rule_set", "invert",
+        "method", "reject_method", "no_drop", "override_address", "override_port", "tls_spoof", "tls_spoof_method",
+        "override_destination", "strategy", "sniffers",
+    )
+
     class Imported(val profile: RouteProfile?, val fatal: String, val warnings: List<String>, val legacyArray: Boolean)
 
     class RemoteEntry(val url: String, val name: String)
 
-    /** ToShareObject (RouteProfile.cpp:395-440) for a structured profile; rules whose server is missing are left out. */
+    /** ToShareObject (RouteProfile.cpp:438-483) for a structured profile; rules whose server is missing are left out. */
     fun toShareObject(p: RouteProfile, profileName: (Long) -> String?): JsonObject {
         val root = JsonObject()
         root["kind"] = KIND
@@ -47,9 +57,10 @@ object RouteShare {
         ROUTE_LINK_PREFIX + Base64Strict.encode(JsonWriter.write(toShareObject(p, profileName)), urlSafe = true, padding = false)
 
     /**
-     * FromShareInput (RouteProfile.cpp:448-539): a throne://route link (any case), share JSON, base64url or standard
+     * FromShareInput (RouteProfile.cpp:491-586): a throne://route link (any case), share JSON, base64url or standard
      * base64 of it with or without padding, or a legacy rule array. Raw profiles are refused; endpoints and endpoint
-     * rules are dropped with a warning (D11). Rule outbound names resolve through [profileIdByName].
+     * rules are dropped with a warning (D11), as are rules with fields Android does not support ([parseRuleObject]).
+     * Rule outbound names resolve through [profileIdByName].
      */
     fun fromShareInput(text: String, profileIdByName: (String) -> Long?): Imported {
         var input = text.trim()
@@ -71,7 +82,7 @@ object RouteShare {
     }
 
     /**
-     * FromRemoteRoutesLink (RouteProfile.cpp:541-580): null when [text] is not a throne://remoteroute link; for an
+     * FromRemoteRoutesLink (RouteProfile.cpp:588-627): null when [text] is not a throne://remoteroute link; for an
      * invalid one an [IllegalArgumentException] carries the desktop's error text, so a returned list is never empty.
      */
     fun fromRemoteRoutesLink(text: String): List<RemoteEntry>? {
@@ -112,7 +123,7 @@ object RouteShare {
         profile.default_outbound_id = OutboundIds.fromName(root.string("default_outbound")) ?: OutboundIds.PROXY
         if (root.array("endpoints").isNotEmpty()) warnings.add("endpoints are not supported on Android and were dropped")
         var fallbackNum = 1
-        for (value in root.array("rules")) {
+        for ((i, value) in root.array("rules").withIndex()) {
             if (value !is JsonObject) continue
             val type = RuleType.ofToken(value.string("type"))
             val name = value.string("name")
@@ -120,7 +131,7 @@ object RouteShare {
                 warnings.add("endpoint rule \"$name\" dropped: endpoints are not supported on Android")
                 continue
             }
-            val rule = parseRuleObject(value, warnings, profileIdByName)
+            val rule = parseRuleObject(value, name.ifEmpty { "#${i + 1}" }, warnings, profileIdByName) ?: continue
             rule.type = type.id
             rule.name = name.ifEmpty { "rule_" + fallbackNum++ }
             profile.rules.add(rule)
@@ -128,31 +139,50 @@ object RouteShare {
         return Imported(profile, "", warnings, false)
     }
 
-    /** parseJsonArray (RouteProfile.cpp:224-245): the legacy bare rule array; every rule is custom. */
+    /**
+     * parseJsonArray (RouteProfile.cpp:258-288): the legacy bare rule array; every rule is custom. An array is nothing
+     * but its rules, so one whose rules are all dropped fails like an empty one.
+     */
     private fun fromLegacyArray(arr: JsonArray, warnings: MutableList<String>, profileIdByName: (String) -> Long?): Imported {
         if (arr.isEmpty()) return failure("Input is not a valid json array")
         val profile = RouteProfile()
         var ruleId = 1
-        for (item in arr) {
+        for ((i, item) in arr.withIndex()) {
             if (item !is JsonObject) return failure("expected array of json objects but have member of type '${qtJsonType(item)}'")
-            val rule = parseRuleObject(item, warnings, profileIdByName)
             val name = item.string("name")
+            val rule = parseRuleObject(item, name.ifEmpty { "#${i + 1}" }, warnings, profileIdByName) ?: continue
             rule.name = name.ifEmpty { "imported rule #" + ruleId++ }
             profile.rules.add(rule)
         }
+        if (profile.rules.isEmpty()) return failure("No rule in the array can be imported:\n" + warnings.joinToString("\n"))
         return Imported(profile, "", warnings, true)
     }
 
-    /** parse_rule_object (RouteProfile.cpp:190-222) plus the D12 fixes: numbers, warp-bypass/block names, reject_method. */
-    private fun parseRuleObject(obj: JsonObject, warnings: MutableList<String>, profileIdByName: (String) -> Long?): RouteRule {
+    /**
+     * parse_rule_object (RouteProfile.cpp:215-256) plus the D12 fixes: numbers, warp-bypass/block names, reject_method.
+     * Import policy: a rule with a key outside [RULE_KEYS] or a network_type sing-box does not know is dropped whole,
+     * with a warning naming it by [label], and null returned: importing it without that field would widen its match.
+     */
+    private fun parseRuleObject(
+        obj: JsonObject,
+        label: String,
+        warnings: MutableList<String>,
+        profileIdByName: (String) -> Long?,
+    ): RouteRule? {
+        val keys = obj.sortedKeys()
+        keys.firstOrNull { it !in RULE_KEYS }?.let {
+            warnings.add("rule \"$label\" dropped: unsupported field \"$it\"")
+            return null
+        }
         val rule = RouteRule()
-        for (key in obj.sortedKeys()) {
+        val notes = ArrayList<String>()
+        for (key in keys) {
             if (key == "name" || key == "type") continue
             when (val value = obj[key]) {
                 is JsonArray -> if (key != "outbound") setField(rule, key, value.map { itemText(key, it) })
                 is String -> if (key == "outbound") {
                     rule.outbound_id = OutboundIds.fromName(value) ?: profileIdByName(value) ?: run {
-                        warnings.add("outbound \"$value\" not found, using proxy")
+                        notes.add("outbound \"$value\" not found, using proxy")
                         OutboundIds.PROXY
                     }
                 } else {
@@ -165,7 +195,7 @@ object RouteShare {
                     rule.outbound_id = when (id) {
                         OutboundIds.PROXY, OutboundIds.DIRECT, OutboundIds.BLOCK, OutboundIds.WARP_BYPASS -> id
                         else -> {
-                            warnings.add("outbound id $id not found, using proxy")
+                            notes.add("outbound id $id not found, using proxy")
                             OutboundIds.PROXY
                         }
                     }
@@ -176,6 +206,11 @@ object RouteShare {
                 else -> {}
             }
         }
+        rule.network_type.firstOrNull { it !in RouteRule.NETWORK_TYPES }?.let {
+            warnings.add("rule \"$label\" dropped: unsupported network_type \"$it\"")
+            return null
+        }
+        warnings.addAll(notes)
         return rule
     }
 
@@ -191,7 +226,7 @@ object RouteShare {
         else -> ""
     }
 
-    /** set_field_value (RouteRule.cpp:472-584); `reject_method` is accepted besides the desktop's `method`. */
+    /** set_field_value (RouteRule.cpp:480-600) plus Android's network_type and network_is_expensive. */
     private fun setField(rule: RouteRule, key: String, values: List<String>) {
         val scalar = values.firstOrNull()?.trim() ?: ""
         val list = values.map { it.trim() }.filterTo(ArrayList()) { it.isNotEmpty() }
@@ -216,8 +251,11 @@ object RouteShare {
             "process_path" -> rule.process_path = list
             "process_path_regex" -> rule.process_path_regex = list
             "package_name" -> rule.package_name = list
+            "network_type" -> rule.network_type = list
+            "network_is_expensive" -> rule.network_is_expensive = scalar == "true"
             "wifi_ssid" -> rule.wifi_ssid = list
             "wifi_bssid" -> rule.wifi_bssid = list
+            "sniffers" -> rule.sniffers = list
             "rule_set" -> rule.rule_set = list
             "invert" -> rule.invert = scalar == "true"
             "action" -> rule.action = scalar

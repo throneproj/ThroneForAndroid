@@ -269,11 +269,58 @@ object BackupRestore {
         val before = rules.rows.size
         if (owner >= 0) rules.rows.removeAll { it[owner] !in ids }
         if (rules.rows.size < before) warnings.add(app.getString(R.string.backup_warn_orphan_rules, before - rules.rows.size))
+        if (owner >= 0) {
+            skipUnsupportedRules(bak, main, rules, warnings)
+            // RoutesRepo numbers each profile's rules 0..n-1: close the gaps of skipped rows and of the backup itself.
+            val order = rules.index("rule_order")
+            val next = HashMap<Any?, Long>()
+            for (row in rules.rows) {
+                val n = next[row[owner]] ?: 0L
+                row[order] = n
+                next[row[owner]] = n + 1
+            }
+        }
         val raw = profiles.index("is_raw").takeIf { it >= 0 }?.let { i -> profiles.rows.count { (it[i] as? Long ?: 0L) != 0L } } ?: 0
         if (raw > 0) warnings.add(app.getString(R.string.backup_warn_raw_routes, raw))
         staged.routeProfiles = profiles
         staged.routeRules = rules
     }
+
+    /**
+     * A backup column Android lacks is a rule field it does not support: a rule with a value there (anything but
+     * NULL, '', '[]', 0 or '0') is skipped whole, since restoring it without that field would widen what it matches.
+     */
+    private fun skipUnsupportedRules(bak: SQLiteDatabase, main: SupportSQLiteDatabase, rules: SqlTable, warnings: MutableList<String>) {
+        val known = main.tableColumns(ROUTE_RULES).mapTo(HashSet()) { it.name }
+        val unknown = bak.tableColumns(ROUTE_RULES).map { it.name }.filter { it !in known }
+        if (unknown.isEmpty()) return
+        val hasValue = unknown.map { sqlName(it) }.map { "($it IS NOT NULL AND $it NOT IN ('', '[]', 0, '0'))" }
+        val offending = HashMap<Pair<Any?, Any?>, List<String>>()
+        bak.rawQuery(
+            "SELECT `route_profile_id`, `rule_order`, ${hasValue.joinToString(",")} FROM `$ROUTE_RULES` " +
+                "WHERE ${hasValue.joinToString(" OR ")}",
+            null
+        ).use { c ->
+            while (c.moveToNext()) offending[c.value(0) to c.value(1)] = unknown.filterIndexed { i, _ -> c.getLong(i + 2) != 0L }
+        }
+        val owner = rules.index("route_profile_id")
+        val order = rules.index("rule_order")
+        val used = HashSet<String>()
+        val before = rules.rows.size
+        rules.rows.removeAll { row ->
+            val columns = offending[row[owner] to row[order]] ?: return@removeAll false
+            used.addAll(columns)
+            true
+        }
+        val skipped = before - rules.rows.size
+        if (skipped > 0) {
+            val fields = unknown.filter { it in used }.joinToString(", ")
+            warnings.add(app.getString(R.string.backup_warn_unsupported_rules, skipped, fields))
+        }
+    }
+
+    /** A backup's own column name as an SQL identifier; it is data, so a backtick in it is escaped. */
+    private fun sqlName(name: String): String = "`" + name.replace("`", "``") + "`"
 
     private fun stageSettings(bak: SQLiteDatabase, main: SupportSQLiteDatabase, staged: Staged, warnings: MutableList<String>) {
         require(bak, SETTINGS)

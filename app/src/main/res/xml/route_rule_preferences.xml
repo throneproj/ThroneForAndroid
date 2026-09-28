@@ -66,6 +66,10 @@
             app:icon="@drawable/ic_navigation_apps"
             app:key="package_name"
             app:title="@string/route_rule_apps" />
+        <io.nekohasekai.sagernet.widget.StringLinesPreference
+            app:icon="@drawable/ic_hardware_router"
+            app:key="network_type"
+            app:title="@string/route_rule_network_type" />
     </PreferenceCategory>
 
     <Preference
@@ -162,6 +166,10 @@
             app:dialogMessage="@string/route_rule_regex_hint"
             app:key="process_path_regex"
             app:title="@string/route_rule_process_path_regex" />
+        <SwitchPreference
+            app:key="network_is_expensive"
+            app:summary="@string/route_rule_network_is_expensive_sum"
+            app:title="@string/route_rule_network_is_expensive" />
         <EditTextPreference
             app:dialogMessage="@string/route_rule_lines_hint"
             app:key="wifi_ssid"

@@ -177,7 +177,10 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
         }
     }
 
-    /** ToShareLink; rules whose server is gone are left out, and app rules are Android-only, so both are pointed out. */
+    /**
+     * ToShareLink; rules whose server is gone are left out, and rules on apps, network type or metered network are
+     * Android-only (the desktop skips or never matches them), so both are pointed out.
+     */
     private fun share(id: Long, qr: Boolean) = runOnLifecycleDispatcher {
         val profile = RouteManager.get(id) ?: return@runOnLifecycleDispatcher
         val names = HashMap<Long, String?>()
@@ -188,14 +191,15 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
             type != RuleType.ENDPOINT_PREFERRED_BY && !(type != RuleType.CUSTOM && rule.isEmpty())
         }
         val dropped = shared.count { it.toRuleJson(true, null, nameOf).isEmpty() }
-        val appRules = shared.any { rule ->
-            rule.package_name.any { it.isNotBlank() } && rule.toRuleJson(true, null, nameOf).isNotEmpty()
+        val androidOnly = shared.any { rule ->
+            val androidCondition = rule.matchesByApp() || rule.network_type.any { it.isNotBlank() } || rule.network_is_expensive
+            androidCondition && rule.toRuleJson(true, null, nameOf).isNotEmpty()
         }
         onMainDispatcher {
             if (!isAdded) return@onMainDispatcher
             val warnings = ArrayList<String>()
             if (dropped > 0) warnings.add(resources.getQuantityString(R.plurals.route_export_dropped, dropped, dropped))
-            if (appRules) warnings.add(getString(R.string.route_export_package_note))
+            if (androidOnly) warnings.add(getString(R.string.route_export_package_note))
             if (qr) {
                 QRCodeDialog(link, profile.name).showAllowingStateLoss(parentFragmentManager)
                 if (warnings.isNotEmpty()) snackbar(warnings.joinToString("\n")).show()

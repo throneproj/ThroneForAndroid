@@ -3,12 +3,15 @@ package io.nekohasekai.sagernet.route
 import io.nekohasekai.sagernet.outbound.QtStrings
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonObject
+import io.nekohasekai.sagernet.outbound.json.JsonValues
+import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
 import kotlin.reflect.KMutableProperty1
 
 /**
  * RouteRule (include/database/entities/RouteRule.h, src/database/entities/RouteRule.cpp). Members carry the desktop
  * member names so preference bindings, backups and the desktop columns line up; [package_name] is the Android
- * addition (desktop column `package_name_json`, rule key `package_name`).
+ * addition the desktop also stores (column `package_name_json`, rule key `package_name`). [network_type] and
+ * [network_is_expensive] exist only on Android: the desktop drops a rule carrying them on import.
  */
 @Suppress("PropertyName")
 class RouteRule {
@@ -33,7 +36,11 @@ class RouteRule {
     @JvmField var process_name: MutableList<String> = mutableListOf()
     @JvmField var process_path: MutableList<String> = mutableListOf()
     @JvmField var process_path_regex: MutableList<String> = mutableListOf()
+    /** The apps the rule matches; [UNKNOWN_PACKAGE] also matches connections whose app is not identified. */
     @JvmField var package_name: MutableList<String> = mutableListOf()
+    /** [NETWORK_TYPES] values the current default network must have. */
+    @JvmField var network_type: MutableList<String> = mutableListOf()
+    @JvmField var network_is_expensive: Boolean = false
     @JvmField var wifi_ssid: MutableList<String> = mutableListOf()
     @JvmField var wifi_bssid: MutableList<String> = mutableListOf()
     @JvmField var rule_set: MutableList<String> = mutableListOf()
@@ -109,6 +116,8 @@ class RouteRule {
         putStrings(obj, "process_path", process_path)
         putStrings(obj, "process_path_regex", process_path_regex)
         putStrings(obj, "package_name", package_name)
+        putStrings(obj, "network_type", network_type)
+        if (network_is_expensive) obj["network_is_expensive"] = true
         putStrings(obj, "wifi_ssid", wifi_ssid)
         putStrings(obj, "wifi_bssid", wifi_bssid)
         val ruleSets = JsonArray()
@@ -149,6 +158,47 @@ class RouteRule {
         }
         if (act == "sniff" && sniff_override_dest) obj["override_destination"] = true
         if (act == "resolve" && strategy.isNotBlank()) obj["strategy"] = strategy.trim()
+        return obj
+    }
+
+    /**
+     * The rule as the core takes it. sing-box cannot match "no identified app" with package_name, so Apps holding
+     * [UNKNOWN_PACKAGE] become a logical `or` of the listed packages and an inverted `.*` package_name_regex (true
+     * only while no package is known), and-ed with the rule's other conditions; invert then applies to the whole.
+     */
+    fun toConfigJson(outboundTag: String?): JsonObject {
+        val flat = toRuleJson(false, outboundTag)
+        val apps = (flat["package_name"] as? JsonArray)?.strings() ?: return flat
+        if (UNKNOWN_PACKAGE !in apps) return flat
+        flat.remove("package_name")
+        val invert = flat.remove("invert") == true
+        val logical = jsonObjectOf("type" to "logical", "mode" to "and")
+        val own = JsonObject()
+        for ((key, value) in flat) if (key in ACTION_KEYS) logical[key] = value else own[key] = value
+        val unidentified = jsonObjectOf("package_name_regex" to JsonArray.of(".*"), "invert" to true)
+        val packages = apps.filter { it != UNKNOWN_PACKAGE }
+        val appMatch = if (packages.isEmpty()) unidentified else jsonObjectOf(
+            "type" to "logical", "mode" to "or",
+            "rules" to JsonArray.of(jsonObjectOf("package_name" to JsonValues.stringArray(packages)), unidentified),
+        )
+        val rules = JsonArray()
+        if (own.isNotEmpty()) rules.add(own)
+        rules.add(appMatch)
+        logical["rules"] = rules
+        if (invert) logical["invert"] = true
+        return logical
+    }
+
+    /** Whether the match depends on the connection's app, which DNS rules and tun routes cannot follow. */
+    fun matchesByApp(): Boolean = !blank(package_name)
+
+    /** The conditions on the current network (type, metering, Wi-Fi) as rule keys; DNS rules take the same keys. */
+    fun networkConditions(): JsonObject {
+        val obj = JsonObject()
+        putStrings(obj, "network_type", network_type)
+        if (network_is_expensive) obj["network_is_expensive"] = true
+        putStrings(obj, "wifi_ssid", wifi_ssid)
+        putStrings(obj, "wifi_bssid", wifi_bssid)
         return obj
     }
 
@@ -207,6 +257,8 @@ class RouteRule {
         l("process_path", process_path)
         l("process_path_regex", process_path_regex)
         l("package_name", package_name)
+        l("network_type", network_type)
+        b("network_is_expensive", network_is_expensive)
         l("wifi_ssid", wifi_ssid)
         l("wifi_bssid", wifi_bssid)
         l("rule_set", rule_set)
@@ -266,13 +318,25 @@ class RouteRule {
             RouteRule::inbound, RouteRule::domain, RouteRule::domain_suffix, RouteRule::domain_keyword,
             RouteRule::domain_regex, RouteRule::source_ip_cidr, RouteRule::ip_cidr, RouteRule::source_port,
             RouteRule::source_port_range, RouteRule::port, RouteRule::port_range, RouteRule::process_name,
-            RouteRule::process_path, RouteRule::process_path_regex, RouteRule::package_name, RouteRule::wifi_ssid,
-            RouteRule::wifi_bssid, RouteRule::rule_set, RouteRule::sniffers,
+            RouteRule::process_path, RouteRule::process_path_regex, RouteRule::package_name, RouteRule::network_type,
+            RouteRule::wifi_ssid, RouteRule::wifi_bssid, RouteRule::rule_set, RouteRule::sniffers,
         )
 
         val BOOL_FIELDS: List<KMutableProperty1<RouteRule, Boolean>> = listOf(
             RouteRule::source_ip_is_private, RouteRule::ip_is_private, RouteRule::invert, RouteRule::no_drop,
-            RouteRule::sniff_override_dest,
+            RouteRule::sniff_override_dest, RouteRule::network_is_expensive,
+        )
+
+        /** The package_name entry for connections whose app is not identified (no owner, or a uid without a package). */
+        const val UNKNOWN_PACKAGE = "unknown"
+
+        /** sing-box's network_type values (constant/network.go). */
+        val NETWORK_TYPES = listOf("wifi", "cellular", "ethernet", "other")
+
+        /** Rule JSON keys that configure the action rather than narrow the match. */
+        private val ACTION_KEYS = setOf(
+            "action", "outbound", "reject_method", "no_drop", "override_address", "override_port", "tls_spoof",
+            "tls_spoof_method", "override_destination", "strategy",
         )
 
         private val ADDRESS_ATTRIBUTES = setOf("domain", "domain_suffix", "domain_keyword", "domain_regex", "rule_set", "ip_cidr")

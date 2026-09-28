@@ -71,6 +71,9 @@ internal class Prerequisites {
     var needProxyDnsRules = false
     val proxyDns = DomainSelectors()
 
+    /** The direct / proxy rules that depend on the network, in rule order: (DNS server tag, network conditions, sites). */
+    val conditionalDns = ArrayList<Triple<String, JsonObject, DomainSelectors>>()
+
     /** The `ip:` values of the route -> direct rules; they bypass the tun only with enable_tun_routing. */
     val directIpCidrs = ArrayList<String>()
 
