@@ -180,6 +180,14 @@ fun Fragment.needReload() {
     }
 }
 
+fun ThemedActivity.needReload() {
+    if (DataStore.serviceState.started) {
+        snackbar(getString(R.string.need_reload)).setAction(R.string.apply) {
+            SagerNet.reloadService()
+        }.show()
+    }
+}
+
 fun Fragment.needRestart() {
     snackbar(R.string.need_restart).setAction(R.string.apply) {
         triggerFullRestart(requireContext())

@@ -207,7 +207,6 @@
 <string name="subscriptions">Подписки</string>
 <string name="test_concurrency">Число параллельных подключений</string>
 <string name="theme">Тема</string>
-<string name="tile_title">Переключатель</string>
 <string name="tls_camouflage_settings">Настройки защиты TLS</string>
 <string name="tuic_congestion_controller">Контроллер перегрузки</string>
 <string name="tuic_disable_sni">Отключить SNI</string>

@@ -32,7 +32,6 @@
     <string name="service_mode_proxy">Sadece vekil sunucu</string>
     <string name="service_mode">Servis Modu</string>
     <string name="group_update">Güncelle</string>
-    <string name="tile_title">Değiştirici</string>
     <string name="quick_toggle">Aç/Kapat</string>
     <string name="quick_enable">Etkinleştir</string>
     <string name="quick_disable">Devre Dışı Bırak</string>

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
-import android.os.SystemClock
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -22,26 +21,23 @@ import androidx.annotation.StringRes
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.bg.BaseService
+import io.nekohasekai.sagernet.bg.SingBoxDashboard
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.databinding.LayoutDashboardBinding
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.launchCustomTab
 import io.nekohasekai.sagernet.ui.settings.CoreSettingsFragment
 import io.nekohasekai.sagernet.widget.applyInsetMargin
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 /**
  * The sing-box dashboard (SagerNet/sing-box-dashboard) served by the running core's api service, pre-connected like
  * the desktop's OpenDashboard (mainwindow_system.cpp:462-530): the page stays hidden until its localStorage holds the
  * `throne` server entry that res/dashboard-bootstrap.html seeds there, so the dashboard's setup screen never shows.
- * The core downloads the dashboard on first use and answers 404 until it has it.
+ * The page is the copy the app bundles ([SingBoxDashboard]): a 404 means the build has none, or unpacking it failed.
  */
 class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.OnMenuItemClickListener {
 
@@ -66,8 +62,6 @@ class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.On
     /** Loads this screen starts make `throne` the active server; the page's own reloads keep the user's choice. */
     private var activate = true
     private var seedReloads = 0
-    private var downloadWaitStart = 0L
-    private var retryJob: Job? = null
 
     private val backCallback = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
@@ -98,7 +92,6 @@ class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.On
     }
 
     override fun onDestroyView() {
-        retryJob?.cancel()
         destroyWebView()
         origin = ""
         shown = false
@@ -157,7 +150,6 @@ class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.On
 
     private fun load() {
         val binding = binding ?: return
-        retryJob?.cancel()
         val webView = this.webView ?: createWebView(binding.dashboardWeb)?.also { this.webView = it }
         if (webView == null) {
             origin = ""
@@ -168,7 +160,6 @@ class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.On
         origin = "http://127.0.0.1:$port"
         activate = true
         seedReloads = 0
-        downloadWaitStart = 0L
         mainFrameStatus = 0
         clearHistory = true
         showProgress(R.string.dashboard_loading)
@@ -177,7 +168,6 @@ class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.On
 
     /** Stops the page, whose streams would otherwise keep knocking on a port nothing serves. */
     private fun unload() {
-        retryJob?.cancel()
         if (origin.isEmpty()) return
         origin = ""
         webView?.run {
@@ -207,27 +197,7 @@ class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.On
             if (result != "\"ok\"") Logs.w("dashboard: server entry check returned $result")
             activate = false
             seedReloads = 0
-            downloadWaitStart = 0L
             showDashboard()
-        }
-    }
-
-    /** The core fetches the dashboard when the service starts; a failed fetch is retried at the next start. */
-    private fun waitForDownload(view: WebView) {
-        val now = SystemClock.elapsedRealtime()
-        if (downloadWaitStart == 0L) downloadWaitStart = now
-        if (now - downloadWaitStart >= DOWNLOAD_WAIT_MS) {
-            showMessage(
-                R.drawable.ic_baseline_warning_24, R.string.dashboard_not_downloaded_title,
-                getString(R.string.dashboard_not_downloaded), R.string.dashboard_retry,
-            ) { render(reload = true) }
-            return
-        }
-        showProgress(R.string.dashboard_downloading)
-        retryJob?.cancel()
-        retryJob = viewLifecycleOwner.lifecycleScope.launch {
-            delay(DOWNLOAD_POLL_MS)
-            if (view === webView) view.reload()
         }
     }
 
@@ -245,7 +215,6 @@ class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.On
         @DrawableRes icon: Int, @StringRes title: Int, text: CharSequence, @StringRes action: Int, onAction: () -> Unit,
     ) {
         val binding = binding ?: return
-        retryJob?.cancel()
         shown = false
         binding.dashboardWeb.isInvisible = true
         binding.dashboardProgress.isVisible = false
@@ -352,7 +321,11 @@ class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.On
             when (status) {
                 0 -> seed(view)
                 -1 -> Unit
-                404 -> waitForDownload(view)
+                404 -> showMessage(
+                    R.drawable.ic_baseline_warning_24, R.string.dashboard_missing_title,
+                    getString(R.string.dashboard_missing), R.string.dashboard_retry,
+                ) { render(reload = true) }
+
                 else -> showError(getString(R.string.dashboard_http_error, status))
             }
         }
@@ -373,9 +346,6 @@ class DashboardFragment : ToolbarFragment(R.layout.layout_dashboard), Toolbar.On
     }
 
     private companion object {
-        const val DOWNLOAD_WAIT_MS = 60_000L
-        const val DOWNLOAD_POLL_MS = 3_000L
-
         /**
          * dashboard-bootstrap.html as a check: the `throne` entry of the page's server list (src/api/config.ts) gets
          * this core's address and secret, other servers stay. Answers "ok" when nothing had to change, "seeded" after

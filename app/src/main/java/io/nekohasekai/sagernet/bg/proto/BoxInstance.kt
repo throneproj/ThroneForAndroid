@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.bg.proto
 
 import io.nekohasekai.sagernet.bg.AbstractInstance
 import io.nekohasekai.sagernet.bg.CoreRuntime
+import io.nekohasekai.sagernet.bg.SingBoxDashboard
 import io.nekohasekai.sagernet.bg.XrayGeoAssets
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -53,6 +54,8 @@ abstract class BoxInstance(
         core = CoreConfig.from(config, listOf(CoreConfig.TAG_PROXY))
         CoreRuntime.applyLogLevel(config.coreConfig)
         ensureXrayAssets()
+        // Before the start: the core downloads the dashboard itself when it finds the dir empty.
+        if (DataStore.apiDashboardEnabled) withContext(Dispatchers.IO) { SingBoxDashboard.install() }
         loadConfig()
     }
 

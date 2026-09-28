@@ -603,6 +603,7 @@ class BaseService {
                     preInit()
                     proxy.init()
                     DataStore.currentProfile = profile.id
+                    DataStore.runningProfiles = proxy.config.involvedProfileIds.map { it.toString() }
 
                     startProcesses()
                     data.changeState(State.Connected)

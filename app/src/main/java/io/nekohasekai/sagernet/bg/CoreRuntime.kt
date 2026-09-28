@@ -17,6 +17,9 @@ import java.io.File
 // Loaded only in the :bg process: everything here pulls the ThroneCore AAR (libthrone.so) in.
 object CoreRuntime {
 
+    /** The core's working dir under filesDir, which relative paths of its config resolve against. */
+    const val WORKING_DIR = "core"
+
     private const val LOG_QUEUE_LINES = 1024
 
     val platform: NativeInterface by lazy { NativeInterface() }
@@ -53,7 +56,7 @@ object CoreRuntime {
         logLevel = runCatching { levelOf(DataStore.logLevel) }.getOrDefault(Mobile.LogLevelWarn)
         Mobile.setup(SetupOptions().apply {
             basePath = app.filesDir.absolutePath
-            workingPath = File(app.filesDir, "core").absolutePath
+            workingPath = File(app.filesDir, WORKING_DIR).absolutePath
             tempPath = app.cacheDir.absolutePath
             logMaxLines = LOG_QUEUE_LINES
             debug = BuildConfig.DEBUG

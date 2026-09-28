@@ -42,7 +42,6 @@
     <string name="service_mode_proxy">Hanya proxy</string>
     <string name="service_mode">Mode Layanan</string>
     <string name="group_update">Perbarui</string>
-    <string name="tile_title">Pengalih</string>
     <string name="quick_toggle">Beralih</string>
     <string name="quick_enable">Aktifkan</string>
     <string name="quick_disable">Nonaktifkan</string>

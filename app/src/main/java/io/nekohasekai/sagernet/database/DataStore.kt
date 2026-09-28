@@ -28,6 +28,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     // last used, but may not be running
     var currentProfile by configurationStore.long(Key.PROFILE_CURRENT)
 
+    /** The involvedProfileIds of the config [currentProfile] last started with, for ProfileManager.runningUses. */
+    var runningProfiles by configurationStore.stringList(Key.RUNNING_PROFILES)
+
     var selectedProxy by configurationStore.long(Key.PROFILE_ID)
 
     // only in bg process

@@ -13,7 +13,6 @@
     <string name="menu_about">대하여</string>
     <string name="menu_group">그룹</string>
     <string name="menu_configuration">구성</string>
-    <string name="tile_title">스위처</string>
     <string name="menu_dashboard">sing-box 대시보드</string>
     <string name="action_copy">복사</string>
     <string name="group_update">업데이트</string>

@@ -1001,8 +1001,8 @@ class ConfigGenerator @JvmOverloads constructor(
 
     /**
      * buildServicesSection (:2186-2212): the core builds the traffic tracker from the mere presence of an api service;
-     * with a port it also serves the sing-box dashboard. Unlike the desktop, which installs the dashboard itself, the
-     * core downloads it on first use, so that fetch goes through `proxy` rather than a possibly blocked direct route.
+     * with a port it also serves the sing-box dashboard, the copy the app bundles and unpacks into [DASHBOARD_PATH]
+     * before the start, like the desktop.
      */
     private fun buildServicesSection(state: BuildState) {
         if (state.forTest) return
@@ -1017,14 +1017,7 @@ class ConfigGenerator @JvmOverloads constructor(
         if (dashboard) {
             // Defaults to "*", i.e. any page the user visits could reach loopback.
             api["access_control_allow_origin"] = JsonArray.of("http://127.0.0.1:${settings.apiPort}")
-            // apiDashboardDir (generate.h:10-11), not the Clash external_ui dir; relative to the core's working dir.
-            val options = jsonObjectOf("enabled" to true, "path" to "sb-dashboard")
-            // The core refuses a detour to a `direct` outbound without dial options; direct is its default anyway.
-            val proxied = (state.outbounds + state.endpoints).any {
-                it is JsonObject && it.string("tag") == Tags.PROXY && it.string("type") != "direct"
-            }
-            if (proxied) options["http_client"] = jsonObjectOf("detour" to Tags.PROXY)
-            api["dashboard"] = options
+            api["dashboard"] = jsonObjectOf("enabled" to true, "path" to DASHBOARD_PATH)
         }
         state.coreConfig["services"] = JsonArray.of(api)
     }
@@ -1067,6 +1060,12 @@ class ConfigGenerator @JvmOverloads constructor(
     }
 
     companion object {
+        /**
+         * apiDashboardDir (generate.h:10-11), the api service's `dashboard.path` relative to the core's working dir;
+         * not the Clash external_ui dir, which holds a different UI.
+         */
+        const val DASHBOARD_PATH = "sb-dashboard"
+
         private val SELECTOR_PREFIXES = listOf("ruleset:", "domain:", "suffix:", "keyword:", "regex:", "ip:")
 
         private val DURATION = Regex("^(?:\\d+(?:\\.\\d+)?(?:ns|us|ms|s|m|h|d))+$")

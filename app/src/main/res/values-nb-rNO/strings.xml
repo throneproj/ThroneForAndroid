@@ -169,7 +169,6 @@
     <string name="allow_access">Tillat tilkoblinger fra LAN</string>
     <string name="service_mode">Servicemodus</string>
     <string name="group_update">Oppdater</string>
-    <string name="tile_title">Bytter</string>
     <string name="quick_toggle">Veksle</string>
     <string name="quick_enable">Aktiver</string>
     <string name="quick_disable">Deaktiver</string>

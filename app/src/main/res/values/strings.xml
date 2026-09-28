@@ -19,7 +19,6 @@
     <string name="quick_toggle">Toggle</string>
     <string name="quick_enable">Enable</string>
     <string name="quick_disable">Disable</string>
-    <string name="tile_title">Switcher</string>
     <string name="menu_dashboard">sing-box dashboard</string>
     <string name="action_copy">Copy</string>
     <!-- toolbar navigation button -->
@@ -655,14 +654,13 @@
     <string name="dashboard_reload">Reload</string>
     <string name="dashboard_retry">Retry</string>
     <string name="dashboard_loading">Loading the dashboard…</string>
-    <string name="dashboard_downloading">Downloading the dashboard…</string>
     <string name="dashboard_off_title">The sing-box API is off</string>
     <string name="dashboard_off">The dashboard is served by the core\'s sing-box API. Turn it on in Settings › Core.</string>
     <string name="dashboard_core_settings">Core settings</string>
     <string name="dashboard_stopped_title">The service is not running</string>
     <string name="dashboard_stopped">Start a profile first; the dashboard is served by the running core.</string>
-    <string name="dashboard_not_downloaded_title">The dashboard is not downloaded yet</string>
-    <string name="dashboard_not_downloaded">The core downloads it through the proxy when the service starts, which can take a few minutes on a slow connection. If the download failed, the log says why, and reloading the service tries again.</string>
+    <string name="dashboard_missing_title">The dashboard is missing</string>
+    <string name="dashboard_missing">This build does not include the sing-box dashboard files, or they could not be unpacked; the log says why. Reloading the service tries again.</string>
     <string name="dashboard_error_title">Could not load the dashboard</string>
     <string name="dashboard_unreachable">Nothing answers on 127.0.0.1:%1$d (%2$s). Reload the service after changing the sing-box API settings. A profile with a custom full config serves the dashboard only when its own config has an api service on that port.</string>
     <string name="dashboard_http_error">The core answered with HTTP %1$d.</string>

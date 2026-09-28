@@ -1,0 +1,27 @@
+name: Fetch sing-box dashboard
+description: >-
+  Downloads the gh-pages build of SagerNet/sing-box-dashboard into app/src/main/assets/sb-dashboard/ (gitignored), the
+  dashboard the app unpacks for the core's api service (bg/SingBoxDashboard.kt) instead of the core downloading it.
+runs:
+  using: composite
+  steps:
+    - name: Fetch sing-box dashboard
+      shell: bash
+      run: |
+        set -euo pipefail
+        DEST=app/src/main/assets/sb-dashboard
+        rm -rf "$DEST"
+        mkdir -p "$DEST"
+        curl -fsSL --retry 3 https://codeload.github.com/SagerNet/sing-box-dashboard/tar.gz/refs/heads/gh-pages \
+          | tar -xz --strip-components=1 -C "$DEST"
+        # aapt leaves out dot files and directories starting with "_" without failing the build.
+        find "$DEST" -type f -name '.*' -delete
+        if [ -n "$(find "$DEST" -type d -name '_*')" ]; then
+          echo "::error::the sing-box dashboard has directories starting with _, which the APK would lack"
+          exit 1
+        fi
+        if [ ! -s "$DEST/index.html" ]; then
+          echo "::error::the sing-box dashboard has no index.html"
+          exit 1
+        fi
+        du -sh "$DEST"
