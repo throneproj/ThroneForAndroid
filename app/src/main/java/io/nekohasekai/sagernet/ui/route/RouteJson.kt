@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.ui.route
 
 import io.nekohasekai.sagernet.route.OutboundIds
 import io.nekohasekai.sagernet.route.RouteProfile
+import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.route.RouteRule
 import org.json.JSONArray
 import org.json.JSONObject
@@ -47,6 +48,10 @@ internal object RouteJson {
         for (f in RouteRule.STRING_FIELDS) put(f.name, f.get(r))
         for (f in RouteRule.BOOL_FIELDS) put(f.name, f.get(r))
         for (f in RouteRule.LIST_FIELDS) put(f.name, JSONArray(f.get(r)))
+        // lxbox/asteriskbox extension fields (not in reflection lists)
+        if (r.rules_json.isNotBlank()) put("rules_json", r.rules_json)
+        put("balancer_pool", r.balancer_pool)
+        put("balancer_pool_tolerance", r.balancer_pool_tolerance)
     }
 
     private fun ruleFrom(obj: JSONObject) = RouteRule().apply {
@@ -60,5 +65,9 @@ internal object RouteJson {
             val values = obj.optJSONArray(f.name) ?: continue
             f.set(this, (0 until values.length()).map { values.optString(it) }.filterTo(ArrayList()) { it.isNotBlank() })
         }
+        // lxbox/asteriskbox extension fields
+        rules_json = obj.optString("rules_json", "")
+        balancer_pool = obj.optInt("balancer_pool", 0)
+        balancer_pool_tolerance = obj.optInt("balancer_pool_tolerance", 0)
     }
 }

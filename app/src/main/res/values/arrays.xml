@@ -646,4 +646,41 @@
         <item>@string/warp_http3_only</item>
         <item>HTTP/2</item>
     </string-array>
+    <!-- lxbox/asteriskbox: logical mode for rule nesting -->
+    <string-array name="route_rule_logical_mode_entries">
+        <item>@string/route_rule_unset</item>
+        <item>AND (all must match)</item>
+        <item>OR (any matches)</item>
+    </string-array>
+    <string-array name="route_rule_logical_mode_values" translatable="false">
+        <item></item>
+        <item>and</item>
+        <item>or</item>
+    </string-array>
+    <!-- lxbox: balancer mode for urltest round-robin -->
+    <string-array name="route_rule_balancer_mode_entries">
+        <item>@string/route_rule_unset</item>
+        <item>round_robin (load balance)</item>
+        <item>least_test (fastest, default)</item>
+    </string-array>
+    <string-array name="route_rule_balancer_mode_values" translatable="false">
+        <item></item>
+        <item>round_robin</item>
+        <item>least_test</item>
+    </string-array>
+    <!-- DNS server types -->
+    <string-array name="dns_server_type_entries">
+        <item>UDP</item>
+        <item>TCP</item>
+        <item>DoH (DNS over HTTPS)</item>
+        <item>DoT (DNS over TLS)</item>
+        <item>Gateway</item>
+    </string-array>
+    <string-array name="dns_server_type_values" translatable="false">
+        <item>udp</item>
+        <item>tcp</item>
+        <item>https</item>
+        <item>dot</item>
+        <item>gate</item>
+    </string-array>
 </resources>

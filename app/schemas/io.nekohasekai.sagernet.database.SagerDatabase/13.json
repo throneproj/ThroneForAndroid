@@ -1,0 +1,875 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 13,
+    "identityHash": "3525468e13426221ac62c4bfb61de28e",
+    "entities": [
+      {
+        "tableName": "groups",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `archive` INTEGER NOT NULL DEFAULT 0, `skip_auto_update` INTEGER NOT NULL DEFAULT 0, `name` TEXT NOT NULL DEFAULT '', `url` TEXT NOT NULL DEFAULT '', `info` TEXT NOT NULL DEFAULT '', `sub_last_update` INTEGER NOT NULL DEFAULT 0, `front_proxy_id` INTEGER NOT NULL DEFAULT -1, `landing_proxy_id` INTEGER NOT NULL DEFAULT -1, `column_width_json` TEXT NOT NULL DEFAULT '', `scroll_last_profile` INTEGER NOT NULL DEFAULT -1, `auto_clear_unavailable` INTEGER NOT NULL DEFAULT 0, `test_sort_by` INTEGER NOT NULL DEFAULT 0, `traffic_sort_by` INTEGER NOT NULL DEFAULT 0, `test_items_to_show` INTEGER NOT NULL DEFAULT 0, `type_sort_by` INTEGER NOT NULL DEFAULT 0, `sub_options_json` TEXT NOT NULL DEFAULT '{}', `display_order` INTEGER NOT NULL DEFAULT 0)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "archive",
+            "columnName": "archive",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "skipAutoUpdate",
+            "columnName": "skip_auto_update",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "info",
+            "columnName": "info",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "subLastUpdate",
+            "columnName": "sub_last_update",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "frontProxyId",
+            "columnName": "front_proxy_id",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "-1"
+          },
+          {
+            "fieldPath": "landingProxyId",
+            "columnName": "landing_proxy_id",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "-1"
+          },
+          {
+            "fieldPath": "columnWidthJson",
+            "columnName": "column_width_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "scrollLastProfile",
+            "columnName": "scroll_last_profile",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "-1"
+          },
+          {
+            "fieldPath": "autoClearUnavailable",
+            "columnName": "auto_clear_unavailable",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "testSortBy",
+            "columnName": "test_sort_by",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "trafficSortBy",
+            "columnName": "traffic_sort_by",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "testItemsToShow",
+            "columnName": "test_items_to_show",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "typeSortBy",
+            "columnName": "type_sort_by",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "subOptions",
+            "columnName": "sub_options_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'{}'"
+          },
+          {
+            "fieldPath": "displayOrder",
+            "columnName": "display_order",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "profiles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type` TEXT NOT NULL, `name` TEXT, `gid` INTEGER NOT NULL DEFAULT 0, `user_order` INTEGER NOT NULL DEFAULT 0, `latency` INTEGER NOT NULL DEFAULT 0, `latency_at` INTEGER NOT NULL DEFAULT 0, `dl_speed` TEXT, `ul_speed` TEXT, `test_country` TEXT, `ip_out` TEXT, `outbound_json` TEXT NOT NULL, `traffic_dl` INTEGER NOT NULL DEFAULT 0, `traffic_up` INTEGER NOT NULL DEFAULT 0, `test_error` TEXT, FOREIGN KEY(`gid`) REFERENCES `groups`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "groupId",
+            "columnName": "gid",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "userOrder",
+            "columnName": "user_order",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "latency",
+            "columnName": "latency",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "latencyAt",
+            "columnName": "latency_at",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "dlSpeed",
+            "columnName": "dl_speed",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ulSpeed",
+            "columnName": "ul_speed",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "testCountry",
+            "columnName": "test_country",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ipOut",
+            "columnName": "ip_out",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "outboundJson",
+            "columnName": "outbound_json",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "traffic_dl",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "tx",
+            "columnName": "traffic_up",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "testError",
+            "columnName": "test_error",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_profiles_gid",
+            "unique": false,
+            "columnNames": [
+              "gid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_profiles_gid` ON `${TABLE_NAME}` (`gid`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "groups",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "gid"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "route_profiles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL DEFAULT '', `default_outbound_id` INTEGER NOT NULL DEFAULT -1, `is_remote` INTEGER NOT NULL DEFAULT 0, `remote_url` TEXT NOT NULL DEFAULT '', `auto_update` INTEGER NOT NULL DEFAULT 0, `remote_last_update` INTEGER NOT NULL DEFAULT 0, `is_raw` INTEGER NOT NULL DEFAULT 0, `raw_route` TEXT NOT NULL DEFAULT '', `prevent_modifications` INTEGER NOT NULL DEFAULT 0, `endpoint_profile_ids` TEXT NOT NULL DEFAULT '[]', `inner_hop_endpoint_ids` TEXT NOT NULL DEFAULT '[]')",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "defaultOutboundId",
+            "columnName": "default_outbound_id",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "-1"
+          },
+          {
+            "fieldPath": "isRemote",
+            "columnName": "is_remote",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "remoteUrl",
+            "columnName": "remote_url",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "autoUpdate",
+            "columnName": "auto_update",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "remoteLastUpdate",
+            "columnName": "remote_last_update",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "isRaw",
+            "columnName": "is_raw",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "rawRoute",
+            "columnName": "raw_route",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "preventModifications",
+            "columnName": "prevent_modifications",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "endpointProfileIds",
+            "columnName": "endpoint_profile_ids",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "innerHopEndpointIds",
+            "columnName": "inner_hop_endpoint_ids",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "route_rules",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`route_profile_id` INTEGER NOT NULL, `rule_order` INTEGER NOT NULL, `name` TEXT NOT NULL DEFAULT '', `type` INTEGER NOT NULL DEFAULT 0, `ip_version` TEXT NOT NULL DEFAULT '', `network` TEXT NOT NULL DEFAULT '', `protocol` TEXT NOT NULL DEFAULT '', `inbound_json` TEXT NOT NULL DEFAULT '[]', `domain_json` TEXT NOT NULL DEFAULT '[]', `domain_suffix_json` TEXT NOT NULL DEFAULT '[]', `domain_keyword_json` TEXT NOT NULL DEFAULT '[]', `domain_regex_json` TEXT NOT NULL DEFAULT '[]', `source_ip_cidr_json` TEXT NOT NULL DEFAULT '[]', `source_ip_is_private` INTEGER NOT NULL DEFAULT 0, `ip_cidr_json` TEXT NOT NULL DEFAULT '[]', `ip_is_private` INTEGER NOT NULL DEFAULT 0, `source_port_json` TEXT NOT NULL DEFAULT '[]', `source_port_range_json` TEXT NOT NULL DEFAULT '[]', `port_json` TEXT NOT NULL DEFAULT '[]', `port_range_json` TEXT NOT NULL DEFAULT '[]', `process_name_json` TEXT NOT NULL DEFAULT '[]', `process_path_json` TEXT NOT NULL DEFAULT '[]', `process_path_regex_json` TEXT NOT NULL DEFAULT '[]', `package_name_json` TEXT NOT NULL DEFAULT '[]', `rule_set_json` TEXT NOT NULL DEFAULT '[]', `invert` INTEGER NOT NULL DEFAULT 0, `outbound_id` INTEGER NOT NULL DEFAULT -2, `action` TEXT NOT NULL DEFAULT 'route', `reject_method` TEXT NOT NULL DEFAULT '', `no_drop` INTEGER NOT NULL DEFAULT 0, `override_address` TEXT NOT NULL DEFAULT '', `override_port` TEXT NOT NULL DEFAULT '', `sniffers_json` TEXT NOT NULL DEFAULT '[]', `sniff_override_dest` INTEGER NOT NULL DEFAULT 0, `strategy` TEXT NOT NULL DEFAULT '', `wifi_ssid_json` TEXT NOT NULL DEFAULT '[]', `wifi_bssid_json` TEXT NOT NULL DEFAULT '[]', `tls_spoof` TEXT NOT NULL DEFAULT '', `tls_spoof_method` TEXT NOT NULL DEFAULT '', `logical_mode` TEXT NOT NULL DEFAULT '', `rules_json` TEXT NOT NULL DEFAULT '', `default_interface_address_json` TEXT NOT NULL DEFAULT '[]', `dns_server_json` TEXT NOT NULL DEFAULT '[]', `balancer_mode` TEXT NOT NULL DEFAULT '', `balancer_pool` INTEGER NOT NULL DEFAULT 0, `balancer_pool_tolerance` INTEGER NOT NULL DEFAULT 0, `balancer_sticky_hash_json` TEXT NOT NULL DEFAULT '[]', PRIMARY KEY(`route_profile_id`, `rule_order`), FOREIGN KEY(`route_profile_id`) REFERENCES `route_profiles`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "routeProfileId",
+            "columnName": "route_profile_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ruleOrder",
+            "columnName": "rule_order",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "ipVersion",
+            "columnName": "ip_version",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "network",
+            "columnName": "network",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "protocol",
+            "columnName": "protocol",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "inboundJson",
+            "columnName": "inbound_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "domainJson",
+            "columnName": "domain_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "domainSuffixJson",
+            "columnName": "domain_suffix_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "domainKeywordJson",
+            "columnName": "domain_keyword_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "domainRegexJson",
+            "columnName": "domain_regex_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "sourceIpCidrJson",
+            "columnName": "source_ip_cidr_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "sourceIpIsPrivate",
+            "columnName": "source_ip_is_private",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "ipCidrJson",
+            "columnName": "ip_cidr_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "ipIsPrivate",
+            "columnName": "ip_is_private",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "sourcePortJson",
+            "columnName": "source_port_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "sourcePortRangeJson",
+            "columnName": "source_port_range_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "portJson",
+            "columnName": "port_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "portRangeJson",
+            "columnName": "port_range_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "processNameJson",
+            "columnName": "process_name_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "processPathJson",
+            "columnName": "process_path_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "processPathRegexJson",
+            "columnName": "process_path_regex_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "packageNameJson",
+            "columnName": "package_name_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "ruleSetJson",
+            "columnName": "rule_set_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "invert",
+            "columnName": "invert",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "outboundId",
+            "columnName": "outbound_id",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "-2"
+          },
+          {
+            "fieldPath": "action",
+            "columnName": "action",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'route'"
+          },
+          {
+            "fieldPath": "rejectMethod",
+            "columnName": "reject_method",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "noDrop",
+            "columnName": "no_drop",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "overrideAddress",
+            "columnName": "override_address",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "overridePort",
+            "columnName": "override_port",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "sniffersJson",
+            "columnName": "sniffers_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "sniffOverrideDest",
+            "columnName": "sniff_override_dest",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "strategy",
+            "columnName": "strategy",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "wifiSsidJson",
+            "columnName": "wifi_ssid_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "wifiBssidJson",
+            "columnName": "wifi_bssid_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "tlsSpoof",
+            "columnName": "tls_spoof",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "tlsSpoofMethod",
+            "columnName": "tls_spoof_method",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "logicalMode",
+            "columnName": "logical_mode",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "rulesJson",
+            "columnName": "rules_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "defaultInterfaceAddressJson",
+            "columnName": "default_interface_address_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "dnsServerJson",
+            "columnName": "dns_server_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          },
+          {
+            "fieldPath": "balancerMode",
+            "columnName": "balancer_mode",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "balancerPool",
+            "columnName": "balancer_pool",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "balancerPoolTolerance",
+            "columnName": "balancer_pool_tolerance",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "balancerStickyHashJson",
+            "columnName": "balancer_sticky_hash_json",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'[]'"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "route_profile_id",
+            "rule_order"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "route_profiles",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "route_profile_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "dns_servers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tag` TEXT NOT NULL, `address` TEXT NOT NULL, `type` TEXT NOT NULL, `bind_interface` TEXT NOT NULL, `detour` TEXT NOT NULL, `disable_cache` INTEGER NOT NULL, `disable_expire` INTEGER NOT NULL, `ip_is_private` INTEGER NOT NULL, `client_subnet` TEXT NOT NULL, `reject_expired` INTEGER NOT NULL, `user_order` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tag",
+            "columnName": "tag",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bindInterface",
+            "columnName": "bind_interface",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "detour",
+            "columnName": "detour",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "disableCache",
+            "columnName": "disable_cache",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "disableExpire",
+            "columnName": "disable_expire",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ipIsPrivate",
+            "columnName": "ip_is_private",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientSubnet",
+            "columnName": "client_subnet",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rejectExpired",
+            "columnName": "reject_expired",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userOrder",
+            "columnName": "user_order",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "settings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `value` TEXT NOT NULL, PRIMARY KEY(`key`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "key"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "markers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `marked_at` INTEGER NOT NULL DEFAULT (strftime('%s','now')), PRIMARY KEY(`key`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "markedAt",
+            "columnName": "marked_at",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "(strftime('%s','now'))"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "key"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3525468e13426221ac62c4bfb61de28e')"
+    ]
+  }
+}

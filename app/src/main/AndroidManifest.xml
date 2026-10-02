@@ -483,6 +483,14 @@
             android:exported="false"
             android:process=":bg" />
 
-    </application>
+        <activity
+        android:name=".ui.dns.DnsServerListActivity"
+        android:exported="false"
+        android:label="@string/dns_servers_title" />
+    <activity
+        android:name=".ui.dns.DnsServerEditActivity"
+        android:exported="false"
+        android:label="@string/dns_server_add" />
+</application>
 
 </manifest>

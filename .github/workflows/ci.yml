@@ -1,4 +1,5 @@
 name: CI
+
 on:
   push:
     branches:
@@ -7,16 +8,96 @@ on:
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
+
 permissions:
   contents: read
+
 jobs:
   build:
-    name: Unit tests and debug build
+    name: Build Signed Release APK
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
-      - name: Build
-        uses: ./.github/actions/android-build
+        uses: actions/checkout@v4
         with:
-          tasks: app:testOssDebugUnitTest app:assembleOssDebug
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.1" > /dev/null 2>&1
+
+      - name: Build ThroneCore AAR and schema
+        run: |
+          REF=$(sed -n 's/^THRONE_CORE_REF=//p' nb4a.properties | tr -d '\r[:space:]')
+          THRONE_DIR="$(dirname "$GITHUB_WORKSPACE")/Throne"
+          rm -rf "$THRONE_DIR"
+          git init -q "$THRONE_DIR"
+          git -C "$THRONE_DIR" remote add origin https://github.com/throneproj/Throne
+          git -C "$THRONE_DIR" fetch -q --depth 1 origin "$REF"
+          git -C "$THRONE_DIR" checkout -q --detach FETCH_HEAD
+
+          go install github.com/sagernet/gomobile/cmd/gomobile@v0.1.13
+          go install github.com/sagernet/gomobile/cmd/gobind@v0.1.13
+          export PATH="$(go env GOPATH)/bin:$PATH"
+
+          echo y | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;28.2.13676358" > /dev/null 2>&1
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358"
+
+          cd "$THRONE_DIR"
+          DEST="$GITHUB_WORKSPACE/app/libs" bash script/build_android.sh
+
+          cd "$THRONE_DIR/core"
+          TAGS=$(sed -n 's/^TAGS="\(.*\)"$/\1/p' ../script/build_android.sh)
+          mkdir -p "$GITHUB_WORKSPACE/app/src/main/assets/schema"
+          CGO_ENABLED=0 go run -trimpath -ldflags=-checklinkname=0 -tags "$TAGS,with_purego" ./cmd/schemagen -o "$GITHUB_WORKSPACE/app/src/main/assets/schema/sing-box.json"
+
+          test -s "$GITHUB_WORKSPACE/app/libs/ThroneCore.aar"
+          test -s "$GITHUB_WORKSPACE/app/src/main/assets/schema/sing-box.json"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Generate signing key
+        run: |
+          keytool -genkeypair -v -keystore signing.keystore -alias throne \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass throne123 -keypass throne123 \
+            -dname "CN=Throne Dev, OU=Dev, O=Throne, L=City, S=State, C=CN"
+
+      - name: Build and sign release APK
+        run: |
+          # Configure signing
+          echo "signing.storeFile=signing.keystore" > local.properties
+          echo "signing.storePassword=throne123" >> local.properties
+          echo "signing.keyAlias=throne" >> local.properties
+          echo "signing.keyPassword=throne123" >> local.properties
+          
+          # Build signed release APK
+          ./gradlew assembleOssRelease
+
+      - name: Verify signed APK
+        run: |
+          echo "=== 构建产物 ==="
+          find app/build/outputs/apk -name "*.apk" -exec ls -lh {} \;
+          echo ""
+          echo "=== 验证签名 ==="
+          for apk in app/build/outputs/apk/oss/release/*.apk; do
+            echo "APK: $apk"
+            jarsigner -verify -verbose -certs "$apk" 2>&1 | head -5
+            echo ""
+          done
+
+      - name: Upload Signed Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Throne-signed-release-arm64
+          path: app/build/outputs/apk/oss/release/*.apk

@@ -20,11 +20,13 @@ import kotlinx.coroutines.launch
 @Database(
     entities = [
         ProxyGroup::class, ProxyEntity::class, RouteProfileEntity::class, RouteRuleEntity::class,
+        DnsServerEntity::class,
         SettingEntry::class, MarkerEntity::class,
     ],
-    version = 12,
+    version = 13,
     autoMigrations = [
         AutoMigration(from = 8, to = 9),
+        AutoMigration(from = 12, to = 13),
     ]
 )
 @TypeConverters(value = [SubscriptionOptions.Converter::class])
@@ -97,6 +99,20 @@ abstract class SagerDatabase : RoomDatabase() {
             }
         }
 
+        /** 12 -> 13: add lxbox/asteriskbox extension columns to route_rules. */
+        val MIGRATION_12_13: Migration = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `route_rules` ADD COLUMN `logical_mode` TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE `route_rules` ADD COLUMN `rules_json` TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE `route_rules` ADD COLUMN `default_interface_address_json` TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL("ALTER TABLE `route_rules` ADD COLUMN `dns_server_json` TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL("ALTER TABLE `route_rules` ADD COLUMN `balancer_mode` TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE `route_rules` ADD COLUMN `balancer_pool` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `route_rules` ADD COLUMN `balancer_pool_tolerance` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `route_rules` ADD COLUMN `balancer_sticky_hash_json` TEXT NOT NULL DEFAULT '[]'")
+            }
+        }
+
         /**
          * 11 -> 12: the desktop's `groups` / `profiles` tables replace `proxy_groups` / `proxy_entities` (no data is
          * carried over), `settings` moves in from configuration.db, `markers` is added and `route_profiles` gains the
@@ -163,7 +179,7 @@ abstract class SagerDatabase : RoomDatabase() {
         @OptIn(DelicateCoroutinesApi::class)
         private fun buildProfileDatabase(): SagerDatabase =
             Room.databaseBuilder(SagerNet.application, SagerDatabase::class.java, Key.DB_PROFILE)
-                .addMigrations(MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
+                .addMigrations(MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
                 .addCallback(callback)
                 .setJournalMode(JournalMode.TRUNCATE)
                 .allowMainThreadQueries()
@@ -213,6 +229,7 @@ abstract class SagerDatabase : RoomDatabase() {
         val routeDao get() = instance.routeDao()
         val settingsDao get() = instance.settingsDao()
         val markerDao get() = instance.markerDao()
+        val dnsServerDao get() = instance.dnsServerDao()
 
     }
 
@@ -221,5 +238,6 @@ abstract class SagerDatabase : RoomDatabase() {
     abstract fun routeDao(): RouteDao
     abstract fun settingsDao(): SettingEntry.Dao
     abstract fun markerDao(): MarkerEntity.Dao
+    abstract fun dnsServerDao(): DnsServerDao
 
 }

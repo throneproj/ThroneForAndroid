@@ -40,6 +40,24 @@
             app:key="sniff_override_dest"
             app:summary="@string/route_rule_override_destination_sum"
             app:title="@string/route_rule_override_destination" />
+        <!-- lxbox/asteriskbox: logical rule mode -->
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:entries="@array/route_rule_logical_mode_entries"
+            app:entryValues="@array/route_rule_logical_mode_values"
+            app:icon="@drawable/ic_baseline_link_24"
+            app:key="logical_mode"
+            app:title="@string/route_rule_logical_mode"
+            app:useSimpleSummaryProvider="true"
+            app:persistent="false" />
+        <!-- lxbox: load balancer mode -->
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:entries="@array/route_rule_balancer_mode_entries"
+            app:entryValues="@array/route_rule_balancer_mode_values"
+            app:icon="@drawable/ic_baseline_shuffle_24"
+            app:key="balancer_mode"
+            app:title="@string/route_rule_balancer_mode"
+            app:useSimpleSummaryProvider="true"
+            app:persistent="false" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/route_rule_category_match">
@@ -170,6 +188,39 @@
             app:dialogMessage="@string/route_rule_lines_hint"
             app:key="wifi_bssid"
             app:title="@string/route_rule_wifi_bssid" />
+        <!-- lxbox/asteriskbox extension: rules_json holds a raw JSON blob, not newline-separated values, so it uses a
+             plain EditTextPreference — the Kotlin code casts findPreference<EditTextPreference>("rules_json"), and a
+             StringLinesPreference here would crash on save. -->
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_rule_folder_24"
+            app:key="rules_json"
+            app:title="@string/route_rule_rules_json"
+            app:persistent="false" />
+        <io.nekohasekai.sagernet.widget.StringLinesPreference
+            app:icon="@drawable/ic_baseline_nat_24"
+            app:key="default_interface_address"
+            app:title="@string/route_rule_default_interface_address"
+            app:persistent="false" />
+        <io.nekohasekai.sagernet.widget.StringLinesPreference
+            app:icon="@drawable/ic_action_dns"
+            app:key="dns_server"
+            app:title="@string/route_rule_dns_server"
+            app:persistent="false" />
+        <EditTextPreference
+            app:key="balancer_pool"
+            app:title="@string/route_rule_balancer_pool"
+            app:useSimpleSummaryProvider="true"
+            app:persistent="false" />
+        <EditTextPreference
+            app:key="balancer_pool_tolerance"
+            app:title="@string/route_rule_balancer_pool_tolerance"
+            app:useSimpleSummaryProvider="true"
+            app:persistent="false" />
+        <io.nekohasekai.sagernet.widget.StringLinesPreference
+            app:icon="@drawable/ic_baseline_push_pin_24"
+            app:key="balancer_sticky_hash"
+            app:title="@string/route_rule_balancer_sticky_hash"
+            app:persistent="false" />
     </PreferenceCategory>
 
 </PreferenceScreen>

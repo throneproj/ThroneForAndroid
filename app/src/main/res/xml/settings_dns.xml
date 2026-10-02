@@ -3,26 +3,11 @@
     <PreferenceCategory
         app:key="dnsServers"
         app:title="@string/cag_dns_servers">
-        <EditTextPreference
-            app:dialogMessage="@string/dns_address_dialog_message"
+        <Preference
             app:icon="@drawable/ic_action_dns"
-            app:key="remote_dns"
-            app:title="@string/remote_dns"
-            app:useSimpleSummaryProvider="true" />
-        <SwitchPreference
-            app:key="remote_dns_disable_ipv6"
-            app:summary="@string/dns_disable_ipv6_sum"
-            app:title="@string/remote_dns_disable_ipv6" />
-        <EditTextPreference
-            app:dialogMessage="@string/dns_address_dialog_message"
-            app:icon="@drawable/ic_action_dns"
-            app:key="direct_dns"
-            app:title="@string/direct_dns"
-            app:useSimpleSummaryProvider="true" />
-        <SwitchPreference
-            app:key="direct_dns_disable_ipv6"
-            app:summary="@string/dns_disable_ipv6_sum"
-            app:title="@string/direct_dns_disable_ipv6" />
+            app:key="dnsServerManagement"
+            app:summary="@string/dns_server_management_sum"
+            app:title="@string/dns_server_management" />
         <EditTextPreference
             app:dialogMessage="@string/underlying_dns_sum"
             app:key="core_box_underlying_dns"

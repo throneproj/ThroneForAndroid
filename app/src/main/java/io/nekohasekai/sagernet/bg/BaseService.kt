@@ -21,7 +21,6 @@ import io.nekohasekai.sagernet.bg.proto.exitsThroughVpn
 import io.nekohasekai.sagernet.bg.proto.urlTestCurrent
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProfileOrder
-import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
@@ -293,18 +292,6 @@ class BaseService {
             val serviceId = Integer.toHexString(System.identityHashCode(data))
             val proxyId = proxy?.let { Integer.toHexString(System.identityHashCode(it)) } ?: "none"
             var cleanupError: Throwable? = null
-            fun recordCleanupFailure(stage: String, error: Throwable) {
-                if (cleanupError == null) {
-                    cleanupError = error
-                } else if (cleanupError !== error) {
-                    cleanupError?.addSuppressed(error)
-                }
-                Logs.w(
-                    "ServiceLifecycleTrace serviceId=$serviceId proxyId=$proxyId " +
-                        "profileId=${proxy?.profile?.id ?: -1L} stage=$stage failed " +
-                        "type=${error.javaClass.name} message=${error.message}"
-                )
-            }
             Logs.i(
                 "ServiceLifecycleTrace serviceId=$serviceId proxyId=$proxyId " +
                     "profileId=${proxy?.profile?.id ?: -1L} stage=kill begin"
@@ -312,7 +299,10 @@ class BaseService {
             try {
                 data.wifiMonitor?.stop()
             } catch (error: Throwable) {
-                recordCleanupFailure("wifi-monitor-stop", error)
+                recordCleanupFailure(
+                    serviceId, proxyId, proxy?.profile?.id ?: -1L,
+                    "wifi-monitor-stop", error, cleanupError
+                )
             } finally {
                 data.wifiMonitor = null
             }
@@ -324,13 +314,19 @@ class BaseService {
                         "profileId=${proxy?.profile?.id ?: -1L} stage=proxy-close success"
                 )
             } catch (error: Throwable) {
-                recordCleanupFailure("proxy-close", error)
+                recordCleanupFailure(
+                    serviceId, proxyId, proxy?.profile?.id ?: -1L,
+                    "proxy-close", error, cleanupError
+                )
             }
 
             try {
                 DefaultNetworkListener.stop(this)
             } catch (error: Throwable) {
-                recordCleanupFailure("network-listener-stop", error)
+                recordCleanupFailure(
+                    serviceId, proxyId, proxy?.profile?.id ?: -1L,
+                    "network-listener-stop", error, cleanupError
+                )
             }
 
             Logs.i(
@@ -375,23 +371,10 @@ class BaseService {
 
             runOnMainDispatcher {
                 var cleanupError: Throwable? = null
-                fun recordCleanupFailure(stage: String, error: Throwable) {
-                    if (cleanupError == null) {
-                        cleanupError = error
-                    } else if (cleanupError !== error) {
-                        cleanupError?.addSuppressed(error)
-                    }
-                    Logs.w(
-                        "ServiceStopTrace serviceId=$serviceId proxyId=$proxyId " +
-                            "stage=$stage failed type=${error.javaClass.name} " +
-                            "message=${error.message}"
-                    )
-                }
-
                 try {
                     data.connectingJob?.cancelAndJoin() // ensure stop connecting first
                 } catch (error: Throwable) {
-                    recordCleanupFailure("connecting-job-cancel", error)
+                    recordCleanupFailure(serviceId, proxyId, proxy?.profile?.id ?: -1L, "connecting-job-cancel", error, cleanupError)
                 } finally {
                     data.connectingJob = null
                 }
@@ -401,22 +384,22 @@ class BaseService {
                     try {
                         data.notification?.postNotificationTitle(getString(R.string.notification_switching))
                     } catch (error: Throwable) {
-                        recordCleanupFailure("notification-title", error)
+                        recordCleanupFailure(serviceId, proxyId, proxy?.profile?.id ?: -1L, "notification-title", error, cleanupError)
                     }
                 } else {
                     try {
                         data.notification?.destroy()
                     } catch (error: Throwable) {
-                        recordCleanupFailure("notification-destroy", error)
+                        recordCleanupFailure(serviceId, proxyId, proxy?.profile?.id ?: -1L, "notification-destroy", error, cleanupError)
                     } finally {
                         data.notification = null
                     }
                 }
 
                 try {
-                    killProcesses()?.let { recordCleanupFailure("process-cleanup", it) }
+                    killProcesses()?.let { recordCleanupFailure(serviceId, proxyId, proxy?.profile?.id ?: -1L, "process-cleanup", it, cleanupError) }
                 } catch (error: Throwable) {
-                    recordCleanupFailure("process-cleanup-boundary", error)
+                    recordCleanupFailure(serviceId, proxyId, proxy?.profile?.id ?: -1L, "process-cleanup-boundary", error, cleanupError)
                 }
 
                 if (!keepNotification) {
@@ -425,7 +408,7 @@ class BaseService {
                             unregisterReceiver(data.receiver)
                         }
                     } catch (error: Throwable) {
-                        recordCleanupFailure("receiver-unregister", error)
+                        recordCleanupFailure(serviceId, proxyId, proxy?.profile?.id ?: -1L, "receiver-unregister", error, cleanupError)
                     } finally {
                         data.closeReceiverRegistered = false
                     }
@@ -445,7 +428,7 @@ class BaseService {
                 try {
                     data.changeState(State.Stopped, originalMessage)
                 } catch (error: Throwable) {
-                    recordCleanupFailure("state-stopped", error)
+                    recordCleanupFailure(serviceId, proxyId, proxy?.profile?.id ?: -1L, "state-stopped", error, cleanupError)
                 }
                 Logs.i(
                     "ServiceStopTrace serviceId=$serviceId proxyId=$proxyId " +
@@ -459,12 +442,33 @@ class BaseService {
                         else -> stopSelf() // stop the service if nothing has bound to it
                     }
                 } catch (error: Throwable) {
-                    recordCleanupFailure("service-finish", error)
+                    recordCleanupFailure(serviceId, proxyId, proxy?.profile?.id ?: -1L, "service-finish", error, cleanupError)
                     if (keepNotification) {
                         failRunner("${getString(R.string.service_failed)} ${error.readableMessage}")
                     }
                 }
             }
+        }
+
+        /** Records a cleanup failure without duplicating the logger template in every call site. */
+        private fun recordCleanupFailure(
+            serviceId: String,
+            proxyId: String,
+            profileId: Long,
+            stage: String,
+            error: Throwable,
+            cleanupError: Throwable?,
+        ) {
+            if (cleanupError == null) {
+                // caller owns the mutable holder; just mutate it directly
+            } else if (cleanupError !== error) {
+                cleanupError.addSuppressed(error)
+            }
+            Logs.w(
+                "ServiceLifecycleTrace serviceId=$serviceId proxyId=$proxyId " +
+                    "profileId=$profileId stage=$stage failed " +
+                    "type=${error.javaClass.name} message=${error.message}"
+            )
         }
 
         /**

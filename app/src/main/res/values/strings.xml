@@ -1758,4 +1758,47 @@
     <string name="scanner_no_camera">No camera: choose an image with a QR code</string>
     <string name="share_target_missing">No app can receive the file</string>
     <string name="try_again_later">Please try again later</string>
+    <!-- lxbox/asteriskbox route rule extensions -->
+    <string name="route_rule_logical_mode">Logical Mode</string>
+    <string name="route_rule_logical_mode_and">AND (all conditions must match)</string>
+    <string name="route_rule_logical_mode_or">OR (any condition matches)</string>
+    <string name="route_rule_rules_json">Nested Rules (JSON)</string>
+    <string name="route_rule_rules_json_hint">Paste nested rule JSON array for logical rules</string>
+    <string name="route_rule_default_interface_address">Default Interface Address</string>
+    <string name="route_rule_default_interface_address_hint">One CIDR per line, e.g. 2000::/3</string>
+    <string name="route_rule_dns_server">DNS Server</string>
+    <string name="route_rule_dns_server_hint">DNS server tag(s) to resolve domain names (one per line)</string>
+    <string name="route_rule_balancer_mode">Balancer Mode</string>
+    <string name="route_rule_balancer_pool">Pool Size</string>
+    <string name="route_rule_balancer_pool_hint">Number of nodes in rotation (default 3)</string>
+    <string name="route_rule_balancer_pool_tolerance">Pool Tolerance (ms)</string>
+    <string name="route_rule_balancer_pool_tolerance_hint">Max delay difference to keep nodes in pool</string>
+    <string name="route_rule_balancer_sticky_hash">Sticky Hash Keys</string>
+    <string name="route_rule_balancer_sticky_hash_hint">process, domain, source_ip, dest_ip, dest_port, none</string>
+    <!-- JSON paste dialog -->
+    <string name="route_rule_json_paste_title">Import Rule JSON</string>
+    <string name="route_rule_json_paste_hint">Paste a sing-box rule JSON fragment (logical rules, urltest balancer, etc.)</string>
+    <string name="route_rule_json_paste_error">Invalid JSON: %s</string>
+    <string name="route_rule_json_paste_success">Imported %d field(s) from JSON</string>
+    <string name="route_rule_json_paste">Import from JSON…</string>
+    <!-- DNS Server Management -->
+    <string name="dns_servers_title">DNS Servers</string>
+    <string name="dns_server_add">Add DNS Server</string>
+    <string name="dns_server_edit">Edit DNS Server</string>
+    <string name="dns_server_delete_title">Delete DNS Server</string>
+    <string name="dns_server_info">Server Info</string>
+    <string name="dns_server_tag">Tag</string>
+    <string name="dns_server_address">Address</string>
+    <string name="dns_server_address_hint">e.g. 8.8.8.8, tls://dns.google, https://dns.google/dns-query</string>
+    <string name="dns_server_type">Type</string>
+    <string name="dns_server_advanced">Advanced</string>
+    <string name="dns_server_bind_interface">Bind Interface</string>
+    <string name="dns_server_detour">Detour</string>
+    <string name="dns_server_client_subnet">Client Subnet</string>
+    <string name="dns_server_disable_cache">Disable Cache</string>
+    <string name="dns_server_disable_expire">Disable Expire</string>
+    <string name="dns_server_ip_is_private">IP is Private</string>
+    <string name="dns_server_reject_expired">Reject Expired</string>
+    <string name="dns_server_management">DNS Server Management</string>
+    <string name="dns_server_management_sum">Manage custom DNS servers for route rules</string>
 </resources>

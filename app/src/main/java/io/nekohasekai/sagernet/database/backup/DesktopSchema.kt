@@ -138,6 +138,14 @@ object DesktopSchema {
             tls_spoof TEXT,
             tls_spoof_method TEXT,
             package_name_json TEXT,
+            logical_mode TEXT NOT NULL DEFAULT '',
+            rules_json TEXT NOT NULL DEFAULT '',
+            default_interface_address_json TEXT NOT NULL DEFAULT '[]',
+            dns_server_json TEXT NOT NULL DEFAULT '[]',
+            balancer_mode TEXT NOT NULL DEFAULT '',
+            balancer_pool INTEGER NOT NULL DEFAULT 0,
+            balancer_pool_tolerance INTEGER NOT NULL DEFAULT 0,
+            balancer_sticky_hash_json TEXT NOT NULL DEFAULT '[]',
             PRIMARY KEY (route_profile_id, rule_order),
             FOREIGN KEY(route_profile_id) REFERENCES route_profiles(id) ON DELETE CASCADE
         )

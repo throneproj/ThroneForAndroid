@@ -64,6 +64,15 @@ data class RouteRuleEntity(
     @ColumnInfo(name = "wifi_bssid_json", defaultValue = "[]") var wifiBssidJson: String = "[]",
     @ColumnInfo(name = "tls_spoof", defaultValue = "") var tlsSpoof: String = "",
     @ColumnInfo(name = "tls_spoof_method", defaultValue = "") var tlsSpoofMethod: String = "",
+    // lxbox/asteriskbox extensions
+    @ColumnInfo(name = "logical_mode", defaultValue = "") var logicalMode: String = "",
+    @ColumnInfo(name = "rules_json", defaultValue = "") var rulesJson: String = "",
+    @ColumnInfo(name = "default_interface_address_json", defaultValue = "[]") var defaultInterfaceAddressJson: String = "[]",
+    @ColumnInfo(name = "dns_server_json", defaultValue = "[]") var dnsServerJson: String = "[]",
+    @ColumnInfo(name = "balancer_mode", defaultValue = "") var balancerMode: String = "",
+    @ColumnInfo(name = "balancer_pool", defaultValue = "0") var balancerPool: Int = 0,
+    @ColumnInfo(name = "balancer_pool_tolerance", defaultValue = "0") var balancerPoolTolerance: Int = 0,
+    @ColumnInfo(name = "balancer_sticky_hash_json", defaultValue = "[]") var balancerStickyHashJson: String = "[]",
 ) {
 
     fun toModel(): RouteRule = RouteRule().also {
@@ -104,6 +113,14 @@ data class RouteRuleEntity(
         it.wifi_bssid = listFromJson(wifiBssidJson)
         it.tls_spoof = tlsSpoof
         it.tls_spoof_method = tlsSpoofMethod
+        it.logical_mode = logicalMode
+        it.rules_json = rulesJson
+        it.default_interface_address = listFromJson(defaultInterfaceAddressJson)
+        it.dns_server = listFromJson(dnsServerJson)
+        it.balancer_mode = balancerMode
+        it.balancer_pool = balancerPool
+        it.balancer_pool_tolerance = balancerPoolTolerance
+        it.balancer_sticky_hash = listFromJson(balancerStickyHashJson)
     }
 
     companion object {
@@ -149,6 +166,14 @@ data class RouteRuleEntity(
             wifiBssidJson = listToJson(r.wifi_bssid),
             tlsSpoof = r.tls_spoof,
             tlsSpoofMethod = r.tls_spoof_method,
+            logicalMode = r.logical_mode,
+            rulesJson = r.rules_json,
+            defaultInterfaceAddressJson = listToJson(r.default_interface_address),
+            dnsServerJson = listToJson(r.dns_server),
+            balancerMode = r.balancer_mode,
+            balancerPool = r.balancer_pool,
+            balancerPoolTolerance = r.balancer_pool_tolerance,
+            balancerStickyHashJson = listToJson(r.balancer_sticky_hash),
         )
 
         /** QListStr2QJsonArray (Utils.cpp:110-118) written compact. */

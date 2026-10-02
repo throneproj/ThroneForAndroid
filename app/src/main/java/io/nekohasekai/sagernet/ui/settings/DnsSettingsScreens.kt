@@ -8,17 +8,22 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.SettingValidators
 import io.nekohasekai.sagernet.database.SettingsRegistry
 import io.nekohasekai.sagernet.ktx.needReload
+import android.content.Intent
+import io.nekohasekai.sagernet.ui.dns.DnsServerListActivity
 import moe.matsuri.nb4a.ui.EditConfigPreference
 
 /** Routing Settings › DNS: the simple settings, predefined answers and the custom DNS object. */
 class DnsSettingsFragment : SettingsScreenFragment(R.xml.settings_dns) {
 
     override fun bind() {
-        checkText(SettingsRegistry.REMOTE_DNS.key, R.string.invalid_dns_address) { it.isNotEmpty() }
-        checkText(SettingsRegistry.DIRECT_DNS.key, R.string.invalid_dns_address) { it.isNotEmpty() }
+        // DNS Server Management
+        pref<Preference>("dnsServerManagement")?.setOnPreferenceClickListener {
+            startActivity(Intent(context, DnsServerListActivity::class.java))
+            true
+        }
+        // remote_dns and direct_dns removed; DNS servers are now managed per-route via dns_server
         checkText(SettingsRegistry.CORE_BOX_UNDERLYING_DNS.key, R.string.invalid_dns_address) { true }
         reloadOn(
-            SettingsRegistry.REMOTE_DNS_DISABLE_IPV6.key, SettingsRegistry.DIRECT_DNS_DISABLE_IPV6.key,
             SettingsRegistry.DNS_FINAL_OUT.key, SettingsRegistry.ENABLE_DNS_ROUTING.key,
             SettingsRegistry.FAKEIP_DISABLE_IPV6.key, SettingsRegistry.DNS_USE_HOSTS.key,
         )

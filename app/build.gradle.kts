@@ -1,5 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -32,6 +34,27 @@ android {
         buildConfig = true
         viewBinding = true
         aidl = true
+    }
+    // Disable minification to keep APK under 50MB and maintain debuggability
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            // Configure signing
+            if (file("release.properties").exists()) {
+                val props = Properties()
+                props.load(file("release.properties").inputStream())
+                signingConfigs {
+                    create("release") {
+                        storeFile = file(props["signing.storeFile"] as String)
+                        storePassword = props["signing.storePassword"] as String
+                        keyAlias = props["signing.keyAlias"] as String
+                        keyPassword = props["signing.keyPassword"] as String
+                    }
+                }
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
     }
     namespace = "io.nekohasekai.sagernet"
     packaging {

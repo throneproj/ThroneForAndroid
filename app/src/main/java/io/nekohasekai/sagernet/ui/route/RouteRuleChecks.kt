@@ -124,5 +124,6 @@ internal object RouteRuleChecks {
     private val ACTION_OPTIONS = setOf(
         "invert", "override_address", "override_port", "tls_spoof", "tls_spoof_method", "reject_method", "no_drop",
         "sniff_override_dest", "strategy",
+        "logical_mode", "balancer_mode", "balancer_pool", "balancer_pool_tolerance",
     )
 }
