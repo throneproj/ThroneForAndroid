@@ -781,7 +781,8 @@ class ConfigGenerator @JvmOverloads constructor(
         if (settings.fakeDns) {
             val fakeServer = jsonObjectOf("tag" to Tags.DNS_FAKE, "type" to "fakeip", "inet4_range" to "198.18.0.0/15")
             // No inet6_range makes the transport answer AAAA empty itself; the rule stays on both types.
-            if (!settings.fakeIpDisableIpv6) fakeServer["inet6_range"] = "fc00::/18"
+            // Not fc00::/18: the Tun's fc00::/7 private-range bypass would route fake addresses outside it.
+            if (!settings.fakeIpDisableIpv6) fakeServer["inet6_range"] = "2001:db8::/32"
             servers.add(fakeServer)
             rules.add(jsonObjectOf("query_type" to JsonArray.of("A", "AAAA"), "action" to "route", "server" to Tags.DNS_FAKE))
             independentCache = true
