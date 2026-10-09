@@ -270,6 +270,10 @@ class ConfigGenerator @JvmOverloads constructor(
         val ctx = buildContext.copy(buildingTestConfig = true)
         val state = BuildState(forTest = true)
         val chains = ChainBuilder(profiles, ctx, state)
+        // The DNS section comes before the chains here, so their ECH query names are collected up front (:2714-2719).
+        for (candidate in candidates) {
+            for (hopId in chains.unwrapChain(candidate.id)) profiles.get(hopId)?.let { state.collectEchQueryName(it) }
+        }
         buildDnsSection(state, useDnsObj = false)
         buildLogSection(state)
         buildCertificateSection(state)
@@ -473,7 +477,8 @@ class ConfigGenerator @JvmOverloads constructor(
     /**
      * The tun inbound of :1141-1180 with the Android field set of design §2.4: no interface_name / auto_redirect
      * (the platform opens the device), per-app package lists instead of uid rules, the system HTTP proxy handed to
-     * the VpnService builder through `platform.http_proxy`, and an explicit 1.14 `dns_mode`.
+     * the VpnService builder through `platform.http_proxy`, and an explicit 1.14 `dns_mode`. No `stack`: sing-tun's
+     * default, as on the desktop.
      */
     private fun buildTunInbound(state: BuildState): JsonObject {
         val tun = JsonObject()
@@ -481,7 +486,6 @@ class ConfigGenerator @JvmOverloads constructor(
         tun["type"] = "tun"
         tun["auto_route"] = true
         tun["mtu"] = settings.tunMtu
-        tun["stack"] = settings.tunStack
         tun["strict_route"] = settings.tunStrictRoute
         state.tunIPv4Cidr = settings.tunIPv4Cidr
         val address = JsonArray.of(settings.tunIPv4Cidr)
@@ -784,10 +788,22 @@ class ConfigGenerator @JvmOverloads constructor(
             )
         }
 
+        if (!state.forTest && state.echQueryNames.isNotEmpty()) {
+            headRules.add(
+                jsonObjectOf(
+                    "domain" to JsonValues.stringArray(state.echQueryNames),
+                    "query_type" to JsonArray.of("HTTPS"),
+                    "action" to "route",
+                    "server" to Tags.DNS_DIRECT,
+                ),
+            )
+        }
+
         if (settings.fakeDns) {
             val fakeServer = jsonObjectOf("tag" to Tags.DNS_FAKE, "type" to "fakeip", "inet4_range" to "198.18.0.0/15")
             // No inet6_range makes the transport answer AAAA empty itself; the rule stays on both types.
-            if (!settings.fakeIpDisableIpv6) fakeServer["inet6_range"] = "fc00::/18"
+            // Not fc00::/18: the Tun's fc00::/7 private-range bypass would route fake addresses outside it.
+            if (!settings.fakeIpDisableIpv6) fakeServer["inet6_range"] = "2001:db8::/32"
             servers.add(fakeServer)
             rules.add(jsonObjectOf("query_type" to JsonArray.of("A", "AAAA"), "action" to "route", "server" to Tags.DNS_FAKE))
             independentCache = true
@@ -818,7 +834,22 @@ class ConfigGenerator @JvmOverloads constructor(
         dnsLocalObj["tag"] = Tags.DNS_LOCAL
         servers.add(dnsLocalObj)
 
-        val allRules = if (headRules.isEmpty()) rules else headRules.also { head -> for (rule in rules) head.add(rule) }
+        // Each resolver's rule is prepended to the head rules in turn (:1150-1165), so the last one leads.
+        val echRules = ArrayList<JsonObject>()
+        var echDnsIdx = 0
+        for ((name, resolver) in state.echResolvers) {
+            val tag = hopTag(Tags.DNS_ECH_PREFIX, echDnsIdx++)
+            val echDnsObj = DnsServers.buildDnsObj(resolver)
+            echDnsObj["tag"] = tag
+            echDnsObj["domain_resolver"] = Tags.DNS_LOCAL
+            servers.add(echDnsObj)
+            echRules.add(0, jsonObjectOf("domain" to JsonArray.of(name), "query_type" to JsonArray.of("HTTPS"), "action" to "route", "server" to tag))
+        }
+
+        val allRules = JsonArray()
+        for (rule in echRules) allRules.add(rule)
+        for (rule in headRules) allRules.add(rule)
+        for (rule in rules) allRules.add(rule)
         val dns = jsonObjectOf("servers" to servers, "rules" to allRules, "cache_capacity" to settings.dnsCacheCapacity)
         if (settings.dnsDisableCache) dns["disable_cache"] = true
         if (settings.dnsDisableExpire) dns["disable_expire"] = true

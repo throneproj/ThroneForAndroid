@@ -266,7 +266,6 @@
     <string name="wireguard_public_key">Peer public key</string>
     <string name="wireguard_psk">Peer pre-shared key</string>
 
-    <string name="tun_implementation">TUN implementation</string>
     <string name="naive_insecure_concurrency">Insecure concurrency</string>
     <string name="naive_insecure_concurrency_summary">Use N concurrent tunnel connections to be more
         robust under bad network conditions. More connections make the tunneling easier to detect
@@ -312,7 +311,8 @@
     <string name="enable_ech">Enable ECH</string>
     <string name="ech_settings">ECH settings</string>
     <string name="ech_config">ECH config</string>
-    <string name="ech_query_server_name">ECH query server name</string>
+    <string name="ech_query_server_name">ECH query name / resolver</string>
+    <string name="ech_query_target_hint">Domain, or domain+resolver (e.g. cloudflare-ech.com+https://1.1.1.1/dns-query)</string>
     <string name="http_upgrade_host">HTTPUpgrade host</string>
     <string name="http_upgrade_path">HTTPUpgrade path</string>
     <string name="global_allow_insecure">Always allow insecure</string>
@@ -379,6 +379,8 @@
     <string name="enable_tls">Enable TLS</string>
     <string name="one_per_line">One per line</string>
     <string name="certificate_pem_hint">PEM text; one certificate per block</string>
+    <string name="certificate_sha256">Certificate SHA256</string>
+    <string name="certificate_sha256_hint">SHA-256 of the server\'s whole certificate in base64, one per line (pcs in share links). A match replaces CA verification, so a self-signed certificate works. Cannot be combined with custom certificates.</string>
     <string name="certificate_public_key_sha256">Certificate public key SHA256</string>
     <string name="tls_fragment">TLS Client Hello fragment</string>
     <string name="tls_fragment_fallback_delay">Fragment fallback delay</string>
@@ -418,6 +420,8 @@
     <string name="xhttp_download_settings">Download settings (JSON)</string>
     <string name="xray_pinned_peer_cert_sha256">Pinned peer certificate SHA256</string>
     <string name="xray_verify_peer_cert_by_name">Verify peer certificate by name</string>
+    <string name="xray_ech_config_list">ECH config list</string>
+    <string name="xray_ech_config_list_hint">A base64 ECHConfigList, or domain+DoH URL to let Xray fetch it (e.g. cloudflare-ech.com+https://8.8.8.8/dns-query)</string>
     <string name="reality_settings">Reality settings</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="xray_mux_concurrency">Concurrency</string>

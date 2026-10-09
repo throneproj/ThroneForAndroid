@@ -70,8 +70,8 @@ object ProfileImport {
             messages.add("$title: $text")
         }
 
-        /** Parser::document (SubscriptionParser.cpp:290-338). */
-        fun document(raw: String, allowBase64: Boolean, needParse: Boolean, depth: Int) {
+        /** Parser::document (SubscriptionParser.cpp:361-408); [overrideName] names a WireGuard profile that has none. */
+        fun document(raw: String, allowBase64: Boolean, needParse: Boolean, depth: Int, overrideName: String = "") {
             if (depth > MAX_DEPTH) return
             val text = Scan.trim(raw)
             if (text.isEmpty()) return
@@ -83,7 +83,7 @@ object ProfileImport {
                     else -> null
                 }
                 if (decoded != null) {
-                    document(decoded, allowBase64 = false, needParse = true, depth = depth + 1)
+                    document(decoded, allowBase64 = false, needParse = true, depth = depth + 1, overrideName = overrideName)
                     return
                 }
             }
@@ -102,8 +102,8 @@ object ProfileImport {
                 return
             }
 
-            if (text.contains("[Interface]") && text.contains("[Peer]")) {
-                wireguardFile(text)
+            if (hasWireGuardSections(text)) {
+                wireguardFile(text, overrideName)
                 return
             }
 
@@ -118,11 +118,13 @@ object ProfileImport {
             }
 
             if (needParse && text.contains('\n')) {
-                Scan.forEachItem(text) { item -> document(item, allowBase64 = true, needParse = false, depth = depth + 1) }
+                Scan.forEachItem(text) { item ->
+                    document(item, allowBase64 = true, needParse = false, depth = depth + 1, overrideName = overrideName)
+                }
                 return
             }
 
-            link(text, depth)
+            link(text, depth, overrideName)
         }
 
         /** Parser::json (SubscriptionParser.cpp:340-370): Xray first, its configs share the `outbounds` wrapper with sing-box. */
@@ -277,10 +279,13 @@ object ProfileImport {
             }
         }
 
-        /** Parser::wireguardFile (SubscriptionParser.cpp:478-482). */
-        private fun wireguardFile(text: String) {
+        /** Parser::wireguardFile (SubscriptionParser.cpp:541-548). */
+        private fun wireguardFile(text: String, overrideName: String) {
             val wireguard = WireGuard()
             if (!wireguard.parseFromLink(text)) return
+
+            val names = extractWireGuardNames(text)
+            setNameIfEmpty(wireguard, overrideName, names.explicitName, names.peerComment)
             produce(wireguard)
         }
 
@@ -321,24 +326,34 @@ object ProfileImport {
             produce(openConnect)
         }
 
-        /** Parser::link (SubscriptionParser.cpp:510-537). */
-        private fun link(line: String, depth: Int) {
+        /**
+         * Parser::link (SubscriptionParser.cpp:591-621): [overrideName] only reaches a link of a wireguard scheme
+         * (json:// and throne://add/ match no scheme).
+         */
+        private fun link(line: String, depth: Int, overrideName: String) {
             if (line.startsWith("vpn://", ignoreCase = true)) {
                 vpnLink(line, depth)
                 return
             }
-            produce(OutboundFactory.parseLink(line, preference))
+            val outbound = OutboundFactory.parseLink(line, preference)
+            if (outbound != null && OutboundFactory.typeForScheme(line) == "wireguard") setNameIfEmpty(outbound, overrideName)
+            produce(outbound)
         }
 
         /**
-         * Parser::vpnLink (SubscriptionParser.cpp:561-603), the AmneziaVPN share link: base64 (standard, then
+         * Parser::vpnLink (SubscriptionParser.cpp:645-718), the AmneziaVPN share link: base64 (standard, then
          * url-safe), optionally Qt-compressed, holding either the `containers` JSON (each protocol's `last_config`
-         * carries a config document) or a config document itself.
+         * carries a config document) or a config document itself. The #fragment, else the export's `description` or
+         * `name`, becomes the name of the WireGuard profiles inside.
          */
         private fun vpnLink(line: String, depth: Int) {
             var raw = line.substring(6)
+            var fragmentName = ""
             val fragment = raw.indexOf('#')
-            if (fragment != -1) raw = raw.substring(0, fragment)
+            if (fragment != -1) {
+                fragmentName = LinkCodec.decodeFully(raw.substring(fragment + 1)).trim()
+                raw = raw.substring(0, fragment)
+            }
             raw = LinkCodec.decodeFully(raw)
             val decoded = Base64Strict.decode(raw)?.takeIf { it.isNotEmpty() }
                 ?: Base64Strict.decode(raw, urlSafe = true)?.takeIf { it.isNotEmpty() }
@@ -357,8 +372,17 @@ object ProfileImport {
                 null
             }
             if (doc != null && doc.contains("containers")) {
+                var jsonName = doc.string("description").trim()
+                if (jsonName.isEmpty()) jsonName = doc.string("name").trim()
+                val targetName = fragmentName.ifEmpty { jsonName }
+
+                val entries = ArrayList<VpnConfigEntry>()
+                var wgCount = 0
+
                 for (container in doc.array("containers")) {
                     val containerObj = container as? JsonObject ?: continue
+                    val containerType = containerObj.string("container").trim()
+
                     for (key in containerObj.keys()) {
                         val protoObj = containerObj[key] as? JsonObject ?: continue
                         val conf = when (val lastConfig = protoObj["last_config"]) {
@@ -371,11 +395,23 @@ object ProfileImport {
                             else -> ""
                         }
                         if (conf.isEmpty()) continue
-                        document(conf, allowBase64 = false, needParse = true, depth = depth + 1)
+
+                        val isWireGuard = hasWireGuardSections(conf)
+                        if (isWireGuard) wgCount++
+                        entries.add(VpnConfigEntry(conf, containerType, isWireGuard))
                     }
                 }
+
+                for (e in entries) {
+                    // Several WireGuard confs in one export would share a single name, so each is tagged with its container type.
+                    var name = targetName
+                    if (e.isWireGuard && wgCount > 1 && name.isNotEmpty() && e.containerType.isNotEmpty()) {
+                        name += " (" + e.containerType + ")"
+                    }
+                    document(e.conf, allowBase64 = false, needParse = true, depth = depth + 1, overrideName = name)
+                }
             } else {
-                document(text, allowBase64 = false, needParse = true, depth = depth + 1)
+                document(text, allowBase64 = false, needParse = true, depth = depth + 1, overrideName = fragmentName)
             }
             if (produced.size == before) log("No importable profile found in the vpn:// link.")
         }
@@ -461,6 +497,89 @@ object ProfileImport {
 
     private val OPENCONNECT_CLI = Regex("""(?:^|\s)--protocol[= ](?:anyconnect|nc|gp|pulse|f5|fortinet)\b""")
     private val OPENCONNECT_FILE = Regex("""[ \t]*protocol[ \t]*=[ \t]*(?:anyconnect|nc|gp|pulse|f5|fortinet)[ \t]*""")
+
+    /** hasWireGuardSections (SubscriptionParser.cpp:103-106): shared by document and vpnLink so both agree on what a WireGuard conf is. */
+    private fun hasWireGuardSections(text: String): Boolean = text.contains("[Interface]") && text.contains("[Peer]")
+
+    // PCRE2's \s and \w spelled out: Unicode-wide where the desktop sets UseUnicodePropertiesOption, ASCII elsewhere.
+    // java.util.regex (ASCII by default) and Android's ICU engine (Unicode) would each get one of them wrong.
+    private val WG_NAME_SEPARATOR = Regex("""[\p{Z}\t\n\u000B\f\r\u0085_\-.:]+""")
+    private val WG_COMMENT_MARKERS = Regex("""^[#;\p{Z}\t\n\u000B\f\r\u0085]+""")
+    private val WG_DIRECTIVE = Regex("""^[A-Za-z0-9_]+[ \t\n\u000B\f\r]*=""")
+    private val WG_EXPLICIT_NAME = Regex("""^(?:name|remarks?)[ \t\n\u000B\f\r]*[:=][ \t\n\u000B\f\r]*(.+)$""", RegexOption.IGNORE_CASE)
+    private val WG_GENERIC_WORDS = setOf("peer", "server", "wireguard", "configuration", "config", "interface", "client", "wg")
+
+    /**
+     * looksLikeName (SubscriptionParser.cpp:108-121): filters dividers and boilerplate headers ("# WireGuard
+     * configuration", "# Peer 1") so only a real node name can become a profile name.
+     */
+    private fun looksLikeName(comment: String): Boolean {
+        // QChar::isLetterOrNumber covers every L* and N* category; Char.isLetterOrDigit stops at Nd
+        if (comment.none { it.category.code[0] in "LN" }) return false
+        for (word in comment.lowercase().split(WG_NAME_SEPARATOR)) {
+            val w = word.trimEnd { it.isDigit() }
+            if (w.isEmpty()) continue
+            if (w !in WG_GENERIC_WORDS) return true
+        }
+        return false
+    }
+
+    /** WireGuardNames (SubscriptionParser.cpp:123-126). */
+    private class WireGuardNames {
+        var explicitName = ""
+        var peerComment = ""
+    }
+
+    /**
+     * extractWireGuardNames (SubscriptionParser.cpp:128-163): an explicit `name`/`remark(s)` comment, and the comment
+     * directly above the last `[Peer]`. Any blank or config line in between drops that comment, so `[Interface]`
+     * comments cannot leak in.
+     */
+    private fun extractWireGuardNames(text: String): WireGuardNames {
+        val out = WireGuardNames()
+        var lastComment = ""
+
+        Scan.forEachLine(text) { raw ->
+            val line = Scan.trim(raw)
+            val isComment = line.isNotEmpty() && (line[0] == '#' || line[0] == ';')
+            if (!isComment) {
+                // Assigned on every [Peer]: the name comes from the last peer, the one WireGuard.parseFromLink keeps.
+                if (line.startsWith("[peer]", ignoreCase = true)) out.peerComment = lastComment
+                lastComment = ""
+                return@forEachLine true
+            }
+
+            val comment = WG_COMMENT_MARKERS.replace(line, "").trim()
+
+            if (out.explicitName.isEmpty()) {
+                WG_EXPLICIT_NAME.find(comment)?.let { out.explicitName = it.groupValues[1].trim() }
+            }
+
+            // Commented-out options such as "# DNS = 1.1.1.1" are not names.
+            lastComment = if (!WG_DIRECTIVE.containsMatchIn(comment) && looksLikeName(comment)) comment else ""
+            true
+        }
+
+        return out
+    }
+
+    /**
+     * setNameIfEmpty (SubscriptionParser.cpp:165-175): candidates in priority order; a name the link parse already
+     * read from a #fragment is never overwritten.
+     */
+    private fun setNameIfEmpty(outbound: Outbound, vararg candidates: String) {
+        if (outbound.name.trim().isNotEmpty()) return
+        for (c in candidates) {
+            val t = c.trim()
+            if (t.isNotEmpty()) {
+                outbound.name = t
+                return
+            }
+        }
+    }
+
+    /** ConfigEntry of Parser::vpnLink (SubscriptionParser.cpp:669-673): one config document of a `containers` export. */
+    private class VpnConfigEntry(val conf: String, val containerType: String, val isWireGuard: Boolean)
 
     /** Subscription::scan (include/configs/sub/SubscriptionScan.hpp) on strings. */
     internal object Scan {

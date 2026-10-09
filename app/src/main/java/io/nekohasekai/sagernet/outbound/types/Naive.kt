@@ -134,7 +134,7 @@ class Naive : Outbound("naive") {
         return obj
     }
 
-    /** naive.cpp:180-197: not tls.build(), which would inject the global skip_cert / fragment defaults the core rejects for naive. */
+    /** naive.cpp:180-200: not tls.build(), which would inject the global skip_cert / fragment defaults the core rejects for naive. */
     override fun build(ctx: BuildContext): BuildResult {
         val obj = JsonObject()
         obj["type"] = "naive"
@@ -148,7 +148,10 @@ class Naive : Outbound("naive") {
             obj["quic"] = quic
             if (congestion_control.isNotEmpty()) obj["quic_congestion_control"] = congestion_control
         }
-        obj["tls"] = naiveTls(tls.exportToJson(), keepFragment = false)
+        val tlsObj = tls.exportToJson()
+        // exportToJson keeps the Throne-only ech.resolver, which the core rejects
+        if (tls.ech.enabled) tlsObj["ech"] = tls.ech.build(ctx)
+        obj["tls"] = naiveTls(tlsObj, keepFragment = false)
         return BuildResult(obj)
     }
 

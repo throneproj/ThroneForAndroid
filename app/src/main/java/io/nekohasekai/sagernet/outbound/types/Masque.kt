@@ -142,8 +142,8 @@ class Masque : Outbound("masque") {
 
     /** masque.cpp:123-128: the peer key pins the server certificate, which the core enforces even when insecure is set. */
     override fun security(): SecurityInfo {
-        if (tls.insecure && peer_public_key.isEmpty()) return SecurityInfo("Insecure TLS", "", SecurityLevel.Weak)
-        return SecurityInfo("TLS", "", SecurityLevel.Secure)
+        if (peer_public_key.isNotEmpty()) return SecurityInfo("TLS", "", SecurityLevel.Secure)
+        return securityFromTls("")
     }
 
     /** masque.cpp:130-133. */

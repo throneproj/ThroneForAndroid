@@ -269,6 +269,12 @@
             app:key="streamSetting.tls.verifyPeerCertByName"
             app:title="@string/xray_verify_peer_cert_by_name"
             app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_domain_24"
+            app:key="streamSetting.tls.echConfigList"
+            app:title="@string/xray_ech_config_list"
+            app:dialogMessage="@string/xray_ech_config_list_hint"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory

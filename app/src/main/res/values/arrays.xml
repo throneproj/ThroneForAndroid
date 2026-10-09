@@ -130,12 +130,6 @@
         <item>2</item>
     </string-array>
 
-    <string-array name="tun_implementation" translatable="false">
-        <item>gVisor</item>
-        <item>System</item>
-        <item>Mixed</item>
-    </string-array>
-
     <string-array name="packet_encoding_entry">
         <item>none</item>
         <item>packet</item>
@@ -443,11 +437,6 @@
         <item>3</item>
         <item>4</item>
         <item>5</item>
-    </string-array>
-    <string-array name="vpn_impl_values" translatable="false">
-        <item>gvisor</item>
-        <item>system</item>
-        <item>mixed</item>
     </string-array>
     <string-array name="domain_strategy_entries">
         <item>@string/setting_default</item>

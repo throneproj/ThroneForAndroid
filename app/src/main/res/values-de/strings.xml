@@ -229,7 +229,6 @@
     <string name="wireguard_local_address">Lokale Adresse</string>
     <string name="wireguard_public_key">Öffentlicher Schlüssel des Peers</string>
     <string name="wireguard_psk">Pre-Shared Key des Peers</string>
-    <string name="tun_implementation">TUN-Implementierung</string>
     <string name="naive_insecure_concurrency">Unsichere Parallelität</string>
     <string name="naive_insecure_concurrency_summary">Verwende N gleichzeitige Tunnelverbindungen, um unter schlechten Netzwerkbedingungen robuster zu sein. Mehr Verbindungen machen das Tunnelerkennbar und weniger sicher. Dieses Projekt strebt den stärksten Schutz gegen Datenverkehrsanalyse an. Eine unsichere Nutzung macht diesen Zweck zunichte. \n\nWenn du dies verwenden musst, versuche zuerst N=2, um zu sehen, ob es deine Probleme löst. Von mehr als 4 Verbindungen wird dringend abgeraten.</string>
     <string name="backup">Sicherung</string>

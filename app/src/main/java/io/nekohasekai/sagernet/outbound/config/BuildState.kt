@@ -3,6 +3,8 @@ package io.nekohasekai.sagernet.outbound.config
 import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonObject
+import io.nekohasekai.sagernet.outbound.link.Hosts
+import java.util.TreeMap
 
 /** The tag vocabulary of generate.cpp:43-74. */
 internal object Tags {
@@ -15,6 +17,7 @@ internal object Tags {
     const val DNS_LOCAL = "dns-local"
     const val DNS_FAKE = "dns-fake"
     const val DNS_HOSTS = "dns-hosts"
+    const val DNS_ECH_PREFIX = "dns-ech"
 
     const val DNS_IN = "dns-in"
     const val MIXED_IN = "mixed-in"
@@ -106,6 +109,12 @@ internal class BuildState(val forTest: Boolean) {
     val singToXrayBridges = ArrayList<BridgeConfig>()
     val xrayToSingBridges = ArrayList<BridgeConfig>()
 
+    /** Names whose HTTPS record a hop's ECH needs to fetch; they must not resolve over the proxy they unlock. */
+    val echQueryNames = ArrayList<String>()
+
+    /** ECH query name -> the hop's own resolver, key-sorted like the desktop's QMap (generate.cpp:209). */
+    val echResolvers = TreeMap<String, String>()
+
     // BuildConfigResult (generate.h:35-51)
     val coreConfig = JsonObject()
     var xrayConfig = JsonObject()
@@ -115,6 +124,25 @@ internal class BuildState(val forTest: Boolean) {
     var autoSelector: AutoSelectorBuild? = null
 
     val failed: Boolean get() = error.isNotEmpty()
+
+    /**
+     * collectEchQueryName (generate.cpp:1403-1420): without a static config the core fetches the ECH list over DNS
+     * first, and via dns-remote that dials the same hop. The core queries query_server_name when set, else the TLS
+     * server name, else the dial host.
+     */
+    fun collectEchQueryName(hop: Outbound) {
+        if (!hop.hasTls()) return
+        val tls = hop.getTls()
+        if (!tls.enabled || !tls.ech.enabled) return
+        if (tls.ech.config.isNotEmpty() || tls.ech.config_path.isNotEmpty()) return
+        val name = Hosts.toAceHost(tls.ech.serverName.ifEmpty { tls.server_name }.ifEmpty { hop.server }.trim())
+        if (name.isEmpty() || Hosts.isIpAddress(name)) return
+        if (DnsServers.usableEchResolver(tls.ech.resolver)) {
+            if (!echResolvers.containsKey(name)) echResolvers[name] = tls.ech.resolver
+        } else if (!echQueryNames.contains(name)) {
+            echQueryNames.add(name)
+        }
+    }
 
     /** bridgeIngressMismatch (generate.cpp:209-213). */
     fun bridgeIngressMismatch(): String =

@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.group
 
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.bg.ProfileValidator
+import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.GroupSort
 import io.nekohasekai.sagernet.database.GroupSortAction
@@ -61,7 +62,8 @@ internal object SubscriptionFilters {
             claim(R.string.subs_removed_duplicates) { it.id !in keep }
         }
         if (options.removeInsecure) {
-            claim(R.string.subs_removed_insecure) { it.outbound.security().isDangerous }
+            val skipCert = DataStore.skipCert
+            claim(R.string.subs_removed_insecure) { it.outbound.effectiveSecurity(skipCert).isInsecure }
         }
         if (options.removeInvalid) {
             val scan = ProfileValidator.findInvalid(profiles.filter { it.id !in flagged })

@@ -46,11 +46,14 @@ object GroupSort {
             GroupSortMethod.BY_TYPE -> compareBy { it.outbound.displayType() }
             GroupSortMethod.BY_NAME -> compareBy { it.outbound.name }
             GroupSortMethod.BY_ADDRESS -> compareBy { it.outbound.displayAddress() }
-            GroupSortMethod.BY_SECURITY -> Comparator { a, b ->
-                val secA = a.outbound.security()
-                val secB = b.outbound.security()
-                if (secA.level != secB.level) secA.level.compareTo(secB.level)
-                else (secA.transport + secA.label).compareTo(secB.transport + secB.label)
+            GroupSortMethod.BY_SECURITY -> {
+                val skipCert = DataStore.skipCert
+                Comparator<ProxyEntity> { a, b ->
+                    val secA = a.outbound.effectiveSecurity(skipCert)
+                    val secB = b.outbound.effectiveSecurity(skipCert)
+                    if (secA.level != secB.level) secA.level.compareTo(secB.level)
+                    else (secA.transport + secA.label).compareTo(secB.transport + secB.label)
+                }
             }
 
             GroupSortMethod.BY_LATENCY -> compareBy { latencyKey(it.latency) }

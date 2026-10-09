@@ -201,7 +201,6 @@
     <string name="wireguard_psk">피어 사전 공유 키</string>
     <string name="warp_generate">구성 생성</string>
     <string name="generating">생성 중…</string>
-    <string name="tun_implementation">TUN 구현</string>
     <string name="naive_insecure_concurrency">안전하지 않은 동시 연결</string>
     <string name="naive_insecure_concurrency_summary">열악한 네트워크 환경에서 더 견고하도록 N개의 동시 터널 연결을 사용합니다. 연결이 많을수록 터널링이 더 쉽게 탐지되고 보안이 약해집니다. 이 프로젝트는 트래픽 분석에 대한 가장 강력한 보안을 추구합니다. 안전하지 않은 방식으로 사용하면 그 목적이 무색해집니다. \n\n반드시 사용해야 한다면 먼저 N=2로 문제가 해결되는지 확인하세요. 여기서 4개를 초과하는 연결 사용은 강력히 권장하지 않습니다.</string>
     <string name="backup">백업</string>

@@ -1285,7 +1285,6 @@
     <string name="tuic_reduce_rtt">Уключыць рукавіцу QUIC 0-RTT</string>
     <string name="tuic_udp_over_stream">UDP праз паток</string>
     <string name="tuic_udp_relay_mode">Рэжым рэтрансляцыі UDP</string>
-    <string name="tun_implementation">Рэалізацыя TUN</string>
     <string name="tun_ipv4_cidr">IPv4 CIDR</string>
     <string name="tun_ipv6_cidr">IPv6 CIDR</string>
     <string name="tv_next_server">Наступны сервер</string>

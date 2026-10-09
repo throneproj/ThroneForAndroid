@@ -229,7 +229,6 @@
     <string name="wireguard_local_address">Indirizzo locale</string>
     <string name="wireguard_public_key">Chiave pubblica del peer</string>
     <string name="wireguard_psk">Chiave pre-condivisa del peer</string>
-    <string name="tun_implementation">Implementazione TUN</string>
     <string name="naive_insecure_concurrency">Concorrenza non sicura</string>
     <string name="naive_insecure_concurrency_summary">Usa N connessioni tunnel concorrenti per essere più robusto in cattive condizioni di rete. Più connessioni rendono il tunneling più facile da rilevare e meno sicuro. Questo progetto punta alla sicurezza più forte contro l\'analisi del traffico. Usarlo in modo non sicuro ne vanifica lo scopo. \n\nSe devi usarlo, prova prima N=2 per vedere se risolve i tuoi problemi. È fortemente sconsigliato usare più di 4 connessioni.</string>
     <string name="backup">Backup</string>

@@ -137,6 +137,9 @@ class Ssh : Outbound("ssh") {
     /** ssh.cpp:159-162. */
     override fun displayType(): String = "SSH"
 
-    /** ssh.cpp:164-167. */
-    override fun security(): SecurityInfo = SecurityInfo("Encrypted", "", SecurityLevel.Secure)
+    /** ssh.cpp:164-169: without a host key the core accepts whatever key the server presents. */
+    override fun security(): SecurityInfo {
+        if (host_key.isEmpty()) return SecurityInfo("Unverified Host Key", "", SecurityLevel.Weak)
+        return SecurityInfo("Encrypted", "", SecurityLevel.Secure)
+    }
 }

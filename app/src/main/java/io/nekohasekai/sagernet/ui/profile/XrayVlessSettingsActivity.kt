@@ -61,6 +61,7 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         pbm.text("$STREAM.tls.fingerprint")
         pbm.text("$STREAM.tls.pinnedPeerCertSha256")
         pbm.text("$STREAM.tls.verifyPeerCertByName")
+        pbm.text("$STREAM.tls.echConfigList")
 
         pbm.text("$STREAM.reality.serverName")
         pbm.text("$STREAM.reality.fingerprint")

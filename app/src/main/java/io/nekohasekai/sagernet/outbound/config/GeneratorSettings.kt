@@ -44,8 +44,6 @@ data class GeneratorSettings(
     val vpnMode: Boolean = false,
     /** vpn_mtu (SettingsRepo.h:236). */
     val tunMtu: Int = 9000,
-    /** vpn_impl (SettingsRepo.h:222-231): the tun `stack`. */
-    val tunStack: String = "gvisor",
     /** vpn_strict_route (SettingsRepo.h:222-231); always true on Android (no setting). */
     val tunStrictRoute: Boolean = true,
     /** vpn_tun_ipv4_cidr (SettingsRepo.h:240). */

@@ -194,7 +194,6 @@
     <string name="wireguard_psk">Eş Ön Paylaşımlı Anahtarı</string>
     <string name="wireguard_public_key">Eş Umumi Anahtarı</string>
     <string name="wireguard_local_address">Yerel Adres</string>
-    <string name="tun_implementation">TUN Tanımlaması</string>
     <string name="generating">Oluşturuluyor…</string>
     <string name="warp_generate">Yapılandırma Oluştur</string>
     <string name="naive_insecure_concurrency">Güvensiz Eşzamanlılık</string>

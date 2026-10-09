@@ -163,6 +163,12 @@
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:icon="@drawable/ic_baseline_push_pin_24"
+            app:key="tls.certificate_sha256"
+            app:title="@string/certificate_sha256"
+            app:dialogMessage="@string/certificate_sha256_hint"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_push_pin_24"
             app:key="tls.certificate_public_key_sha256"
             app:title="@string/certificate_public_key_sha256"
             app:dialogMessage="@string/one_per_line"
@@ -236,8 +242,9 @@
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:icon="@drawable/ic_baseline_domain_24"
-            app:key="tls.ech.serverName"
+            app:key="tls.ech.queryTarget"
             app:title="@string/ech_query_server_name"
+            app:dialogMessage="@string/ech_query_target_hint"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 

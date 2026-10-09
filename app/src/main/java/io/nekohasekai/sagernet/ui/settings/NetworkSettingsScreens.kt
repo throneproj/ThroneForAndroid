@@ -101,7 +101,7 @@ class TunSettingsFragment : SettingsScreenFragment(R.xml.settings_tun) {
 
     override fun bind() {
         reloadOn(
-            SettingsRegistry.VPN_IMPL.key, SettingsRegistry.VPN_MTU.key, SettingsRegistry.VPN_IPV6.key,
+            SettingsRegistry.VPN_MTU.key, SettingsRegistry.VPN_IPV6.key,
             SettingsRegistry.ENABLE_TUN_ROUTING.key,
         )
 

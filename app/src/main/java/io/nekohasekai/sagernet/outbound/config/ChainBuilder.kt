@@ -363,6 +363,7 @@ internal class ChainBuilder(
             }
             val obj = result.json
             obj["tag"] = tag
+            state.collectEchQueryName(hop.outbound)
             // Realm reads its STUN resolver off this key only; without it the hosts go through DNS rules (:1356-1358).
             if (TypeAccess.realmActive(hop.outbound)) obj["domain_resolver"] = jsonObjectOf("server" to Tags.DNS_DIRECT)
             if (nextTag.isNotEmpty() && opts.link) obj["detour"] = nextTag

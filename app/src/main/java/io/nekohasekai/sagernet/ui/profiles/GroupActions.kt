@@ -81,11 +81,12 @@ internal object GroupActions {
         }
     }
 
-    /** on_menu_remove_insecure_triggered: GetSecurity().isDangerous(). */
+    /** on_menu_remove_insecure_triggered: EffectiveSecurity().isInsecure(). */
     fun removeInsecure(host: ConfigurationFragment, groupId: Long) {
         host.launchIo {
             val skip = DataStore.skipDeleteConfirmation
-            val insecure = ProfileManager.members(groupId).filter { it.outbound.security().isDangerous }
+            val skipCert = DataStore.skipCert
+            val insecure = ProfileManager.members(groupId).filter { it.outbound.effectiveSecurity(skipCert).isInsecure }
             host.onUi {
                 if (insecure.isEmpty()) {
                     snackbar(R.string.profiles_no_insecure).show()

@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory app:title="@string/cag_interface">
-        <moe.matsuri.nb4a.ui.SimpleMenuPreference
-            app:entries="@array/tun_implementation"
-            app:entryValues="@array/vpn_impl_values"
-            app:icon="@drawable/ic_baseline_flip_camera_android_24"
-            app:key="vpn_impl"
-            app:title="@string/tun_implementation"
-            app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nb4a.ui.MTUPreference
             app:entries="@array/mtu_select"
             app:entryValues="@array/mtu_select"

@@ -145,7 +145,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     }
 
     // tun
-    var vpnImpl by SettingsRegistry.VPN_IMPL
     var vpnMtu by SettingsRegistry.VPN_MTU
     var vpnIpv6 by SettingsRegistry.VPN_IPV6
     var vpnTunIpv4Cidr by SettingsRegistry.VPN_TUN_IPV4_CIDR

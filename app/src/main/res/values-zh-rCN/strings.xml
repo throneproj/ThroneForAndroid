@@ -217,7 +217,6 @@
     <string name="wireguard_local_address">本地地址</string>
     <string name="wireguard_public_key">节点公钥</string>
     <string name="wireguard_psk">节点预共享密钥</string>
-    <string name="tun_implementation">TUN 实现</string>
     <string name="generating">正在生成…</string>
     <string name="warp_generate">生成配置</string>
     <string name="naive_insecure_concurrency">不安全并发</string>

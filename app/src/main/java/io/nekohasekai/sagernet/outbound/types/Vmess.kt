@@ -230,11 +230,11 @@ class Vmess : Outbound("vmess") {
     /** vmess.cpp:207-210. */
     override fun displayType(): String = "VMess"
 
-    /** vmess.cpp:212-221: the payload stays encrypted without TLS unless the cipher is a no-op. */
+    /** vmess.cpp:212-221: encrypted, but VMess without TLS still counts as insecure; a no-op cipher stays Raw. */
     override fun security(): SecurityInfo {
         val info = super.security()
         if (info.level == SecurityLevel.None && security != "none" && security != "zero") {
-            return SecurityInfo("Encrypted", info.transport, SecurityLevel.Weak)
+            return info.copy(label = "Insecure", level = SecurityLevel.Weak)
         }
         return info
     }

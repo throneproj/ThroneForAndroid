@@ -21,16 +21,33 @@ class BuildResult(@JvmField val json: JsonObject, @JvmField val error: String = 
     val ok: Boolean get() = error.isEmpty()
 }
 
-/** Outbound.h:22-28, ordered worst to best. */
+/** Outbound.h:23-28, ordered worst to best. */
 enum class SecurityLevel { Unknown, None, Weak, Secure }
 
-/** Outbound.h:30-38; labels are the desktop's untranslated source strings. */
-class SecurityInfo(
+/**
+ * Outbound.h:30-45; labels are the desktop's untranslated source strings. [caVerified]: Secure only through the CA
+ * check, which the global skip_cert setting turns off. [compromised]: weakened by that global setting rather than by
+ * the profile itself.
+ */
+data class SecurityInfo(
     @JvmField val label: String = "",
     @JvmField val transport: String = "",
     @JvmField val level: SecurityLevel = SecurityLevel.Unknown,
+    @JvmField val caVerified: Boolean = false,
+    @JvmField val compromised: Boolean = false,
 ) {
     val isDangerous: Boolean get() = level == SecurityLevel.None || level == SecurityLevel.Weak
+
+    /** What "Remove insecure" acts on: a global setting is no reason to delete a profile. */
+    val isInsecure: Boolean get() = isDangerous && !compromised
+}
+
+/** WithPrivateServer (Outbound.cpp:49-57): traffic to a private address never crosses the internet. */
+fun withPrivateServer(info: SecurityInfo, host: String): SecurityInfo {
+    if (info.isDangerous && Hosts.isPrivateHost(host)) {
+        return info.copy(label = "Private", level = SecurityLevel.Secure, compromised = false)
+    }
+    return info
 }
 
 /** DisplayTransportName (Outbound.cpp:5-16). */
@@ -79,7 +96,7 @@ abstract class Outbound(@JvmField var type: String) {
 
     fun displayTypeAndName(): String = "[${displayType()}] ${displayName()}"
 
-    /** GetSecurity (Outbound.cpp:45-65). */
+    /** GetSecurity (Outbound.cpp:72-92): what the profile's own settings give; consumers want [effectiveSecurity]. */
     open fun security(): SecurityInfo {
         if (isXray()) {
             val stream = getXrayStream()
@@ -93,22 +110,42 @@ abstract class Outbound(@JvmField var type: String) {
         return securityFromTls(if (hasTransport()) displayTransportName(getTransport().type) else "")
     }
 
-    /** DisplaySecurity (Outbound.cpp:67-75). */
-    fun displaySecurity(): String {
-        val info = security()
+    /**
+     * EffectiveSecurity (Outbound.cpp:59-70): [security] plus what the profile can't see, a private server and the
+     * global skip_cert setting, which the caller passes as [skipCert] (DataStore.skipCert, as for BuildContext).
+     */
+    fun effectiveSecurity(skipCert: Boolean): SecurityInfo {
+        var info = security()
+        // Only TLS::Build injects skip_cert: naive builds its own TLS object, and custom JSON passes through untouched.
+        if (info.caVerified && hasTls() && !limitedTls() && skipCert) {
+            info = info.copy(label = "Compromised", level = SecurityLevel.Weak, compromised = true)
+        }
+        if (!info.isDangerous) return info
+        return withPrivateServer(info, getAddress())
+    }
+
+    /** DisplaySecurity (Outbound.cpp:94-102). */
+    fun displaySecurity(skipCert: Boolean): String {
+        val info = effectiveSecurity(skipCert)
         if (info.label.isEmpty()) return ""
         val text = if (info.transport.isEmpty()) info.label else "${info.transport}+${info.label}"
         return if (info.isDangerous) "⚠️ $text" else text
     }
 
-    /** SecurityFromTLS (Outbound.cpp:18-43). */
+    /** SecurityFromTLS (Outbound.cpp:18-47). */
     protected fun securityFromTls(transport: String): SecurityInfo {
         if (hasTls()) {
             val tls = getTls()
-            if (tls.reality.enabled) return SecurityInfo("Reality", transport, SecurityLevel.Secure)
+            // TLS::Build emits nothing while TLS is off, Reality included.
             if (tls.enabled || mustTls()) {
-                return if (tls.insecure) SecurityInfo("Insecure TLS", transport, SecurityLevel.Weak)
-                else SecurityInfo("TLS", transport, SecurityLevel.Secure)
+                return when {
+                    tls.reality.enabled -> SecurityInfo("Reality", transport, SecurityLevel.Secure)
+                    // The core checks a pinned certificate or key in place of the CA chain, insecure or not.
+                    tls.certificate_sha256.isNotEmpty() || tls.certificate_public_key_sha256.isNotEmpty() ->
+                        SecurityInfo("TLS", transport, SecurityLevel.Secure)
+                    tls.insecure -> SecurityInfo("Insecure TLS", transport, SecurityLevel.Weak)
+                    else -> SecurityInfo("TLS", transport, SecurityLevel.Secure, caVerified = true)
+                }
             }
         }
         return SecurityInfo("Raw", transport, SecurityLevel.None)

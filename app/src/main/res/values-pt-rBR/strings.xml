@@ -229,7 +229,6 @@
     <string name="wireguard_local_address">Endereço local</string>
     <string name="wireguard_public_key">Chave pública do peer</string>
     <string name="wireguard_psk">Chave pré-compartilhada do peer</string>
-    <string name="tun_implementation">Implementação TUN</string>
     <string name="naive_insecure_concurrency">Concorrência insegura</string>
     <string name="naive_insecure_concurrency_summary">Use N conexões de túnel concorrentes para ser mais robusto em más condições de rede. Mais conexões tornam o tunelamento mais fácil de detectar e menos seguro. Este projeto busca a segurança mais forte contra análise de tráfego. Usá-lo de forma insegura derrota esse propósito. \n\nSe você precisar usar isto, tente N=2 primeiro para ver se resolve seus problemas. É fortemente recomendado não usar mais de 4 conexões aqui.</string>
     <string name="backup">Backup</string>

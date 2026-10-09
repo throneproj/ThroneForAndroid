@@ -15,6 +15,7 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SettingsMapper
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.outbound.BuildContext
+import io.nekohasekai.sagernet.outbound.common.Ech
 import moe.matsuri.nb4a.proxy.PreferenceBindingManager
 import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
@@ -44,6 +45,32 @@ fun PreferenceFragmentCompat.multilineInput(vararg keys: String) {
         editText.isSingleLine = false
         editText.minLines = 3
         editText.setSelection(editText.text.length)
+    }
+}
+
+/**
+ * The ECH rows under [prefix] (edit_advanced.cpp): `queryTarget` is an unbound row showing query_server_name and the
+ * resolver as one `domain+resolver` text (ECH::QueryTarget) and writing both back through ECH::SetQueryTarget, and a
+ * bare base64 config is PEM-wrapped as it is entered (ECH::NormalizeConfig).
+ */
+fun PreferenceFragmentCompat.echInputs(prefix: String) {
+    val store = DataStore.profileCacheStore
+    findPreference<EditTextPreference>("$prefix.queryTarget")?.let { row ->
+        val ech = Ech()
+        ech.serverName = store.getString("$prefix.serverName").orEmpty()
+        ech.resolver = store.getString("$prefix.resolver").orEmpty()
+        row.text = ech.queryTarget()
+        row.setOnPreferenceChangeListener { _, newValue ->
+            ech.setQueryTarget(newValue as String)
+            store.putString("$prefix.serverName", ech.serverName)
+            store.putString("$prefix.resolver", ech.resolver)
+            true
+        }
+    }
+    findPreference<EditTextPreference>("$prefix.config")?.setOnPreferenceChangeListener { row, newValue ->
+        val lines = (newValue as String).split('\n').map { it.trim() }.filter { it.isNotEmpty() }
+        (row as EditTextPreference).text = Ech.normalizeConfig(lines).joinToString("\n")
+        false
     }
 }
 
@@ -159,6 +186,7 @@ object TlsBlock {
         pbm.text("$prefix.max_version")
         pbm.text("$prefix.certificate")
         pbm.text("$prefix.certificate_path")
+        pbm.text("$prefix.certificate_sha256")
         pbm.text("$prefix.certificate_public_key_sha256")
         pbm.tri("$prefix.fragment", "$prefix.fragment_unspecified")
         pbm.text("$prefix.fragment_fallback_delay")
@@ -177,7 +205,9 @@ object TlsBlock {
         pbm.bool("$prefix.ech.enabled")
         pbm.text("$prefix.ech.config")
         pbm.text("$prefix.ech.config_path")
+        // no rows of their own: both are edited through the ech.queryTarget row, see echInputs
         pbm.text("$prefix.ech.serverName")
+        pbm.text("$prefix.ech.resolver")
     }
 
     /**
@@ -206,7 +236,11 @@ object TlsBlock {
             setVisible(enabled && fragment != "2", delayKey)
         }
 
-        multilineInput("$prefix.alpn", "$prefix.certificate", "$prefix.certificate_public_key_sha256", "$prefix.ech.config")
+        multilineInput(
+            "$prefix.alpn", "$prefix.certificate", "$prefix.certificate_sha256", "$prefix.certificate_public_key_sha256",
+            "$prefix.ech.config",
+        )
+        echInputs("$prefix.ech")
         if (mustTls) {
             findPreference<Preference>(enabledKey)?.isVisible = false
         } else {
@@ -221,11 +255,11 @@ object TlsBlock {
         }
         applyVisibility()
         onSwitch("$prefix.reality.enabled") { setVisible(it, "$prefix.reality.public_key", "$prefix.reality.short_id") }
-        onSwitch("$prefix.ech.enabled") { setVisible(it, "$prefix.ech.config", "$prefix.ech.config_path", "$prefix.ech.serverName") }
+        onSwitch("$prefix.ech.enabled") { setVisible(it, "$prefix.ech.config", "$prefix.ech.config_path", "$prefix.ech.queryTarget") }
 
         presetTriSummary("$prefix.fragment", presets.fragmentDefaultOn)
         presetTriSummary("$prefix.tls_tricks", presets.tlsTricksDefaultOn)
-        // the custom implementation fragments at the dialer and has no fallback delay (TLS.cpp:433-436)
+        // the custom implementation fragments at the dialer and has no fallback delay (TLS.cpp:540-543)
         if (presets.fragmentImplementation == "custom") {
             findPreference<Preference>(delayKey)?.isEnabled = false
             fixedSummary(delayKey, R.string.preset_fallback_delay_unused)

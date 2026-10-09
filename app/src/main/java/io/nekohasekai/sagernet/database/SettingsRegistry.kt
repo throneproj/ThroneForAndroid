@@ -95,9 +95,6 @@ object SettingsRegistry {
     @JvmField
     val DOMAIN_STRATEGIES = listOf("", "ipv4_only", "ipv6_only", "prefer_ipv4", "prefer_ipv6")
 
-    @JvmField
-    val VPN_IMPLEMENTATIONS = listOf("gvisor", "system", "mixed")
-
     /** Most verbose first (BS.cpp:48). */
     @JvmField
     val LOG_LEVELS = listOf("trace", "debug", "info", "warn", "error", "fatal", "panic")
@@ -163,7 +160,6 @@ object SettingsRegistry {
 
     // ------------------------------------------------------------------------------------------------ tun
 
-    @JvmField val VPN_IMPL = oneOf("vpn_impl", "gvisor", VPN_IMPLEMENTATIONS)
     /** Android 9000 (decision D2; desktop 1500). */
     @JvmField val VPN_MTU = int("vpn_mtu", 9000) { it in 1000..10000 }
     @JvmField val VPN_IPV6 = bool("vpn_ipv6", false)

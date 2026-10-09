@@ -234,7 +234,6 @@
     <string name="language">Språk</string>
     <string name="http_proxy_bypass">Omgåelsesliste for HTTP-mellomtjener</string>
     <string name="http_proxy_bypass_dialog_message">Én per linje. Linjer som starter med # er kommentarer. Eksempel: *zhihu.com</string>
-    <string name="tun_implementation">TUN-implementering</string>
     <string name="naive_insecure_concurrency">Usikker samtidighet</string>
     <string name="naive_insecure_concurrency_summary">Bruk N samtidige tunnelforbindelser for å være mer robust under dårlige nettverksforhold. Flere forbindelser gjør tunneleringen lettere å oppdage og mindre sikker. Dette prosjektet streber etter sterkest mulig sikkerhet mot trafikkanalyse. Å bruke den på en usikker måte motvirker formålet. \n\nHvis du må bruke dette, prøv N=2 først for å se om det løser problemene dine. Sterkt anbefalt mot å bruke mer enn 4 forbindelser her.</string>
     <string name="backup">Sikkerhetskopiering</string>

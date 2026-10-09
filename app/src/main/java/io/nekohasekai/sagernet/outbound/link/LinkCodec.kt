@@ -73,6 +73,37 @@ object LinkCodec {
         return false
     }
 
+    /**
+     * QUrlQuery::queryItemValue(key, QUrl::FullyEncoded) recoded from the stored PrettyDecoded [pretty] value: kept
+     * escapes stay (unreserved ones decode), every character outside [QUERY_RAW] is encoded, delimiters are left as
+     * they are; one malformed escape makes every '%' literal and encoded.
+     */
+    @JvmStatic
+    fun recodeQueryFullyEncoded(pretty: String): String {
+        val keepEscapes = !hasInvalidPercent(pretty)
+        val sb = StringBuilder(pretty.length + 16)
+        var i = 0
+        while (i < pretty.length) {
+            val b = if (keepEscapes) escapeAt(pretty, i) else -1
+            if (b >= 0) {
+                val ch = b.toChar()
+                if (b < 0x80 && (isAlnum(ch) || UNRESERVED_RAW.indexOf(ch) >= 0)) sb.append(ch) else appendEscape(sb, b)
+                i += 3
+                continue
+            }
+            val c = pretty[i]
+            if (c.code < 0x80) {
+                if (isAlnum(c) || QUERY_RAW.indexOf(c) >= 0) sb.append(c) else appendEscape(sb, c.code)
+                i++
+                continue
+            }
+            val cp = pretty.codePointAt(i)
+            for (byte in String(Character.toChars(cp)).toByteArray(Charsets.UTF_8)) appendEscape(sb, byte.toInt() and 0xFF)
+            i += Character.charCount(cp)
+        }
+        return sb.toString()
+    }
+
     /** QUrl TolerantMode: one malformed escape makes every '%' of that component a literal percent sign. */
     @JvmStatic
     fun tolerant(s: String): String = if (hasInvalidPercent(s)) s.replace("%", "%25") else s

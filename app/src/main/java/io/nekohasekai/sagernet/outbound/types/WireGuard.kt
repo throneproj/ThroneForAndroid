@@ -174,7 +174,10 @@ class WireGuard : Outbound("wireguard") {
     @JvmField var random_trailers: Boolean = false
     @JvmField var disable_cookies: Boolean = false
 
-    /** wireguard.cpp:124-245: wg-quick / AmneziaWG INI text, or a wg:// / wireguard:// URL. */
+    /**
+     * wireguard.cpp:124-245: wg-quick / AmneziaWG INI text, or a wg:// / wireguard:// / awg:// URL. The scheme is not
+     * checked, and awg:// alone does not enable AmneziaWG; only its parameters do, as on the desktop.
+     */
     override fun parseFromLink(link: String): Boolean {
         if (link.contains("[Interface]") && link.contains("[Peer]")) return parseIni(link)
 

@@ -14,17 +14,19 @@ import io.nekohasekai.sagernet.outbound.link.ParsedLink
 
 /** xrayStreamSetting.h:5-9 */
 val xrayNetworks = listOf("raw", "xhttp", "ws", "httpupgrade", "grpc")
-/** xrayTLS (xrayStreamSetting.h:17-31, xrayStreamSetting.cpp:248-314). No insecure flag is modelled. */
+/** xrayTLS (xrayStreamSetting.h:17-33, xrayStreamSetting.cpp:248-318). No insecure flag is modelled. */
 class XrayTls {
     @JvmField var serverName: String = ""
     @JvmField var pinnedPeerCertSha256: String = ""
     @JvmField var verifyPeerCertByName: String = ""
     @JvmField var alpn: MutableList<String> = ArrayList()
     @JvmField var fingerprint: String = ""
+    /** Base64 ECHConfigList, or "<query domain>+<DoH url>" for Xray to fetch it itself. */
+    @JvmField var echConfigList: String = ""
 
     fun parseFromLink(link: String): Boolean = parseFromLink(LinkParser.parse(link))
 
-    /** xrayStreamSetting.cpp:248-261. */
+    /** xrayStreamSetting.cpp:248-262. */
     fun parseFromLink(url: ParsedLink): Boolean {
         if (!url.isValid) return false
         val q = url.query
@@ -35,10 +37,11 @@ class XrayTls {
         if (q.has("vcn")) verifyPeerCertByName = q.valueFully("vcn")
         if (q.has("alpn")) alpn = QtStrings.split(q.valueFully("alpn"), ",")
         if (q.has("fp")) fingerprint = q.value("fp")
+        if (q.has("ech")) echConfigList = q.valueFully("ech")
         return true
     }
 
-    /** xrayStreamSetting.cpp:263-271. */
+    /** xrayStreamSetting.cpp:264-273. */
     fun parseFromJson(obj: JsonObject): Boolean {
         if (obj.isEmpty()) return false
         if (obj.contains("serverName")) serverName = obj.string("serverName")
@@ -46,10 +49,11 @@ class XrayTls {
         if (obj.contains("verifyPeerCertByName")) verifyPeerCertByName = obj.string("verifyPeerCertByName")
         if (obj.contains("alpn")) alpn = obj.array("alpn").strings()
         if (obj.contains("fingerprint")) fingerprint = obj.string("fingerprint")
+        if (obj.contains("echConfigList")) echConfigList = obj.string("echConfigList")
         return true
     }
 
-    /** xrayStreamSetting.cpp:273-286. */
+    /** xrayStreamSetting.cpp:275-288. */
     fun parseFromClash(proxy: ClashProxy): Boolean {
         serverName = proxy.string("servername").ifEmpty { proxy.string("sni") }.ifEmpty { proxy.string("server") }
         alpn.addAll(proxy.strings("alpn"))
@@ -58,7 +62,7 @@ class XrayTls {
         return true
     }
 
-    /** xrayStreamSetting.cpp:288-296: sni is always written. */
+    /** xrayStreamSetting.cpp:290-299: sni is always written. */
     fun exportToLink(): List<Pair<String, String>> {
         val q = ArrayList<Pair<String, String>>()
         q.add("sni" to serverName)
@@ -66,10 +70,11 @@ class XrayTls {
         if (verifyPeerCertByName.isNotEmpty()) q.add("vcn" to verifyPeerCertByName)
         if (alpn.isNotEmpty()) q.add("alpn" to alpn.joinToString(","))
         if (fingerprint.isNotEmpty()) q.add("fp" to fingerprint)
+        if (echConfigList.isNotEmpty()) q.add("ech" to echConfigList)
         return q
     }
 
-    /** xrayStreamSetting.cpp:298-308: serverName is always written. */
+    /** xrayStreamSetting.cpp:301-312: serverName is always written. */
     fun exportToJson(): JsonObject {
         val obj = JsonObject()
         obj["serverName"] = Hosts.toAceHost(serverName)
@@ -77,10 +82,11 @@ class XrayTls {
         if (verifyPeerCertByName.isNotEmpty()) obj["verifyPeerCertByName"] = verifyPeerCertByName
         if (alpn.isNotEmpty()) obj["alpn"] = JsonValues.stringArray(alpn)
         if (fingerprint.isNotEmpty()) obj["fingerprint"] = fingerprint
+        if (echConfigList.isNotEmpty()) obj["echConfigList"] = echConfigList
         return obj
     }
 
-    /** xrayStreamSetting.cpp:310-314. */
+    /** xrayStreamSetting.cpp:314-318. */
     fun build(ctx: BuildContext): JsonObject {
         val obj = exportToJson()
         if (fingerprint.isEmpty() && ctx.utlsFingerprint.isNotEmpty()) obj["fingerprint"] = ctx.utlsFingerprint
@@ -292,10 +298,10 @@ class XrayXhttp {
         if (xmuxObj.isNotEmpty()) parseXmuxObject(xmuxObj)
     }
 
-    /** xrayStreamSetting.cpp:381-387: tolerates Python-style quoting and booleans. */
+    /** xrayStreamSetting.cpp:381-388: Python dict repr ('key': True) is rewritten only when the JSON parse fails. */
     fun parseExtraJson(text: String): Boolean {
-        val normalized = text.replace('\'', '"').replace("True", "true").replace("False", "false")
-        val obj = JsonInput.parseObject(normalized)
+        var obj = JsonInput.parseObject(text)
+        if (obj.isEmpty()) obj = JsonInput.parseObject(text.replace('\'', '"').replace("True", "true").replace("False", "false"))
         if (obj.isEmpty()) return false
         parseExtraObject(obj)
         return true
@@ -310,7 +316,7 @@ class XrayXhttp {
         if (q.has("host")) host = q.value("host")
         if (q.has("path")) path = q.valueFully("path")
         if (q.has("mode")) mode = q.value("mode")
-        if (q.has("extra")) parseExtraJson(q.valueFully("extra"))
+        if (q.has("extra") && !parseExtraJson(q.valueFully("extra"))) parseExtraJson(q.valueFormDecoded("extra"))
         if (q.has("headers")) {
             headers = QtStrings.split(q.valueFully("headers"), "|")
             if (headers.size % 2 != 0) headers.clear()
@@ -678,7 +684,7 @@ class XrayStreamSetting {
         val q = url.query
         if (q.has("fm") || q.has("finalmask")) {
             val key = if (q.has("fm")) "fm" else "finalmask"
-            JsonInput.parseObjectOrNull(q.valueFully(key))?.let { finalmask = it }
+            (JsonInput.parseObjectOrNull(q.valueFully(key)) ?: JsonInput.parseObjectOrNull(q.valueFormDecoded(key)))?.let { finalmask = it }
         }
         if (q.has("type")) network = q.value("type").replace("tcp", "raw")
         if (network !in xrayNetworks) return false
@@ -810,6 +816,7 @@ class XrayStreamSetting {
         } else if (security == "tls") {
             if (tls.serverName.isNotEmpty()) obj["sni"] = Hosts.toAceHost(tls.serverName)
             if (tls.fingerprint.isNotEmpty()) obj["fingerprint"] = tls.fingerprint
+            if (tls.echConfigList.isNotEmpty()) obj["ech"] = if (tls.echConfigList.contains("://")) tls.echConfigList else "static"
         }
         return obj
     }

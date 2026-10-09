@@ -608,9 +608,9 @@ class OpenConnect : Outbound("openconnect") {
     /** openconnect.cpp:496-499. */
     override fun displayType(): String = "OpenConnect"
 
-    /** openconnect.cpp:501-505. */
+    /** openconnect.cpp:501-506: the core still checks a pinned fingerprint when insecure is set. */
     override fun security(): SecurityInfo {
-        if (tls.insecure) return SecurityInfo("Insecure TLS", "", SecurityLevel.Weak)
+        if (tls.insecure && tls.peer_fingerprint.isEmpty()) return SecurityInfo("Insecure TLS", "", SecurityLevel.Weak)
         return SecurityInfo("TLS", "", SecurityLevel.Secure)
     }
 

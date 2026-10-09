@@ -29,6 +29,7 @@ class NaiveSettingsActivity : BindingSettingsActivity<Naive>() {
         pbm.bool("tls.ech.enabled")
         pbm.text("tls.ech.config")
         pbm.text("tls.ech.serverName")
+        pbm.text("tls.ech.resolver")
     }
 
     override fun PreferenceFragmentCompat.onPreferencesCreated() {
@@ -36,7 +37,8 @@ class NaiveSettingsActivity : BindingSettingsActivity<Naive>() {
         numberInput("insecure_concurrency")
         passwordSummary("password")
         multilineInput("extra_headers", "tls.certificate", "tls.ech.config")
-        onSwitch("tls.ech.enabled") { setVisible(it, "tls.ech.config", "tls.ech.serverName") }
+        echInputs("tls.ech")
+        onSwitch("tls.ech.enabled") { setVisible(it, "tls.ech.config", "tls.ech.queryTarget") }
         // limited TLS: only the custom (dialer-level) fragment reaches naive (dialog_edit_profile.cpp:765)
         if (DataStore.fragmentImplementation == "custom") {
             presetTriSummary("tls.fragment", DataStore.fragmentDefaultOn)

@@ -15,7 +15,8 @@ internal object DnsServers {
 
     /**
      * `local*` -> local; `dhcp://<ifc|auto>` -> dhcp; `tcp://`, `tls://`, `quic://`, `https://`, `h3://` set the
-     * type (default udp), the HTTP forms split a `path` at the first `/`, and `host:port` splits `server_port`.
+     * type (default udp, `udp://` stripped), the HTTP forms split a `path` at the first `/`, and `host:port` splits
+     * `server_port`.
      * The `underlying` variant only exists for tun + systemd-resolved on Linux (:782-784), never on Android.
      */
     @JvmStatic
@@ -33,6 +34,7 @@ internal object DnsServers {
         var port = -1
         var type = "udp"
         var path = ""
+        if (address.startsWith("udp://")) addr = addr.substring(6)
         if (address.startsWith("tcp://")) {
             type = "tcp"
             addr = addr.replace("tcp://", "")
@@ -74,6 +76,16 @@ internal object DnsServers {
         if (port != -1) res["server_port"] = port
         if (path.isNotEmpty()) res["path"] = path
         return res
+    }
+
+    private val ECH_RESOLVER_SCHEMES = setOf("udp", "tcp", "tls", "https", "quic", "h3")
+
+    /** usableEchResolver (generate.cpp:1395-1401): a resolver [buildDnsObj] cannot express falls back to dns-direct like an unset one. */
+    @JvmStatic
+    fun usableEchResolver(resolver: String): Boolean {
+        if (resolver.isEmpty()) return false
+        if (!resolver.contains("://")) return true
+        return resolver.substringBefore("://").lowercase() in ECH_RESOLVER_SCHEMES
     }
 
     private val KNOWN_DOH = mapOf(

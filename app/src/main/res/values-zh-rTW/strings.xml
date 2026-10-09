@@ -202,7 +202,6 @@
     <string name="hysteria_obfs">混淆密碼</string>
     <string name="menu_tools">工具</string>
     <string name="menu_log">記錄檔</string>
-    <string name="tun_implementation">TUN 實作</string>
     <string name="clear_logcat">清除記錄檔</string>
     <string name="wireguard_local_address">本機位址</string>
     <string name="wireguard_public_key">節點公開金鑰</string>

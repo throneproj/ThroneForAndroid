@@ -229,7 +229,6 @@
     <string name="wireguard_local_address">Lokaal adres</string>
     <string name="wireguard_public_key">Publieke sleutel van peer</string>
     <string name="wireguard_psk">Vooraf gedeelde sleutel van peer</string>
-    <string name="tun_implementation">TUN-implementatie</string>
     <string name="naive_insecure_concurrency">Onveilige gelijktijdigheid</string>
     <string name="naive_insecure_concurrency_summary">Gebruik N gelijktijdige tunnelverbindingen om robuuster te zijn onder slechte netwerkomstandigheden. Meer verbindingen maken het tunnelen gemakkelijker te detecteren en minder veilig. Dit project streeft naar de sterkste beveiliging tegen verkeersanalyse. Het op een onveilige manier gebruiken doet dit doel teniet. \n\nAls u dit toch moet gebruiken, probeer eerst N=2 om te zien of het uw problemen oplost. Het wordt sterk afgeraden hier meer dan 4 verbindingen te gebruiken.</string>
     <string name="backup">Back-up</string>

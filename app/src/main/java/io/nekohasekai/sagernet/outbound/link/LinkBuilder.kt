@@ -9,6 +9,9 @@ class LinkBuilder(@JvmField val scheme: String) {
     @JvmField var host: String = ""
     @JvmField var port: Int = -1
     @JvmField var fragment: String? = null
+
+    /** setQuery(query.toString(QUrl::FullyEncoded).replace('+', "%2B"), QUrl::TolerantMode) (xrayVless.cpp:82). */
+    @JvmField var plusAsEscape: Boolean = false
     private var userName: String? = null
     private var password: String? = null
     private val query = ArrayList<Item>()
@@ -62,14 +65,14 @@ class LinkBuilder(@JvmField val scheme: String) {
         sb.append(Hosts.formatForUrl(hostEncoded))
         if (port >= 0) sb.append(':').append(port)
         if (query.isNotEmpty()) {
-            sb.append('?')
-            var first = true
+            val q = StringBuilder()
             for (item in query) {
-                if (!first) sb.append('&')
-                first = false
-                sb.append(LinkCodec.encodeQueryPart(item.key)).append('=')
-                sb.append(if (item.encoded) item.value else LinkCodec.encodeQueryPart(item.value))
+                if (q.isNotEmpty()) q.append('&')
+                q.append(LinkCodec.encodeQueryPart(item.key)).append('=')
+                q.append(if (item.encoded) item.value else LinkCodec.encodeQueryPart(item.value))
             }
+            val text = q.toString()
+            sb.append('?').append(if (plusAsEscape) text.replace("+", "%2B") else text)
         }
         fragment?.let { sb.append('#').append(LinkCodec.encodeFragment(it)) }
         return sb.toString()

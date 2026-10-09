@@ -202,7 +202,6 @@
     <string name="wireguard_psk">ピア事前共有鍵</string>
     <string name="warp_generate">設定を生成</string>
     <string name="generating">生成中…</string>
-    <string name="tun_implementation">TUN 実装</string>
     <string name="naive_insecure_concurrency">安全でない同時接続</string>
     <string name="naive_insecure_concurrency_summary">悪いネットワーク状況下での堅牢性を高めるため、N 個の同時トンネル接続を使用します。接続数が増えるとトンネリングが検出されやすくなり、安全性が低下します。本プロジェクトはトラフィック解析に対する最強のセキュリティを目指しています。安全でない方法で使用すると、その目的が損なわれます。\n\nどうしても使用する必要がある場合は、まず N=2 を試して問題が解決するか確認してください。ここで 4 接続を超えて使用することは強くお勧めしません。</string>
     <string name="backup">バックアップ</string>

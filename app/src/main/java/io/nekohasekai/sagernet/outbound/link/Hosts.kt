@@ -141,6 +141,69 @@ object Hosts {
         return "$host:$port"
     }
 
+    /**
+     * IsPrivateHost (utils.cpp:109-141): Xray's own private list (common/geodata/consts.go): loopback, LAN, CGNAT
+     * and reserved ranges, local-only names. Only IP literals are matched against the ranges; names never resolve.
+     */
+    @JvmStatic
+    fun isPrivateHost(host: String): Boolean {
+        var bare = host.trim().lowercase().replace("[", "").replace("]", "")
+        if (bare.endsWith(".")) bare = bare.dropLast(1)
+        if (bare.isEmpty()) return false
+
+        hostAddressBytes(bare)?.let { ip -> return PRIVATE_RANGES.any { it.contains(ip) } }
+
+        for (suffix in PRIVATE_SUFFIXES) {
+            if (bare == suffix || bare.endsWith(".$suffix")) return true
+        }
+        // A dotless name only resolves through the local search domain.
+        return DOTLESS_NAME.matches(bare)
+    }
+
+    private class Subnet(val prefix: ByteArray, val bits: Int) {
+        fun contains(ip: ByteArray): Boolean {
+            if (ip.size != prefix.size) return false
+            for (i in 0 until bits / 8) if (ip[i] != prefix[i]) return false
+            val rest = bits % 8
+            if (rest == 0) return true
+            val mask = (0xFF shl (8 - rest)) and 0xFF
+            return (ip[bits / 8].toInt() and mask) == (prefix[bits / 8].toInt() and mask)
+        }
+    }
+
+    private val PRIVATE_RANGES: List<Subnet> by lazy {
+        listOf(
+            "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.0/8", "169.254.0.0/16",
+            "172.16.0.0/12", "192.0.0.0/24", "192.0.2.0/24", "192.88.99.0/24", "192.168.0.0/16",
+            "198.18.0.0/15", "198.51.100.0/24", "203.0.113.0/24", "224.0.0.0/3",
+            "::/127", "fc00::/7", "fe80::/10", "ff00::/8",
+        ).map { cidr ->
+            val slash = cidr.indexOf('/')
+            Subnet(hostAddressBytes(cidr.substring(0, slash))!!, cidr.substring(slash + 1).toInt())
+        }
+    }
+
+    private val PRIVATE_SUFFIXES = listOf(
+        "lan", "localdomain", "example", "invalid", "localhost", "test", "local", "home.arpa", "internal",
+    )
+
+    private val DOTLESS_NAME = Regex("[a-z]([a-z0-9-]{0,61}[a-z0-9])?")
+
+    // QHostAddress::setAddress then the v4-mapped fold of toIPv4Address(): 4 bytes for IPv4 and ::ffff:a.b.c.d,
+    // 16 for other IPv6 (the scope id after the last '%' dropped), null when the text is no IP literal.
+    private fun hostAddressBytes(text: String): ByteArray? {
+        if (text.contains(':')) {
+            val pct = text.lastIndexOf('%')
+            val v6 = parseIpv6(if (pct >= 0) text.substring(0, pct) else text)
+            if (v6 != null) {
+                val mapped = (0 until 10).all { v6[it].toInt() == 0 } && v6[10] == 0xFF.toByte() && v6[11] == 0xFF.toByte()
+                return if (mapped) v6.copyOfRange(12, 16) else v6
+            }
+        }
+        val v4 = parseIpv4(text) ?: return null
+        return byteArrayOf((v4 shr 24).toByte(), (v4 shr 16).toByte(), (v4 shr 8).toByte(), v4.toByte())
+    }
+
     private fun isAscii(s: String): Boolean = s.all { it.code <= 0x7F }
 
     // qt_ACE_do with ForbidLeadingDot: one trailing dot allowed, labels of 1-63 LDH/underscore characters

@@ -27,7 +27,7 @@ object LogExport {
 
     // Non-secret settings only; values such as DNS URLs, inbound credentials or API secrets never leave the device.
     private val SETTINGS = listOf(
-        SettingsRegistry.VPN_IMPL, SettingsRegistry.VPN_MTU, SettingsRegistry.VPN_IPV6,
+        SettingsRegistry.VPN_MTU, SettingsRegistry.VPN_IPV6,
         SettingsRegistry.ENABLE_TUN_ROUTING, SettingsRegistry.DISABLE_PRIVATE_RANGE_BYPASS,
         SettingsRegistry.DOMAIN_STRATEGY, SettingsRegistry.OUTBOUND_DOMAIN_STRATEGY, SettingsRegistry.FAKEDNS,
         SettingsRegistry.ENABLE_DNS_ROUTING, SettingsRegistry.USE_DNS_OBJECT, SettingsRegistry.ENABLE_STATS,

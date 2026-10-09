@@ -95,8 +95,9 @@
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:icon="@drawable/ic_baseline_domain_24"
-            app:key="tls.ech.serverName"
+            app:key="tls.ech.queryTarget"
             app:title="@string/ech_query_server_name"
+            app:dialogMessage="@string/ech_query_target_hint"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 

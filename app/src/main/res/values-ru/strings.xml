@@ -212,7 +212,6 @@
 <string name="tuic_disable_sni">Отключить SNI</string>
 <string name="tuic_reduce_rtt">Включить 0-RTT QUIC-соединение</string>
 <string name="tuic_udp_relay_mode">Режим UDP-ретранслятора</string>
-<string name="tun_implementation">Реализация TUN</string>
 <string name="unavailable">Недоступен</string>
 <string name="undo">Отменить</string>
 <string name="unsaved_changes_prompt">Есть несохраненные изменения. Сохранить?</string>

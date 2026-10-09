@@ -6,11 +6,45 @@ import io.nekohasekai.sagernet.outbound.QtStrings
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.json.JsonValues
 import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
+import io.nekohasekai.sagernet.outbound.link.Base64Strict
 import io.nekohasekai.sagernet.outbound.link.Hosts
 import io.nekohasekai.sagernet.outbound.link.LinkParser
 import io.nekohasekai.sagernet.outbound.link.ParsedLink
 
-/** uTLS (TLS.h:11-25, TLS.cpp:11-65). */
+private val SHA256_HEX = Regex("[0-9a-fA-F]{64}")
+private const val LOWER_HEX = "0123456789abcdef"
+
+/**
+ * certificateSha256FromPcs (TLS.cpp:14-23): Xray's pcs and sing-box's certificate_sha256 both hash the whole DER
+ * certificate, hex there and base64 here; anything but a 64-digit hex value (':' separators allowed) is dropped.
+ */
+private fun certificateSha256FromPcs(pcs: String): MutableList<String> {
+    val hashes = ArrayList<String>()
+    for (item in QtStrings.splitSkipEmpty(pcs, ",")) {
+        val value = item.trim().replace(":", "")
+        if (!SHA256_HEX.matches(value)) continue
+        hashes.add(Base64Strict.encode(ByteArray(32) { value.substring(it * 2, it * 2 + 2).toInt(16).toByte() }))
+    }
+    return hashes
+}
+
+/** pcsFromCertificateSha256 (TLS.cpp:25-32): only values that decode to 32 bytes are written, as lower-case hex. */
+private fun pcsFromCertificateSha256(hashes: List<String>): String {
+    val pcs = ArrayList<String>()
+    for (hash in hashes) {
+        val raw = Base64Strict.decodeLenient(hash.trim())
+        if (raw.size != 32) continue
+        val sb = StringBuilder(64)
+        for (b in raw) {
+            val v = b.toInt() and 0xFF
+            sb.append(LOWER_HEX[v shr 4]).append(LOWER_HEX[v and 0xF])
+        }
+        pcs.add(sb.toString())
+    }
+    return pcs.joinToString(",")
+}
+
+/** uTLS (TLS.h:11-25, TLS.cpp:35-89). */
 class UTls {
     @JvmField var supported: Boolean = true
     @JvmField var enabled: Boolean = false
@@ -18,7 +52,7 @@ class UTls {
 
     fun parseFromLink(link: String): Boolean = parseFromLink(LinkParser.parse(link))
 
-    /** TLS.cpp:11-20. */
+    /** TLS.cpp:35-44. */
     fun parseFromLink(url: ParsedLink): Boolean {
         if (!url.isValid && !url.invalidPortOnly) return false
         val q = url.query
@@ -27,7 +61,7 @@ class UTls {
         return true
     }
 
-    /** TLS.cpp:21-27. */
+    /** TLS.cpp:45-51. */
     fun parseFromJson(obj: JsonObject): Boolean {
         if (obj.isEmpty()) return false
         if (obj.contains("enabled")) enabled = obj.bool("enabled")
@@ -35,7 +69,7 @@ class UTls {
         return true
     }
 
-    /** TLS.cpp:35-41. */
+    /** TLS.cpp:59-65. */
     fun exportToLink(): List<Pair<String, String>> {
         if (!enabled) return emptyList()
         val q = ArrayList<Pair<String, String>>()
@@ -43,7 +77,7 @@ class UTls {
         return q
     }
 
-    /** TLS.cpp:42-49. */
+    /** TLS.cpp:66-73. */
     fun exportToJson(): JsonObject {
         val obj = JsonObject()
         if (!enabled) return obj
@@ -52,7 +86,7 @@ class UTls {
         return obj
     }
 
-    /** TLS.cpp:28-34. */
+    /** TLS.cpp:52-58. */
     fun parseFromClash(proxy: ClashProxy): Boolean {
         val fingerprint = proxy.string("client-fingerprint")
         if (fingerprint.isEmpty()) return false
@@ -61,14 +95,14 @@ class UTls {
         return true
     }
 
-    /** TLS.cpp:50-55. */
+    /** TLS.cpp:74-79. */
     fun exportIdentity(): JsonObject {
         val obj = JsonObject()
         if (enabled && fingerPrint.isNotEmpty()) obj["fingerprint"] = fingerPrint
         return obj
     }
 
-    /** TLS.cpp:56-65: the global fingerprint fills in whenever the profile has no usable one. */
+    /** TLS.cpp:80-89: the global fingerprint fills in whenever the profile has no usable one. */
     fun build(ctx: BuildContext): JsonObject {
         if (!supported) return JsonObject()
         val obj = exportToJson()
@@ -80,48 +114,105 @@ class UTls {
     }
 }
 
-/** ECH (TLS.h:27-41, TLS.cpp:67-121). */
+/** ECH (TLS.h:27-47, TLS.cpp:91-217). [resolver] is Throne-only: it is stored and shared but never reaches the core. */
 class Ech {
     @JvmField var enabled: Boolean = false
     @JvmField var config: MutableList<String> = ArrayList()
     @JvmField var config_path: String = ""
     @JvmField var serverName: String = ""
+    @JvmField var resolver: String = ""
+
+    companion object {
+        /** NormalizeConfig (TLS.cpp:91-102): a bare base64 list becomes one PEM block; a list with a BEGIN line is kept. */
+        @JvmStatic
+        fun normalizeConfig(items: List<String>): MutableList<String> {
+            if (items.any { it.contains("-----BEGIN") }) return ArrayList(items)
+            val joined = items.joinToString("").trim()
+            if (joined.isEmpty()) return ArrayList()
+            return arrayListOf("-----BEGIN ECH CONFIGS-----", joined, "-----END ECH CONFIGS-----")
+        }
+    }
+
+    /** SetQueryTarget (TLS.cpp:104-120): `<domain>+<scheme://resolver>`, a bare resolver URL, or a bare domain. */
+    fun setQueryTarget(target: String) {
+        val trimmed = target.trim()
+        val schemeIdx = trimmed.indexOf("://")
+        if (schemeIdx != -1) {
+            val plusIdx = trimmed.indexOf('+')
+            if (plusIdx > 0 && plusIdx < schemeIdx) {
+                serverName = trimmed.substring(0, plusIdx).trim()
+                resolver = trimmed.substring(plusIdx + 1).trim()
+            } else {
+                serverName = ""
+                resolver = trimmed
+            }
+        } else {
+            serverName = trimmed
+            resolver = ""
+        }
+    }
+
+    /** QueryTarget (TLS.cpp:123-126). */
+    fun queryTarget(): String {
+        if (resolver.isEmpty()) return serverName
+        return if (serverName.isEmpty()) resolver else "$serverName+$resolver"
+    }
+
+    /** ConfigBase64 (TLS.cpp:128-134): the config lines without the PEM armour. */
+    fun configBase64(): String {
+        val sb = StringBuilder()
+        for (line in config) if (!line.contains("-----")) sb.append(line.trim())
+        return sb.toString()
+    }
 
     fun parseFromLink(link: String): Boolean = parseFromLink(LinkParser.parse(link))
 
-    /** TLS.cpp:67-78. */
+    /** TLS.cpp:136-161: `ech` is off (0/false/empty), on (1/true), a query target (has "://" or '.') or a config. */
     fun parseFromLink(url: ParsedLink): Boolean {
         if (!url.isValid && !url.invalidPortOnly) return false
         val q = url.query
+        if (q.has("ech")) {
+            val echVal = q.valueFully("ech").trim()
+            enabled = echVal.isNotEmpty() && echVal != "0" && echVal != "false"
+            if (enabled && echVal != "1" && echVal != "true") {
+                if (echVal.contains("://") || echVal.contains('.')) setQueryTarget(echVal)
+                else config = normalizeConfig(listOf(echVal))
+            }
+        }
         if (q.has("ech_enabled")) enabled = q.value("ech_enabled") == "true"
-        if (q.has("ech_config")) config = QtStrings.split(q.value("ech_config"), ",")
+        if (q.has("ech_config")) config = normalizeConfig(QtStrings.splitSkipEmpty(q.value("ech_config"), ","))
         if (q.has("ech_config_path")) config_path = q.value("ech_config_path")
         if (q.has("ech_server_name")) serverName = q.value("ech_server_name")
         return true
     }
 
-    /** TLS.cpp:79-89. */
+    /** TLS.cpp:162-173. */
     fun parseFromJson(obj: JsonObject): Boolean {
         if (obj.isEmpty()) return false
         if (obj.contains("enabled")) enabled = obj.bool("enabled")
-        if (obj.contains("config")) config = obj.array("config").strings()
+        if (obj.contains("config")) config = normalizeConfig(obj.array("config").strings())
         if (obj.contains("config_path")) config_path = obj.string("config_path")
         if (obj.contains("query_server_name")) serverName = obj.string("query_server_name")
+        if (obj.contains("resolver")) resolver = obj.string("resolver")
         return true
     }
 
-    /** TLS.cpp:90-99. */
+    /** TLS.cpp:174-189: `ech_config` carries the bare base64; `ech` repeats the target or config in its short form. */
     fun exportToLink(): List<Pair<String, String>> {
         if (!enabled) return emptyList()
+        val b64 = configBase64()
         val q = ArrayList<Pair<String, String>>()
         q.add("ech_enabled" to "true")
-        if (config.isNotEmpty()) q.add("ech_config" to config.joinToString(","))
+        if (b64.isNotEmpty()) q.add("ech_config" to b64)
         if (config_path.isNotEmpty()) q.add("ech_config_path" to config_path)
         if (serverName.isNotEmpty()) q.add("ech_server_name" to serverName)
+        if (serverName.isNotEmpty() && resolver.isNotEmpty()) q.add("ech" to "$serverName+$resolver")
+        else if (serverName.isEmpty() && b64.isNotEmpty()) q.add("ech" to b64)
+        else if (serverName.isEmpty() && resolver.isNotEmpty()) q.add("ech" to resolver)
         return q
     }
 
-    /** TLS.cpp:100-111. */
+    /** TLS.cpp:190-202. */
     fun exportToJson(): JsonObject {
         val obj = JsonObject()
         if (!enabled) return obj
@@ -129,21 +220,29 @@ class Ech {
         if (config.isNotEmpty()) obj["config"] = JsonValues.stringArray(config)
         if (config_path.isNotEmpty()) obj["config_path"] = config_path
         if (serverName.isNotEmpty()) obj["query_server_name"] = Hosts.toAceHost(serverName)
+        if (resolver.isNotEmpty()) obj["resolver"] = resolver
         return obj
     }
 
-    /** TLS.cpp:112-117. */
+    /** TLS.cpp:203-211. */
     fun exportIdentity(): JsonObject {
         val obj = JsonObject()
-        if (enabled) obj["enabled"] = true
+        if (!enabled) return obj
+        obj["enabled"] = true
+        if (serverName.isNotEmpty()) obj["query_server_name"] = Hosts.toAceHost(serverName)
+        if (resolver.isNotEmpty()) obj["resolver"] = resolver
         return obj
     }
 
-    /** TLS.cpp:118-121. */
-    fun build(ctx: BuildContext): JsonObject = exportToJson()
+    /** TLS.cpp:212-217: the core rejects the Throne-only `resolver`. */
+    fun build(ctx: BuildContext): JsonObject {
+        val obj = exportToJson()
+        obj.remove("resolver")
+        return obj
+    }
 }
 
-/** Reality (TLS.h:43-57, TLS.cpp:123-185). */
+/** Reality (TLS.h:49-63, TLS.cpp:219-281). */
 class Reality {
     @JvmField var enabled: Boolean = false
     @JvmField var public_key: String = ""
@@ -151,7 +250,7 @@ class Reality {
 
     fun parseFromLink(link: String): Boolean = parseFromLink(LinkParser.parse(link))
 
-    /** TLS.cpp:123-136. */
+    /** TLS.cpp:219-232. */
     fun parseFromLink(url: ParsedLink): Boolean {
         if (!url.isValid && !url.invalidPortOnly) return false
         val q = url.query
@@ -163,7 +262,7 @@ class Reality {
         return true
     }
 
-    /** TLS.cpp:137-144. */
+    /** TLS.cpp:233-240. */
     fun parseFromJson(obj: JsonObject): Boolean {
         if (obj.isEmpty()) return false
         if (obj.contains("enabled")) enabled = obj.bool("enabled")
@@ -172,13 +271,13 @@ class Reality {
         return true
     }
 
-    /** TLS.cpp:153-160: both keys are written whenever enabled. */
+    /** TLS.cpp:249-256: both keys are written whenever enabled. */
     fun exportToLink(): List<Pair<String, String>> {
         if (!enabled) return emptyList()
         return listOf("pbk" to public_key, "sid" to short_id)
     }
 
-    /** TLS.cpp:145-152. */
+    /** TLS.cpp:241-248. */
     fun parseFromClash(proxy: ClashProxy): Boolean {
         val opts = proxy.obj("reality-opts")
         val publicKey = opts.string("public-key")
@@ -189,7 +288,7 @@ class Reality {
         return true
     }
 
-    /** TLS.cpp:161-169. */
+    /** TLS.cpp:257-265. */
     fun exportToJson(): JsonObject {
         val obj = JsonObject()
         if (!enabled) return obj
@@ -199,14 +298,14 @@ class Reality {
         return obj
     }
 
-    /** TLS.cpp:170-175. */
+    /** TLS.cpp:266-271. */
     fun exportIdentity(): JsonObject {
         val obj = JsonObject()
         if (enabled) obj["enabled"] = true
         return obj
     }
 
-    /** TLS.cpp:176-185: public_key is always written, even empty. */
+    /** TLS.cpp:272-281: public_key is always written, even empty. */
     fun build(ctx: BuildContext): JsonObject {
         val obj = JsonObject()
         if (public_key.isNotEmpty() || enabled) {
@@ -218,7 +317,7 @@ class Reality {
     }
 }
 
-/** TLS (TLS.h:59-133, TLS.cpp:187-479). Tri-states: `*_unspecified` true means "Keep Default" (key absent). */
+/** TLS (TLS.h:65-140, TLS.cpp:283-586). Tri-states: `*_unspecified` true means "Keep Default" (key absent). */
 class Tls {
     @JvmField var enabled: Boolean = false
     @JvmField var disable_sni: Boolean = false
@@ -231,6 +330,7 @@ class Tls {
     @JvmField var curve_preferences: MutableList<String> = ArrayList()
     @JvmField var certificate: MutableList<String> = ArrayList()
     @JvmField var certificate_path: String = ""
+    @JvmField var certificate_sha256: MutableList<String> = ArrayList()
     @JvmField var certificate_public_key_sha256: MutableList<String> = ArrayList()
     @JvmField var client_certificate: MutableList<String> = ArrayList()
     @JvmField var client_certificate_path: String = ""
@@ -250,20 +350,20 @@ class Tls {
     @JvmField var utls: UTls = UTls()
     @JvmField var reality: Reality = Reality()
 
-    /** TLS.h:95-99 (0 = Keep Default, 1 = On, 2 = Off). */
+    /** TLS.h:107-110 (0 = Keep Default, 1 = On, 2 = Off). */
     fun saveFragmentState(state: Int) {
         fragment = state == 1
         fragment_unspecified = state == 0
     }
 
-    /** TLS.cpp:459-464. */
+    /** TLS.cpp:566-571. */
     fun fragmentEffectivelyOn(ctx: BuildContext): Boolean {
         if (fragment) return true
         if (fragment_unspecified) return ctx.fragmentDefaultOn
         return false
     }
 
-    /** TLS.cpp:474-479. */
+    /** TLS.cpp:581-586. */
     fun tlsTricksEffectivelyOn(ctx: BuildContext): Boolean {
         if (tls_tricks) return true
         if (tls_tricks_unspecified) return ctx.tlsTricksDefaultOn
@@ -272,11 +372,11 @@ class Tls {
 
     fun parseFromLink(link: String): Boolean = parseFromLink(LinkParser.parse(link))
 
-    /** TLS.cpp:187-233. */
+    /** TLS.cpp:283-330. */
     fun parseFromLink(url: ParsedLink): Boolean {
         if (!url.isValid && !url.invalidPortOnly) return false
         val q = url.query
-        // TLS.cpp:193-199 is a literal chain of substring replacements on the value, quirks included ("false" -> "tls")
+        // TLS.cpp:289-295 is a literal chain of substring replacements on the value, quirks included ("false" -> "tls")
         if (q.has("security")) enabled = q.value("security")
             .replace("reality", "tls")
             .replace("none", "")
@@ -297,6 +397,7 @@ class Tls {
         if (q.has("tls_curve_preferences")) curve_preferences = QtStrings.split(q.value("tls_curve_preferences"), ",")
         if (q.has("tls_certificate")) certificate = QtStrings.split(q.value("tls_certificate"), ",")
         if (q.has("tls_certificate_path")) certificate_path = q.value("tls_certificate_path")
+        if (q.has("pcs")) certificate_sha256 = certificateSha256FromPcs(q.valueFully("pcs"))
         if (q.has("tls_certificate_public_key_sha256")) certificate_public_key_sha256 = QtStrings.split(q.value("tls_certificate_public_key_sha256"), ",")
         if (q.has("tls_client_certificate")) client_certificate = QtStrings.split(q.value("tls_client_certificate"), ",")
         if (q.has("tls_client_certificate_path")) client_certificate_path = q.value("tls_client_certificate_path")
@@ -331,7 +432,7 @@ class Tls {
         return true
     }
 
-    /** TLS.cpp:234-285. */
+    /** TLS.cpp:331-385. */
     fun parseFromJson(obj: JsonObject): Boolean {
         if (obj.isEmpty()) return false
         if (obj.contains("enabled")) enabled = obj.bool("enabled")
@@ -348,6 +449,7 @@ class Tls {
             else obj.array("certificate").strings()
         }
         if (obj.contains("certificate_path")) certificate_path = obj.string("certificate_path")
+        if (obj.contains("certificate_sha256")) certificate_sha256 = obj.array("certificate_sha256").strings()
         if (obj.contains("certificate_public_key_sha256")) certificate_public_key_sha256 = obj.array("certificate_public_key_sha256").strings()
         if (obj.contains("client_certificate")) client_certificate = obj.array("client_certificate").strings()
         if (obj.contains("client_certificate_path")) client_certificate_path = obj.string("client_certificate_path")
@@ -381,7 +483,7 @@ class Tls {
         return true
     }
 
-    /** TLS.cpp:286-303: `servername`, then `sni`, then the server itself name the certificate. */
+    /** TLS.cpp:386-403: `servername`, then `sni`, then the server itself name the certificate. */
     fun parseFromClash(proxy: ClashProxy): Boolean {
         enabled = proxy.bool("tls")
         server_name = proxy.string("servername").ifEmpty { proxy.string("sni") }.ifEmpty { proxy.string("server") }
@@ -392,7 +494,7 @@ class Tls {
         return true
     }
 
-    /** TLS.cpp:304-337. */
+    /** TLS.cpp:404-438. */
     fun exportToLink(): List<Pair<String, String>> {
         if (!enabled) return emptyList()
         val q = ArrayList<Pair<String, String>>()
@@ -407,6 +509,7 @@ class Tls {
         if (curve_preferences.isNotEmpty()) q.add("tls_curve_preferences" to curve_preferences.joinToString(","))
         if (certificate.isNotEmpty()) q.add("tls_certificate" to certificate.joinToString(","))
         if (certificate_path.isNotEmpty()) q.add("tls_certificate_path" to certificate_path)
+        pcsFromCertificateSha256(certificate_sha256).let { if (it.isNotEmpty()) q.add("pcs" to it) }
         if (certificate_public_key_sha256.isNotEmpty()) q.add("tls_certificate_public_key_sha256" to certificate_public_key_sha256.joinToString(","))
         if (client_certificate.isNotEmpty()) q.add("tls_client_certificate" to client_certificate.joinToString(","))
         if (client_certificate_path.isNotEmpty()) q.add("tls_client_certificate_path" to client_certificate_path)
@@ -427,7 +530,7 @@ class Tls {
         return q
     }
 
-    /** TLS.cpp:338-386. */
+    /** TLS.cpp:439-490. */
     fun exportToJson(): JsonObject {
         val obj = JsonObject()
         if (!enabled) return obj
@@ -442,6 +545,7 @@ class Tls {
         if (curve_preferences.isNotEmpty()) obj["curve_preferences"] = JsonValues.stringArray(curve_preferences)
         if (certificate.isNotEmpty()) obj["certificate"] = JsonValues.stringArray(certificate)
         if (certificate_path.isNotEmpty()) obj["certificate_path"] = certificate_path
+        if (certificate_sha256.isNotEmpty()) obj["certificate_sha256"] = JsonValues.stringArray(certificate_sha256)
         if (certificate_public_key_sha256.isNotEmpty()) obj["certificate_public_key_sha256"] = JsonValues.stringArray(certificate_public_key_sha256)
         if (client_certificate.isNotEmpty()) obj["client_certificate"] = JsonValues.stringArray(client_certificate)
         if (client_certificate_path.isNotEmpty()) obj["client_certificate_path"] = client_certificate_path
@@ -462,7 +566,7 @@ class Tls {
         return obj
     }
 
-    /** TLS.cpp:387-399. */
+    /** TLS.cpp:491-503. */
     fun exportIdentity(): JsonObject {
         val obj = JsonObject()
         if (!enabled) return obj
@@ -476,7 +580,7 @@ class Tls {
     }
 
     /**
-     * TLS.cpp:400-457 without `spoof` / `spoof_method` (TLS.cpp:438-444): spoofing needs raw sockets, which an
+     * TLS.cpp:504-564 without `spoof` / `spoof_method` (TLS.cpp:545-551): spoofing needs raw sockets, which an
      * unrooted app does not have (D8). The spoof fields still round-trip through links and JSON.
      */
     fun build(ctx: BuildContext): JsonObject {
@@ -493,6 +597,7 @@ class Tls {
         if (curve_preferences.isNotEmpty()) obj["curve_preferences"] = JsonValues.stringArray(curve_preferences)
         if (certificate.isNotEmpty()) obj["certificate"] = JsonValues.stringArray(certificate)
         if (certificate_path.isNotEmpty()) obj["certificate_path"] = certificate_path
+        if (certificate_sha256.isNotEmpty()) obj["certificate_sha256"] = JsonValues.stringArray(certificate_sha256)
         if (certificate_public_key_sha256.isNotEmpty()) obj["certificate_public_key_sha256"] = JsonValues.stringArray(certificate_public_key_sha256)
         if (client_certificate.isNotEmpty()) obj["client_certificate"] = JsonValues.stringArray(client_certificate)
         if (client_certificate_path.isNotEmpty()) obj["client_certificate_path"] = client_certificate_path

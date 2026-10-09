@@ -4,6 +4,8 @@ import io.nekohasekai.sagernet.outbound.BuildContext
 import io.nekohasekai.sagernet.outbound.import.ClashProxy
 import io.nekohasekai.sagernet.outbound.BuildResult
 import io.nekohasekai.sagernet.outbound.Outbound
+import io.nekohasekai.sagernet.outbound.SecurityInfo
+import io.nekohasekai.sagernet.outbound.SecurityLevel
 import io.nekohasekai.sagernet.outbound.common.XrayMultiplex
 import io.nekohasekai.sagernet.outbound.common.XrayStreamSetting
 import io.nekohasekai.sagernet.outbound.json.JsonObject
@@ -80,9 +82,10 @@ class XrayVless : Outbound("xrayvless") {
         return true
     }
 
-    /** xrayVless.cpp:52-69: no dial-field query items. */
+    /** xrayVless.cpp:67-84: no dial-field query items; '+' goes out as %2B so receivers don't decode it as a space. */
     override fun exportToLink(): String {
         val url = LinkBuilder("vless")
+        url.plusAsEscape = true
         // a uuid missing from the link or JSON is a null QString on the desktop, which adds no user-info
         if (uuid.isNotEmpty()) url.setUserName(uuid)
         url.host = server
@@ -142,7 +145,23 @@ class XrayVless : Outbound("xrayvless") {
     /** xrayVless.h:26-28. */
     override fun displayType(): String = "VLESS (Xray)"
 
+    /** xrayVless.cpp:126-133. */
+    override fun security(): SecurityInfo {
+        val info = super.security()
+        if (info.level == SecurityLevel.None && isVlessEncrypted(encryption)) {
+            return info.copy(label = "Encrypted", level = SecurityLevel.Secure)
+        }
+        return info
+    }
+
     companion object {
+        /**
+         * IsVlessEncrypted (xrayVless.h:9-10): Xray loads only "none" or an mlkem768x25519plus key string, which
+         * encrypts the payload without transport security.
+         */
+        @JvmStatic
+        fun isVlessEncrypted(encryption: String): Boolean = encryption.isNotEmpty() && encryption != "none"
+
         /**
          * normalizeXrayVlessForParse (SubscriptionParser.cpp:142-162): a real Xray outbound nests the server under
          * `settings.vnext[0]` and the user under its `users[0]`, while [parseFromJson] reads a flat `settings`.

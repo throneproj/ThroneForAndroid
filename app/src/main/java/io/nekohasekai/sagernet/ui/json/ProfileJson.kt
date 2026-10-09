@@ -12,7 +12,7 @@ import io.nekohasekai.sagernet.ui.json.engine.SchemaStore
  */
 object ProfileJson {
 
-    private val TLS_KEYS = listOf(ExtraKey("/tls", "spoof_enabled"))
+    private val TLS_KEYS = listOf(ExtraKey("/tls", "spoof_enabled"), ExtraKey("/tls/ech", "resolver"))
 
     /** Root keys of the stored forms (the types' exportToJson) that sing-box does not have. */
     private val THRONE_KEYS = mapOf(

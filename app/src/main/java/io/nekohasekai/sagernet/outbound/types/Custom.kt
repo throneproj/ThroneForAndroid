@@ -7,6 +7,7 @@ import io.nekohasekai.sagernet.outbound.OutboundFactory
 import io.nekohasekai.sagernet.outbound.SecurityInfo
 import io.nekohasekai.sagernet.outbound.SecurityLevel
 import io.nekohasekai.sagernet.outbound.displayTransportName
+import io.nekohasekai.sagernet.outbound.withPrivateServer
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.json.JsonObject
@@ -95,7 +96,7 @@ class Custom : Outbound("custom") {
         else -> subtype
     }
 
-    /** custom.cpp:154-174: the verdict of the outbound the config actually exits through. */
+    /** custom.cpp:176-196: the verdict of the outbound the config actually exits through. */
     override fun security(): SecurityInfo = when (subtype) {
         CUSTOM_OUTBOUND -> analyzeSingBoxOutbound(configObject())
         CUSTOM_FULL_CONFIG -> {
@@ -110,7 +111,7 @@ class Custom : Outbound("custom") {
         else -> SecurityInfo()
     }
 
-    /** custom.cpp:176-195. */
+    /** custom.cpp:198-217. */
     override fun exportIdentity(): JsonObject {
         val ob = when (subtype) {
             CUSTOM_OUTBOUND -> singBoxOutboundIdentity(configObject())
@@ -235,23 +236,37 @@ class Custom : Outbound("custom") {
         private fun capitalized(s: String): String =
             if (s.isEmpty()) s else s[0].uppercaseChar() + s.substring(1)
 
-        /** custom.cpp:14-17. */
+        /** custom.cpp:15-18. */
         private fun isSingBoxInfra(t: String): Boolean = t == "direct" || t == "block" || t == "dns"
 
-        /** custom.cpp:70-73. */
-        private fun isXrayInfra(p: String): Boolean = p == "freedom" || p == "blackhole" || p == "dns" || p == "loopback"
+        /** custom.cpp:71-75: direct and block are Xray's aliases of freedom and blackhole. */
+        private fun isXrayInfra(p: String): Boolean =
+            p == "freedom" || p == "direct" || p == "blackhole" || p == "block" || p == "dns" || p == "loopback"
 
-        /** custom.cpp:19-29 (the outbound of an unknown or not yet ported type has no verdict). */
+        /** custom.cpp:77-82: Xray lets a top-level address replace vnext/servers, taking the inline user with it. */
+        private fun xrayPeer(settings: JsonObject): JsonObject {
+            if (settings.contains("address")) return settings
+            return firstObject(if (settings.contains("vnext")) settings.array("vnext") else settings.array("servers"))
+        }
+
+        /** custom.cpp:84-89. */
+        private fun xrayVlessEncryption(settings: JsonObject): String {
+            val peer = xrayPeer(settings)
+            val user = if (peer.contains("users")) firstObject(peer.array("users")) else peer
+            return user.string("encryption")
+        }
+
+        /** custom.cpp:20-30 (the outbound of an unknown or not yet ported type has no verdict). */
         private fun analyzeSingBoxOutbound(o: JsonObject): SecurityInfo {
             val type = o.string("type")
             if (type.isEmpty() || type == "custom" || type == "selector" || type == "urltest" || isSingBoxInfra(type)) return SecurityInfo()
             val ob = OutboundFactory.newByType(type)
             if (ob.invalid) return SecurityInfo()
             ob.parseFromJson(o)
-            return ob.security()
+            return withPrivateServer(ob.security(), ob.getAddress())
         }
 
-        /** custom.cpp:31-41. */
+        /** custom.cpp:32-42. */
         private fun singBoxOutboundIdentity(o: JsonObject): JsonObject {
             val type = o.string("type")
             if (type.isEmpty() || type == "custom" || type == "selector" || type == "urltest" || isSingBoxInfra(type)) return JsonObject()
@@ -264,7 +279,7 @@ class Custom : Outbound("custom") {
         private fun singBoxFullConfigEgress(cfg: JsonObject): JsonObject =
             resolveSingBoxEgress(cfg.array("outbounds"), cfg.obj("route").string("final"), 5)
 
-        // custom.cpp:43-68: the named tag, or the first outbound (sing-box's default egress), through selector/urltest groups.
+        // custom.cpp:44-69: the named tag, or the first outbound (sing-box's default egress), through selector/urltest groups.
         private fun resolveSingBoxEgress(outbounds: JsonArray, tag: String, depth: Int): JsonObject {
             if (depth <= 0 || outbounds.isEmpty()) return JsonObject()
             var target = JsonObject()
@@ -291,8 +306,8 @@ class Custom : Outbound("custom") {
             return target
         }
 
-        /** custom.cpp:75-110. */
-        private fun analyzeXrayOutbound(o: JsonObject): SecurityInfo {
+        /** custom.cpp:91-127. */
+        private fun xrayOutboundSecurity(o: JsonObject): SecurityInfo {
             val protocol = o.string("protocol")
             if (protocol.isEmpty() || isXrayInfra(protocol)) return SecurityInfo()
             val stream = o.obj("streamSettings")
@@ -304,13 +319,21 @@ class Custom : Outbound("custom") {
                 return if (insecure) SecurityInfo("Insecure TLS", transport, SecurityLevel.Weak)
                 else SecurityInfo("TLS", transport, SecurityLevel.Secure)
             }
-            // no transport security: shadowsocks still encrypts its payload; vmess is trivially detectable
-            if (protocol == "shadowsocks") return SecurityInfo("Encrypted", transport, SecurityLevel.Secure)
-            if (protocol == "vmess") return SecurityInfo("Encrypted", transport, SecurityLevel.Weak)
+            // Without transport security, shadowsocks, WireGuard and VLESS Encryption still encrypt; VMess counts as insecure.
+            if (protocol == "shadowsocks" || protocol == "wireguard" ||
+                (protocol == "vless" && XrayVless.isVlessEncrypted(xrayVlessEncryption(o.obj("settings"))))
+            ) {
+                return SecurityInfo("Encrypted", transport, SecurityLevel.Secure)
+            }
+            if (protocol == "vmess") return SecurityInfo("Insecure", transport, SecurityLevel.Weak)
             return SecurityInfo("Raw", transport, SecurityLevel.None)
         }
 
-        /** custom.cpp:112-142. */
+        /** custom.cpp:129-132. */
+        private fun analyzeXrayOutbound(o: JsonObject): SecurityInfo =
+            withPrivateServer(xrayOutboundSecurity(o), xrayPeer(o.obj("settings")).string("address"))
+
+        /** custom.cpp:134-164. */
         private fun xrayOutboundIdentity(o: JsonObject): JsonObject {
             val protocol = o.string("protocol")
             if (protocol.isEmpty() || isXrayInfra(protocol)) return JsonObject()
@@ -343,7 +366,7 @@ class Custom : Outbound("custom") {
             return id
         }
 
-        /** custom.cpp:145-151: Xray routes to the first outbound by default; pick the first real proxy. */
+        /** custom.cpp:166-173: Xray routes to the first outbound by default; pick the first real proxy. */
         private fun firstXrayEgress(outbounds: JsonArray): JsonObject {
             for (v in outbounds) {
                 val obj = v as? JsonObject ?: JsonObject()

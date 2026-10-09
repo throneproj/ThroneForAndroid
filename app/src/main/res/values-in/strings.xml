@@ -226,7 +226,6 @@
     <string name="wireguard_local_address">Alamat lokal</string>
     <string name="wireguard_public_key">Kunci publik peer</string>
     <string name="wireguard_psk">Kunci pra-bagian peer</string>
-    <string name="tun_implementation">Implementasi TUN</string>
     <string name="naive_insecure_concurrency">Konkurensi tidak aman</string>
     <string name="naive_insecure_concurrency_summary">Gunakan N koneksi tunnel serentak agar lebih tangguh dalam kondisi jaringan buruk. Lebih banyak koneksi membuat tunneling lebih mudah terdeteksi dan kurang aman. Proyek ini berusaha keras untuk keamanan terkuat terhadap analisis lalu lintas. Menggunakannya dengan cara yang tidak aman mengalahkan tujuannya. \n\nJika Anda harus menggunakan ini, coba N=2 terlebih dahulu untuk melihat apakah itu menyelesaikan masalah Anda. Sangat tidak disarankan menggunakan lebih dari 4 koneksi di sini.</string>
     <string name="backup">Cadangan</string>
