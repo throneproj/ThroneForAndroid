@@ -17,7 +17,6 @@
     <string name="quick_toggle">Omschakelen</string>
     <string name="quick_enable">Inschakelen</string>
     <string name="quick_disable">Uitschakelen</string>
-    <string name="tile_title">Schakelaar</string>
     <string name="menu_dashboard">sing-box-dashboard</string>
     <string name="action_copy">Kopiëren</string>
     <string name="navigation_open_drawer">Navigatiemenu openen</string>
@@ -247,7 +246,6 @@
     <string name="app_tls_version">Min. TLS-versie voor abonnement</string>
     <string name="hop_interval">Port-hopping-interval (seconden)</string>
     <string name="utls_fingerprint">uTLS-vingerafdruk</string>
-    <string name="set_panel_url">Paneel-URL instellen</string>
     <string name="enable_clash_api">Clash API inschakelen</string>
     <string name="log_level">Logniveau</string>
     <string name="enable_clash_api_summary">De Clash API serveren voor externe controllers en het dashboard</string>

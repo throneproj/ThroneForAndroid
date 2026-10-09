@@ -257,7 +257,6 @@
     <string name="app_tls_version">Abonelik için en düşük TLS sürümü</string>
     <string name="hop_interval">Port atlama aralığı (saniye)</string>
     <string name="utls_fingerprint">uTLS parmak izi</string>
-    <string name="set_panel_url">Panel URL\'si ayarla</string>
     <string name="enable_clash_api">Clash API\'yi etkinleştir</string>
     <string name="log_level">Günlük seviyesi</string>
     <string name="enable_clash_api_summary">Harici denetleyiciler ve panel için Clash API\'yi sun</string>

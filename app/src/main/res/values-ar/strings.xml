@@ -1123,7 +1123,6 @@
     <string name="save_fallback_message">لا يحتوي هذا الجهاز على منتقي مستندات، لذا يُحفظ الملف في:\n%1$s</string>
     <string name="save_fallback_title">لا يوجد منتقي ملفات</string>
     <string name="scanner_no_camera">لا كاميرا: اختر صورة تحتوي على رمز QR</string>
-    <string name="set_panel_url">تعيين رابط اللوحة</string>
     <string name="setting_default">افتراضي</string>
     <string name="setting_default_value">افتراضي (%s)</string>
     <string name="settings_appearance">المظهر</string>

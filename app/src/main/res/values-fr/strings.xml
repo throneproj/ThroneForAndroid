@@ -246,7 +246,6 @@
     <string name="app_tls_version">Version TLS minimale des abonnements</string>
     <string name="hop_interval">Intervalle de saut de ports (secondes)</string>
     <string name="utls_fingerprint">Empreinte uTLS</string>
-    <string name="set_panel_url">Définir l\'URL du panneau</string>
     <string name="enable_clash_api">Activer Clash API</string>
     <string name="log_level">Niveau de journalisation</string>
     <string name="enable_clash_api_summary">Servir l\'API Clash aux contrôleurs externes et au tableau de bord</string>

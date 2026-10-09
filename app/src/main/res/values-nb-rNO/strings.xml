@@ -253,7 +253,6 @@
     <string name="app_tls_version">Laveste TLS-versjon for abonnement</string>
     <string name="hop_interval">Intervall for porthopping (sekunder)</string>
     <string name="utls_fingerprint">uTLS-fingeravtrykk</string>
-    <string name="set_panel_url">Sett panel-URL</string>
     <string name="enable_clash_api">Aktiver Clash API</string>
     <string name="log_level">Loggnivå</string>
     <string name="enable_clash_api_summary">Betjen Clash API for eksterne kontrollere og oversikten</string>

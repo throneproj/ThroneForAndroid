@@ -243,7 +243,6 @@
     <string name="app_tls_version">Versi TLS minimum langganan</string>
     <string name="hop_interval">Interval lompatan port (detik)</string>
     <string name="utls_fingerprint">Sidik jari uTLS</string>
-    <string name="set_panel_url">Tetapkan URL panel</string>
     <string name="enable_clash_api">Aktifkan Clash API</string>
     <string name="log_level">Tingkat log</string>
     <string name="enable_clash_api_summary">Sajikan Clash API untuk pengendali eksternal dan dasbor</string>

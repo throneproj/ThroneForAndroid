@@ -1405,7 +1405,6 @@
     <string name="allow_insecure_sum">停用憑證檢查。當啟用時，此設定檔將和純文字同等安全</string>
     <string name="allow_insecure">允許不安全的連線</string>
     <string name="show_direct_speed_sum">在通知中一併顯示未被代理的流量速度</string>
-    <string name="tile_title">切換器</string>
     <string name="extra_headers">額外標頭</string>
     <string name="route_proxy">代理</string>
     <string name="route_profile">選取設定檔…</string>
@@ -1496,7 +1495,6 @@
     <string name="app_tls_version">訂閱最低 TLS 版本</string>
     <string name="hop_interval">端口跳躍間隔(秒)</string>
     <string name="utls_fingerprint">uTLS 指紋</string>
-    <string name="set_panel_url">設定面板 URL</string>
     <string name="enable_clash_api">啟用 Clash API</string>
     <string name="log_level">日誌級別</string>
     <string name="xtls_flow">Flow（VLESS 子協議）</string>
