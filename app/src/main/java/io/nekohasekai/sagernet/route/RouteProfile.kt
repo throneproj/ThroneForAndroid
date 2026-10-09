@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.route
 
+import io.nekohasekai.sagernet.outbound.json.JsonObject
+
 /**
  * A RouteProfile (include/database/entities/RouteProfile.h). [id] 0 means not saved yet. The desktop's raw profile
  * ([is_raw], [raw_route], [prevent_modifications]) and endpoint lists are carried verbatim so backups give them
@@ -64,11 +66,28 @@ class RouteProfile {
 
     fun proxySites(): List<String> = sites(OutboundIds.PROXY)
 
-    /** get_direct_ips (RouteProfile.cpp:745-759). */
+    /** A direct or proxy route rule that applies only on some networks: its [RouteRule.networkConditions] and sites. */
+    class ConditionalSites(val outbound: Long, val conditions: JsonObject, val sites: List<String>)
+
+    /** The direct and proxy route rules that apply only on some networks, in rule order, for DNS rules that follow them. */
+    fun conditionalSites(): List<ConditionalSites> {
+        val out = ArrayList<ConditionalSites>()
+        for (rule in rules) {
+            if (rule.outbound_id != OutboundIds.DIRECT && rule.outbound_id != OutboundIds.PROXY) continue
+            if (rule.action != "route" || rule.invert || rule.matchesByApp()) continue
+            val conditions = rule.networkConditions()
+            if (conditions.isEmpty()) continue
+            val sites = ruleSites(rule)
+            if (sites.isNotEmpty()) out.add(ConditionalSites(rule.outbound_id, conditions, sites))
+        }
+        return out
+    }
+
+    /** get_direct_ips (RouteProfile.cpp:745-759) over the [unconditional] rules only. */
     fun directIps(): List<String> {
         val out = ArrayList<String>()
         for (rule in rules) {
-            if (rule.outbound_id != OutboundIds.DIRECT || rule.action != "route") continue
+            if (rule.outbound_id != OutboundIds.DIRECT || rule.action != "route" || !unconditional(rule)) continue
             for (entry in rule.rule_set) {
                 val e = entry.trim()
                 if (e.startsWith("geoip-")) out.add("ruleset:$e")
@@ -90,22 +109,36 @@ class RouteProfile {
         return out
     }
 
-    /** get_direct_sites / get_proxy_sites (RouteProfile.cpp:697-743). */
+    /** get_direct_sites / get_proxy_sites (RouteProfile.cpp:697-743) over the [unconditional] rules only. */
     private fun sites(outbound: Long): List<String> {
         val out = ArrayList<String>()
         for (rule in rules) {
-            if (rule.outbound_id != outbound || rule.action != "route") continue
-            for (entry in rule.rule_set) {
-                val e = entry.trim()
-                if (e.startsWith("geosite-")) out.add("ruleset:$e")
-            }
-            addPrefixed(out, "domain:", rule.domain)
-            addPrefixed(out, "suffix:", rule.domain_suffix)
-            addPrefixed(out, "keyword:", rule.domain_keyword)
-            addPrefixed(out, "regex:", rule.domain_regex)
+            if (rule.outbound_id != outbound || rule.action != "route" || !unconditional(rule)) continue
+            out.addAll(ruleSites(rule))
         }
         return out
     }
+
+    private fun ruleSites(rule: RouteRule): List<String> {
+        val out = ArrayList<String>()
+        for (entry in rule.rule_set) {
+            val e = entry.trim()
+            if (e.startsWith("geosite-")) out.add("ruleset:$e")
+        }
+        addPrefixed(out, "domain:", rule.domain)
+        addPrefixed(out, "suffix:", rule.domain_suffix)
+        addPrefixed(out, "keyword:", rule.domain_keyword)
+        addPrefixed(out, "regex:", rule.domain_regex)
+        return out
+    }
+
+    /**
+     * Whether the rule's sites and addresses may become DNS rules and tun routes that hold on every network for
+     * every app. Unlike the desktop, inverted rules (their values are what they do NOT match), app rules and
+     * network-dependent rules are left out; the route rule alone decides for them.
+     */
+    private fun unconditional(rule: RouteRule): Boolean =
+        !rule.invert && !rule.matchesByApp() && rule.networkConditions().isEmpty()
 
     private fun addPrefixed(out: MutableList<String>, prefix: String, values: List<String>) {
         for (value in values) {

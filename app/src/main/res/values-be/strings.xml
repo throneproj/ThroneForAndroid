@@ -53,7 +53,6 @@
     <string name="service_mode_proxy">Толькі проксі</string>
     <string name="service_mode">Рэжым абслугоўвання</string>
     <string name="group_update">Абнаўленне</string>
-    <string name="tile_title">Перамыкач</string>
     <string name="quick_toggle">Пераключыць</string>
     <string name="quick_enable">Уключыць</string>
     <string name="quick_disable">Выключыць</string>
@@ -1078,7 +1077,6 @@
     <string name="service_proxy">Сэрвіс проксі</string>
     <string name="service_subscription">Сэрвіс абнаўлення падпіскі</string>
     <string name="service_vpn">Сэрвіс VPN</string>
-    <string name="set_panel_url">Задаць URL панэлі</string>
     <string name="setting_default">Прадвызначаны</string>
     <string name="setting_default_value">Прадвызначаны (%s)</string>
     <string name="settings">Налады</string>

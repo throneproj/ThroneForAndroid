@@ -185,7 +185,6 @@
 <string name="service_proxy">Прокси-сервис</string>
 <string name="service_subscription">Служба обновления подписки</string>
 <string name="service_vpn">VPN-сервис</string>
-<string name="set_panel_url">Установить URL панель</string>
 <string name="settings">Настройки</string>
 <string name="share">Поделиться</string>
 <string name="share_qr_nfc">QR-код</string>
@@ -208,7 +207,6 @@
 <string name="subscriptions">Подписки</string>
 <string name="test_concurrency">Число параллельных подключений</string>
 <string name="theme">Тема</string>
-<string name="tile_title">Переключатель</string>
 <string name="tls_camouflage_settings">Настройки защиты TLS</string>
 <string name="tuic_congestion_controller">Контроллер перегрузки</string>
 <string name="tuic_disable_sni">Отключить SNI</string>

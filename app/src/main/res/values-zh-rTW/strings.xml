@@ -141,7 +141,6 @@
     <string name="show_direct_speed_sum">在通知中一併顯示未被代理的流量速度</string>
     <string name="show_direct_speed">顯示直連速度</string>
     <string name="cag_misc">其他設定</string>
-    <string name="tile_title">切換器</string>
     <string name="version_x">版本 (%s)</string>
     <string name="extra_headers">額外標頭</string>
     <string name="theme">主題</string>
@@ -242,7 +241,6 @@
     <string name="app_tls_version">訂閱最低 TLS 版本</string>
     <string name="hop_interval">埠跳躍間隔(秒)</string>
     <string name="utls_fingerprint">uTLS 指紋</string>
-    <string name="set_panel_url">設定面板 URL</string>
     <string name="enable_clash_api">啟用 Clash API</string>
     <string name="log_level">日誌級別</string>
     <string name="xtls_flow">Flow（VLESS 子協議）</string>

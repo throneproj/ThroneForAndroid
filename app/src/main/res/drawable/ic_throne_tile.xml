@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The system tints tile and notification icons, so the crown's facets are told apart by gaps, not colour. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M1,4.61 L1,15.7 A3.7,3.7 0 0,0 4.7,19.39 L12.6,19.39 Z M7.84,11.09 L12,4.61 L21.17,18.89 A3.7,3.7 0 0,1 19.3,19.39 L14.35,19.39 Z M23,4.61 L23,15.7 A3.7,3.7 0 0,1 22.21,17.97 L17.85,11.17 Z" />
+</vector>

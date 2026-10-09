@@ -302,7 +302,6 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
         editButton.isVisible = buttons && !adapter.isCompact
         shareButton.isVisible = buttons && !adapter.isCompact && !profile.isChain()
         moreButton.isVisible = buttons
-        editButton.isEnabled = !host.isStartedProfile(id)
         applyCardColors(host.isSelectedProfile(id), selectCheck.isChecked)
     }
 

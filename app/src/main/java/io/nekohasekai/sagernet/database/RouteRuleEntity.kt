@@ -9,8 +9,9 @@ import io.nekohasekai.sagernet.outbound.json.JsonValues
 import io.nekohasekai.sagernet.route.RouteRule
 
 /**
- * The desktop's `route_rules` row (RoutesRepo.cpp:51-94) plus `package_name_json`. List members are compact JSON
- * string arrays in the `<member>_json` columns, like the desktop stores them.
+ * The desktop's `route_rules` row (RoutesRepo.cpp:51-94) plus the Android-only `network_type_json`,
+ * `network_is_expensive` and `package_name_regex_json`. List members are compact JSON string arrays in the
+ * `<member>_json` columns, like the desktop stores them.
  */
 @Entity(
     tableName = RouteRuleEntity.TABLE,
@@ -64,6 +65,9 @@ data class RouteRuleEntity(
     @ColumnInfo(name = "wifi_bssid_json", defaultValue = "[]") var wifiBssidJson: String = "[]",
     @ColumnInfo(name = "tls_spoof", defaultValue = "") var tlsSpoof: String = "",
     @ColumnInfo(name = "tls_spoof_method", defaultValue = "") var tlsSpoofMethod: String = "",
+    @ColumnInfo(name = "network_type_json", defaultValue = "[]") var networkTypeJson: String = "[]",
+    @ColumnInfo(name = "network_is_expensive", defaultValue = "0") var networkIsExpensive: Boolean = false,
+    @ColumnInfo(name = "package_name_regex_json", defaultValue = "[]") var packageNameRegexJson: String = "[]",
 ) {
 
     fun toModel(): RouteRule = RouteRule().also {
@@ -104,6 +108,9 @@ data class RouteRuleEntity(
         it.wifi_bssid = listFromJson(wifiBssidJson)
         it.tls_spoof = tlsSpoof
         it.tls_spoof_method = tlsSpoofMethod
+        it.network_type = listFromJson(networkTypeJson)
+        it.network_is_expensive = networkIsExpensive
+        it.package_name_regex = listFromJson(packageNameRegexJson)
     }
 
     companion object {
@@ -149,6 +156,9 @@ data class RouteRuleEntity(
             wifiBssidJson = listToJson(r.wifi_bssid),
             tlsSpoof = r.tls_spoof,
             tlsSpoofMethod = r.tls_spoof_method,
+            networkTypeJson = listToJson(r.network_type),
+            networkIsExpensive = r.network_is_expensive,
+            packageNameRegexJson = listToJson(r.package_name_regex),
         )
 
         /** QListStr2QJsonArray (Utils.cpp:110-118) written compact. */

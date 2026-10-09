@@ -35,6 +35,8 @@ https://throneproj.github.io
 * Cloudflare WARP: registration (WireGuard or MASQUE identity) and a built-in WARP mode for routing
 * URL, IP / country and speed tests, with a bulk-test panel (live progress, latency histogram, fastest servers,
   sort / remove unavailable / connect to fastest)
+* The sing-box dashboard built in (live traffic, connections, logs), already connected to the running core
+* Xray configs with geoip: / geosite: rules: the data files are downloaded when a config first needs them
 * JSON editor with sing-box schema checking, completion and formatting
 * In-app updater for GitHub builds (stable or pre-release channel, verified downloads)
 * Home-screen widgets, and server switching from the notification

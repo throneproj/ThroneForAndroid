@@ -10,7 +10,6 @@
     <string name="service_mode_proxy">プロキシのみ</string>
     <string name="service_mode">サービスモード</string>
     <string name="group_update">アップデート</string>
-    <string name="tile_title">スイッチャー</string>
     <string name="quick_toggle">トグル</string>
     <string name="quick_enable">有効化</string>
     <string name="quick_disable">無効化</string>
@@ -220,7 +219,6 @@
     <string name="app_tls_version">サブスクリプションの最小 TLS バージョン</string>
     <string name="hop_interval">ポートホッピング間隔 (秒)</string>
     <string name="utls_fingerprint">uTLS フィンガープリント</string>
-    <string name="set_panel_url">パネル URL を設定</string>
     <string name="enable_clash_api">Clash API を有効化</string>
     <string name="log_level">ログレベル</string>
     <string name="xtls_flow">Flow (VLESS サブプロトコル)</string>

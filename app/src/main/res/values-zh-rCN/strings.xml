@@ -182,7 +182,6 @@
     <string name="connection_test_clear_results">清理测试结果</string>
     <string name="connection_test_refused">连接重置</string>
     <string name="connection_test_timeout_error">超时</string>
-    <string name="tile_title">开关</string>
     <string name="http_proxy_bypass">HTTP 代理绕过列表</string>
     <string name="http_proxy_bypass_dialog_message">一行一个，# 开头代表注释。示例：*zhihu.com</string>
     <string name="group_basic">基本</string>
@@ -242,7 +241,6 @@
     <string name="tuic_congestion_controller">拥塞控制</string>
     <string name="tuic_udp_relay_mode">UDP 转发模式</string>
     <string name="menu_dashboard">sing-box 仪表板</string>
-    <string name="set_panel_url">设置面板 URL</string>
     <string name="enable_clash_api">启用 Clash API</string>
     <string name="xtls_flow">Flow（VLESS 子协议）</string>
     <string name="need_restart">重新启动应用程序以应用更改</string>

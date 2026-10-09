@@ -46,6 +46,7 @@ import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ui.profile.ProfileTextImport
 import io.nekohasekai.sagernet.ui.route.RouteImports
 import io.nekohasekai.sagernet.ui.settings.DnsSettingsFragment
+import io.nekohasekai.sagernet.ui.settings.XrayGeoSettingsFragment
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MessageStore
@@ -156,7 +157,7 @@ class MainActivity : ThemedActivity(),
         if (savedInstanceState == null) intent?.let(::handleImportIntent)
         SubscriptionReportDialog.observe(this)
 
-        refreshNavMenu(DataStore.clashApiEnabled)
+        refreshNavMenu(DataStore.apiDashboardEnabled)
 
         if (savedInstanceState == null) {
             firstStart.start()
@@ -213,9 +214,10 @@ class MainActivity : ThemedActivity(),
         }
     }
 
-    fun refreshNavMenu(clashApi: Boolean) {
+    /** The dashboard item follows the sing-box API (core_box_api_port), which serves the dashboard. */
+    fun refreshNavMenu(dashboard: Boolean) {
         if (::navigation.isInitialized) {
-            navigation.menu.findItem(R.id.nav_traffic)?.isVisible = clashApi
+            navigation.menu.findItem(R.id.nav_traffic)?.isVisible = dashboard
         }
     }
 
@@ -383,7 +385,7 @@ class MainActivity : ThemedActivity(),
             R.id.nav_group -> displayFragment(GroupFragment())
             R.id.nav_route -> displayFragment(RouteFragment())
             R.id.nav_settings -> displayFragment(SettingsFragment())
-            R.id.nav_traffic -> displayFragment(WebviewFragment())
+            R.id.nav_traffic -> displayFragment(DashboardFragment())
             R.id.nav_tools -> displayFragment(ToolsFragment())
             R.id.nav_logcat -> displayFragment(LogcatFragment())
             R.id.nav_faq -> {
@@ -407,8 +409,10 @@ class MainActivity : ThemedActivity(),
     ) {
         DataStore.serviceState = state
         refreshConfigurationProfileState()
-        ((currentMainFragment ?: supportFragmentManager.findFragmentById(R.id.fragment_holder)) as? RouteFragment)
-            ?.onServiceStateChanged()
+        when (val fragment = currentMainFragment ?: supportFragmentManager.findFragmentById(R.id.fragment_holder)) {
+            is RouteFragment -> fragment.onServiceStateChanged()
+            is DashboardFragment -> fragment.onServiceStateChanged()
+        }
 
         binding.fab.changeState(state, DataStore.serviceState, animate)
         binding.stats.changeState(state)
@@ -433,6 +437,10 @@ class MainActivity : ThemedActivity(),
             bar.setAction(R.string.settings_dns) {
                 openSettingsScreen(DnsSettingsFragment::class.java.name, getString(R.string.settings_dns))
             }
+        } else if (DataStore.serviceErrorGeo) {
+            bar.setAction(R.string.xray_geo_assets_action) {
+                openSettingsScreen(XrayGeoSettingsFragment::class.java.name, getString(R.string.xray_geo_assets))
+            }
         } else {
             bar.setAction(R.string.menu_log) { displayFragmentWithId(R.id.nav_logcat) }
         }
@@ -441,6 +449,7 @@ class MainActivity : ThemedActivity(),
                 if (event == DISMISS_EVENT_SWIPE || event == DISMISS_EVENT_ACTION) {
                     DataStore.serviceError = ""
                     DataStore.serviceErrorDns = false
+                    DataStore.serviceErrorGeo = false
                 }
             }
         }).also { it.show() }

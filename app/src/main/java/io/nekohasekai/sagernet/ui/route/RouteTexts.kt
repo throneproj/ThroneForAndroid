@@ -79,7 +79,10 @@ internal object RouteTexts {
         list("rule-set", rule.rule_set) { RuleSetLabels.shortName(it) }
         list("ip", rule.ip_cidr)
         if (rule.ip_is_private) parts.add(context.getString(R.string.route_summary_private_ip))
-        list("app", rule.package_name) { appLabels[it] ?: it }
+        list("app", rule.package_name) {
+            if (it == RouteRule.UNKNOWN_PACKAGE) context.getString(R.string.route_rule_unknown_apps) else appLabels[it] ?: it
+        }
+        list("app regex", rule.package_name_regex)
         list("process", rule.process_name)
         list("path", rule.process_path)
         list("path regex", rule.process_path_regex)
@@ -93,6 +96,8 @@ internal object RouteTexts {
         list("source port", rule.source_port)
         list("source port range", rule.source_port_range)
         list("inbound", rule.inbound)
+        list("network type", rule.network_type)
+        if (rule.network_is_expensive) parts.add(context.getString(R.string.route_summary_metered))
         list("ssid", rule.wifi_ssid)
         list("bssid", rule.wifi_bssid)
         if (parts.isEmpty()) {

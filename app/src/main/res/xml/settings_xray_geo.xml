@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <Preference
+        app:icon="@drawable/ic_baseline_info_24"
+        app:key="xrayGeoNote"
+        app:persistent="false"
+        app:selectable="false"
+        app:summary="@string/xray_geo_note" />
+    <moe.matsuri.nb4a.ui.SimpleMenuPreference
+        app:icon="@drawable/baseline_public_24"
+        app:key="xrayGeoSource"
+        app:persistent="false"
+        app:title="@string/xray_geo_source" />
+    <EditTextPreference
+        app:icon="@drawable/ic_baseline_link_24"
+        app:key="xray_geoip_url"
+        app:title="@string/xray_geo_geoip_url"
+        app:useSimpleSummaryProvider="true" />
+    <EditTextPreference
+        app:icon="@drawable/ic_baseline_link_24"
+        app:key="xray_geosite_url"
+        app:title="@string/xray_geo_geosite_url"
+        app:useSimpleSummaryProvider="true" />
+
+    <PreferenceCategory
+        app:summary="@string/xray_geo_files_sum"
+        app:title="@string/xray_geo_files">
+        <Preference
+            app:icon="@drawable/ic_baseline_folder_open_24"
+            app:key="xrayGeoFileGeoip"
+            app:persistent="false" />
+        <Preference
+            app:icon="@drawable/ic_baseline_folder_open_24"
+            app:key="xrayGeoFileGeosite"
+            app:persistent="false" />
+        <Preference
+            app:icon="@drawable/ic_baseline_download_24"
+            app:key="xrayGeoDownload"
+            app:persistent="false"
+            app:summary="@string/xray_geo_download_now_sum"
+            app:title="@string/xray_geo_download_now" />
+    </PreferenceCategory>
+</PreferenceScreen>

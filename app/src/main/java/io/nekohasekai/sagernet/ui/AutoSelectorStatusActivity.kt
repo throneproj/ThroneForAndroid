@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.ColorInt
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -30,7 +31,9 @@ import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.databinding.LayoutAutoSelectorMemberBinding
 import io.nekohasekai.sagernet.databinding.LayoutAutoSelectorStatusBinding
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.ktx.needReload
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
+import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.profileSettingsIntent
 import io.nekohasekai.sagernet.ui.profiles.ProfilesDbWatcher
 import io.nekohasekai.sagernet.widget.applyInsetPadding
@@ -79,6 +82,10 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
     private val connection = SagerConnection(SagerConnection.CONNECTION_ID_AUTO_SELECTOR, true)
     private val adapter = MemberAdapter()
     private val reloads = Channel<Unit>(Channel.CONFLATED)
+
+    private val editor = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.data?.getBooleanExtra(ProfileSettingsActivity.EXTRA_RESTART_NEEDED, false) == true) needReload()
+    }
 
     private var selectorId = -1L
     private var onlyProblems = false
@@ -167,7 +174,7 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
             val id = selectorId
             lifecycleScope.launch {
                 val profile = withContext(Dispatchers.IO) { ProfileManager.getProfile(id) }
-                if (profile != null) startActivity(profile.profileSettingsIntent(this@AutoSelectorStatusActivity, false))
+                if (profile != null) editor.launch(profile.profileSettingsIntent(this@AutoSelectorStatusActivity, false))
             }
             true
         }

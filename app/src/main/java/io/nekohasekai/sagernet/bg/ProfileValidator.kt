@@ -101,7 +101,7 @@ object ProfileValidator {
                 xrayConf.remove("inbounds")
                 return check(xrayConf.toCompact(), xray = true) { error ->
                     // Left to fail at test time, where the missing geo asset is named.
-                    if (error.contains("geoip.dat") || error.contains("geosite.dat")) Verdict.VALID
+                    if (XrayGeoAssets.isGeoError(error)) Verdict.VALID
                     else invalid("Invalid Xray ent ${outbound.name}: $error")
                 }
             }
@@ -119,6 +119,22 @@ object ProfileValidator {
         }
         conf["log"] = jsonObjectOf("level" to logLevel)
         return check(conf.toCompact(), xray = false) { error -> invalid("Invalid ent ${outbound.name}: $error") }
+    }
+
+    /**
+     * IsValid's core check of a custom Xray full config (generate.cpp:2493-2510), the config as Throne runs it (without
+     * its inbounds): the core's error, null when it passes. Geo asset errors are returned too, for the caller to name.
+     */
+    fun xrayFullConfigError(config: String): String? {
+        val xrayConf = JsonInput.parseObjectOrNull(config)?.takeIf { it.isNotEmpty() }
+            ?: return "Custom Xray full config is not valid JSON"
+        xrayConf.remove("inbounds")
+        return try {
+            Mobile.checkXrayConfig(xrayConf.toCompact())
+            null
+        } catch (e: Exception) {
+            e.message.orEmpty().ifEmpty { e.javaClass.simpleName }
+        }
     }
 
     private inline fun check(config: String, xray: Boolean, onError: (String) -> Verdict): Verdict {

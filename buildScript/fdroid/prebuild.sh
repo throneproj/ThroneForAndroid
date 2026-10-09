@@ -35,5 +35,15 @@ test -s "$ROUTES/srslist.h"
 curl -fsSL --retry 3 https://codeload.github.com/throneproj/routeprofiles/tar.gz/refs/heads/profile \
   | tar -xz --strip-components=1 -C "$ROUTES/profile"
 
+# Bundle the sing-box dashboard (same as .github/actions/sing-box-dashboard).
+DASHBOARD="$PWD/app/src/main/assets/sb-dashboard"
+rm -rf "$DASHBOARD"
+mkdir -p "$DASHBOARD"
+curl -fsSL --retry 3 https://codeload.github.com/SagerNet/sing-box-dashboard/tar.gz/refs/heads/gh-pages \
+  | tar -xz --strip-components=1 -C "$DASHBOARD"
+find "$DASHBOARD" -type f -name '.*' -delete
+test -z "$(find "$DASHBOARD" -type d -name '_*')"
+test -s "$DASHBOARD/index.html"
+
 # F-Droid builds stable tags: the same versionCode as the GitHub release (VERSION_CODE * 1000 + 999).
 grep -q '^throne.build=' gradle.properties || printf '\nthrone.build=999\n' >> gradle.properties

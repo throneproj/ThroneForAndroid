@@ -48,6 +48,23 @@
             app:title="@string/clash_api_secret" />
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/cag_api_dashboard">
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_transform_24"
+            app:key="coreApiDashboardEnabled"
+            app:persistent="false"
+            app:summary="@string/api_dashboard_enable_sum"
+            app:title="@string/api_dashboard_enable" />
+        <EditTextPreference
+            app:key="coreApiDashboardPort"
+            app:persistent="false"
+            app:title="@string/listen_port" />
+        <EditTextPreference
+            app:dialogMessage="@string/api_dashboard_secret_hint"
+            app:key="core_box_api_secret"
+            app:title="@string/clash_api_secret" />
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/cag_xray">
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:entries="@array/xray_vless_preference_entries"
@@ -55,6 +72,11 @@
             app:key="xray_vless_preference"
             app:title="@string/xray_vless_preference"
             app:useSimpleSummaryProvider="true" />
+        <Preference
+            app:fragment="io.nekohasekai.sagernet.ui.settings.XrayGeoSettingsFragment"
+            app:key="xrayGeoAssets"
+            app:summary="@string/xray_geo_assets_sum"
+            app:title="@string/xray_geo_assets" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_security">

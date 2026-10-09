@@ -17,7 +17,6 @@
     <string name="quick_toggle">Attiva/disattiva</string>
     <string name="quick_enable">Abilita</string>
     <string name="quick_disable">Disabilita</string>
-    <string name="tile_title">Interruttore</string>
     <string name="menu_dashboard">Dashboard sing-box</string>
     <string name="action_copy">Copia</string>
     <string name="navigation_open_drawer">Apri riquadro di navigazione</string>
@@ -247,7 +246,6 @@
     <string name="app_tls_version">Versione TLS minima abbonamento</string>
     <string name="hop_interval">Intervallo port hopping (secondi)</string>
     <string name="utls_fingerprint">Impronta uTLS</string>
-    <string name="set_panel_url">Imposta URL pannello</string>
     <string name="enable_clash_api">Abilita Clash API</string>
     <string name="log_level">Livello di log</string>
     <string name="enable_clash_api_summary">Servì la Clash API per controller esterni e dashboard</string>

@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.ui.profiles
 
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import io.nekohasekai.sagernet.ui.SaveDocument
 import androidx.appcompat.widget.PopupMenu
 import io.nekohasekai.sagernet.R
@@ -12,12 +13,14 @@ import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.confirmAction
+import io.nekohasekai.sagernet.ktx.needReload
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.showAllowingStateLoss
 import io.nekohasekai.sagernet.ktx.snackbar
 import io.nekohasekai.sagernet.ktx.startFilesForResult
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
 import io.nekohasekai.sagernet.ui.profile.ProfileConfigExport
+import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.profileSettingsIntent
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 
@@ -40,9 +43,13 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         }
     }
 
+    private val editor = host.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.data?.getBooleanExtra(ProfileSettingsActivity.EXTRA_RESTART_NEEDED, false) == true) host.needReload()
+    }
+
     fun edit(profile: ProxyEntity, group: ProxyGroup?) {
         val context = host.context ?: return
-        context.startActivity(profile.profileSettingsIntent(context, group?.isSubscription == true))
+        editor.launch(profile.profileSettingsIntent(context, group?.isSubscription == true))
     }
 
     internal fun showMenu(anchor: View, profile: ProxyEntity, adapter: ProfileListAdapter) {

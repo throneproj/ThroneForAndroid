@@ -62,18 +62,20 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             "override_address", "override_port",
         )
         private val LIST_KEYS = listOf(
-            "domain_suffix", "domain", "ip_cidr", "rule_set", "package_name", "domain_keyword", "domain_regex",
-            "source_ip_cidr", "port", "port_range", "source_port", "source_port_range", "inbound", "process_name",
-            "process_path", "process_path_regex", "wifi_ssid", "wifi_bssid",
+            "domain_suffix", "domain", "ip_cidr", "rule_set", "package_name", "network_type", "domain_keyword",
+            "domain_regex", "source_ip_cidr", "port", "port_range", "source_port", "source_port_range", "inbound",
+            "package_name_regex", "process_name", "process_path", "process_path_regex", "wifi_ssid", "wifi_bssid",
         )
-        private val BOOL_KEYS = listOf("sniff_override_dest", "ip_is_private", "source_ip_is_private", "invert", "no_drop")
+        private val BOOL_KEYS = listOf(
+            "sniff_override_dest", "ip_is_private", "source_ip_is_private", "invert", "no_drop", "network_is_expensive",
+        )
 
         /** The members inside the collapsed group. */
         private val ADVANCED_KEYS = listOf(
             "domain_keyword", "domain_regex", "ip_is_private", "source_ip_cidr", "source_ip_is_private", "port",
             "port_range", "source_port", "source_port_range", "network", "protocol", "ip_version", "inbound", "invert",
-            "override_address", "override_port", "no_drop", "process_name", "process_path", "process_path_regex",
-            "wifi_ssid", "wifi_bssid",
+            "override_address", "override_port", "no_drop", "package_name_regex", "process_name", "process_path",
+            "process_path_regex", "network_is_expensive", "wifi_ssid", "wifi_bssid",
         )
 
         /** Android names apps by package, never by process: these show only when a desktop rule brought a value. */
@@ -99,7 +101,7 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
         if (list != null) setListValue("rule_set", list)
     }
 
-    private val appPicker = registerForActivityResult(AppListActivity.Contract()) { list ->
+    private val appPicker = registerForActivityResult(AppListActivity.Contract(unknownEntry = true)) { list ->
         if (list != null) setListValue("package_name", list)
     }
 
@@ -159,6 +161,22 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             DataStore.dirty = true
         }
         fragment?.findPreference<StringLinesPreference>(key)?.refresh()
+    }
+
+    /** Checks the stored network types; OK keeps the checked ones in sing-box's order, Cancel changes nothing. */
+    private fun pickNetworkTypes(current: List<String>) {
+        val types = RouteRule.NETWORK_TYPES
+        val checked = BooleanArray(types.size) { types[it] in current }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.route_rule_network_type)
+            .setMultiChoiceItems(R.array.route_rule_network_type_entries, checked) { _, which, isChecked ->
+                checked[which] = isChecked
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                setListValue("network_type", types.filterIndexed { i, _ -> checked[i] })
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -267,7 +285,7 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
                 findPreference<SimpleMenuPreference>(key)?.ensureValue()
             }
 
-            val multiline = LIST_KEYS - setOf("rule_set", "package_name")
+            val multiline = LIST_KEYS - setOf("rule_set", "package_name", "network_type")
             multilineInput(*multiline.toTypedArray())
             for (key in multiline) findPreference<EditTextPreference>(key)?.summaryProvider = LinesSummaryProvider(maxLines = 3)
             refreshWifiHint()
@@ -286,10 +304,23 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
                 summaryProvider = Preference.SummaryProvider<StringLinesPreference> { p ->
                     val packages = p.values
                     if (packages.size > 5) getString(R.string.apps_message, packages.size)
-                    else summarize(packages.map { PackageCache.loadLabel(it) }, 5, ", ")
+                    else summarize(packages.map {
+                        if (it == RouteRule.UNKNOWN_PACKAGE) getString(R.string.route_rule_unknown_apps) else PackageCache.loadLabel(it)
+                    }, 5, ", ")
                 }
                 setOnPreferenceClickListener {
                     host.appPicker.launch(values)
+                    true
+                }
+            }
+            findPreference<StringLinesPreference>("network_type")!!.apply {
+                summaryProvider = Preference.SummaryProvider<StringLinesPreference> { p ->
+                    val labels = resources.getStringArray(R.array.route_rule_network_type_entries)
+                    val names = p.values.map { labels.getOrNull(RouteRule.NETWORK_TYPES.indexOf(it)) ?: it }
+                    if (names.isEmpty()) getString(androidx.preference.R.string.not_set) else names.joinToString(", ")
+                }
+                setOnPreferenceClickListener {
+                    host.pickNetworkTypes(values)
                     true
                 }
             }

@@ -94,6 +94,9 @@ abstract class ProfileSettingsActivity<T : Outbound>(
         const val EXTRA_PROFILE_ID = "id"
         const val EXTRA_IS_SUBSCRIPTION = "sub"
 
+        /** Result extra: the saved profile is one the running config uses, so the service needs a restart. */
+        const val EXTRA_RESTART_NEEDED = "restartNeeded"
+
         /** Profile cache key holding the whole ExportToJson while the "Edit as JSON" editor is open. */
         const val KEY_RAW_JSON = "serverRawJson"
     }
@@ -180,10 +183,10 @@ abstract class ProfileSettingsActivity<T : Outbound>(
                 finish()
                 return
             }
-            if (entity.id == DataStore.selectedProxy) {
-                SagerNet.stopService()
+            // dialog_edit_profile.cpp:947-951: saving a profile the running config uses asks for a restart.
+            if (ProfileManager.updateOutbound(entity.putOutbound(outbound)) && ProfileManager.runningUses(entity.id)) {
+                setResult(RESULT_OK, Intent().putExtra(EXTRA_RESTART_NEEDED, true))
             }
-            ProfileManager.updateOutbound(entity.putOutbound(outbound))
         }
         finish()
 
@@ -240,6 +243,9 @@ abstract class ProfileSettingsActivity<T : Outbound>(
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.profile_config_menu, menu)
+        // Like the list: the started profile can be edited, not deleted.
+        menu.findItem(R.id.action_delete)?.isVisible =
+            DataStore.editingId == 0L || ProfileManager.runningProfileId() != DataStore.editingId
         menu.findItem(R.id.action_move)?.apply {
             if (DataStore.editingId != 0L // not new profile
                 && SagerDatabase.groupDao.getById(DataStore.editingGroup)?.isSubscription == false

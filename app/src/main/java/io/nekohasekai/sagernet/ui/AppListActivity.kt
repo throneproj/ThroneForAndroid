@@ -27,6 +27,7 @@ import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.databinding.LayoutAppListBinding
 import io.nekohasekai.sagernet.databinding.LayoutAppsItemBinding
 import io.nekohasekai.sagernet.ktx.crossFadeFrom
+import io.nekohasekai.sagernet.route.RouteRule
 import io.nekohasekai.sagernet.utils.PackageCache
 import io.nekohasekai.sagernet.widget.applyListInsets
 import kotlinx.coroutines.Dispatchers
@@ -44,20 +45,28 @@ class AppListActivity : ThemedActivity() {
 
     companion object {
         const val EXTRA_PACKAGES = "packages"
+        private const val EXTRA_UNKNOWN_ENTRY = "unknownEntry"
         private const val SWITCH = "switch"
         private const val STATE_SELECTED = "selected"
         private const val STATE_SYSTEM_APPS = "systemApps"
     }
 
-    class Contract : ActivityResultContract<List<String>, List<String>?>() {
+    /** [unknownEntry] lists [RouteRule.UNKNOWN_PACKAGE] first, as the row for connections without a known app. */
+    class Contract(private val unknownEntry: Boolean = false) : ActivityResultContract<List<String>, List<String>?>() {
         override fun createIntent(context: Context, input: List<String>) =
             Intent(context, AppListActivity::class.java).putStringArrayListExtra(EXTRA_PACKAGES, ArrayList(input))
+                .putExtra(EXTRA_UNKNOWN_ENTRY, unknownEntry)
 
         override fun parseResult(resultCode: Int, intent: Intent?): List<String>? =
             if (resultCode == RESULT_OK) intent?.getStringArrayListExtra(EXTRA_PACKAGES) else null
     }
 
-    private class AppItem(val packageName: String, val info: ApplicationInfo?, val label: String) {
+    private class AppItem(
+        val packageName: String,
+        val info: ApplicationInfo?,
+        val label: String,
+        val unknown: Boolean = false,
+    ) {
         val sys get() = info != null && (info.flags and ApplicationInfo.FLAG_SYSTEM) != 0
         val uid get() = info?.uid
     }
@@ -72,12 +81,17 @@ class AppListActivity : ThemedActivity() {
 
         fun bind(app: AppItem) {
             item = app
-            binding.itemicon.setImageDrawable(app.info?.loadIcon(packageManager) ?: packageManager.defaultActivityIcon)
             binding.title.text = app.label
-            binding.desc.text = if (app.info != null) {
-                "${app.packageName} (${app.uid})"
+            if (app.unknown) {
+                binding.itemicon.setImageResource(R.drawable.ic_navigation_apps)
+                binding.desc.setText(R.string.route_rule_unknown_apps_desc)
             } else {
-                getString(R.string.app_not_installed, app.packageName)
+                binding.itemicon.setImageDrawable(app.info?.loadIcon(packageManager) ?: packageManager.defaultActivityIcon)
+                binding.desc.text = if (app.info != null) {
+                    "${app.packageName} (${app.uid})"
+                } else {
+                    getString(R.string.app_not_installed, app.packageName)
+                }
             }
             handlePayload(listOf(SWITCH))
         }
@@ -105,8 +119,11 @@ class AppListActivity : ThemedActivity() {
                 coroutineContext[Job]!!.ensureActive()
                 packageInfo.applicationInfo?.let { AppItem(packageName, it, it.loadLabel(packageManager).toString()) }
             }.toMutableList()
+            if (unknownEntry) {
+                list.add(AppItem(RouteRule.UNKNOWN_PACKAGE, null, getString(R.string.route_rule_unknown_apps), unknown = true))
+            }
             for (packageName in selected) {
-                if (packageName !in installed) {
+                if (packageName !in installed && !(unknownEntry && packageName == RouteRule.UNKNOWN_PACKAGE)) {
                     val info = PackageCache.installedApps[packageName]
                     list.add(AppItem(packageName, info, info?.loadLabel(packageManager)?.toString() ?: packageName))
                 }
@@ -162,9 +179,10 @@ class AppListActivity : ThemedActivity() {
     private var apps = emptyList<AppItem>()
     private val appsAdapter = AppsAdapter()
     private var sysApps = false
+    private var unknownEntry = false
 
     private fun sorted(list: List<AppItem>) =
-        list.sortedWith(compareBy({ it.packageName !in selected }, { it.label }))
+        list.sortedWith(compareBy({ !it.unknown }, { it.packageName !in selected }, { it.label }))
 
     private fun refilter() = appsAdapter.filter.filter(binding.search.text?.toString() ?: "")
 
@@ -179,7 +197,8 @@ class AppListActivity : ThemedActivity() {
             binding.loading.crossFadeFrom(binding.list)
             withContext(Dispatchers.IO) { appsAdapter.reload() }
             refilter()
-            if (apps.isEmpty()) {
+            // The unknown-app row alone is no app list: the permission hint still shows.
+            if (apps.all { it.unknown }) {
                 binding.list.visibility = View.GONE
                 binding.appPlaceholder.root.crossFadeFrom(binding.loading)
             } else {
@@ -213,6 +232,7 @@ class AppListActivity : ThemedActivity() {
         val initial = savedInstanceState?.getStringArrayList(STATE_SELECTED)
             ?: intent.getStringArrayListExtra(EXTRA_PACKAGES).orEmpty()
         initial.map { it.trim() }.filterTo(selected) { it.isNotEmpty() }
+        unknownEntry = intent.getBooleanExtra(EXTRA_UNKNOWN_ENTRY, false)
         sysApps = savedInstanceState?.getBoolean(STATE_SYSTEM_APPS) ?: false
         updateSubtitle()
 
@@ -256,6 +276,7 @@ class AppListActivity : ThemedActivity() {
         when (item.itemId) {
             R.id.action_invert_selections -> {
                 for (app in apps) {
+                    if (app.unknown) continue
                     if (!selected.remove(app.packageName)) selected.add(app.packageName)
                 }
                 apps = sorted(apps)

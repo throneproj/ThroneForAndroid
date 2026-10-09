@@ -17,10 +17,12 @@ import okhttp3.Response
 import okhttp3.Route
 import okhttp3.TlsVersion
 import okio.Buffer
+import java.io.IOException
 import java.net.Authenticator
 import java.net.InetSocketAddress
 import java.net.PasswordAuthentication
 import java.net.Proxy
+import java.net.ServerSocket
 import java.net.Socket
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -202,6 +204,51 @@ fun httpGet(url: String, options: HttpGetOptions = HttpGetOptions()): HttpGetRes
     }
 }
 
+/**
+ * A core runs connected. The :bg process asks its own service; the main process keeps the state the service
+ * connection reported.
+ */
+fun serviceConnected(): Boolean = DataStore.baseService?.data?.state?.connected ?: DataStore.serviceState.connected
+
+/**
+ * A client for app requests that stream their body: [httpGet]'s setup (net_insecure, app_tls_version, the mixed inbound
+ * as an HTTP proxy when [viaProxy] and it exists) with OkHttp following redirects itself. Blocking calls.
+ */
+fun appHttpClient(viaProxy: Boolean, timeoutSeconds: Long = 30): OkHttpClient {
+    val builder = OkHttpClient.Builder()
+        .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
+        .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
+        .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
+    if (viaProxy && !DataStore.mixedInboundDisabled) {
+        val address = DataStore.inboundAddress.let { if (it == "::") LOCALHOST else it }
+        builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(address, DataStore.inboundSocksPort)))
+        if (DataStore.inboundAuth) {
+            val credential = Credentials.basic(DataStore.inboundUser, DataStore.inboundPass)
+            builder.proxyAuthenticator(object : okhttp3.Authenticator {
+                override fun authenticate(route: Route?, response: Response): Request? {
+                    if (response.request.header("Proxy-Authorization") != null) return null
+                    return response.request.newBuilder().header("Proxy-Authorization", credential).build()
+                }
+            })
+        }
+    }
+    if (DataStore.appTLSVersion == "1.3") {
+        builder.connectionSpecs(
+            listOf(
+                ConnectionSpec.Builder(ConnectionSpec.RESTRICTED_TLS).tlsVersions(TlsVersion.TLS_1_3).build(),
+                ConnectionSpec.CLEARTEXT,
+            )
+        )
+    }
+    if (DataStore.netInsecure) {
+        val sslContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, arrayOf(TrustAllManager), SecureRandom())
+        builder.sslSocketFactory(sslContext.socketFactory, TrustAllManager)
+        builder.hostnameVerifier { _, _ -> true }
+    }
+    return builder.build()
+}
+
 /** The body, or null once it exceeds [maxBytes] (0 = no cap). */
 private fun readCapped(response: Response, maxBytes: Long): ByteArray? {
     val body = response.body ?: return ByteArray(0)
@@ -247,6 +294,17 @@ fun mkPort(): Int {
     val port = socket.localPort
     socket.close()
     return port
+}
+
+/** Whether a listener could bind [port] on loopback now; SO_REUSEADDR like the core's, so TIME_WAIT does not count. */
+fun isLoopbackPortFree(port: Int): Boolean = try {
+    ServerSocket().use {
+        it.reuseAddress = true
+        it.bind(InetSocketAddress(LOCALHOST, port))
+    }
+    true
+} catch (_: IOException) {
+    false
 }
 
 const val USER_AGENT = "Throne/Android/" + BuildConfig.VERSION_NAME

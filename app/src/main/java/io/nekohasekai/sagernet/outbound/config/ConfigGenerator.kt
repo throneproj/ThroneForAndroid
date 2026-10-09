@@ -21,7 +21,7 @@ import io.nekohasekai.sagernet.route.RuleType
  *
  * Not generated on Android (desktop-only or out of scope): raw route profiles, the `hijack` / `hijack-dns`
  * inbounds, route_exclude_address_set, TLS spoof, extra cores, auxiliary VPN endpoints and the OpenVPN /
- * OpenConnect tunnel DNS servers, the L3 bridge, the api dashboard and Tailscale profiles.
+ * OpenConnect tunnel DNS servers, the L3 bridge and Tailscale profiles.
  */
 class ConfigGenerator @JvmOverloads constructor(
     private val profiles: ProfileProvider,
@@ -185,6 +185,12 @@ class ConfigGenerator @JvmOverloads constructor(
             val proxySites = route.proxySites()
             parseDomainSelectors(proxySites, pre.proxyDns)
             pre.needProxyDnsRules = proxySites.isNotEmpty()
+            for (entry in route.conditionalSites()) {
+                val selectors = DomainSelectors()
+                parseDomainSelectors(entry.sites, selectors)
+                val server = if (entry.outbound == OutboundIds.DIRECT) Tags.DNS_DIRECT else Tags.DNS_REMOTE
+                pre.conditionalDns.add(Triple(server, entry.conditions, selectors))
+            }
         }
 
         for (id in listOf(frontProxyId, landingProxyId)) {
@@ -789,6 +795,12 @@ class ConfigGenerator @JvmOverloads constructor(
 
         // Below the fakeip rule, which keeps answering A / AAAA for these sites as on the desktop (R6 §3.5).
         val pre = state.prerequisites
+        // Ahead of the site lists, so on its network a rule's DNS server wins the way its route does.
+        for ((server, conditions, selectors) in pre.conditionalDns) {
+            if (state.forTest && server == Tags.DNS_REMOTE) continue
+            val disableIPv6 = if (server == Tags.DNS_DIRECT) buildContext.directDnsDisableIpv6 else settings.remoteDnsDisableIpv6
+            appendDnsRoutingRules(rules, selectors, server, disableIPv6, conditions)
+        }
         if (pre.needDirectDnsRules) appendDnsRoutingRules(rules, pre.directDns, Tags.DNS_DIRECT, buildContext.directDnsDisableIpv6)
 
         // A test box builds no dns-remote server at all, so its fall-through goes out direct.
@@ -826,19 +838,26 @@ class ConfigGenerator @JvmOverloads constructor(
     // The desktop never stores a malformed duration (dialog_manage_routes.cpp:230-237) and the core rejects one.
     private fun validDuration(text: String): String = text.trim().takeIf { isValidDuration(it) } ?: ""
 
-    /** appendDnsRoutingRules (:386-399): one rule-set rule and one inline rule that always carries all four keys. */
-    private fun appendDnsRoutingRules(rules: JsonArray, selectors: DomainSelectors, server: String, disableIPv6: Boolean) {
+    /**
+     * appendDnsRoutingRules (:386-399): one rule-set rule and one inline rule that always carries all four keys, both
+     * narrowed by the route rule's network [conditions] if it has any.
+     */
+    private fun appendDnsRoutingRules(
+        rules: JsonArray, selectors: DomainSelectors, server: String, disableIPv6: Boolean, conditions: JsonObject = JsonObject(),
+    ) {
         if (selectors.ruleSets.isNotEmpty()) {
-            appendDnsRoute(rules, jsonObjectOf("rule_set" to selectors.ruleSets), server, disableIPv6)
+            appendDnsRoute(rules, conditions.copy().merge(jsonObjectOf("rule_set" to selectors.ruleSets)), server, disableIPv6)
         }
         if (selectors.hasInlineConditions()) {
             appendDnsRoute(
                 rules,
-                jsonObjectOf(
-                    "domain" to selectors.domains,
-                    "domain_suffix" to selectors.suffixes,
-                    "domain_keyword" to selectors.keywords,
-                    "domain_regex" to selectors.regexes,
+                conditions.copy().merge(
+                    jsonObjectOf(
+                        "domain" to selectors.domains,
+                        "domain_suffix" to selectors.suffixes,
+                        "domain_keyword" to selectors.keywords,
+                        "domain_regex" to selectors.regexes,
+                    )
                 ),
                 server, disableIPv6,
             )
@@ -913,7 +932,9 @@ class ConfigGenerator @JvmOverloads constructor(
     /**
      * get_route_rules(false, outboundMap) (RouteProfile.cpp:593-628) with get_rule_json (RouteRule.cpp:82-190): simple
      * rules without a condition are skipped and the adblock reject goes in front of the first `route` rule, else last.
-     * Endpoint rules are skipped (no auxiliary endpoints on Android) and rule-level TLS spoof is dropped (D8).
+     * Endpoint rules are skipped (no auxiliary endpoints on Android), rule-level TLS spoof is dropped (D8) and a rule
+     * whose apps include unidentified ones, or that has both apps and package regexes, becomes a logical rule
+     * ([RouteRule.toConfigJson]).
      */
     private fun getRouteRules(state: BuildState, route: RouteProfile): JsonArray {
         val out = JsonArray()
@@ -922,7 +943,7 @@ class ConfigGenerator @JvmOverloads constructor(
             val type = RuleType.ofId(rule.type)
             if (type == RuleType.ENDPOINT_PREFERRED_BY) continue
             if (type != RuleType.CUSTOM && rule.isEmpty()) continue
-            val json = rule.toRuleJson(false, state.prerequisites.outboundMap[rule.outbound_id])
+            val json = rule.toConfigJson(state.prerequisites.outboundMap[rule.outbound_id])
             if (json.isEmpty()) {
                 state.error = "Aborted generating routing section, an error has occurred"
                 return out
@@ -979,12 +1000,27 @@ class ConfigGenerator @JvmOverloads constructor(
         state.coreConfig["experimental"] = experimental
     }
 
-    /** buildServicesSection (:2160-2185): the core builds the traffic tracker from the mere presence of an api service. */
+    /**
+     * buildServicesSection (:2186-2212): the core builds the traffic tracker from the mere presence of an api service;
+     * with a port it also serves the sing-box dashboard, the copy the app bundles and unpacks into [DASHBOARD_PATH]
+     * before the start, like the desktop.
+     */
     private fun buildServicesSection(state: BuildState) {
-        if (state.forTest || !settings.trafficStats) return
-        state.coreConfig["services"] = JsonArray.of(
-            jsonObjectOf("type" to "api", "listen" to "127.0.0.1", "listen_port" to 0, "secret" to settings.apiSecret),
+        if (state.forTest) return
+        val dashboard = settings.apiPort > 0
+        if (!dashboard && !settings.trafficStats) return
+        val api = jsonObjectOf(
+            "type" to "api",
+            "listen" to "127.0.0.1",
+            "listen_port" to if (dashboard) settings.apiPort else 0,
+            "secret" to settings.apiSecret,
         )
+        if (dashboard) {
+            // Defaults to "*", i.e. any page the user visits could reach loopback.
+            api["access_control_allow_origin"] = JsonArray.of("http://127.0.0.1:${settings.apiPort}")
+            api["dashboard"] = jsonObjectOf("enabled" to true, "path" to DASHBOARD_PATH)
+        }
+        state.coreConfig["services"] = JsonArray.of(api)
     }
 
     /** buildXrayConfig (:2189-2221): one socks inbound and routing rule per Xray ingress, no dns object. */
@@ -1025,6 +1061,12 @@ class ConfigGenerator @JvmOverloads constructor(
     }
 
     companion object {
+        /**
+         * apiDashboardDir (generate.h:10-11), the api service's `dashboard.path` relative to the core's working dir;
+         * not the Clash external_ui dir, which holds a different UI.
+         */
+        const val DASHBOARD_PATH = "sb-dashboard"
+
         private val SELECTOR_PREFIXES = listOf("ruleset:", "domain:", "suffix:", "keyword:", "regex:", "ip:")
 
         private val DURATION = Regex("^(?:\\d+(?:\\.\\d+)?(?:ns|us|ms|s|m|h|d))+$")

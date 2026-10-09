@@ -17,7 +17,6 @@
     <string name="quick_toggle">Umschalten</string>
     <string name="quick_enable">Aktivieren</string>
     <string name="quick_disable">Deaktivieren</string>
-    <string name="tile_title">Umschalter</string>
     <string name="menu_dashboard">sing-box-Dashboard</string>
     <string name="action_copy">Kopieren</string>
     <string name="navigation_open_drawer">Navigationsleiste öffnen</string>
@@ -247,7 +246,6 @@
     <string name="app_tls_version">Min. TLS-Version für Abonnements</string>
     <string name="hop_interval">Port-Hopping-Intervall (Sekunden)</string>
     <string name="utls_fingerprint">uTLS-Fingerabdruck</string>
-    <string name="set_panel_url">Panel-URL festlegen</string>
     <string name="enable_clash_api">Clash API aktivieren</string>
     <string name="log_level">Protokollstufe</string>
     <string name="enable_clash_api_summary">Die Clash API für externe Controller und das Dashboard bereitstellen</string>

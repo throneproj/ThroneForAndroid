@@ -1,8 +1,8 @@
 name: Android build
 description: >-
   Shared build steps of ci.yml, preview.yml and release.yml: JDK 17, ThroneCore AAR + sing-box schema, routeprofiles
-  snapshot, Gradle, then ./gradlew <tasks>. With sign=true, release builds are signed with the SIGNING_* secrets from
-  the job environment; the build fails without them.
+  snapshot, sing-box dashboard, Gradle, then ./gradlew <tasks>. With sign=true, release builds are signed with the
+  SIGNING_* secrets from the job environment; the build fails without them.
 inputs:
   tasks:
     description: Gradle tasks to run
@@ -31,6 +31,8 @@ runs:
       uses: ./.github/actions/throne-core
     - name: Fetch routeprofiles snapshot
       uses: ./.github/actions/routeprofiles
+    - name: Fetch sing-box dashboard
+      uses: ./.github/actions/sing-box-dashboard
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v6
       with:

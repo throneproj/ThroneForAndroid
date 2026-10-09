@@ -8,7 +8,6 @@
     <string name="app_desc">سلسلة أدوات البروکسی العالمية لنظام Android ، مكتوبة بلغة Kotlin.</string>
     <string name="project">مشروع</string>
     <string name="group_update">تحديث</string>
-    <string name="tile_title">الجلاد</string>
     <string name="quick_toggle">تبديل</string>
     <string name="quick_enable">تمكين</string>
     <string name="quick_disable">تعطيل</string>
@@ -1124,7 +1123,6 @@
     <string name="save_fallback_message">لا يحتوي هذا الجهاز على منتقي مستندات، لذا يُحفظ الملف في:\n%1$s</string>
     <string name="save_fallback_title">لا يوجد منتقي ملفات</string>
     <string name="scanner_no_camera">لا كاميرا: اختر صورة تحتوي على رمز QR</string>
-    <string name="set_panel_url">تعيين رابط اللوحة</string>
     <string name="setting_default">افتراضي</string>
     <string name="setting_default_value">افتراضي (%s)</string>
     <string name="settings_appearance">المظهر</string>

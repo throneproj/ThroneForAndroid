@@ -34,12 +34,12 @@ object Key {
     const val HIDE_FROM_RECENT_APPS = "hideFromRecentApps"
     const val PREVIEW_HINT_DISMISSED_VERSION = "previewHintDismissedVersion"
     const val GROUP_LAYOUT_MODE = "groupLayoutMode"
-    const val YACD_URL = "yacdURL"
 
     const val PROFILE_DIRTY = "profileDirty"
     const val PROFILE_ID = "profileId"
     const val PROFILE_GROUP = "profileGroup"
     const val PROFILE_CURRENT = "profileCurrent"
+    const val RUNNING_PROFILES = "runningProfiles"
 
     const val SERVER_CONFIG = "serverConfig"
 
@@ -61,6 +61,7 @@ object Key {
     const val WIFI_PERMISSION_ASKED = "wifiPermissionAsked"
     const val SERVICE_ERROR = "serviceError"
     const val SERVICE_ERROR_DNS = "serviceErrorDns"
+    const val SERVICE_ERROR_GEO = "serviceErrorGeo"
 
     const val WEBDAV_SERVER = "webdavServer"
     const val WEBDAV_USERNAME = "webdavUsername"

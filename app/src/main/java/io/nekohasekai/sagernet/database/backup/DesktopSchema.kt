@@ -4,6 +4,7 @@ package io.nekohasekai.sagernet.database.backup
  * The tables of a fresh desktop `throne.db` (Throne @ 31a6562b), created in DatabaseManager.cpp:65-128 order:
  * `entity_ids` (DatabaseManager.cpp:83-110), ProfilesRepo.cpp:17-43, GroupsRepo.cpp:19-56, RoutesRepo.cpp:13-106,
  * OtpProfilesRepo.cpp:10-29, SettingsRepo.cpp:222-229, MarkersRepo.cpp:8-15. Update together with the desktop.
+ * `route_rules` ends with Android's own rule columns, which only an Android restore reads.
  */
 object DesktopSchema {
 
@@ -138,6 +139,9 @@ object DesktopSchema {
             tls_spoof TEXT,
             tls_spoof_method TEXT,
             package_name_json TEXT,
+            network_type_json TEXT,
+            network_is_expensive INTEGER NOT NULL DEFAULT 0,
+            package_name_regex_json TEXT,
             PRIMARY KEY (route_profile_id, rule_order),
             FOREIGN KEY(route_profile_id) REFERENCES route_profiles(id) ON DELETE CASCADE
         )

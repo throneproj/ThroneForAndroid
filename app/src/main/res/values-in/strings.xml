@@ -42,7 +42,6 @@
     <string name="service_mode_proxy">Hanya proxy</string>
     <string name="service_mode">Mode Layanan</string>
     <string name="group_update">Perbarui</string>
-    <string name="tile_title">Pengalih</string>
     <string name="quick_toggle">Beralih</string>
     <string name="quick_enable">Aktifkan</string>
     <string name="quick_disable">Nonaktifkan</string>
@@ -244,7 +243,6 @@
     <string name="app_tls_version">Versi TLS minimum langganan</string>
     <string name="hop_interval">Interval lompatan port (detik)</string>
     <string name="utls_fingerprint">Sidik jari uTLS</string>
-    <string name="set_panel_url">Tetapkan URL panel</string>
     <string name="enable_clash_api">Aktifkan Clash API</string>
     <string name="log_level">Tingkat log</string>
     <string name="enable_clash_api_summary">Sajikan Clash API untuk pengendali eksternal dan dasbor</string>

@@ -133,6 +133,15 @@ class ServiceNotification(
         update()
     }
 
+    /** What a start waits for (an Xray geo asset download) under the title, [percent] -1 while unknown; null clears it. */
+    suspend fun postStartProgress(text: String?, percent: Int) {
+        useBuilder {
+            it.setContentText(text)
+            if (text == null) it.setProgress(0, 0, false) else it.setProgress(100, percent.coerceAtLeast(0), percent < 0)
+        }
+        update()
+    }
+
     suspend fun postConnected() {
         updateActions()
         useBuilder { it.priority = NotificationCompat.PRIORITY_LOW }

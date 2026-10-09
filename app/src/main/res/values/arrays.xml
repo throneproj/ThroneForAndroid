@@ -566,6 +566,13 @@
         <item>udp</item>
         <item>icmp</item>
     </string-array>
+    <!-- Same order as RouteRule.NETWORK_TYPES. -->
+    <string-array name="route_rule_network_type_entries">
+        <item>@string/route_rule_network_type_wifi</item>
+        <item>@string/route_rule_network_type_cellular</item>
+        <item>@string/route_rule_network_type_ethernet</item>
+        <item>@string/route_rule_network_type_other</item>
+    </string-array>
     <string-array name="route_rule_protocol_entries">
         <item>@string/route_rule_any</item>
         <item>http</item>

@@ -13,7 +13,6 @@
     <string name="menu_about">대하여</string>
     <string name="menu_group">그룹</string>
     <string name="menu_configuration">구성</string>
-    <string name="tile_title">스위처</string>
     <string name="menu_dashboard">sing-box 대시보드</string>
     <string name="action_copy">복사</string>
     <string name="group_update">업데이트</string>
@@ -219,7 +218,6 @@
     <string name="app_tls_version">구독 최소 TLS 버전</string>
     <string name="hop_interval">포트 호핑 간격 (초)</string>
     <string name="utls_fingerprint">uTLS 지문</string>
-    <string name="set_panel_url">패널 URL 설정</string>
     <string name="enable_clash_api">Clash API 활성화</string>
     <string name="log_level">로그 레벨</string>
     <string name="xtls_flow">Flow (VLESS 하위 프로토콜)</string>

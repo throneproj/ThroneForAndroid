@@ -114,7 +114,12 @@ data class GeneratorSettings(
     val enableTunRouting: Boolean = false,
     /** enable_stats (SettingsRepo.h:118): route.find_process and the api service. */
     val trafficStats: Boolean = true,
-    /** core_box_api_secret (SettingsRepo.h:295): the api service's secret. */
+    /**
+     * core_box_api_port (SettingsRepo.h:298), sign-encoded: > 0 is the loopback port the api service serves the
+     * dashboard on, otherwise the service is only there for the stats. Android defaults to 9091 (on).
+     */
+    val apiPort: Int = -9091,
+    /** core_box_api_secret (SettingsRepo.h:299): the api service's secret. */
     val apiSecret: String = "",
 
     // ---- experimental (SettingsRepo.h:290-292)

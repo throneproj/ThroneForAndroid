@@ -17,7 +17,6 @@
     <string name="quick_toggle">Alternar</string>
     <string name="quick_enable">Habilitar</string>
     <string name="quick_disable">Deshabilitar</string>
-    <string name="tile_title">Conmutador</string>
     <string name="menu_dashboard">Panel de sing-box</string>
     <string name="action_copy">Copiar</string>
     <string name="navigation_open_drawer">Abrir panel de navegación</string>
@@ -247,7 +246,6 @@
     <string name="app_tls_version">Versión mínima de TLS de suscripción</string>
     <string name="hop_interval">Intervalo de salto de puertos (segundos)</string>
     <string name="utls_fingerprint">Huella uTLS</string>
-    <string name="set_panel_url">Establecer URL del panel</string>
     <string name="enable_clash_api">Activar Clash API</string>
     <string name="log_level">Nivel de registro</string>
     <string name="enable_clash_api_summary">Servir la Clash API para controladores externos y el panel</string>

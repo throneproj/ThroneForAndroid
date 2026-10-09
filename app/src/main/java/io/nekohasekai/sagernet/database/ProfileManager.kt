@@ -106,6 +106,16 @@ object ProfileManager {
     /** The profile the service runs (the desktop's started_id), 0 when stopped. */
     fun runningProfileId(): Long = if (DataStore.serviceState.started) DataStore.currentProfile else 0L
 
+    /**
+     * The running config was built from [profileId]: the started profile, or one of the profiles it pulled in (chain
+     * hops, the group's landing / front proxy, auto-selector members, route outbounds), RunningUsesProfile.
+     */
+    fun runningUses(profileId: Long): Boolean {
+        val running = runningProfileId()
+        if (running <= 0L || profileId <= 0L) return false
+        return profileId == running || profileId.toString() in DataStore.runningProfiles
+    }
+
     // ------------------------------------------------------------------------------------------------ add
 
     /** ProfilesRepo::AddProfile: appended to group [groupId], the current group when it is not a group id (<= 0). */
@@ -157,11 +167,17 @@ object ProfileManager {
         }
     }
 
-    /** Stores only the profile data (type, name, outbound JSON): test results and traffic written meanwhile stay. */
-    suspend fun updateOutbound(profile: ProxyEntity) {
+    /**
+     * Stores only the profile data (type, name, outbound JSON): test results and traffic written meanwhile stay.
+     * Returns whether that data changed.
+     */
+    suspend fun updateOutbound(profile: ProxyEntity): Boolean {
+        val before = dao.getById(profile.id)
         dao.updateOutbound(profile.id, profile.type, profile.name, profile.outboundJson)
-        val stored = dao.getById(profile.id) ?: return
+        val stored = dao.getById(profile.id) ?: return false
         iterator { onUpdated(stored, false) }
+        return before == null || before.type != stored.type || before.name != stored.name ||
+            before.outboundJson != stored.outboundJson
     }
 
     suspend fun updateTraffic(profileId: Long, rx: Long, tx: Long) {

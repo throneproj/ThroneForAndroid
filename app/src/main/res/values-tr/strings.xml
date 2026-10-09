@@ -32,7 +32,6 @@
     <string name="service_mode_proxy">Sadece vekil sunucu</string>
     <string name="service_mode">Servis Modu</string>
     <string name="group_update">Güncelle</string>
-    <string name="tile_title">Değiştirici</string>
     <string name="quick_toggle">Aç/Kapat</string>
     <string name="quick_enable">Etkinleştir</string>
     <string name="quick_disable">Devre Dışı Bırak</string>
@@ -258,7 +257,6 @@
     <string name="app_tls_version">Abonelik için en düşük TLS sürümü</string>
     <string name="hop_interval">Port atlama aralığı (saniye)</string>
     <string name="utls_fingerprint">uTLS parmak izi</string>
-    <string name="set_panel_url">Panel URL\'si ayarla</string>
     <string name="enable_clash_api">Clash API\'yi etkinleştir</string>
     <string name="log_level">Günlük seviyesi</string>
     <string name="enable_clash_api_summary">Harici denetleyiciler ve panel için Clash API\'yi sun</string>

@@ -4,6 +4,8 @@ import android.app.Application
 import go.Seq
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.bg.test.TestEngine
+import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.throneproj.mobile.Instance
 import io.throneproj.mobile.LogSink
 import io.throneproj.mobile.Mobile
@@ -14,6 +16,9 @@ import java.io.File
 
 // Loaded only in the :bg process: everything here pulls the ThroneCore AAR (libthrone.so) in.
 object CoreRuntime {
+
+    /** The core's working dir under filesDir, which relative paths of its config resolve against. */
+    const val WORKING_DIR = "core"
 
     private const val LOG_QUEUE_LINES = 1024
 
@@ -38,12 +43,20 @@ object CoreRuntime {
         if (detached) TestEngine.onRunningClosed()
     }
 
+    /**
+     * The sing-box level lines must reach to be written: the box level-filters only its own console and hands every
+     * line to the sink, so the sink applies the running config's `log.level` (unset = trace, like sing-box).
+     */
+    @Volatile
+    private var logLevel = Mobile.LogLevelTrace
+
     fun setup(app: Application) {
         Seq.setContext(app)
         CoreLog.newSession()
+        logLevel = runCatching { levelOf(DataStore.logLevel) }.getOrDefault(Mobile.LogLevelWarn)
         Mobile.setup(SetupOptions().apply {
             basePath = app.filesDir.absolutePath
-            workingPath = File(app.filesDir, "core").absolutePath
+            workingPath = File(app.filesDir, WORKING_DIR).absolutePath
             tempPath = app.cacheDir.absolutePath
             logMaxLines = LOG_QUEUE_LINES
             debug = BuildConfig.DEBUG
@@ -52,8 +65,24 @@ object CoreRuntime {
         Mobile.setLogSink(CoreLogSink)
     }
 
+    /** Follows the `log.level` of [coreConfig], the config the main instance is about to run. */
+    fun applyLogLevel(coreConfig: String) {
+        logLevel = levelOf(JsonInput.parseObject(coreConfig).obj("log").string("level"))
+    }
+
+    private fun levelOf(level: String): Int = when (level.trim().lowercase()) {
+        "panic" -> Mobile.LogLevelPanic
+        "fatal" -> Mobile.LogLevelFatal
+        "error" -> Mobile.LogLevelError
+        "warn", "warning" -> Mobile.LogLevelWarn
+        "info" -> Mobile.LogLevelInfo
+        "debug" -> Mobile.LogLevelDebug
+        else -> Mobile.LogLevelTrace
+    }
+
     private object CoreLogSink : LogSink {
         override fun write(level: Int, message: String) {
+            if (level > logLevel) return
             CoreLog.write("[${levelName(level)}] $message")
         }
 
