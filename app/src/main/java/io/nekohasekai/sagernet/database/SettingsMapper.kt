@@ -24,7 +24,7 @@ import java.util.concurrent.Executors
  * routing input. The UI process (config export) and the :bg process (running instances, URL / speed tests) map them
  * identically, except that only :bg, where the core is loaded, lets the core check auto-selector members.
  * Every desktop key maps onto the field that names it; the Android-only inputs are the service mode, the per-app
- * lists and the HTTP proxy bypass list.
+ * lists and the system HTTP proxy switch and bypass list.
  */
 object SettingsMapper {
 
@@ -78,7 +78,7 @@ object SettingsMapper {
             perAppEnabled = DataStore.proxyApps,
             perAppBypass = DataStore.bypass,
             perAppPackages = GeneratorSettings.splitLines(DataStore.individual),
-            httpProxyEnabled = mixedEnabled,
+            httpProxyEnabled = DataStore.appendHttpProxy,
             httpProxyBypassDomains = GeneratorSettings.splitLines(DataStore.httpProxyBypass),
             remoteDns = DataStore.remoteDns,
             remoteDnsDisableIpv6 = DataStore.remoteDnsDisableIpv6,

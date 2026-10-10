@@ -7,6 +7,7 @@ import io.nekohasekai.sagernet.database.SettingsMapper
 import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.config.ConfigGenerator
 import io.nekohasekai.sagernet.outbound.config.GeneratedConfig
+import io.nekohasekai.sagernet.outbound.config.GeneratorSettings
 import io.nekohasekai.sagernet.outbound.config.ProfileProvider
 import io.nekohasekai.sagernet.outbound.config.RoutingInput
 import io.nekohasekai.sagernet.outbound.config.TestCandidate
@@ -24,13 +25,19 @@ object CoreConfigs {
         override fun get(id: Long): Outbound? = cache.getOrPut(id) { SagerDatabase.proxyDao.getById(id)?.outbound }
     }
 
-    fun generator(routing: RoutingInput = RoutingInput.DEFAULT): ConfigGenerator =
-        ConfigGenerator(DatabaseProfiles(), SettingsMapper.generatorSettings(), SettingsMapper.buildContext(), routing)
+    fun generator(
+        routing: RoutingInput = RoutingInput.DEFAULT,
+        settings: GeneratorSettings = SettingsMapper.generatorSettings(),
+    ): ConfigGenerator = ConfigGenerator(DatabaseProfiles(), settings, SettingsMapper.buildContext(), routing)
 
-    /** The main config of [profile]; throws with the generator's message when it cannot be built. */
-    fun buildMain(profile: ProxyEntity): GeneratedConfig {
+    /**
+     * The main config of [profile]; throws with the generator's message when it cannot be built. [deferRuleSets]
+     * is GeneratorSettings.deferRuleSets, for a start the user let go without its rule-sets.
+     */
+    fun buildMain(profile: ProxyEntity, deferRuleSets: Boolean = false): GeneratedConfig {
         val (landing, front) = groupProxies(profile.groupId)
-        val generated = generator(SettingsMapper.routingInput()).build(profile.id, landing, front)
+        val settings = SettingsMapper.generatorSettings().copy(deferRuleSets = deferRuleSets)
+        val generated = generator(SettingsMapper.routingInput(), settings).build(profile.id, landing, front)
         if (!generated.ok) error(generated.error ?: "config generation failed")
         return generated
     }

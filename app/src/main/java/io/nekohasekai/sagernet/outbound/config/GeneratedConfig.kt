@@ -11,7 +11,7 @@ package io.nekohasekai.sagernet.outbound.config
  *   when any Xray instance runs, else "".
  * - [xrayFullConfigs]: opaque custom Xray full configs, one instance each: test candidates, or the members of a
  *   started auto-selector.
- * - [outboundTags] / [tagToProfileId]: the ingress tag of every built test candidate (`proxy-<n>-0`,
+ * - [outboundTags] / [tagToProfileId]: the ingress tag of every built test candidate (`proxy-<id>-0`,
  *   `xrayfull-<id>-0`) and its profile id (test builds only).
  * - [fullConfigs]: custom `fullconfig` test candidates passed through with their `inbounds` emptied, by profile id.
  * - [skipped]: test candidates that were not built, with the reason.

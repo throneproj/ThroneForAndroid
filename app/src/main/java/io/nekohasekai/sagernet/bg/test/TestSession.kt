@@ -81,6 +81,10 @@ internal class TestSession(
     /** Why profiles were left untested for a geo asset, shown as a warning once the session ends. */
     private val assetProblems: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
+    /** The profiles under test by id, for the names in the log. */
+    @Volatile
+    private var tested: Map<Long, ProxyEntity> = emptyMap()
+
     /** stop(): the core cancels the tests in flight, the sweep starts nothing new. */
     fun stop() {
         cancelled = true
@@ -149,6 +153,7 @@ internal class TestSession(
 
     private suspend fun runProfiles() {
         val profiles = resolve()
+        tested = profiles.associateBy { it.id }
         if (notification.scope.isBlank()) {
             notification.scope = profiles.firstOrNull()?.let { GroupRepo.get(it.groupId)?.displayName() }.orEmpty()
         }
@@ -167,6 +172,7 @@ internal class TestSession(
     private suspend fun runCurrent() {
         started(1)
         val running = CoreRuntime.running
+        running?.let { ProfileManager.getProfile(it.profileId) }?.let { tested = mapOf(it.id to it) }
         when (kind) {
             TestSpec.KIND_URL -> UrlTestRunner(this).runCurrent(running)
             TestSpec.KIND_SPEED -> SpeedTestRunner(this).runCurrent(running)
@@ -222,12 +228,14 @@ internal class TestSession(
             } else {
                 counted(ProxyEntity.isWorking(latency), ProxyEntity.isUnavailable(latency))
             }
+            if (ProxyEntity.isUnavailable(latency)) Logs.w("[${nameOf(result.profileId)}] test error: ${result.error}")
             notifyClient { it.onUrlResult(result.profileId, latency, if (result.connectOnly) "" else result.error) }
         }
     }
 
-    /** The running connection's URL test is shown, never stored. */
+    /** The running connection's URL test is shown, never stored; its error is logged (mainwindow_view.cpp:446-448). */
     fun reportCurrentUrl(result: ProbeResult) {
+        if (result.error.isNotEmpty()) Logs.w("UrlTest error: ${result.error}")
         val latency = latencyCode(result.latency, result.error, result.connectOnly)
         counted(ProxyEntity.isWorking(latency), ProxyEntity.isUnavailable(latency))
         notifyClient { it.onUrlResult(result.profileId, latency, if (result.connectOnly) "" else result.error) }
@@ -238,7 +246,9 @@ internal class TestSession(
         persist(results) { ProfileManager.saveIpTestResult(it.profileId, it.ip, it.country, it.error) }
         for (result in results) {
             val success = result.measured && result.error.isEmpty()
-            counted(success, result.measured && !success && !ProxyEntity.isTestAborted(result.error))
+            val failure = result.measured && !success && !ProxyEntity.isTestAborted(result.error)
+            counted(success, failure)
+            if (failure) Logs.w("[${nameOf(result.profileId)}] IP test error: ${result.error}")
             val error = if (result.measured) result.error else notMeasured(result.error)
             notifyClient {
                 it.onIpResult(
@@ -257,7 +267,7 @@ internal class TestSession(
         val dl = result.dlSpeed.orEmpty()
         val ul = result.ulSpeed.orEmpty()
         val country = CountryNames.toCode(result.serverCountry)
-        if (error.isNotEmpty()) Logs.w("[$profileId] speed test error: $error")
+        if (error.isNotEmpty()) Logs.w("[${nameOf(profileId)}] speed test error: $error")
         val stored = try {
             if (error.isEmpty()) {
                 ProfileManager.saveSpeedTestResult(profileId, dl, ul, result.latency, country, "")
@@ -312,6 +322,10 @@ internal class TestSession(
             Logs.w(e)
         }
     }
+
+    /** DisplayTypeAndName, as the desktop's result log lines name a profile. */
+    private fun nameOf(profileId: Long): String =
+        tested[profileId]?.outbound?.displayTypeAndName() ?: profileId.toString()
 
     private fun counted(success: Boolean, failure: Boolean) {
         done.incrementAndGet()

@@ -82,6 +82,7 @@ class Vmess : Outbound("vmess") {
             transport.method = "GET"
             transport.path = QtStrings.sectionFirstSkipEmpty(transport.path, ',').trim()
         }
+        transport.rawHttpHeader = rawHttp
 
         val scy = objN.string("scy")
         if (scy.isNotEmpty()) security = scy

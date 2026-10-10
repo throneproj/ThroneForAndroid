@@ -21,6 +21,11 @@
             app:persistent="false"
             app:summary="@string/allow_access_sum"
             app:title="@string/allow_access" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_http_24"
+            app:key="appendHttpProxy"
+            app:summary="@string/append_http_proxy_sum"
+            app:title="@string/append_http_proxy" />
         <EditTextPreference
             app:dialogMessage="@string/http_proxy_bypass_dialog_message"
             app:icon="@drawable/ic_baseline_domain_24"
@@ -44,6 +49,12 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_advanced">
+        <EditTextPreference
+            app:dialogMessage="@string/dns_in_port_dialog_message"
+            app:icon="@drawable/ic_action_dns"
+            app:key="core_dns_in_port"
+            app:title="@string/dns_in_port"
+            app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nb4a.ui.EditConfigPreference
             app:icon="@drawable/ic_baseline_layers_24"
             app:jsonAllowEmpty="true"

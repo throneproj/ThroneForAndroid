@@ -59,6 +59,10 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var serviceErrorDns by configurationStore.boolean(Key.SERVICE_ERROR_DNS)
     /** [serviceError] is about Xray's geoip.dat / geosite.dat, so it offers the geo asset settings instead. */
     var serviceErrorGeo by configurationStore.boolean(Key.SERVICE_ERROR_GEO)
+    /** [serviceError] is about remote rule-sets that could not be downloaded, so it offers to start without them. */
+    var serviceErrorRuleSets by configurationStore.boolean(Key.SERVICE_ERROR_RULE_SETS)
+    /** When (epoch ms) the user agreed to start without those rule-sets; the next start spends it, 0 = none. */
+    var startWithoutRuleSets by configurationStore.long(Key.START_WITHOUT_RULE_SETS)
     var groupLayoutMode by configurationStore.stringToInt(Key.GROUP_LAYOUT_MODE) { 0 }
 
     var networkChangeResetConnections by configurationStore.boolean(Key.NETWORK_CHANGE_RESET_CONNECTIONS) { true }
@@ -84,6 +88,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var proxyApps by configurationStore.boolean(Key.PROXY_APPS)
     var bypass by configurationStore.boolean(Key.BYPASS_MODE) { true }
     var individual by configurationStore.string(Key.INDIVIDUAL)
+    /** The VPN hands the mixed inbound to apps as the system HTTP proxy (only without inbound_auth). */
+    var appendHttpProxy by configurationStore.boolean(Key.APPEND_HTTP_PROXY)
     var httpProxyBypass by configurationStore.string(Key.HTTP_PROXY_BYPASS) { "" }
 
     var webdavServer: String?

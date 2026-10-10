@@ -260,8 +260,10 @@ class ConfigGenerator @JvmOverloads constructor(
     }
 
     /**
-     * One test box for every candidate at once (BuildTestConfig, :2544-2693): candidate n is a chain under the
-     * prefix `proxy-<n>` whose ingress tag `proxy-<n>-0` is reported in [GeneratedConfig.outboundTags]; there is no
+     * One test box for every candidate at once (BuildTestConfig, :2544-2693): a candidate is a chain under the
+     * prefix `proxy-<profile id>` whose ingress tag `proxy-<profile id>-0` is reported in
+     * [GeneratedConfig.outboundTags]. The desktop numbers candidates per build instead; ids keep the tags of builds
+     * that test at once (a failed probe's halves) apart, as the core's result buffers are process-wide. There is no
      * `proxy` tag, no inbounds except the Xray -> sing-box bridges, no experimental or services section, and the
      * DNS falls through to dns-direct. Xray candidates share one Xray config; custom Xray full configs each get
      * their own instance ([GeneratedConfig.xrayFullConfigs]).
@@ -285,7 +287,8 @@ class ConfigGenerator @JvmOverloads constructor(
         val xrayFullConfigs = ArrayList<String>()
         val skipped = LinkedHashMap<Long, String>()
 
-        val resolved = candidates.map { it to profiles.get(it.id) }
+        // A repeated candidate would repeat its id-derived tags.
+        val resolved = candidates.distinctBy { it.id }.map { it to profiles.get(it.id) }
         var xrayCount = 0
         var chainCount = 0
         for ((_, outbound) in resolved) {
@@ -296,7 +299,6 @@ class ConfigGenerator @JvmOverloads constructor(
         // Reserved in one batch so no two candidates collide; every chain is assumed to transition twice (:2553-2554).
         val xrayPorts = LocalPorts.reserve(xrayCount + 2 * chainCount)
         var xrayPortIdx = 0
-        var suffix = 1
 
         for ((candidate, outbound) in resolved) {
             val id = candidate.id
@@ -359,14 +361,13 @@ class ConfigGenerator @JvmOverloads constructor(
             }
             val tag = chains.buildOutboundChain(
                 ChainRequest(
-                    hopIds, hopTag(Tags.TEST_CHAIN_PREFIX, suffix),
+                    hopIds, "${Tags.TEST_CHAIN_PREFIX}-$id",
                     singToXrayPort = singToXrayPort, xrayToSingPort = xrayToSingPort,
                 ),
             )
             if (state.failed) return GeneratedConfig.failure(state.error)
             outboundTags.add(tag)
             tagToProfileId[tag] = id
-            suffix++
         }
 
         buildXrayConfig(state)
@@ -476,8 +477,8 @@ class ConfigGenerator @JvmOverloads constructor(
 
     /**
      * The tun inbound of :1141-1180 with the Android field set of design §2.4: no interface_name / auto_redirect
-     * (the platform opens the device), per-app package lists instead of uid rules, the system HTTP proxy handed to
-     * the VpnService builder through `platform.http_proxy`, and an explicit 1.14 `dns_mode`. No `stack`: sing-tun's
+     * (the platform opens the device), per-app package lists instead of uid rules, the opt-in system HTTP proxy handed
+     * to the VpnService builder through `platform.http_proxy`, and an explicit 1.14 `dns_mode`. No `stack`: sing-tun's
      * default, as on the desktop.
      */
     private fun buildTunInbound(state: BuildState): JsonObject {
@@ -500,7 +501,8 @@ class ConfigGenerator @JvmOverloads constructor(
             val packages = JsonValues.stringArray(settings.perAppPackages.map { it.trim() })
             if (packages.isNotEmpty()) tun[if (settings.perAppBypass) "exclude_package" else "include_package"] = packages
         }
-        if (settings.mixedInboundEnabled && settings.httpProxyEnabled) {
+        // ProxyInfo carries no credentials: apps would only get 407 from a mixed inbound with users.
+        if (settings.mixedInboundEnabled && settings.httpProxyEnabled && !settings.mixedAuth) {
             val httpProxy = jsonObjectOf("enabled" to true, "server" to "127.0.0.1", "server_port" to settings.mixedPort)
             val bypass = JsonValues.stringArray(settings.httpProxyBypassDomains.map { it.trim() })
             if (bypass.isNotEmpty()) httpProxy["bypass_domain"] = bypass
@@ -740,7 +742,14 @@ class ConfigGenerator @JvmOverloads constructor(
     /** buildDNSSection (:873-1114) without the Tailscale, tunnel DNS, extra-core and DNS-server hijack rules. */
     private fun buildDnsSection(state: BuildState, useDnsObj: Boolean) {
         if (buildContext.useDnsObject && useDnsObj) {
-            state.coreConfig["dns"] = JsonInput.parseObject(settings.dnsObject)
+            val dns = JsonInput.parseObject(settings.dnsObject)
+            if (settings.deferRuleSets && dns.isArray("rules")) {
+                // As in appendDnsRoutingRules; a whole rule goes, since dropping only its rule_set would widen it.
+                val rules = JsonArray()
+                dns.array("rules").filterNot(::referencesRuleSet).forEach { rules.add(it) }
+                dns["rules"] = rules
+            }
+            state.coreConfig["dns"] = dns
             return
         }
         var independentCache = false
@@ -876,7 +885,10 @@ class ConfigGenerator @JvmOverloads constructor(
     private fun appendDnsRoutingRules(
         rules: JsonArray, selectors: DomainSelectors, server: String, disableIPv6: Boolean, conditions: JsonObject = JsonObject(),
     ) {
-        if (selectors.ruleSets.isNotEmpty()) {
+        // A DNS rule pins the DNS mode a set's metadata implies at start (dns/router.go:229-276): the download of a
+        // set that started empty could flip it and be refused before it is cached (rule_set_remote.go:214), so
+        // every later start would fail on it again.
+        if (selectors.ruleSets.isNotEmpty() && !settings.deferRuleSets) {
             appendDnsRoute(rules, conditions.copy().merge(jsonObjectOf("rule_set" to selectors.ruleSets)), server, disableIPv6)
         }
         if (selectors.hasInlineConditions()) {
@@ -894,6 +906,10 @@ class ConfigGenerator @JvmOverloads constructor(
             )
         }
     }
+
+    /** A DNS rule, or a logical one's sub-rule, that matches a rule-set. */
+    private fun referencesRuleSet(rule: Any): Boolean =
+        rule is JsonObject && (rule.contains("rule_set") || rule.array("rules").any(::referencesRuleSet))
 
     // "*." is rewritten to the queried name by the core; a family without an address is refused rather than passed
     // through, else the other family defeats the override (:936-957).
@@ -995,7 +1011,8 @@ class ConfigGenerator @JvmOverloads constructor(
 
     /**
      * buildRuleSetArray (:1916-1955): the profile's sets, then adblock; always present. No update_interval or
-     * http_client, so the core refreshes each set every 24 h through route.final, as on the desktop.
+     * http_client, so the core refreshes each set every 24 h through route.final, as on the desktop. A deferred start
+     * ([GeneratorSettings.deferRuleSets], Android-only) adds an empty initial_path and a download through `proxy`.
      */
     private fun buildRuleSetArray(state: BuildState): JsonArray {
         val out = JsonArray()
@@ -1007,8 +1024,16 @@ class ConfigGenerator @JvmOverloads constructor(
         return out
     }
 
-    private fun remoteRuleSet(tag: String, url: String): JsonObject =
-        jsonObjectOf("type" to "remote", "tag" to tag, "format" to "binary", "url" to url)
+    private fun remoteRuleSet(tag: String, url: String): JsonObject {
+        val ruleSet = jsonObjectOf("type" to "remote", "tag" to tag, "format" to "binary", "url" to url)
+        if (settings.deferRuleSets) {
+            // StartContext reads initial_path only without a cached copy, instead of failing the start on a fetch
+            // (rule_set_remote.go:97-140); the updater then fetches such a set right away (rule_set_updater.go:45-50).
+            ruleSet["initial_path"] = EMPTY_RULE_SET_PATH
+            ruleSet["http_client"] = jsonObjectOf("detour" to Tags.PROXY)
+        }
+        return ruleSet
+    }
 
     /** buildExperimentalSection (:2133-2155). */
     private fun buildExperimentalSection(state: BuildState) {
@@ -1097,6 +1122,9 @@ class ConfigGenerator @JvmOverloads constructor(
          * not the Clash external_ui dir, which holds a different UI.
          */
         const val DASHBOARD_PATH = "sb-dashboard"
+
+        /** The empty binary rule-set a deferred start begins uncached sets with, relative to the core's working dir. */
+        const val EMPTY_RULE_SET_PATH = "empty-rule-set.srs"
 
         private val SELECTOR_PREFIXES = listOf("ruleset:", "domain:", "suffix:", "keyword:", "regex:", "ip:")
 

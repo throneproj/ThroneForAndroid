@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.ui.settings
 
 import android.content.Intent
+import android.os.Build
 import android.widget.Toast
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
@@ -25,7 +26,10 @@ import kotlinx.coroutines.withContext
 import moe.matsuri.nb4a.ui.EditConfigPreference
 import kotlin.math.abs
 
-/** The mixed inbound (Basic Settings › Inbound Settings) plus the Android HTTP proxy bypass list. */
+/**
+ * The mixed inbound (Basic Settings › Inbound Settings) and the DNS server port (Basic Settings › Core), plus the
+ * Android system HTTP proxy switch and its bypass list.
+ */
 class InboundSettingsFragment : SettingsScreenFragment(R.xml.settings_inbound) {
 
     override fun beforeInflate() {
@@ -39,10 +43,15 @@ class InboundSettingsFragment : SettingsScreenFragment(R.xml.settings_inbound) {
         val auth = pref<SwitchPreference>(SettingsRegistry.INBOUND_AUTH.key)
         val user = pref<EditTextPreference>(SettingsRegistry.INBOUND_USER.key)
         val pass = pref<EditTextPreference>(SettingsRegistry.INBOUND_PASS.key)
+        val appendHttpProxy = pref<SwitchPreference>(Key.APPEND_HTTP_PROXY)
         val httpProxyBypass = pref<EditTextPreference>(Key.HTTP_PROXY_BYPASS)
+        val dnsInPort = pref<EditTextPreference>(SettingsRegistry.CORE_DNS_IN_PORT.key)
 
         checkText(port.key, R.string.invalid_port, valid = SettingValidators::isPort)
         port.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
+        // dialog_basic_settings.cpp:255-256.
+        checkText(dnsInPort.key, R.string.invalid_port, valid = SettingValidators::isPort)
+        dnsInPort.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         pass.summaryProvider = GroupSettingsActivity.PasswordSummaryProvider
         httpProxyBypass.setOnBindEditTextListener(EditTextPreferenceModifiers.Hosts)
         httpProxyBypass.summaryProvider = LinesSummaryProvider(maxLines = 1)
@@ -55,8 +64,22 @@ class InboundSettingsFragment : SettingsScreenFragment(R.xml.settings_inbound) {
             true
         }
 
+        var mixedDisabled = DataStore.disableMixedInbound
+        fun updateHttpProxyState(authOn: Boolean = auth.isChecked, append: Boolean = appendHttpProxy.isChecked) {
+            appendHttpProxy.isEnabled = !mixedDisabled && !authOn
+            appendHttpProxy.summary = getString(
+                when {
+                    mixedDisabled -> R.string.append_http_proxy_mixed_disabled
+                    authOn -> R.string.append_http_proxy_auth_on
+                    else -> R.string.append_http_proxy_sum
+                }
+            )
+            httpProxyBypass.isEnabled = appendHttpProxy.isEnabled && append
+        }
+
         fun updateMixedState(disabled: Boolean) {
-            for (p in listOf(port, randomPort, allowLan, auth, user, pass, httpProxyBypass)) p.isEnabled = !disabled
+            mixedDisabled = disabled
+            for (p in listOf(port, randomPort, allowLan, auth, user, pass)) p.isEnabled = !disabled
             if (disabled) {
                 port.summaryProvider = null
                 port.summary = getString(R.string.mixed_inbound_disabled)
@@ -65,8 +88,9 @@ class InboundSettingsFragment : SettingsScreenFragment(R.xml.settings_inbound) {
             }
             user.isEnabled = !disabled && auth.isChecked
             pass.isEnabled = !disabled && auth.isChecked
+            updateHttpProxyState()
         }
-        updateMixedState(DataStore.disableMixedInbound)
+        updateMixedState(mixedDisabled)
         pref<SwitchPreference>(SettingsRegistry.DISABLE_MIXED_INBOUND.key).setOnPreferenceChangeListener { _, newValue ->
             val disabled = newValue as Boolean
             if (disabled && DataStore.serviceMode == Key.MODE_PROXY) {
@@ -83,8 +107,19 @@ class InboundSettingsFragment : SettingsScreenFragment(R.xml.settings_inbound) {
         auth.setOnPreferenceChangeListener { _, newValue ->
             user.isEnabled = newValue as Boolean
             pass.isEnabled = newValue
+            updateHttpProxyState(authOn = newValue)
             needReload()
             true
+        }
+        appendHttpProxy.setOnPreferenceChangeListener { _, newValue ->
+            updateHttpProxyState(append = newValue as Boolean)
+            needReload()
+            true
+        }
+        // VpnService.Builder.setHttpProxy needs Android 10.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            appendHttpProxy.isVisible = false
+            httpProxyBypass.isVisible = false
         }
         reloadOn(randomPort.key, user.key, pass.key, httpProxyBypass.key)
     }

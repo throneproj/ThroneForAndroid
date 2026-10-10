@@ -22,6 +22,9 @@ class Transport {
     @JvmField var early_data_header_name: String = ""
     @JvmField var service_name: String = ""
 
+    /** Never persisted: the parsed source asked for the raw TCP HTTP header, which sing-box reproduces only without TLS. */
+    @JvmField var rawHttpHeader: Boolean = false
+
     fun parseFromLink(link: String): Boolean = parseFromLink(LinkParser.parse(link))
 
     /** transport.cpp:9-42. */
@@ -35,6 +38,8 @@ class Transport {
             type = "http"
             method = "GET"
         }
+        // a link naming no transport (the throneExtra of a V2RayN link) keeps what the first parse found
+        if (q.has("type") || rawHttp) rawHttpHeader = rawHttp
         if (q.has("host")) host = q.valueFully("host")
         if (q.has("path")) path = q.valueFully("path")
         // the raw header's server accepts any of its comma-listed paths, while sing-box sends exactly one
@@ -88,7 +93,10 @@ class Transport {
         return true
     }
 
-    /** transport.cpp:78-126: ws / httpupgrade, grpc, h2 and http-opts in that priority; false when none applies. */
+    /**
+     * transport.cpp:78-126: ws / httpupgrade, grpc, h2 and http-opts in that priority; false when none applies.
+     * Android also maps `network: http` without a method, which Clash sends as GET.
+     */
     fun parseFromClash(proxy: ClashProxy): Boolean {
         val network = proxy.string("network")
         val ws = proxy.obj("ws-opts")
@@ -109,7 +117,7 @@ class Transport {
             return true
         }
         val grpcServiceName = proxy.obj("grpc-opts").string("grpc-service-name")
-        if (grpcServiceName.isNotEmpty()) {
+        if (grpcServiceName.isNotEmpty() || network == "grpc") {
             type = "grpc"
             service_name = grpcServiceName
             return true
@@ -124,11 +132,12 @@ class Transport {
         }
         val http = proxy.obj("http-opts")
         val httpMethod = http.string("method")
-        if (httpMethod.isNotEmpty()) {
+        if (httpMethod.isNotEmpty() || network == "http") {
             type = "http"
             http.stringListMap("headers")["Host"]?.firstOrNull()?.let { host = it }
             http.strings("path").firstOrNull()?.let { path = it }
-            method = httpMethod
+            method = httpMethod.ifEmpty { "GET" }
+            rawHttpHeader = true
             return true
         }
         return false

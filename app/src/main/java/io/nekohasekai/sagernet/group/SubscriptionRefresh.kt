@@ -47,13 +47,33 @@ internal object SubscriptionRefresh {
         // abort before the first write (no deletion, no update time). Parsing writes nothing, so it runs first.
         val parsed = parse(fetched.body)
         if (parsed.isEmpty()) {
+            // GroupUpdater.cpp:746-752: panels answer a device or quota limit with an empty list and an announcement
+            // saying why.
+            val info = fetched.subInfo
+            if (info.valid) {
+                if (info.announce.isNotEmpty()) Logs.w(str(R.string.subs_announcement_from, group.name, info.announce))
+                SagerDatabase.groupDao.setSubscriptionMetadata(gid, info.toJsonString())
+                GroupRepo.postUpdate(gid)
+            }
             val message = str(R.string.subs_empty_aborted)
             Logs.w("${group.name}: $message")
             if (notifyErrors) SubscriptionQueue.error(gid, message)
             return
         }
+        // Android-only (#53): filtered servers never enter the sink, so the diff deletes the ones already stored.
+        val servers = SubscriptionNameFilter.apply(parsed, options, group.name)
+        if (servers.isEmpty()) {
+            if (fetched.subInfo.valid) {
+                SagerDatabase.groupDao.setSubscriptionMetadata(gid, fetched.subInfo.toJsonString())
+                GroupRepo.postUpdate(gid)
+            }
+            val message = str(R.string.subs_filtered_all_aborted, parsed.size)
+            Logs.w("${group.name}: $message")
+            if (notifyErrors) SubscriptionQueue.error(gid, message)
+            return
+        }
 
-        SagerDatabase.groupDao.setSubscriptionInfo(gid, System.currentTimeMillis() / 1000, fetched.userInfo)
+        SagerDatabase.groupDao.setSubscriptionInfo(gid, System.currentTimeMillis() / 1000, fetched.subInfo.toJsonString())
         GroupRepo.postUpdate(gid)
 
         // Auto selectors are local state, not servers the remote sent: keep them out of the diff.
@@ -94,7 +114,7 @@ internal object SubscriptionRefresh {
         val sink = ImportSink(gid, if (cleared) null else index)
 
         Logs.i(">>>>>>>> " + str(R.string.subs_processing))
-        for (outbound in parsed) sink.add(outbound)
+        for (outbound in servers) sink.add(outbound)
         sink.flush()
         Logs.i(">>>>>>>> " + str(R.string.subs_process_complete))
 
@@ -170,6 +190,8 @@ internal object SubscriptionRefresh {
             }
         }
 
+        val filteredOut = parsed.size - servers.size
+        if (filteredOut > 0) changeText += "\n" + str(R.string.subs_filtered_out, filteredOut) + "\n"
         val filtered = SubscriptionFilters.removeFlagged(gid, members(), options)
         changeText += filtered.report
         disturbed.addAll(filtered.deleted)

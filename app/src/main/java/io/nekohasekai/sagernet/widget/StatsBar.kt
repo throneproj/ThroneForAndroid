@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.widget
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.text.format.Formatter
 import android.util.AttributeSet
@@ -8,6 +9,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
 import com.google.android.material.bottomappbar.BottomAppBar
@@ -17,6 +19,7 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.ui.MainActivity
+import io.nekohasekai.sagernet.ui.test.TestFormat
 import io.nekohasekai.sagernet.SagerNet
 import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +46,12 @@ class StatsBar @JvmOverloads constructor(
     private lateinit var statusText: TextView
     private lateinit var txText: TextView
     private lateinit var rxText: TextView
+    private var exitIpText: TextView? = null
+    private var exitLocationText: TextView? = null
+    private var exitColumn: View? = null
+    private var statusLine: CharSequence = ""
+    private var stateReported = false
+    private val exitListener = { showExit() }
     @Suppress("unused")
     private lateinit var behavior: YourBehavior
     private var currentState = BaseService.State.Idle
@@ -121,12 +130,70 @@ class StatsBar @JvmOverloads constructor(
         statusText = findViewById(R.id.status)
         txText = findViewById(R.id.tx)
         rxText = findViewById(R.id.rx)
+        exitIpText = findViewById(R.id.exit_ip)
+        exitLocationText = findViewById(R.id.exit_location)
+        exitColumn = findViewById(R.id.exit_column)
         super.setOnClickListener(l)
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        ExitIp.listener = exitListener
+        showExit()
+    }
+
+    // A rotation keeps the lookup; a destroyed activity drops it, since the service may restart unseen meanwhile.
+    override fun onDetachedFromWindow() {
+        if (ExitIp.listener === exitListener) ExitIp.listener = null
+        if ((context as? Activity)?.isChangingConfigurations != true) ExitIp.clear()
+        super.onDetachedFromWindow()
+    }
+
     private fun setStatus(text: CharSequence) {
+        statusLine = text
         statusText.text = text
-        TooltipCompat.setTooltipText(this, text)
+        updateTooltip()
+    }
+
+    private fun updateTooltip() {
+        val exit = exitIpText?.takeIf { it.isVisible }?.contentDescription
+        TooltipCompat.setTooltipText(this, if (exit == null) statusLine else "$statusLine\n$exit")
+    }
+
+    /**
+     * runningCountryInfo (mainwindow_view.cpp:151-165, its tooltip :209-210): flag and IP, the country and city where
+     * they fit; the tooltip always has them.
+     */
+    private fun showExit() {
+        val ipView = exitIpText ?: return
+        val info = ExitIp.info?.takeIf { currentState == BaseService.State.Connected }
+        // Portrait only: an empty exit column must not keep half of the row from the speeds.
+        exitColumn?.isVisible = info != null
+        if (info == null) {
+            ipView.isVisible = false
+            exitLocationText?.isVisible = false
+        } else {
+            val code = info.countryCode
+            val country = if (TestFormat.isCountryCode(code)) TestFormat.countryName(code) else info.country
+            val location = if (country.isNotEmpty() && info.city.isNotEmpty()) {
+                context.getString(R.string.exit_ip_location, country, info.city)
+            } else {
+                country.ifEmpty { info.city }
+            }
+            val flag = TestFormat.flag(code)
+            ipView.text = if (flag.isEmpty()) info.ip else "$flag\u00A0${info.ip}"
+            ipView.contentDescription = if (location.isEmpty()) {
+                context.getString(R.string.exit_ip_summary, info.ip)
+            } else {
+                context.getString(R.string.exit_ip_summary_location, info.ip, location)
+            }
+            ipView.isVisible = true
+            exitLocationText?.let {
+                it.text = location
+                it.isVisible = location.isNotEmpty()
+            }
+        }
+        updateTooltip()
     }
 
     // On TV the bar stays put: it holds the URL test and must stay reachable by D-pad.
@@ -282,6 +349,13 @@ class StatsBar @JvmOverloads constructor(
     fun changeState(state: BaseService.State) {
         currentState = state
         updateHideOnScroll()
+        when {
+            state == BaseService.State.Connected -> ExitIp.ensure()
+            // MainActivity.onCreate reports Idle before its service connection does: a rotation keeps the lookup.
+            state != BaseService.State.Idle || stateReported -> ExitIp.clear()
+        }
+        stateReported = true
+        showExit()
         if (state == BaseService.State.Connected) {
             setStatus(app.getText(R.string.vpn_connected))
         } else {
@@ -349,6 +423,8 @@ class StatsBar @JvmOverloads constructor(
                     ).show()
                 }
             }
+            // After the test, not beside it: one request at a time through the running connection.
+            onMainDispatcher { ExitIp.refresh() }
         }
     }
 

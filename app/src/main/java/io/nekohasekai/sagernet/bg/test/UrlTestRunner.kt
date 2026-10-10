@@ -51,11 +51,14 @@ internal class UrlTestRunner(session: TestSession) : LatencySweep(session) {
         // The last emitted result wins: the verdict comes after the failure it replaces.
         val result = AtomicReference(ProbeResult(running.profileId, error = ERROR_NO_RESULT))
         try {
-            session.awaitCore { done ->
-                Mobile.startURLTest(
-                    running.instance, CoreRuntime.platform, request,
-                    Handler({ running.profileId }, result::set, done),
-                )
+            // Sessions never overlap, so only the stats bar's test can report this tag meanwhile.
+            TestTags.holding(listOf(TestTags.CURRENT)) {
+                session.awaitCore { done ->
+                    Mobile.startURLTest(
+                        running.instance, CoreRuntime.platform, request,
+                        Handler({ running.profileId }, result::set, done),
+                    )
+                }
             }
         } catch (e: CancellationException) {
             throw e

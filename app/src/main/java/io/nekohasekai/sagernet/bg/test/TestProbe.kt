@@ -72,6 +72,10 @@ internal class TestProbe private constructor(
     /** The tags the test build gave the profiles [ids] in the shared box. */
     fun tagsOf(ids: Set<Long>): List<String> = tagToProfileId.filterValues { it in ids }.keys.toList()
 
+    /** The tags its core test reports: the shared box's candidates, or the full config's default outbound. */
+    fun reportedTags(): List<String> =
+        if (fullConfigProfileId > 0) listOf(TestTags.defaultOutbound(core.coreConfig)) else tagToProfileId.keys.toList()
+
     fun request(): TestRequest = TestRequest().apply {
         core.applyTo(this)
         useDefaultOutbound = fullConfigProfileId > 0
@@ -225,7 +229,9 @@ internal abstract class LatencySweep(protected val session: TestSession) {
     /**
      * One test build over [ids] and its probes. A probe of several profiles whose box cannot start (one config that
      * fails takes the others down) is split in halves, each built and run on its own, down to the profile at fault; a
-     * probe waits for [gate] only while it runs, so the halves never wait on a permit their parent holds.
+     * probe holds its [TestTags], then a [gate] permit, only while it runs, so the halves never wait on what their
+     * parent holds. The halves' tags never meet; full configs that share a default outbound tag take turns, and since
+     * the tags come first, one waiting for its turn holds no permit.
      */
     private suspend fun runBuild(
         ids: List<Long>,
@@ -252,7 +258,9 @@ internal abstract class LatencySweep(protected val session: TestSession) {
         session.ensureSharedXrayAssets(generated.xrayConfig)
         coroutineScope {
             for (probe in TestProbe.plan(generated)) launch {
-                val failure = gate.withPermit { runProbe(probe, batch, results) } ?: return@launch
+                val failure = TestTags.holding(probe.reportedTags()) {
+                    gate.withPermit { runProbe(probe, batch, results) }
+                } ?: return@launch
                 val profileIds = probe.profileIds
                 if (profileIds.size > 1 && !session.cancelled) {
                     Logs.w("Test probe of ${profileIds.size} profiles could not start, testing it in halves: $failure")

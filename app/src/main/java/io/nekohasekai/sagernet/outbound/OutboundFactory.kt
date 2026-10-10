@@ -158,7 +158,8 @@ object OutboundFactory {
         val encryption = query.value("encryption")
         return preference == XrayVlessPreference.AllVLESS ||
             rawHttpOverTls ||
-            transport == "xhttp" ||
+            // splithttp: XHTTP's former name (Android only, XrayStreamSetting reads it as xhttp)
+            transport == "xhttp" || transport == "splithttp" ||
             query.has("fm") ||
             query.has("finalmask") ||
             // sing-box has no counterpart to verifyPeerCertByName

@@ -15,8 +15,10 @@ import io.nekohasekai.sagernet.aidl.ISagerNetService
 import io.nekohasekai.sagernet.aidl.ISagerNetServiceCallback
 import io.nekohasekai.sagernet.appwidget.Widgets
 import io.nekohasekai.sagernet.bg.autoselector.AutoSelectorRuntime
+import io.nekohasekai.sagernet.bg.proto.DeferredRuleSets
 import io.nekohasekai.sagernet.bg.proto.LocalDnsFailedException
 import io.nekohasekai.sagernet.bg.proto.ProxyInstance
+import io.nekohasekai.sagernet.bg.proto.RuleSetDownloadFailedException
 import io.nekohasekai.sagernet.bg.proto.exitsThroughVpn
 import io.nekohasekai.sagernet.bg.proto.urlTestCurrent
 import io.nekohasekai.sagernet.database.DataStore
@@ -451,6 +453,7 @@ class BaseService {
                     "ServiceStopTrace serviceId=$serviceId proxyId=$proxyId " +
                         "stage=stopped restart=$restart hasCleanupError=${cleanupError != null}"
                 )
+                if (!restart) DeferredRuleSets.serviceStopped()
 
                 try {
                     when {
@@ -469,13 +472,15 @@ class BaseService {
 
         /**
          * A start that failed: MainActivity keeps showing [message] until the next start, also on a later visit, and
-         * offers the DNS settings with it when [dnsSettings], the Xray geo asset settings when [geoSettings].
+         * offers the DNS settings with it when [dnsSettings], the Xray geo asset settings when [geoSettings], a start
+         * without the rule-sets when [ruleSets].
          */
-        fun failRunner(message: String, dnsSettings: Boolean = false, geoSettings: Boolean = false) {
+        fun failRunner(message: String, dnsSettings: Boolean = false, geoSettings: Boolean = false, ruleSets: Boolean = false) {
             if (data.state != State.Stopping) {
                 DataStore.serviceError = message
                 DataStore.serviceErrorDns = dnsSettings
                 DataStore.serviceErrorGeo = geoSettings
+                DataStore.serviceErrorRuleSets = ruleSets
             }
             stopRunner(false, message)
         }
@@ -550,6 +555,7 @@ class BaseService {
             PlatformNotifications.cancelAlwaysOnNoProfile(this)
 
             val proxy = ProxyInstance(profile, this)
+            proxy.deferRuleSets = DeferredRuleSets.consume()
             data.proxy = proxy
             BootReceiver.enabled = DataStore.rememberEnable
             if (!data.closeReceiverRegistered) {
@@ -588,6 +594,7 @@ class BaseService {
                 DataStore.serviceError = ""
                 DataStore.serviceErrorDns = false
                 DataStore.serviceErrorGeo = false
+                DataStore.serviceErrorRuleSets = false
             }
             data.changeState(State.Connecting)
             // startForeground before anything can stop the service (see the link above).
@@ -618,6 +625,11 @@ class BaseService {
                         if (exc.servers.isEmpty()) getString(R.string.local_dns_failed_system)
                         else getString(R.string.local_dns_failed, exc.servers),
                         dnsSettings = true,
+                    )
+                } catch (exc: RuleSetDownloadFailedException) {
+                    failRunner(
+                        getString(R.string.rule_set_deferred_failed, DeferredRuleSets.describe(exc.readableMessage)),
+                        ruleSets = true,
                     )
                 } catch (exc: XrayGeoAssets.DownloadException) {
                     failRunner(

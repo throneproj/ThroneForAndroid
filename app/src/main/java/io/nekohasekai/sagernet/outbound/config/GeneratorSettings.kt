@@ -62,8 +62,11 @@ data class GeneratorSettings(
     val perAppBypass: Boolean = true,
     /** DataStore.individual split on newlines; the caller adds or removes its own package as it sees fit. */
     val perAppPackages: List<String> = emptyList(),
-    /** platform.http_proxy.enabled: the app always pointed the system HTTP proxy at the mixed inbound (VpnService.kt:214-224). */
-    val httpProxyEnabled: Boolean = true,
+    /**
+     * DataStore.appendHttpProxy (Android-only, off by default): `platform.http_proxy` points the VPN's system HTTP
+     * proxy (VpnService.openTun) at the mixed inbound, only while that inbound is on and has no [mixedAuth].
+     */
+    val httpProxyEnabled: Boolean = false,
     /** platform.http_proxy.bypass_domain <- DataStore.httpProxyBypass split on newlines. */
     val httpProxyBypassDomains: List<String> = emptyList(),
 
@@ -158,6 +161,13 @@ data class GeneratorSettings(
     val warpMasqueSni: String = "consumer-masque.cloudflareclient.com",
     /** warp_masque_http_mode: 0 HTTP/3 falling back to HTTP/2, 1 HTTP/3 only, 2 HTTP/2. */
     val warpMasqueHttpMode: Int = 0,
+
+    // ---- start parameters (Android-only, not settings)
+    /**
+     * #65: the start does not wait for remote rule-sets. Each starts from its cached copy or else empty
+     * ([ConfigGenerator.EMPTY_RULE_SET_PATH]) and downloads through `proxy`; DNS rules leave rule-sets out.
+     */
+    val deferRuleSets: Boolean = false,
 ) {
     /** The mixed inbound's `listen`: inbound_address as stored. */
     val mixedListen: String get() = inboundAddress

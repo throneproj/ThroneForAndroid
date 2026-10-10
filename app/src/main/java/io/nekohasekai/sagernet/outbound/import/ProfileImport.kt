@@ -58,8 +58,19 @@ object ProfileImport {
         val produced = ArrayList<Outbound>()
         val messages = ArrayList<String>()
 
+        /** Issue #63: a node its core cannot run is logged and dropped ([CoreSupport]). */
         private fun produce(outbound: Outbound?) {
-            if (outbound != null) produced.add(outbound)
+            if (outbound == null) return
+            val problem = CoreSupport.problem(outbound)
+            if (problem != null) {
+                skip(outbound, problem)
+                return
+            }
+            produced.add(outbound)
+        }
+
+        private fun skip(outbound: Outbound, problem: String) {
+            log("Skipped ${outbound.displayTypeAndName()}: $problem")
         }
 
         private fun log(line: String) {
@@ -272,6 +283,11 @@ object ProfileImport {
                         OutboundFactory.newByType(profileType)
                     }
                     if (!outbound.parseFromClash(node)) continue
+                    val problem = CoreSupport.clashProblem(proxy, outbound)
+                    if (problem != null) {
+                        skip(outbound, problem)
+                        continue
+                    }
                     produce(outbound)
                 }
             } catch (e: Exception) {

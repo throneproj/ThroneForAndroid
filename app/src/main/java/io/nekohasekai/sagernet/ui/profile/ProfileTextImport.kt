@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.ui.profile
 
 import io.nekohasekai.sagernet.database.SettingsMapper
+import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.`import`.ProfileImport
 
@@ -10,6 +11,10 @@ import io.nekohasekai.sagernet.outbound.`import`.ProfileImport
  */
 object ProfileTextImport {
 
-    /** Every outbound found in [text]; empty when nothing parsed. */
-    fun parse(text: String): List<Outbound> = ProfileImport.parse(text, SettingsMapper.xrayVlessPreference()).outbounds
+    /** Every outbound found in [text]; empty when nothing parsed. The parser's notes (skipped nodes) go to the log. */
+    fun parse(text: String): List<Outbound> {
+        val result = ProfileImport.parse(text, SettingsMapper.xrayVlessPreference())
+        for (message in result.messages) Logs.w(message)
+        return result.outbounds
+    }
 }

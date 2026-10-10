@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.group
 
 import androidx.core.net.toUri
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.database.SubUserInfo
 import io.nekohasekai.sagernet.ktx.HttpGetOptions
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
@@ -18,15 +19,15 @@ object SubscriptionFetch {
     /** The body of an HTTP error status is logged up to this size. */
     private const val MAX_LOGGED_BODY = 4096
 
-    /** [error] is null on success; [userInfo] is the raw Subscription-UserInfo header ("" when absent). */
-    class Result(@JvmField val body: String, @JvmField val userInfo: String, @JvmField val error: String?)
+    /** [error] is null on success; [subInfo] is what the headers and the body's head said ([SubscriptionMetadata]). */
+    class Result(@JvmField val body: String, @JvmField val subInfo: SubUserInfo, @JvmField val error: String?)
 
     fun fetch(url: String, name: String, identity: RequestIdentity): Result {
         Logs.i(">>>>>>>> " + app.getString(R.string.subs_requesting, name))
         val result = if (url.startsWith("content://", ignoreCase = true)) readContent(url) else request(url, identity)
         if (result.error != null) {
             Logs.w("<<<<<<<< " + app.getString(R.string.subs_request_error, name, result.error + "\n" + result.body))
-            return Result("", "", result.error)
+            return Result("", SubUserInfo(), result.error)
         }
         Logs.i("<<<<<<<< " + app.getString(R.string.subs_request_finished, name))
         return result
@@ -39,9 +40,10 @@ object SubscriptionFetch {
         )
         if (!response.ok) {
             val body = String(response.data, 0, minOf(response.data.size, MAX_LOGGED_BODY), Charsets.UTF_8)
-            return Result(body, "", response.error)
+            return Result(body, SubUserInfo(), response.error)
         }
-        return Result(String(response.data, Charsets.UTF_8), response.header("Subscription-UserInfo"), null)
+        val body = String(response.data, Charsets.UTF_8)
+        return Result(body, SubscriptionMetadata.read(response::header, body), null)
     }
 
     private fun readContent(url: String): Result = try {
@@ -56,8 +58,9 @@ object SubscriptionFetch {
                 if (out.size() > MAX_BYTES) error(app.getString(R.string.subs_response_too_large, MAX_BYTES / (1024 * 1024)))
             }
         }
-        Result(out.toString(Charsets.UTF_8.name()), "", null)
+        val body = out.toString(Charsets.UTF_8.name())
+        Result(body, SubscriptionMetadata.read({ "" }, body), null)
     } catch (e: Exception) {
-        Result("", "", e.readableMessage)
+        Result("", SubUserInfo(), e.readableMessage)
     }
 }

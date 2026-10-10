@@ -154,8 +154,8 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
 
     private fun appLabels(packages: Collection<String>): Map<String, String> {
         if (packages.isEmpty()) return emptyMap()
-        PackageCache.awaitLoadSync()
-        return packages.distinct().associateWith { PackageCache.loadLabel(it) }
+        val cache = PackageCache.snapshot()
+        return packages.distinct().associateWith { cache.loadLabel(it) }
     }
 
     /** The packages the rules' summaries name, without the unknown-app entry. */

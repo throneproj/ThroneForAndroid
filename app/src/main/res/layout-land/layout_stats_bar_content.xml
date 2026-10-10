@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One line: the speeds left of the FAB, the status right of it; equal halves keep the gap under the centred FAB. -->
+<!-- One line: the speeds left of the FAB, the status and the exit right of it; equal halves keep the gap under the
+     centred FAB. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -44,16 +45,39 @@
         android:layout_width="96dp"
         android:layout_height="0dp" />
 
-    <TextView
-        android:id="@+id/status"
+    <!-- The exit keeps its width (flag and IP only; the rest is in the tooltip), the status takes what is left. -->
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:ellipsize="end"
-        android:gravity="end"
-        android:maxLines="1"
-        android:textColor="?whiteOrTextPrimary"
-        android:textSize="14sp"
-        tools:text="@string/connection_test_available" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:gravity="end"
+            android:maxLines="1"
+            android:textColor="?whiteOrTextPrimary"
+            android:textSize="14sp"
+            tools:text="@string/connection_test_available" />
+
+        <TextView
+            android:id="@+id/exit_ip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="?whiteOrTextPrimary"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:text="203.0.113.5"
+            tools:visibility="visible" />
+
+    </LinearLayout>
 
 </LinearLayout>

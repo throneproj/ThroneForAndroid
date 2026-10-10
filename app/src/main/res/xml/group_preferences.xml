@@ -52,6 +52,13 @@
             app:key="groupSkipAutoUpdate"
             app:title="@string/grp_skip_auto_update" />
 
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_device_data_usage"
+            app:key="groupSubShowInfoCard"
+            app:summary="@string/grp_show_info_card_tip"
+            app:title="@string/grp_show_info_card" />
+
         <Preference
             app:icon="@drawable/ic_baseline_expand_more_24"
             app:key="groupAdvancedToggle"
@@ -142,6 +149,24 @@
             app:key="groupSubSortByLatency"
             app:summary="@string/grp_url_test_only"
             app:title="@string/grp_sort_by_latency" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="groupFilter"
+        app:title="@string/grp_filter">
+
+        <EditTextPreference
+            app:dialogMessage="@string/grp_filter_include_tip"
+            app:icon="@drawable/ic_baseline_filter_list_24"
+            app:key="groupSubNameInclude"
+            app:title="@string/grp_filter_include" />
+
+        <EditTextPreference
+            app:dialogMessage="@string/grp_filter_exclude_tip"
+            app:icon="@drawable/ic_baseline_block_24"
+            app:key="groupSubNameExclude"
+            app:title="@string/grp_filter_exclude" />
 
     </PreferenceCategory>
 

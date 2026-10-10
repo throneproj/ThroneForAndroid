@@ -441,6 +441,8 @@ class MainActivity : ThemedActivity(),
             bar.setAction(R.string.xray_geo_assets_action) {
                 openSettingsScreen(XrayGeoSettingsFragment::class.java.name, getString(R.string.xray_geo_assets))
             }
+        } else if (DataStore.serviceErrorRuleSets) {
+            bar.setAction(R.string.rule_set_deferred_action) { confirmStartWithoutRuleSets() }
         } else {
             bar.setAction(R.string.menu_log) { displayFragmentWithId(R.id.nav_logcat) }
         }
@@ -450,9 +452,24 @@ class MainActivity : ThemedActivity(),
                     DataStore.serviceError = ""
                     DataStore.serviceErrorDns = false
                     DataStore.serviceErrorGeo = false
+                    DataStore.serviceErrorRuleSets = false
                 }
             }
         }).also { it.show() }
+    }
+
+    /** The next start, within a few minutes, goes without the rule-sets it could not download (DeferredRuleSets). */
+    private fun confirmStartWithoutRuleSets() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.rule_set_deferred_title)
+            .setMessage(R.string.rule_set_deferred_message)
+            .setPositiveButton(R.string.connect) { _, _ ->
+                if (DataStore.serviceState.canStop) return@setPositiveButton
+                DataStore.startWithoutRuleSets = System.currentTimeMillis()
+                startFromUi()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     override fun snackbarInternal(text: CharSequence): Snackbar {

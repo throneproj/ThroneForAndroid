@@ -31,6 +31,7 @@ import io.nekohasekai.sagernet.database.SubscriptionOptions
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.group.DeviceDetails
 import io.nekohasekai.sagernet.group.RequestIdentity
+import io.nekohasekai.sagernet.group.SubscriptionNameFilter
 import io.nekohasekai.sagernet.ktx.FixedLinearLayoutManager
 import io.nekohasekai.sagernet.ktx.confirmAction
 import io.nekohasekai.sagernet.ui.settings.DefaultSummaryProvider
@@ -68,6 +69,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         private const val KEY_AUTO_CLEAR = "groupAutoClearUnavailable"
         private const val KEY_SUBSCRIPTION = "groupSubscription"
         private const val KEY_SKIP_AUTO_UPDATE = "groupSkipAutoUpdate"
+        private const val KEY_SHOW_INFO_CARD = "groupSubShowInfoCard"
         private const val KEY_ADVANCED_TOGGLE = "groupAdvancedToggle"
         private val ADVANCED_CATEGORIES = listOf("groupAdvancedRequest", "groupAdvancedUpdate", "groupAdvancedAfterUpdate")
         private const val KEY_USER_AGENT = "groupSubUserAgent"
@@ -83,6 +85,13 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         private const val KEY_URL_TEST = "groupSubUrlTest"
         private const val KEY_REMOVE_UNAVAILABLE = "groupSubRemoveUnavailable"
         private const val KEY_SORT_BY_LATENCY = "groupSubSortByLatency"
+        private const val KEY_FILTER = "groupFilter"
+        private const val KEY_NAME_INCLUDE = "groupSubNameInclude"
+        private const val KEY_NAME_EXCLUDE = "groupSubNameExclude"
+        private val NAME_FILTERS = listOf(
+            KEY_NAME_INCLUDE to R.string.grp_filter_include,
+            KEY_NAME_EXCLUDE to R.string.grp_filter_exclude,
+        )
 
         private val HWID_KEYS = listOf(KEY_HWID, KEY_HWID_OS, KEY_HWID_OS_VERSION, KEY_HWID_MODEL)
         private val OPTION_TEXT_KEYS = listOf(KEY_USER_AGENT) + HWID_KEYS
@@ -275,6 +284,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         store.putString(KEY_LANDING, group.landingProxyId.coerceAtLeast(-1L).toString())
         store.putBoolean(KEY_AUTO_CLEAR, group.autoClearUnavailable)
         store.putBoolean(KEY_SKIP_AUTO_UPDATE, group.skipAutoUpdate)
+        store.putBoolean(KEY_SHOW_INFO_CARD, group.subOptions.showInfoCard)
         val options = group.subOptions
         store.putString(KEY_USER_AGENT, options.userAgent)
         store.putString(KEY_SEND_HWID, options.sendHwid.value.toString())
@@ -289,6 +299,8 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         store.putBoolean(KEY_URL_TEST, options.urlTest)
         store.putBoolean(KEY_REMOVE_UNAVAILABLE, options.removeUnavailable)
         store.putBoolean(KEY_SORT_BY_LATENCY, options.sortByLatency)
+        store.putString(KEY_NAME_INCLUDE, options.nameInclude)
+        store.putString(KEY_NAME_EXCLUDE, options.nameExclude)
     }
 
     /** DialogEditGroupAdvanced::accept: the strings trimmed, disabled fields kept. */
@@ -310,7 +322,21 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             urlTest = flag(KEY_URL_TEST),
             removeUnavailable = flag(KEY_REMOVE_UNAVAILABLE),
             sortByLatency = flag(KEY_SORT_BY_LATENCY),
+            nameInclude = text(KEY_NAME_INCLUDE),
+            nameExclude = text(KEY_NAME_EXCLUDE),
+            showInfoCard = store.getBoolean(KEY_SHOW_INFO_CARD, true),
         )
+    }
+
+    /** A subscription's name filters must compile, like the auto selector's name filter (edit_autoselector onEnd). */
+    private fun nameFilterError(): String? {
+        if (DataStore.groupType != TYPE_SUBSCRIPTION) return null
+        val store = DataStore.profileCacheStore
+        for ((key, title) in NAME_FILTERS) {
+            val error = SubscriptionNameFilter.error(store.getString(key).orEmpty().trim()) ?: continue
+            return getString(R.string.grp_filter_bad_regex, getString(title), error)
+        }
+        return null
     }
 
     private fun sendHwidMode(): SendHwid =
@@ -321,6 +347,14 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
 
     /** DialogEditGroup::accept; an existing subscription keeps a URL ("Please input URL"). */
     private suspend fun save() {
+        nameFilterError()?.let {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.grp_filter)
+                .setMessage(it)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            return
+        }
         val result = withContext(Dispatchers.IO) {
             val group = if (editingId > 0) GroupRepo.get(editingId) ?: return@withContext SaveResult.GONE else ProxyGroup()
             val url = DataStore.subscriptionLink.trim()
@@ -413,6 +447,9 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
                 }
             }
 
+            nameFilter(KEY_NAME_INCLUDE, R.string.grp_filter_include_empty)
+            nameFilter(KEY_NAME_EXCLUDE, R.string.grp_filter_exclude_empty)
+
             findPreference<Preference>(KEY_ADVANCED_TOGGLE)!!.setOnPreferenceClickListener {
                 host.advancedExpanded = !host.advancedExpanded
                 refreshState()
@@ -435,6 +472,24 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
                 it.inputType = InputType.TYPE_CLASS_TEXT
                 it.setSingleLine()
                 it.hint = shown
+            }
+        }
+
+        /** The pattern, or what an empty filter means; an invalid one says so before the save refuses it. */
+        private fun nameFilter(key: String, empty: Int) {
+            val preference = findPreference<EditTextPreference>(key) ?: return
+            preference.summaryProvider = Preference.SummaryProvider<EditTextPreference> {
+                val text = it.text?.trim().orEmpty()
+                val error = SubscriptionNameFilter.error(text)
+                when {
+                    text.isEmpty() -> getString(empty)
+                    error != null -> getString(R.string.grp_filter_invalid, text, error)
+                    else -> text
+                }
+            }
+            preference.setOnBindEditTextListener {
+                it.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                it.setSingleLine()
             }
         }
 
@@ -478,6 +533,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             val store = DataStore.profileCacheStore
             val subscription = DataStore.groupType == TYPE_SUBSCRIPTION
             findPreference<PreferenceCategory>(KEY_SUBSCRIPTION)?.isVisible = subscription
+            findPreference<PreferenceCategory>(KEY_FILTER)?.isVisible = subscription
             val expanded = subscription && host.advancedExpanded
             for (key in ADVANCED_CATEGORIES) findPreference<PreferenceCategory>(key)?.isVisible = expanded
 

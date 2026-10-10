@@ -58,6 +58,7 @@ class Shadowsocks : Outbound("shadowsocks") {
         plugin = q.valueFully("plugin").replace("simple-obfs;", "obfs-local;")
         plugin_opts = QtStrings.substrAfter(plugin, ";")
         plugin = QtStrings.substrBefore(plugin, ";")
+        if (plugin == "simple-obfs") plugin = "obfs-local"
         if (q.has("plugin-opts")) plugin_opts = q.valueFully("plugin-opts")
         if (q.has("uot")) uot = q.value("uot") == "true" || QtStrings.toInt(q.value("uot")) > 0
         // shadowsocks.cpp:42 hands the original text to the multiplex parser (not a valid URL in the v2rayN form)

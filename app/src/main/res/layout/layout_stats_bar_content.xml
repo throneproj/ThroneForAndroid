@@ -7,23 +7,79 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/tx"
-        android:layout_width="wrap_content"
+    <!-- The speeds left of the FAB, the exit right of it; equal halves keep the gap under the centred FAB. -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:textColor="?whiteOrTextPrimary"
-        android:textSize="14sp" />
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/rx"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:textColor="?whiteOrTextPrimary"
-        android:textSize="14sp" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tx"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:textColor="?whiteOrTextPrimary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/rx"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:textColor="?whiteOrTextPrimary"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="72dp"
+            android:layout_height="0dp" />
+
+        <LinearLayout
+            android:id="@+id/exit_column"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/exit_ip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="?whiteOrTextPrimary"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:text="203.0.113.5"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/exit_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:importantForAccessibility="no"
+                android:singleLine="true"
+                android:textColor="?whiteOrTextPrimary"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:text="Germany, Frankfurt am Main"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/status"

@@ -113,8 +113,8 @@ class AppListActivity : ThemedActivity() {
         var filteredApps = apps
 
         suspend fun reload() {
-            PackageCache.reload()
-            val installed = PackageCache.installedPackages.filterKeys { it != BuildConfig.APPLICATION_ID }
+            val cache = PackageCache.reload()
+            val installed = cache.installedPackages.filterKeys { it != BuildConfig.APPLICATION_ID }
             val list = installed.mapNotNull { (packageName, packageInfo) ->
                 coroutineContext[Job]!!.ensureActive()
                 packageInfo.applicationInfo?.let { AppItem(packageName, it, it.loadLabel(packageManager).toString()) }
@@ -124,7 +124,7 @@ class AppListActivity : ThemedActivity() {
             }
             for (packageName in selected) {
                 if (packageName !in installed && !(unknownEntry && packageName == RouteRule.UNKNOWN_PACKAGE)) {
-                    val info = PackageCache.installedApps[packageName]
+                    val info = cache.installedApps[packageName]
                     list.add(AppItem(packageName, info, info?.loadLabel(packageManager)?.toString() ?: packageName))
                 }
             }

@@ -24,6 +24,7 @@ object Key {
     const val SHOW_GROUP_IN_NOTIFICATION = "showGroupInNotification"
     const val NOTIFICATION_ACTIONS = "notificationActions"
 
+    const val APPEND_HTTP_PROXY = "appendHttpProxy"
     const val HTTP_PROXY_BYPASS = "httpProxyBypass"
 
     const val NETWORK_CHANGE_RESET_CONNECTIONS = "networkChangeResetConnections"
@@ -62,6 +63,8 @@ object Key {
     const val SERVICE_ERROR = "serviceError"
     const val SERVICE_ERROR_DNS = "serviceErrorDns"
     const val SERVICE_ERROR_GEO = "serviceErrorGeo"
+    const val SERVICE_ERROR_RULE_SETS = "serviceErrorRuleSets"
+    const val START_WITHOUT_RULE_SETS = "startWithoutRuleSets"
 
     const val WEBDAV_SERVER = "webdavServer"
     const val WEBDAV_USERNAME = "webdavUsername"

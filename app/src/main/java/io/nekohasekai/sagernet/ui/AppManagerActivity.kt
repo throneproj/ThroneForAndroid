@@ -57,8 +57,8 @@ class AppManagerActivity : ThemedActivity() {
         private var instance: AppManagerActivity? = null
         private const val SWITCH = "switch"
 
-        private val cachedApps
-            get() = PackageCache.installedPackages.toMutableMap().apply {
+        private fun cachedApps(cache: PackageCache.Snapshot = PackageCache.snapshot()) =
+            cache.installedPackages.toMutableMap().apply {
                 remove(BuildConfig.APPLICATION_ID)
             }
     }
@@ -119,18 +119,18 @@ class AppManagerActivity : ThemedActivity() {
         var filteredApps = apps
 
         suspend fun reload() {
-            PackageCache.reload()
+            val cache = PackageCache.reload()
             if (!selectionLoaded) {
-                initProxiedUids()
+                initProxiedUids(cache)
                 selectionLoaded = true
             }
-            val cached = cachedApps
+            val cached = cachedApps(cache)
             val list = cached.mapNotNull { (packageName, packageInfo) ->
                 coroutineContext[Job]!!.ensureActive()
                 packageInfo.applicationInfo?.let { ProxiedApp(packageManager, it, packageName) }
             }.toMutableList()
             for (packageName in extraSelected) {
-                list.add(ProxiedApp(packageManager, PackageCache.installedApps[packageName], packageName, byName = true))
+                list.add(ProxiedApp(packageManager, cache.installedApps[packageName], packageName, byName = true))
             }
             apps = sorted(list)
         }
@@ -189,10 +189,10 @@ class AppManagerActivity : ThemedActivity() {
     private var apps = emptyList<ProxiedApp>()
     private val appsAdapter = AppsAdapter()
 
-    private fun initProxiedUids(str: String = DataStore.individual) {
+    private fun initProxiedUids(cache: PackageCache.Snapshot, str: String = DataStore.individual) {
         proxiedUids.clear()
         extraSelected.clear()
-        val apps = cachedApps
+        val apps = cachedApps(cache)
         for (line in str.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }) {
             val uid = apps[line]?.applicationInfo?.uid
             if (uid != null) proxiedUids[uid] = true else extraSelected.add(line)
@@ -382,7 +382,7 @@ class AppManagerActivity : ThemedActivity() {
 
     /** Listed apps are selected by uid; any other name becomes a row of its own. */
     private fun addPackages(names: List<String>) {
-        val listed = cachedApps
+        val listed = cachedApps()
         for (name in names) {
             val uid = listed[name]?.applicationInfo?.uid
             if (uid != null) proxiedUids[uid] = true else extraSelected.add(name)
@@ -401,7 +401,7 @@ class AppManagerActivity : ThemedActivity() {
                 val needProxyAppsList = getAutoProxyApps("")
                 val bypass = DataStore.bypass
                 proxiedUids.clear()
-                for (app in cachedApps) {
+                for (app in cachedApps()) {
                     val needProxy =
                         needProxyAppsList.contains(app.key) || (app.value.applicationInfo?.uid
                             ?: 0) == 1000

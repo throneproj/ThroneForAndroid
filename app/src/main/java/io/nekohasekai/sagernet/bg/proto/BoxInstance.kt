@@ -9,8 +9,10 @@ import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.isLoopbackPortFree
 import io.nekohasekai.sagernet.ktx.mkPort
+import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.outbound.config.AutoSelectorBuild
 import io.nekohasekai.sagernet.outbound.config.GeneratedConfig
+import io.nekohasekai.sagernet.outbound.types.Custom
 import io.throneproj.mobile.Instance
 import io.throneproj.mobile.Mobile
 import io.throneproj.mobile.StartOptions
@@ -28,6 +30,9 @@ abstract class BoxInstance(
 
     val boxOrNull: Instance? get() = if (::box.isInitialized) box else null
 
+    /** This start does not wait for remote rule-sets the core has no copy of ([DeferredRuleSets]). */
+    var deferRuleSets = false
+
     fun isInitialized(): Boolean {
         return ::config.isInitialized && ::box.isInitialized
     }
@@ -42,7 +47,9 @@ abstract class BoxInstance(
             Logs.w("sing-box API port ${DataStore.coreBoxApiPort} is in use, the dashboard moves to $port")
             DataStore.coreBoxApiPort = port
         }
-        config = CoreConfigs.buildMain(profile)
+        // A custom full config keeps its own rule-sets as written.
+        if (isCustomFullConfig()) deferRuleSets = false
+        config = CoreConfigs.buildMain(profile, deferRuleSets)
     }
 
     protected open suspend fun loadConfig() {
@@ -56,6 +63,12 @@ abstract class BoxInstance(
         ensureXrayAssets()
         // Before the start: the core downloads the dashboard itself when it finds the dir empty.
         if (DataStore.apiDashboardEnabled) withContext(Dispatchers.IO) { SingBoxDashboard.install() }
+        if (deferRuleSets) {
+            // The sets' initial_path; without the file the core falls back to fetching during the start.
+            withContext(Dispatchers.IO) {
+                runCatching { DeferredRuleSets.writeEmptySet() }.onFailure { Logs.w("rule-sets: ${it.readableMessage}") }
+            }
+        }
         loadConfig()
     }
 
@@ -90,10 +103,17 @@ abstract class BoxInstance(
         } catch (error: Throwable) {
             Logs.w("box start failed for profile ${profile.id}: ${error.message}")
             box.localDNSFailure()?.let { throw LocalDnsFailedException(it.servers, error) }
+            // Not offered again by a start that went without them, nor for a custom full config.
+            if (!deferRuleSets && DeferredRuleSets.isStartFailure(error.message) && !isCustomFullConfig()) {
+                throw RuleSetDownloadFailedException(error)
+            }
             throw error
         }
         CoreRuntime.attachRunning(box, profile.id)
+        if (deferRuleSets) DeferredRuleSets.afterStart(box, config.coreConfig)
     }
+
+    private fun isCustomFullConfig(): Boolean = (profile.outbound as? Custom)?.isFullConfig() == true
 
     override fun close() {
         boxOrNull?.let(CoreRuntime::detachRunning)
@@ -104,6 +124,9 @@ abstract class BoxInstance(
 
 /** A start that failed on the local DNS server; [servers] are the network's DNS servers it asked, empty for Android's resolver. */
 class LocalDnsFailedException(val servers: String, cause: Throwable) : Exception(cause.message, cause)
+
+/** A start that failed on a remote rule-set without a cached copy that could not be downloaded. */
+class RuleSetDownloadFailedException(cause: Throwable) : Exception(cause.message, cause)
 
 internal fun CoreConfig.toStartOptions(autoSelector: AutoSelectorBuild? = null): StartOptions = StartOptions().apply {
     coreConfig = this@toStartOptions.coreConfig

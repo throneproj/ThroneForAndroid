@@ -52,6 +52,7 @@ import io.nekohasekai.sagernet.ui.profiles.ProfilesDbWatcher
 import io.nekohasekai.sagernet.ui.profiles.ProfilesHeader
 import io.nekohasekai.sagernet.ui.profiles.ProfilesPagerAdapter
 import io.nekohasekai.sagernet.ui.profiles.SelectionMode
+import io.nekohasekai.sagernet.ui.profiles.SubscriptionInfoCard
 import io.nekohasekai.sagernet.ui.test.TestPanelController
 import io.nekohasekai.sagernet.ui.test.TestSessionClient
 import io.nekohasekai.sagernet.ui.test.TestUiState
@@ -61,6 +62,7 @@ import io.nekohasekai.sagernet.widget.applyInsetPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
@@ -90,6 +92,9 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
 
         /** Below this height (a phone in landscape) the header hides while the list scrolls down. */
         private const val COMPACT_HEIGHT_DP = 480
+
+        /** SubscriptionInfoCard.cpp:171-175: the time left is redrawn every minute. */
+        private const val INFO_CARD_TICK_MS = 60_000L
 
         /** From this width in landscape the test panel stands beside the list: 40 % of the width, 320 to 420 dp. */
         private const val SIDE_PANEL_MIN_WINDOW_DP = 600
@@ -139,6 +144,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
     private var searchView: SearchView? = null
     private var testPanel: TestPanelController? = null
     private var header: ProfilesHeader? = null
+    private var infoCard: SubscriptionInfoCard? = null
 
     /** Wide landscape: the test panel stands at the end side, beside the list (read once per view). */
     private var sidePanel = false
@@ -211,9 +217,12 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         runtimeStatus.applyInsetPadding(horizontal = true)
         // the panel keeps its content above the navigation bar, the stats bar and the FAB itself
         panelContainer.applyInsetMargin(horizontal = true)
+        val card = SubscriptionInfoCard(view.findViewById(R.id.subscription_card))
+        card.view.applyInsetMargin(horizontal = true)
+        infoCard = card
         val config = resources.configuration
         header = ProfilesHeader(
-            view as ViewGroup, view.findViewById(R.id.toolbar), tabLayout, runtimeStatus,
+            view as ViewGroup, view.findViewById(R.id.toolbar), tabLayout, runtimeStatus, card.view,
             autoHide = config.screenHeightDp < COMPACT_HEIGHT_DP && !SagerNet.isTv,
             pinned = ::headerPinned,
             frozen = { lists.any { it.adapter.dragging } },
@@ -266,6 +275,13 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
                         updateGroupProgress()
                     }
                 }
+                // the card's time left, as the desktop's countdown timer
+                launch {
+                    while (true) {
+                        updateInfoCard()
+                        delay(INFO_CARD_TICK_MS)
+                    }
+                }
             }
         }
 
@@ -297,6 +313,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         testPanel = null
         panelHeight = 0
         header = null
+        infoCard = null
         sidePanelShown = false
         pager.unregisterOnPageChangeCallback(pageCallback)
         mediator?.detach()
@@ -479,6 +496,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
 
     /** show_group: current_group follows the tab (the leaving tab stores its scroll row when it pauses). */
     private fun onPageShown() {
+        updateInfoCard()
         val group = currentGroup() ?: return
         if (group.id == shownGroupId) return
         shownGroupId = group.id
@@ -537,7 +555,18 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
             if (!::pagerAdapter.isInitialized || view == null) return@onMainDispatcher
             val index = pagerAdapter.update(group)
             if (index >= 0) tabLayout.getTabAt(index)?.text = tabLabel(group)
+            if (index >= 0 && index == pager.currentItem) updateInfoCard()
         }
+    }
+
+    /**
+     * show_group's card (the desktop's ProfilesTableFilterHeader::setGroup) for the current tab: on a tab change, a
+     * write of either process to the group (a refresh, its settings) and every minute.
+     */
+    private fun updateInfoCard() {
+        val card = infoCard ?: return
+        card.bind(if (select) null else currentGroup())
+        header?.cardWanted = card.wanted
     }
 
     override suspend fun groupRemoved(groupId: Long) {

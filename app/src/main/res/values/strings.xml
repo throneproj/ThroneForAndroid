@@ -1822,4 +1822,54 @@
     <string name="scanner_no_camera">No camera: choose an image with a QR code</string>
     <string name="share_target_missing">No app can receive the file</string>
     <string name="try_again_later">Please try again later</string>
+
+    <string name="dns_in_port">DNS server port</string>
+    <string name="dns_in_port_dialog_message">A DNS server for local use listens on this loopback port. Pick another one when a second Android user or another app already holds it.</string>
+    <string name="append_http_proxy">Append HTTP proxy to VPN</string>
+    <string name="append_http_proxy_sum">Apps and browsers that honour the system proxy send their traffic straight to the local proxy port instead of through the VPN interface</string>
+    <string name="append_http_proxy_mixed_disabled">Needs the mixed inbound</string>
+    <string name="append_http_proxy_auth_on">Unavailable while authorization is on: Android cannot pass the username and password to apps</string>
+
+    <string name="rule_set_deferred_failed">Could not download the rule-sets: %s</string>
+    <string name="rule_set_deferred_action">Connect anyway</string>
+    <string name="rule_set_deferred_title">Connect without rule-sets?</string>
+    <string name="rule_set_deferred_message">The connection did not start because some rule-sets could not be downloaded. Connect without them? Rules that use them match nothing until they arrive: they are downloaded through the proxy right after connecting and kept for later connections.</string>
+
+    <string name="grp_filter">Filter</string>
+    <string name="grp_filter_include">Only names matching</string>
+    <string name="grp_filter_include_tip">Optional regular expression, case-insensitive. On every update only the profiles whose name matches are kept, e.g. HK|SG|Japan.</string>
+    <string name="grp_filter_include_empty">Every profile is kept</string>
+    <string name="grp_filter_exclude">Remove names matching</string>
+    <string name="grp_filter_exclude_tip">Optional regular expression, case-insensitive. On every update the profiles whose name matches are left out, e.g. expire|traffic|website.</string>
+    <string name="grp_filter_exclude_empty">Nothing is removed</string>
+    <string name="grp_filter_invalid">%1$s\nNot a valid regular expression: %2$s</string>
+    <string name="grp_filter_bad_regex">%1$s: not a valid regular expression.\n%2$s</string>
+    <string name="subs_filtered_out">Filtered out %1$d profiles by name.</string>
+    <string name="subs_filtered_all_aborted">The name filters left out all %1$d profiles of the subscription; it was left unchanged.</string>
+    <string name="subs_filter_ignored">Ignored the invalid name filter %1$s: %2$s</string>
+
+    <string name="grp_show_info_card">Subscription info card</string>
+    <string name="grp_show_info_card_tip">Show the traffic, the expiry, the provider\'s links and its announcement above the profiles</string>
+    <string name="subs_announcement_from">Announcement from %1$s: %2$s</string>
+    <string name="subinfo_portal">Portal</string>
+    <string name="subinfo_support">Support</string>
+    <string name="subinfo_portal_tip">Website / Portal: %s</string>
+    <string name="subinfo_support_tip">Technical support: %s</string>
+    <string name="subinfo_provider">Provider: %s</string>
+    <string name="subinfo_expired">Expired</string>
+    <string name="subinfo_minutes_left">%dm left</string>
+    <string name="subinfo_hours_left">%dh left</string>
+    <string name="subinfo_days_left">%dd left</string>
+    <string name="subinfo_expires">Expires: %s</string>
+    <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
+    <string name="subinfo_quota_unlimited">%1$s / ∞</string>
+    <string name="subinfo_announcement_title">Announcement - %s</string>
+    <string name="subinfo_no_app">No app can open %s</string>
+
+    <!-- The running connection's exit in the stats bar: %1$s country, %2$s city (desktop runningCountryInfo). -->
+    <string name="exit_ip_location">%1$s, %2$s</string>
+    <!-- Tooltip and spoken text of the exit IP: %1$s the IP address. -->
+    <string name="exit_ip_summary">Exit IP: %1$s</string>
+    <!-- As exit_ip_summary; %2$s the location (exit_ip_location). -->
+    <string name="exit_ip_summary_location">Exit IP: %1$s (%2$s)</string>
 </resources>

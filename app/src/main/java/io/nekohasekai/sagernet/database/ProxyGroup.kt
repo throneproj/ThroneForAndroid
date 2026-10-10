@@ -25,7 +25,7 @@ data class ProxyGroup(
     @ColumnInfo(name = "skip_auto_update", defaultValue = "0") var skipAutoUpdate: Boolean = false,
     @ColumnInfo(name = "name", defaultValue = "") var name: String = "",
     @ColumnInfo(name = "url", defaultValue = "") var url: String = "",
-    /** The raw Subscription-UserInfo header of the last fetch. */
+    /** The raw Subscription-UserInfo header of fetches before [subMetadata]; refreshes clear it. */
     @ColumnInfo(name = "info", defaultValue = "") var info: String = "",
     /** Epoch seconds. */
     @ColumnInfo(name = "sub_last_update", defaultValue = "0") var subLastUpdate: Long = 0L,
@@ -45,11 +45,18 @@ data class ProxyGroup(
     /** [TypeBy] */
     @ColumnInfo(name = "type_sort_by", defaultValue = "0") var typeSortBy: Int = 0,
     @ColumnInfo(name = "sub_options_json", defaultValue = "{}") var subOptions: SubscriptionOptions = SubscriptionOptions(),
+    /** The last fetch's [SubUserInfo]; read it through [subInfo]. */
+    @ColumnInfo(name = "sub_metadata_json", defaultValue = "{}") var subMetadata: SubUserInfo = SubUserInfo(),
     @ColumnInfo(name = "display_order", defaultValue = "0") var displayOrder: Long = 0L,
 ) : Parcelable {
 
     @get:Ignore
     val isSubscription: Boolean get() = url.isNotEmpty()
+
+    /** GroupsRepo.cpp:110-112: rows written before `sub_metadata_json` keep the raw header in [info]. */
+    @get:Ignore
+    val subInfo: SubUserInfo
+        get() = if (subMetadata.valid || info.isEmpty()) subMetadata else SubUserInfo.parseHeader(info)
 
     fun displayName(): String = name.takeIf { it.isNotBlank() } ?: app.getString(R.string.group_default_name)
 
@@ -93,9 +100,16 @@ data class ProxyGroup(
         @Query("UPDATE `groups` SET `display_order` = :order WHERE `id` = :groupId")
         fun setDisplayOrder(groupId: Long, order: Long)
 
-        /** A subscription refresh's stamp (GroupUpdater.cpp:493-495) without rewriting the rest of the row. */
-        @Query("UPDATE `groups` SET `sub_last_update` = :lastUpdate, `info` = :info WHERE `id` = :groupId")
-        fun setSubscriptionInfo(groupId: Long, lastUpdate: Long, info: String): Int
+        /**
+         * A subscription refresh's stamp without rewriting the rest of the row; the structured info replaces the raw
+         * header (GroupUpdater.cpp:757-759).
+         */
+        @Query("UPDATE `groups` SET `sub_last_update` = :lastUpdate, `info` = '', `sub_metadata_json` = :metadata WHERE `id` = :groupId")
+        fun setSubscriptionInfo(groupId: Long, lastUpdate: Long, metadata: String): Int
+
+        /** An answer without profiles still keeps what it said, e.g. why (GroupUpdater.cpp:746-752); no update time. */
+        @Query("UPDATE `groups` SET `info` = '', `sub_metadata_json` = :metadata WHERE `id` = :groupId")
+        fun setSubscriptionMetadata(groupId: Long, metadata: String): Int
 
         /** The group's profiles go by the foreign key cascade. */
         @Query("DELETE FROM `groups` WHERE `id` = :groupId")

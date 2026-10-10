@@ -11,19 +11,24 @@ import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.view.marginBottom
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.abs
 
 /**
- * The toolbar, the group tabs and the status line above the profile lists. With [autoHide] (a compact height, e.g. a
- * phone in landscape) they go away while the list scrolls down and come back when it scrolls up, like the stats bar,
- * and the list and the test panel get their height. The app bar itself stays: it keeps covering the status bar.
+ * The toolbar, the group tabs, the status line and the subscription card above the profile lists. With [autoHide] (a
+ * compact height, e.g. a phone in landscape) they go away while the list scrolls down and come back when it scrolls up,
+ * like the stats bar, and the list and the test panel get their height. The app bar itself stays: it keeps covering
+ * the status bar.
  */
 internal class ProfilesHeader(
     private val root: ViewGroup,
     private val toolbar: View,
     private val tabs: View,
     private val status: View,
+    /** The current group's [SubscriptionInfoCard]. */
+    private val card: View,
     private val autoHide: Boolean,
     /** Keeps the header shown: the selection's actions, the search, the keyboard. */
     private val pinned: () -> Boolean,
@@ -65,12 +70,20 @@ internal class ProfilesHeader(
             apply()
         }
 
+    /** The subscription card shows while the current group has one. */
+    var cardWanted = false
+        set(value) {
+            if (field == value) return
+            field = value
+            apply()
+        }
+
     // The pages lay their rows out once at the final size and ride on the pager's animated bounds; a transition inside
     // a RecyclerView would also suppress its layout, which stops the scroll.
     private val transition: Transition = TransitionSet()
         .setOrdering(TransitionSet.ORDERING_TOGETHER)
         .addTransition(ChangeBounds())
-        .addTransition(Fade().addTarget(toolbar).addTarget(tabs).addTarget(status))
+        .addTransition(Fade().addTarget(toolbar).addTarget(tabs).addTarget(status).addTarget(card))
         .setDuration(TOGGLE_MS)
         .setInterpolator(PathInterpolator(0.4f, 0f, 0.2f, 1f))
         .excludeChildren(RecyclerView::class.java, true)
@@ -120,7 +133,8 @@ internal class ProfilesHeader(
      * lands at its top, which would bring the header straight back.
      */
     private fun hasRoom(list: RecyclerView): Boolean {
-        val gain = toolbar.height + (if (tabs.isVisible) tabs.height else 0) + (if (status.isVisible) status.height else 0)
+        val gain = toolbar.height + (if (tabs.isVisible) tabs.height else 0) + (if (status.isVisible) status.height else 0) +
+            (if (card.isVisible) card.height + card.marginTop + card.marginBottom else 0)
         return list.computeVerticalScrollOffset() > gain + 2 * threshold
     }
 
@@ -139,5 +153,6 @@ internal class ProfilesHeader(
         toolbar.isGone = hidden
         tabs.isVisible = tabsWanted && !hidden
         status.isVisible = statusWanted && !hidden
+        card.isVisible = cardWanted && !hidden
     }
 }

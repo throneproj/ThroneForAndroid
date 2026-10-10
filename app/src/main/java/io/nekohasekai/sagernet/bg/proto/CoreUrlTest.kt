@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.bg.proto
 
 import io.nekohasekai.sagernet.bg.CoreRuntime
+import io.nekohasekai.sagernet.bg.test.TestTags
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.ktx.completeWith
@@ -31,20 +32,22 @@ suspend fun urlTestCurrent(instance: Instance, core: CoreConfig, url: String, ti
     val latency = AtomicInteger(-1)
     val failure = AtomicReference<String?>(null)
     val tunnelUp = AtomicBoolean(false)
-    suspendCancellableCoroutine<Unit> { continuation ->
-        Mobile.startURLTest(instance, CoreRuntime.platform, request, object : URLTestHandler {
-            override fun onResult(tag: String?, latencyMs: Int, error: String?) {
-                if (error.isNullOrEmpty()) latency.set(latencyMs) else failure.set(error)
-            }
+    TestTags.holding(listOf(TestTags.ofCurrent(core.coreConfig), TestTags.CURRENT)) {
+        suspendCancellableCoroutine<Unit> { continuation ->
+            Mobile.startURLTest(instance, CoreRuntime.platform, request, object : URLTestHandler {
+                override fun onResult(tag: String?, latencyMs: Int, error: String?) {
+                    if (error.isNullOrEmpty()) latency.set(latencyMs) else failure.set(error)
+                }
 
-            override fun onVPNStatus(tag: String?, connected: Boolean, state: String?, err: String?) {
-                tunnelUp.set(connected)
-            }
+                override fun onVPNStatus(tag: String?, connected: Boolean, state: String?, err: String?) {
+                    tunnelUp.set(connected)
+                }
 
-            override fun onDone() {
-                continuation.completeWith(Result.success(Unit))
-            }
-        })
+                override fun onDone() {
+                    continuation.completeWith(Result.success(Unit))
+                }
+            })
+        }
     }
     val error = failure.get()
     if (error != null && tunnelUp.get() && !ProxyEntity.isTestAborted(error)) return ProxyEntity.LATENCY_CONNECT_ONLY

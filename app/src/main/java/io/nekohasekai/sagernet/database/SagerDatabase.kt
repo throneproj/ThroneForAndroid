@@ -22,14 +22,15 @@ import kotlinx.coroutines.launch
         ProxyGroup::class, ProxyEntity::class, RouteProfileEntity::class, RouteRuleEntity::class,
         SettingEntry::class, MarkerEntity::class,
     ],
-    version = 14,
+    version = 15,
     autoMigrations = [
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 12, to = 13),
         AutoMigration(from = 13, to = 14),
+        AutoMigration(from = 14, to = 15),
     ]
 )
-@TypeConverters(value = [SubscriptionOptions.Converter::class])
+@TypeConverters(value = [SubscriptionOptions.Converter::class, SubUserInfo.Converter::class])
 abstract class SagerDatabase : RoomDatabase() {
 
     companion object {

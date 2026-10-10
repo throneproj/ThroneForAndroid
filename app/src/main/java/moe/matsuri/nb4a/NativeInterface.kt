@@ -89,8 +89,7 @@ class NativeInterface : PlatformInterface {
 
     private fun packageNamesOf(uid: Int): List<String> {
         if (uid <= 1000) return listOf("android")
-        PackageCache.awaitLoadSync()
-        return PackageCache.uidMap[uid]?.toList() ?: emptyList()
+        return PackageCache.snapshot().uidMap[uid].orEmpty()
     }
 
     // Registered synchronously so DefaultInterface() is populated before the box's first dial.

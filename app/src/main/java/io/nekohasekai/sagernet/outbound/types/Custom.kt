@@ -8,6 +8,7 @@ import io.nekohasekai.sagernet.outbound.SecurityInfo
 import io.nekohasekai.sagernet.outbound.SecurityLevel
 import io.nekohasekai.sagernet.outbound.displayTransportName
 import io.nekohasekai.sagernet.outbound.withPrivateServer
+import io.nekohasekai.sagernet.outbound.common.xrayNetworks
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.json.JsonObject
@@ -190,7 +191,8 @@ class Custom : Outbound("custom") {
         /**
          * SubscriptionParser.cpp:164-179 makeProfileForXrayOutbound: infrastructure protocols are dropped, a VLESS
          * outbound becomes an xrayvless profile when it parses, everything else a custom `xrayoutbound` whose config
-         * is the Indented JSON text, named after the tag.
+         * is the Indented JSON text, named after the tag. Android keeps a VLESS outbound over a network the xrayvless
+         * profile does not model (mKCP, the websocket / splithttp aliases) custom too, so its settings survive.
          */
         @JvmStatic
         fun fromXrayOutbound(out: JsonObject): Outbound? {
@@ -201,7 +203,9 @@ class Custom : Outbound("custom") {
                 val normalized = XrayVless.normalizeForParse(out)
                 if (normalized != null) {
                     val vless = OutboundFactory.newByType("xrayvless")
-                    if (!vless.invalid && vless.parseFromJson(normalized)) return vless
+                    if (!vless.invalid && vless.parseFromJson(normalized) && vless.getXrayStream().network in xrayNetworks) {
+                        return vless
+                    }
                 }
             }
             val custom = Custom()

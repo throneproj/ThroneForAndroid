@@ -53,6 +53,8 @@
         android:textColor="?android:attr/textColorSecondary"
         android:visibility="gone" />
 
+    <include layout="@layout/layout_subscription_card" />
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/profiles_content"
         android:layout_width="match_parent"

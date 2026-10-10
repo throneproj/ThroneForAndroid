@@ -687,6 +687,8 @@ class XrayStreamSetting {
             (JsonInput.parseObjectOrNull(q.valueFully(key)) ?: JsonInput.parseObjectOrNull(q.valueFormDecoded(key)))?.let { finalmask = it }
         }
         if (q.has("type")) network = q.value("type").replace("tcp", "raw")
+        // XHTTP's former name, which Xray still accepts (Android only)
+        if (network == "splithttp") network = "xhttp"
         if (network !in xrayNetworks) return false
         if (network == "raw" && q.value("headerType") == "http") {
             val request = JsonObject()
@@ -734,10 +736,13 @@ class XrayStreamSetting {
         return true
     }
 
-    /** xrayStreamSetting.cpp:820-843: only raw, ws, grpc and xhttp carry over; `tls` picks TLS or Reality by the public key. */
+    /**
+     * xrayStreamSetting.cpp:820-843: only raw, ws, grpc and xhttp carry over; `tls` picks TLS or Reality by the
+     * public key. Clash's `tcp` is read as raw (Android only), as the link and JSON parsers do.
+     */
     fun parseFromClash(proxy: ClashProxy): Boolean {
         val clashNetwork = proxy.string("network")
-        if (clashNetwork.isNotEmpty()) network = clashNetwork
+        if (clashNetwork.isNotEmpty()) network = if (clashNetwork == "tcp") "raw" else clashNetwork
         if (network != "raw" && network != "ws" && network != "grpc" && network != "xhttp") return false
         if (proxy.bool("tls")) {
             if (proxy.obj("reality-opts").string("public-key").isEmpty()) {
