@@ -17,6 +17,7 @@ import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
 import io.nekohasekai.sagernet.outbound.types.AutoSelector
 import io.nekohasekai.sagernet.outbound.types.Custom
 import io.nekohasekai.sagernet.route.RouteDns
+import io.nekohasekai.sagernet.utils.PackageCache
 import io.throneproj.mobile.Mobile
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
@@ -81,7 +82,7 @@ object SettingsMapper {
             privateRanges = DataStore.vpnPrivateRanges,
             perAppEnabled = DataStore.proxyApps,
             perAppBypass = DataStore.bypass,
-            perAppPackages = GeneratorSettings.splitLines(DataStore.individual),
+            perAppPackages = GeneratorSettings.splitLines(DataStore.individual).filter { PackageCache.isValidPackageName(it) },
             httpProxyEnabled = DataStore.appendHttpProxy,
             httpProxyBypassDomains = GeneratorSettings.splitLines(DataStore.httpProxyBypass),
             remoteDns = routeDns.remoteDns,

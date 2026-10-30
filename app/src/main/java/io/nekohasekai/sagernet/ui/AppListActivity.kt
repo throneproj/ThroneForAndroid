@@ -316,13 +316,14 @@ class AppListActivity : ThemedActivity() {
 
             R.id.action_import_clipboard -> {
                 // One package per line; a leading "true"/"false" line (the per-app proxy export) is skipped.
-                val lines = SagerNet.getClipboardText().lines().map { it.trim() }.filter { it.isNotEmpty() }
+                val lines = SagerNet.getClipboardText().lines().take(2000).map { it.trim() }.filter { it.isNotEmpty() }
                     .let { if (it.firstOrNull() == "true" || it.firstOrNull() == "false") it.drop(1) else it }
-                if (lines.isEmpty()) {
+                val packages = lines.filter { it == RouteRule.UNKNOWN_PACKAGE || PackageCache.isValidPackageName(it) }
+                if (packages.isEmpty()) {
                     Snackbar.make(binding.list, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
                 } else {
                     selected.clear()
-                    selected.addAll(lines)
+                    selected.addAll(packages)
                     updateSubtitle()
                     Snackbar.make(binding.list, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
                     loadApps()
@@ -344,12 +345,12 @@ class AppListActivity : ThemedActivity() {
      * the VPN, so "add" there takes them off that list; a remembered bypass list is never turned into a proxy list.
      */
     private fun copyToProxiedApps() {
-        val packages = selected.filter { it != RouteRule.UNKNOWN_PACKAGE }
+        val packages = selected.filter { it != RouteRule.UNKNOWN_PACKAGE && PackageCache.isValidPackageName(it) }
         if (packages.isEmpty()) {
             Snackbar.make(binding.list, R.string.picker_copy_none, Snackbar.LENGTH_LONG).show()
             return
         }
-        val stored = DataStore.individual.lines().map { it.trim() }.filter { it.isNotEmpty() }
+        val stored = DataStore.individual.lines().map { it.trim() }.filter { it.isNotEmpty() && PackageCache.isValidPackageName(it) }
         val enabled = DataStore.proxyApps
         val bypass = DataStore.bypass
 

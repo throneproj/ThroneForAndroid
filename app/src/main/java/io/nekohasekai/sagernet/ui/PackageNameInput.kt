@@ -8,6 +8,7 @@ import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.dp2px
+import io.nekohasekai.sagernet.utils.PackageCache
 
 /**
  * "Add package name…" of the package pickers, for apps the list cannot show (hidden, not installed yet, restored from
@@ -15,7 +16,9 @@ import io.nekohasekai.sagernet.ktx.dp2px
  */
 object PackageNameInput {
 
-    private val PACKAGE_NAME = Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)*$")
+    val PACKAGE_NAME = PackageCache.PACKAGE_NAME_REGEX
+
+    fun isValid(name: String): Boolean = PackageCache.isValidPackageName(name)
 
     fun show(context: Context, onResult: (List<String>) -> Unit) {
         val input = EditText(context).apply {
@@ -32,14 +35,14 @@ object PackageNameInput {
             .setView(container)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val names = input.text.toString().split(Regex("[\\s,]+")).filter { it.isNotEmpty() }
-                val invalid = names.filterNot { PACKAGE_NAME.matches(it) }
+                val invalid = names.filterNot { isValid(it) }
                 if (invalid.isNotEmpty()) {
                     Toast.makeText(
                         context, context.getString(R.string.picker_invalid_package, invalid.joinToString(", ")),
                         Toast.LENGTH_LONG,
                     ).show()
                 }
-                val valid = names.filter { PACKAGE_NAME.matches(it) }.distinct()
+                val valid = names.filter { isValid(it) }.distinct()
                 if (valid.isNotEmpty()) onResult(valid)
             }
             .setNegativeButton(android.R.string.cancel, null)

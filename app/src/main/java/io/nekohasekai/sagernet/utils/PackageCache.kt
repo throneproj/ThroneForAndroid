@@ -28,6 +28,10 @@ object PackageCache {
 
     private const val RELOAD_DELAY_MS = 1000L
 
+    val PACKAGE_NAME_REGEX = Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$")
+
+    fun isValidPackageName(name: String): Boolean = name == "android" || PACKAGE_NAME_REGEX.matches(name)
+
     /**
      * One complete listing. A reload builds the next one aside and publishes it whole, so readers (the core's
      * connection owner lookups on Go threads among them) never see a half-built map and never wait for a reload.
