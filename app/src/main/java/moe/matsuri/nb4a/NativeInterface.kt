@@ -8,6 +8,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Process
+import android.os.SystemClock
 import android.system.OsConstants
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
@@ -112,6 +113,7 @@ class NativeInterface : PlatformInterface {
         var index: Int = Int.MIN_VALUE
         var network: Network? = null
         var isExpensive: Boolean = false
+        var hasReportedAtLeastOnce: Boolean = false
     }
 
     private val ifaceReportStates = Collections.synchronizedMap(
@@ -120,6 +122,8 @@ class NativeInterface : PlatformInterface {
 
     @Volatile
     private var lastResetNetwork: Network? = null
+    @Volatile
+    private var lastResetTime: Long = 0L
 
     private fun reportState(listener: InterfaceUpdateListener): IfaceReportState =
         synchronized(ifaceReportStates) {
@@ -140,48 +144,47 @@ class NativeInterface : PlatformInterface {
             clearInterface(listener, state)
             return
         }
-        // LinkProperties / NetworkInterface may lag behind the callback briefly.
-        repeat(10) {
-            val linkProperties = SagerNet.connectivity.getLinkProperties(network)
-            if (linkProperties == null) {
-                Thread.sleep(100)
-                return@repeat
-            }
-            val interfaceIndex = try {
-                NetworkInterface.getByName(linkProperties.interfaceName).index
-            } catch (e: Exception) {
-                Thread.sleep(100)
-                return@repeat
-            }
-            val capabilities = SagerNet.connectivity.getNetworkCapabilities(network)
-            val isExpensive = capabilities?.let {
-                it.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                    !it.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-            } ?: false
-            val sameInterface = state.name == linkProperties.interfaceName && state.index == interfaceIndex &&
-                state.network == network
-            // Capability-change storms repeat the same interface; skip them without a JNI round trip. A metering change
-            // alone (a Wi-Fi marked metered) is still reported so the core re-reads its interfaces, but is no switch.
-            if (sameInterface && state.isExpensive == isExpensive) return
-            val changed = !sameInterface && state.name != null
-            state.name = linkProperties.interfaceName
-            state.index = interfaceIndex
-            state.network = network
-            state.isExpensive = isExpensive
-            listener.updateDefaultInterface(linkProperties.interfaceName, interfaceIndex, isExpensive, false)
-            if (changed) onDefaultInterfaceChanged(network)
+        val linkProperties = SagerNet.connectivity.getLinkProperties(network)
+        val ifaceName = linkProperties?.interfaceName
+        val networkInterface = try {
+            if (!ifaceName.isNullOrEmpty()) NetworkInterface.getByName(ifaceName) else null
+        } catch (_: Exception) {
+            null
+        }
+        val interfaceIndex = networkInterface?.index ?: -1
+        if (linkProperties == null || networkInterface == null || interfaceIndex == -1 || ifaceName.isNullOrEmpty()) {
+            // LinkProperties or NetworkInterface is not yet provisioned by the OS.
+            // Do not block the callback thread or clearInterface; onLinkPropertiesChanged will trigger an update.
             return
         }
-        Logs.w("checkDefaultInterfaceUpdate exhausted retries for $network")
-        clearInterface(listener, state)
+        val capabilities = SagerNet.connectivity.getNetworkCapabilities(network)
+        val isExpensive = capabilities?.let {
+            it.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                !it.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+        } ?: false
+        val sameInterface = state.name == ifaceName && state.index == interfaceIndex &&
+            state.network == network
+        // Capability-change storms repeat the same interface; skip them without a JNI round trip. A metering change
+        // alone (a Wi-Fi marked metered) is still reported so the core re-reads its interfaces, but is no switch.
+        if (sameInterface && state.isExpensive == isExpensive) return
+        val changed = !sameInterface && (state.name != null || state.hasReportedAtLeastOnce)
+        state.name = ifaceName
+        state.index = interfaceIndex
+        state.network = network
+        state.isExpensive = isExpensive
+        state.hasReportedAtLeastOnce = true
+        listener.updateDefaultInterface(ifaceName, interfaceIndex, isExpensive, false)
+        if (changed) onDefaultInterfaceChanged(network)
     }
 
     // Every box in this process has its own listener, so the user's "reset on network change"
     // switch is applied once per new network to the running VPN instance only.
     private fun onDefaultInterfaceChanged(network: Network) {
         if (!DataStore.networkChangeResetConnections) return
-        if (lastResetNetwork == network) return
+        val now = SystemClock.elapsedRealtime()
+        if (lastResetNetwork == network && now - lastResetTime < 1500L) return
         lastResetNetwork = network
+        lastResetTime = now
         DataStore.baseService?.data?.proxy?.boxOrNull?.resetNetwork()
     }
 

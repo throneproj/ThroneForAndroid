@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.utils
 
 import android.annotation.TargetApi
 import android.net.ConnectivityManager
+import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
@@ -126,6 +127,13 @@ object DefaultNetworkListener {
         ) { // it's a good idea to refresh capabilities
             // Storm source: debug per event (info would flood the log)
             Logs.d("DefaultNetworkListener onCapabilitiesChanged enter network=$network thread=${Thread.currentThread().name}")
+            runBlocking { networkActor.send(NetworkMessage.Update(network)) }
+        }
+
+        override fun onLinkPropertiesChanged(
+            network: Network, linkProperties: LinkProperties
+        ) {
+            Logs.d("DefaultNetworkListener onLinkPropertiesChanged enter network=$network thread=${Thread.currentThread().name}")
             runBlocking { networkActor.send(NetworkMessage.Update(network)) }
         }
 
