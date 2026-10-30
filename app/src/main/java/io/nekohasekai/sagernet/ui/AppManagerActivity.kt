@@ -194,9 +194,22 @@ class AppManagerActivity : ThemedActivity() {
         proxiedUids.clear()
         extraSelected.clear()
         val apps = cachedApps(cache)
+        val validLines = mutableListOf<String>()
+        var hasInvalid = false
         for (line in str.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }) {
             val uid = apps[line]?.applicationInfo?.uid
-            if (uid != null) proxiedUids[uid] = true else extraSelected.add(line)
+            if (uid != null) {
+                proxiedUids[uid] = true
+                validLines.add(line)
+            } else if (PackageCache.isValidPackageName(line)) {
+                extraSelected.add(line)
+                validLines.add(line)
+            } else {
+                hasInvalid = true
+            }
+        }
+        if (hasInvalid) {
+            DataStore.individual = validLines.distinct().joinToString("\n")
         }
     }
 
@@ -356,10 +369,11 @@ class AppManagerActivity : ThemedActivity() {
             R.id.action_import_clipboard -> {
                 // This screen's export leads with the bypass flag; a plain package list (the route rule picker's
                 // export, whose "unknown" entry is no package) keeps the current mode.
-                val lines = SagerNet.getClipboardText().lines().map { it.trim() }.filter { it.isNotEmpty() }
+                val lines = SagerNet.getClipboardText().lines().take(2000).map { it.trim() }.filter { it.isNotEmpty() }
                 val bypass = lines.firstOrNull()?.takeIf { it == "true" || it == "false" }?.toBoolean()
-                val packages = (if (bypass != null) lines.drop(1) else lines).filter { it != RouteRule.UNKNOWN_PACKAGE }
-                if (bypass == null && packages.isEmpty()) {
+                val rawPackages = if (bypass != null) lines.drop(1) else lines
+                val packages = rawPackages.filter { it != RouteRule.UNKNOWN_PACKAGE && PackageCache.isValidPackageName(it) }
+                if ((rawPackages.isNotEmpty() && packages.isEmpty()) || (bypass == null && packages.isEmpty())) {
                     Snackbar.make(binding.list, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
                     return true
                 }
@@ -378,8 +392,9 @@ class AppManagerActivity : ThemedActivity() {
 
     /** Listed apps are selected by uid; any other name becomes a row of its own. */
     private fun addPackages(names: List<String>) {
+        val validNames = names.filter { PackageCache.isValidPackageName(it) }
         val listed = cachedApps()
-        for (name in names) {
+        for (name in validNames) {
             val uid = listed[name]?.applicationInfo?.uid
             if (uid != null) proxiedUids[uid] = true else extraSelected.add(name)
         }
@@ -433,7 +448,7 @@ class AppManagerActivity : ThemedActivity() {
                 content
             }
             if (!TextUtils.isEmpty(proxyApps)) {
-                list = proxyApps.split("\n")
+                list = proxyApps.split("\n").map { it.trim() }.filter { PackageCache.isValidPackageName(it) }
             }
         } catch (_: Exception) {
         }

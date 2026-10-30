@@ -169,6 +169,8 @@ class VpnService : BaseVpnService(),
                 try {
                     builder.addAllowedApplication(it)
                 } catch (_: PackageManager.NameNotFoundException) {
+                } catch (e: Exception) {
+                    Logs.w(e)
                 }
             }
         }
@@ -178,6 +180,8 @@ class VpnService : BaseVpnService(),
                 try {
                     builder.addDisallowedApplication(it)
                 } catch (_: PackageManager.NameNotFoundException) {
+                } catch (e: Exception) {
+                    Logs.w(e)
                 }
             }
         }
