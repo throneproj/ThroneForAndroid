@@ -195,10 +195,13 @@ class TunSettingsFragment : SettingsScreenFragment(R.xml.settings_tun) {
         }
 
         proxyApps = pref(Key.PROXY_APPS)
+        // Only switching it on opens the app list: that screen turns per-app proxy on, so it could never go off here.
         proxyApps.setOnPreferenceChangeListener { _, newValue ->
-            startActivity(Intent(activity, AppManagerActivity::class.java))
-            if (newValue as Boolean) DataStore.dirty = true
-            newValue
+            if (newValue as Boolean) {
+                DataStore.dirty = true
+                startActivity(Intent(activity, AppManagerActivity::class.java))
+            }
+            true
         }
     }
 
