@@ -1400,8 +1400,8 @@
     <string name="autosel_advanced_hide">Hide the advanced options</string>
     <string name="autosel_cat_membership">Which profiles to use</string>
     <string name="autosel_country_filter">Only countries</string>
-    <string name="autosel_country_filter_tip">Comma-separated country codes, empty means any. Uses the country found by the IP test, so profiles that were never IP-tested are skipped while this is set.</string>
-    <string name="autosel_country_filter_empty">Any country (e.g. DE,NL,FR)</string>
+    <string name="autosel_country_filter_tip">Comma-separated country codes, empty means any. Put ! before a code to exclude that country instead, e.g. !RU uses every country but Russia. Uses the country found by the IP test, so profiles that were never IP-tested are skipped while this is set.</string>
+    <string name="autosel_country_filter_empty">Any country (e.g. DE,NL,FR or !RU)</string>
     <string name="autosel_build_limit">Run the best</string>
     <string name="autosel_build_limit_tip">How many profiles are loaded into the running config. The selector switches between these instantly, with no reconnect. Higher costs more memory and startup time.</string>
     <string name="autosel_pool_cap">Rank at most</string>
@@ -2509,7 +2509,7 @@
     <string name="validation_custom_xray_env">Removed the environment variables from the imported configuration: they would apply to Throne\'s core and to the programs it starts.</string>
     <string name="validation_custom_xray_geodata">Removed the geodata updater from the imported configuration: it would download files from addresses the sender chose and replace files in Throne\'s folder.</string>
     <string name="validation_custom_xray_webhook">Removed the webhook from this routing rule: it would send the details of every matching connection to an address the sender chose.</string>
-    <string name="validation_autoselector_countries">Use two-letter country codes separated by commas, for example DE,NL,FR.</string>
+    <string name="validation_autoselector_countries">Use two-letter country codes separated by commas, for example DE,NL,FR; put ! before a code to exclude that country, for example !RU.</string>
     <string name="validation_autoselector_build_limit">Cannot run more profiles than are ranked (%1$s).</string>
     <string name="validation_autoselector_bench_interval">The full sweep cannot run more often than the check interval (%1$s s).</string>
     <string name="validation_autoselector_watch_interval">Watching the profile in use cannot be slower than the check interval (%1$s s).</string>

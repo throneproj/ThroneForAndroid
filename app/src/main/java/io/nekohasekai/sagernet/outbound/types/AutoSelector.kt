@@ -320,9 +320,10 @@ class AutoSelector : Outbound("autoselector") {
 
 /** The Checks of autoselector.h: the free-text fields, and the bounds [AutoSelector.normalize] would otherwise clamp silently. */
 object AutoSelectorChecks {
-    /** The plan matches these against the two-letter country of each profile's last test. */
+    /** The plan matches these against the two-letter country of each profile's last test; "!RU" excludes one. */
     @JvmStatic
-    fun autoSelectorCountries(text: String): String = Validation.eachItem(text, Validation.Split.Comma, { code ->
+    fun autoSelectorCountries(text: String): String = Validation.eachItem(text, Validation.Split.Comma, { item ->
+        val code = if (item.startsWith('!')) item.substring(1).trim() else item
         if (code.length == 2 && code.all { it in 'A'..'Z' || it in 'a'..'z' }) "" else vtr(R.string.validation_autoselector_countries)
     })
 

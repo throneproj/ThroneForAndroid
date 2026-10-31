@@ -260,7 +260,8 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         return members
     }
 
-    private class Filters(val name: Pattern?, val countries: Set<String>)
+    // excludedCountries: "!RU" items, removed whether or not includes are given.
+    private class Filters(val name: Pattern?, val countries: Set<String>, val excludedCountries: Set<String>)
 
     // buildFilters (cpp:27-39): an invalid regex filters nothing (the editor refuses to save one).
     private fun buildFilters(selector: AutoSelector): Filters {
@@ -273,10 +274,15 @@ class AutoSelectorPlanner @JvmOverloads constructor(
             }
         }
         val countries = HashSet<String>()
-        for (code in selector.countryFilter.split(',')) {
-            if (code.isNotEmpty()) countries.add(code.trim().uppercase())
+        val excludedCountries = HashSet<String>()
+        for (item in selector.countryFilter.split(',')) {
+            var code = item.trim()
+            val exclude = code.startsWith('!')
+            if (exclude) code = code.substring(1).trim()
+            if (code.isEmpty()) continue
+            (if (exclude) excludedCountries else countries).add(code.uppercase())
         }
-        return Filters(name, countries)
+        return Filters(name, countries, excludedCountries)
     }
 
     // eligibilityOf (cpp:50-82); null = eligible.
@@ -301,8 +307,12 @@ class AutoSelectorPlanner @JvmOverloads constructor(
             if (custom.configObject().isEmpty()) return AutoSelectorSkip.Malformed
         }
         if (filters.name != null && !filters.name.matcher(outbound.displayName()).find()) return AutoSelectorSkip.NameFilter
-        if (filters.countries.isNotEmpty() && member.testCountry.uppercase() !in filters.countries) {
-            return AutoSelectorSkip.CountryFilter
+        if (filters.countries.isNotEmpty() || filters.excludedCountries.isNotEmpty()) {
+            // Unknown country is skipped either way: an exclusion cannot vouch for a profile never IP-tested.
+            val country = member.testCountry.trim().uppercase()
+            if (country.isEmpty() || country in filters.excludedCountries ||
+                (filters.countries.isNotEmpty() && country !in filters.countries)
+            ) return AutoSelectorSkip.CountryFilter
         }
         // Only a fresh failure excludes a member; an old one would exile it permanently.
         if (selector.excludeUnavailable && member.latency < 0 && hasFreshResult(member, selector, now)) {
