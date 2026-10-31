@@ -543,7 +543,11 @@ class BaseService {
             // Tracks the underlying network for VpnService.setUnderlyingNetworks only; the
             // "reset on network change" switch is applied by NativeInterface's monitor callback.
             DefaultNetworkListener.start(this) { network ->
-                if (network == null) return@start
+                if (network == null) {
+                    SagerNet.underlyingNetwork = null
+                    DataStore.vpnService?.updateUnderlyingNetwork()
+                    return@start
+                }
                 SagerNet.connectivity.getLinkProperties(network)?.also { link ->
                     SagerNet.underlyingNetwork = network
                     DataStore.vpnService?.updateUnderlyingNetwork()
