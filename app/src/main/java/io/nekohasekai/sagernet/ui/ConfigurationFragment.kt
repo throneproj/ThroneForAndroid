@@ -125,9 +125,13 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
 
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
 
-    /** Double column (groupLayoutMode 1): the compact card, two columns at least (the width may give more). */
+    /**
+     * Double column (groupLayoutMode 1): the compact card, two columns at least (the width may give more). Landscape
+     * only, switched from the toolbar; portrait always lists single column cards.
+     */
     var doubleColumn = false
         private set
+    private var landscape = false
 
     val groupMenu = GroupMenu(this)
     val selection = SelectionMode(this)
@@ -204,7 +208,9 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        doubleColumn = DataStore.groupLayoutMode == 1
+        val config = resources.configuration
+        landscape = config.screenWidthDp > config.screenHeightDp
+        doubleColumn = landscape && DataStore.groupLayoutMode == 1
         readProfileState()
 
         setUpToolbar()
@@ -220,7 +226,6 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         val card = SubscriptionInfoCard(view.findViewById(R.id.subscription_card))
         card.view.applyInsetMargin(horizontal = true)
         infoCard = card
-        val config = resources.configuration
         header = ProfilesHeader(
             view as ViewGroup, view.findViewById(R.id.toolbar), tabLayout, runtimeStatus, card.view,
             autoHide = config.screenHeightDp < COMPACT_HEIGHT_DP && !SagerNet.isTv,
@@ -352,6 +357,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
             TvControls.addServerSwitch(toolbar.menu, R.id.group_profiles_toolbar)
             groupMenu.setUp(toolbar.menu)
             imports.prepare(toolbar.menu)
+            updateLayoutAction()
             toolbar.setNavigationOnClickListener {
                 if (selection.active) {
                     selection.finish()
@@ -652,6 +658,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         if (toolbar != null) {
             toolbar.menu.setGroupVisible(R.id.group_profiles_toolbar, !active)
             toolbar.menu.setGroupVisible(R.id.group_selection_toolbar, active)
+            updateLayoutAction()
             if (active) {
                 searchView?.clearFocus()
                 setNavigationIcon(R.drawable.ic_navigation_close, R.string.navigation_cancel_selection)
@@ -673,10 +680,19 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
     }
 
     fun setDoubleColumn(value: Boolean) {
-        if (value == doubleColumn) return
+        if (value == doubleColumn || !landscape) return
         doubleColumn = value
         runOnDefaultDispatcher { DataStore.groupLayoutMode = if (value) 1 else 0 }
         lists.forEach { it.switchLayout() }
+        updateLayoutAction()
+    }
+
+    /** The toolbar's layout switch shows the layout it switches to; setGroupVisible brings it back in portrait too. */
+    private fun updateLayoutAction() {
+        val item = toolbar?.menu?.findItem(R.id.action_layout) ?: return
+        item.isVisible = landscape && !select && !selection.active
+        item.setIcon(if (doubleColumn) R.drawable.ic_baseline_view_list_24 else R.drawable.ic_baseline_grid_view_24)
+        item.setTitle(if (doubleColumn) R.string.layout_single_column else R.string.layout_double_column)
     }
 
     // ------------------------------------------------------------------------------------------------ state

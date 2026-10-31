@@ -25,7 +25,6 @@
     <string name="navigation_cancel_selection">Selectie annuleren</string>
     <string name="group_update">Bijwerken</string>
     <string name="update_all_subscription">Alle abonnementen bijwerken</string>
-    <string name="layout">Lay-out</string>
     <string name="layout_single_column">Eén kolom</string>
     <string name="layout_double_column">Twee kolommen</string>
     <string name="service_mode">Servicemodus</string>
@@ -1008,7 +1007,6 @@
     <string name="profiles_show">Tonen</string>
     <string name="profiles_show_out_ip">Uitgaand IP</string>
     <string name="profiles_show_speed">Snelheid</string>
-    <string name="profiles_appearance">Uiterlijk</string>
     <string name="confirm_clear">Wissen</string>
     <string name="confirm_restore">Herstellen</string>
     <string name="confirm_replace">Vervangen</string>
@@ -1722,8 +1720,8 @@
     <string name="subinfo_provider">Provider: %s</string>
     <string name="subinfo_expired">Verlopen</string>
     <string name="subinfo_minutes_left">%dm over</string>
-    <string name="subinfo_hours_left">%du over</string>
-    <string name="subinfo_days_left">%dd over</string>
+    <string name="subinfo_hours_minutes_left">%1$du %2$dm over</string>
+    <string name="subinfo_days_hours_left">%1$dd %2$du over</string>
     <string name="subinfo_expires">Verloopt: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

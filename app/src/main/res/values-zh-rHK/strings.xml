@@ -659,7 +659,6 @@
     <string name="profile_row_ip">IP %s</string>
     <string name="profile_row_traffic">上傳 %1$s，下載 %2$s</string>
     <string name="profile_row_upload">上傳 %s</string>
-    <string name="profiles_appearance">外觀</string>
     <string name="profiles_copy_links">複製連結</string>
     <string name="profiles_copy_share_links">分享連結</string>
     <string name="profiles_copy_throne_links">Throne 連結</string>
@@ -1505,7 +1504,6 @@
     <string name="menu_dashboard">sing-box 儀表板</string>
     <string name="action_copy">複製</string>
     <string name="update_all_subscription">更新所有訂閱</string>
-    <string name="layout">佈局</string>
     <string name="layout_single_column">單列</string>
     <string name="layout_double_column">雙列</string>
     <string name="enable_fakedns">啟用 FakeDNS</string>
@@ -1701,8 +1699,8 @@
     <string name="subinfo_provider">供應商：%s</string>
     <string name="subinfo_expired">已到期</string>
     <string name="subinfo_minutes_left">剩 %d 分</string>
-    <string name="subinfo_hours_left">剩 %d 小時</string>
-    <string name="subinfo_days_left">剩 %d 天</string>
+    <string name="subinfo_hours_minutes_left">剩 %1$d 小時 %2$d 分</string>
+    <string name="subinfo_days_hours_left">剩 %1$d 天 %2$d 小時</string>
     <string name="subinfo_expires">到期：%s</string>
     <string name="subinfo_quota">%1$s / %2$s（%3$d%%）</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

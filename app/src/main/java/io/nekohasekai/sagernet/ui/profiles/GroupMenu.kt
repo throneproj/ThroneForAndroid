@@ -13,7 +13,6 @@ import io.nekohasekai.sagernet.database.TestShowItems
 import io.nekohasekai.sagernet.database.TrafficBy
 import io.nekohasekai.sagernet.database.TypeBy
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
-import io.nekohasekai.sagernet.ui.route.RouteQuickSwitch
 import io.nekohasekai.sagernet.ui.test.TestSessionClient
 
 /** The ⋮ menu of the profiles screen: actions on the current tab's group (the desktop's Groups menu). */
@@ -107,16 +106,12 @@ class GroupMenu(private val host: ConfigurationFragment) {
             menu.findItem(R.id.action_show_out_ip)?.isChecked = shown.showIp
             menu.findItem(R.id.action_show_speed)?.isChecked = shown.showSpeed
         }
-        menu.findItem(if (host.doubleColumn) R.id.action_layout_double else R.id.action_layout_single)?.isChecked = true
     }
 
     fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_update_all_subscriptions -> GroupActions.updateAll(host)
             R.id.action_test_stop -> TestSessionClient.stop()
-            R.id.action_route_profile -> RouteQuickSwitch.show(host)
-            R.id.action_layout_single -> host.setDoubleColumn(false)
-            R.id.action_layout_double -> host.setDoubleColumn(true)
+            R.id.action_layout -> host.setDoubleColumn(!host.doubleColumn)
             else -> return onGroupItemClick(item, host.currentGroup() ?: return false)
         }
         return true

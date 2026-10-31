@@ -222,7 +222,6 @@
     <string name="menu_dashboard">sing-box-oversikt</string>
     <string name="action_copy">Kopier</string>
     <string name="update_all_subscription">Oppdater alle abonnementer</string>
-    <string name="layout">Oppsett</string>
     <string name="layout_single_column">Én kolonne</string>
     <string name="layout_double_column">To kolonner</string>
     <string name="mux_max_connections">Maks tilkoblinger</string>
@@ -1012,7 +1011,6 @@
     <string name="profiles_show">Vis</string>
     <string name="profiles_show_out_ip">Utgående IP</string>
     <string name="profiles_show_speed">Hastighet</string>
-    <string name="profiles_appearance">Utseende</string>
     <string name="confirm_clear">Tøm</string>
     <string name="confirm_restore">Gjenopprett</string>
     <string name="confirm_replace">Erstatt</string>
@@ -1726,8 +1724,8 @@
     <string name="subinfo_provider">Leverandør: %s</string>
     <string name="subinfo_expired">Utløpt</string>
     <string name="subinfo_minutes_left">%d min igjen</string>
-    <string name="subinfo_hours_left">%d t igjen</string>
-    <string name="subinfo_days_left">%d d igjen</string>
+    <string name="subinfo_hours_minutes_left">%1$d t %2$d min igjen</string>
+    <string name="subinfo_days_hours_left">%1$d d %2$d t igjen</string>
     <string name="subinfo_expires">Utløper: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d %%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

@@ -680,7 +680,6 @@
     <string name="json_status_syntax_only">Сапраўдны JSON (схема недаступна, правераны толькі сінтаксіс)</string>
     <string name="json_status_valid">Сапраўдны JSON</string>
     <string name="language">Мова</string>
-    <string name="layout">Макет</string>
     <string name="layout_double_column">Дзве калонкі</string>
     <string name="layout_single_column">Адна калонка</string>
     <string name="license">Ліцэнзія</string>
@@ -803,7 +802,6 @@
     <string name="profile_row_ip">IP %s</string>
     <string name="profile_row_traffic">Адпраўлена %1$s, загружана %2$s</string>
     <string name="profile_row_upload">Адпраўка %s</string>
-    <string name="profiles_appearance">Знешні выгляд</string>
     <string name="profiles_copy_links">Скапіяваць спасылкі</string>
     <string name="profiles_copy_share_links">Спасылкі абагульвання</string>
     <string name="profiles_copy_throne_links">Спасылкі Throne</string>
@@ -1775,8 +1773,8 @@
     <string name="subinfo_provider">Пастаўшчык: %s</string>
     <string name="subinfo_expired">Тэрмін скончыўся</string>
     <string name="subinfo_minutes_left">Засталося %d хв</string>
-    <string name="subinfo_hours_left">Засталося %d гадз</string>
-    <string name="subinfo_days_left">Засталося %d дз</string>
+    <string name="subinfo_hours_minutes_left">Засталося %1$d гадз %2$d хв</string>
+    <string name="subinfo_days_hours_left">Засталося %1$d дз %2$d гадз</string>
     <string name="subinfo_expires">Заканчваецца: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

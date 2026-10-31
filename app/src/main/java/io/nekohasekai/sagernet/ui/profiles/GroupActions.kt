@@ -29,13 +29,6 @@ internal object GroupActions {
         if (group.isSubscription) SubscriptionClient.refreshGroup(group.id, showDiff = true)
     }
 
-    /** RefreshAll() without onlyAllowed: skip_auto_update groups are included. */
-    fun updateAll(host: ConfigurationFragment) {
-        host.requireContext().confirmAction(
-            host.getString(R.string.grp_update_all_confirm), null, R.string.group_update,
-        ) { SubscriptionClient.refreshAll(onlyAllowed = false) }
-    }
-
     fun clearTestResults(host: ConfigurationFragment, group: ProxyGroup) {
         host.requireContext().confirmAction(
             host.getString(R.string.confirm_clear_test_results), group.displayName(), R.string.confirm_clear,

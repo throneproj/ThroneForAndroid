@@ -25,6 +25,12 @@
         android:id="@+id/action_resolve_domain"
         android:title="@string/profiles_resolve_domain" />
     <item
+        android:id="@+id/action_clear_test_results"
+        android:title="@string/connection_test_clear_results" />
+    <item
+        android:id="@+id/action_clear_traffic_statistics"
+        android:title="@string/clear_traffic_statistics" />
+    <item
         android:id="@+id/action_move_up"
         android:title="@string/profiles_move_up" />
     <item

@@ -228,7 +228,6 @@
     <string name="menu_dashboard">sing-box paneli</string>
     <string name="action_copy">Kopyala</string>
     <string name="update_all_subscription">Tüm abonelikleri güncelle</string>
-    <string name="layout">Düzen</string>
     <string name="layout_single_column">Tek sütun</string>
     <string name="layout_double_column">Çift sütun</string>
     <string name="mux_max_connections">En fazla bağlantı</string>
@@ -1016,7 +1015,6 @@
     <string name="profiles_show">Göster</string>
     <string name="profiles_show_out_ip">Çıkış IP</string>
     <string name="profiles_show_speed">Hız</string>
-    <string name="profiles_appearance">Görünüm</string>
     <string name="confirm_clear">Temizle</string>
     <string name="confirm_restore">Geri yükle</string>
     <string name="confirm_replace">Değiştir</string>
@@ -1728,8 +1726,8 @@
     <string name="subinfo_provider">Sağlayıcı: %s</string>
     <string name="subinfo_expired">Süresi doldu</string>
     <string name="subinfo_minutes_left">%d dk kaldı</string>
-    <string name="subinfo_hours_left">%d sa kaldı</string>
-    <string name="subinfo_days_left">%d gün kaldı</string>
+    <string name="subinfo_hours_minutes_left">%1$d sa %2$d dk kaldı</string>
+    <string name="subinfo_days_hours_left">%1$d gün %2$d sa kaldı</string>
     <string name="subinfo_expires">Bitiş: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%%%3$d)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

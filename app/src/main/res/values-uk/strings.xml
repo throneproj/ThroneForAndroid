@@ -858,7 +858,6 @@
     <string name="profile_row_ip">IP %s</string>
     <string name="profile_row_traffic">Віддано %1$s, отримано %2$s</string>
     <string name="profile_row_upload">Вивантаження %s</string>
-    <string name="profiles_appearance">Вигляд</string>
     <string name="profiles_copy_links">Копіювати посилання</string>
     <string name="profiles_copy_share_links">Посилання для обміну</string>
     <string name="profiles_copy_throne_links">Посилання Throne</string>
@@ -1499,7 +1498,6 @@
     <string name="http_proxy_bypass">Список обходу HTTP-проксі</string>
     <string name="http_proxy_bypass_dialog_message">По одному в рядку. Рядки, що починаються з #, є коментарями. Приклад: *zhihu.com</string>
     <string name="language">Мова</string>
-    <string name="layout">Макет</string>
     <string name="layout_double_column">Двоколонковий</string>
     <string name="layout_single_column">Одноколонковий</string>
     <string name="mux_brutal">TCP Brutal</string>
@@ -1786,8 +1784,8 @@
     <string name="subinfo_provider">Провайдер: %s</string>
     <string name="subinfo_expired">Термін минув</string>
     <string name="subinfo_minutes_left">ще %d хв</string>
-    <string name="subinfo_hours_left">ще %d год</string>
-    <string name="subinfo_days_left">ще %d дн.</string>
+    <string name="subinfo_hours_minutes_left">ще %1$d год %2$d хв</string>
+    <string name="subinfo_days_hours_left">ще %1$d дн. %2$d год</string>
     <string name="subinfo_expires">Спливає: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

@@ -106,6 +106,13 @@
         </item>
 
         <item
+            android:id="@+id/action_layout"
+            android:icon="@drawable/ic_baseline_grid_view_24"
+            android:title="@string/layout_double_column"
+            android:visible="false"
+            app:showAsAction="ifRoom" />
+
+        <item
             android:id="@+id/action_misc"
             android:icon="@drawable/ic_baseline_more_vert_24"
             android:title="@string/profiles_more_options"
@@ -115,24 +122,30 @@
                     <item
                         android:id="@+id/action_update_subscription"
                         android:title="@string/profiles_update_subscription" />
-                    <item
-                        android:id="@+id/action_update_all_subscriptions"
-                        android:title="@string/update_all_subscription" />
                 </group>
                 <group android:id="@+id/group_menu_test">
                     <item
-                        android:id="@+id/action_test_url"
-                        android:title="@string/profiles_test_url" />
+                        android:id="@+id/action_test"
+                        android:title="@string/profiles_test">
+                        <menu>
+                            <item
+                                android:id="@+id/action_test_url"
+                                android:title="@string/profiles_test_url" />
+                            <item
+                                android:id="@+id/action_test_ip"
+                                android:title="@string/profiles_test_ip" />
+                            <item
+                                android:id="@+id/action_test_speed"
+                                android:title="@string/profiles_test_speed" />
+                            <item
+                                android:id="@+id/action_test_stop"
+                                android:title="@string/profiles_test_stop"
+                                android:visible="false" />
+                        </menu>
+                    </item>
                     <item
-                        android:id="@+id/action_test_ip"
-                        android:title="@string/profiles_test_ip" />
-                    <item
-                        android:id="@+id/action_test_speed"
-                        android:title="@string/profiles_test_speed" />
-                    <item
-                        android:id="@+id/action_test_stop"
-                        android:title="@string/profiles_test_stop"
-                        android:visible="false" />
+                        android:id="@+id/action_resolve_domains"
+                        android:title="@string/profiles_resolve_domains" />
                 </group>
                 <group android:id="@+id/group_menu_cleanup">
                     <item
@@ -159,9 +172,6 @@
                                 android:title="@string/profiles_remove_insecure" />
                         </menu>
                     </item>
-                    <item
-                        android:id="@+id/action_resolve_domains"
-                        android:title="@string/profiles_resolve_domains" />
                 </group>
                 <group android:id="@+id/group_menu_order">
                     <item
@@ -253,30 +263,6 @@
                                 android:id="@+id/action_show_speed"
                                 android:checkable="true"
                                 android:title="@string/profiles_show_speed" />
-                        </menu>
-                    </item>
-                </group>
-                <group android:id="@+id/group_menu_screen">
-                    <item
-                        android:id="@+id/action_route_profile"
-                        android:title="@string/route_profile_quick_switch" />
-                    <item
-                        android:id="@+id/action_appearance"
-                        android:title="@string/profiles_appearance">
-                        <menu>
-                            <item
-                                android:enabled="false"
-                                android:title="@string/layout" />
-                            <group
-                                android:id="@+id/layout_group"
-                                android:checkableBehavior="single">
-                                <item
-                                    android:id="@+id/action_layout_single"
-                                    android:title="@string/layout_single_column" />
-                                <item
-                                    android:id="@+id/action_layout_double"
-                                    android:title="@string/layout_double_column" />
-                            </group>
                         </menu>
                     </item>
                 </group>

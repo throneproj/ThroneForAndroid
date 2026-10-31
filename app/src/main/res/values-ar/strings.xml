@@ -760,7 +760,6 @@
     <string name="json_status_syntax_only">JSON صالح (التنسيق غير متاح، فحص الصيغة فقط)</string>
     <string name="json_status_valid">JSON صالح</string>
     <string name="language">اللغة</string>
-    <string name="layout">التخطيط</string>
     <string name="layout_double_column">عمودان</string>
     <string name="layout_single_column">عمود واحد</string>
     <string name="listen_address">عنوان الاستماع</string>
@@ -862,7 +861,6 @@
     <string name="profile_row_ip">IP %s</string>
     <string name="profile_row_traffic">رُفع %1$s، نُزّل %2$s</string>
     <string name="profile_row_upload">رفع %s</string>
-    <string name="profiles_appearance">المظهر</string>
     <string name="profiles_copy_links">نسخ الروابط</string>
     <string name="profiles_copy_share_links">روابط المشاركة</string>
     <string name="profiles_copy_throne_links">روابط Throne</string>
@@ -1829,8 +1827,8 @@
     <string name="subinfo_provider">المزود: %s</string>
     <string name="subinfo_expired">منتهي الصلاحية</string>
     <string name="subinfo_minutes_left">تبقّى %d دقيقة</string>
-    <string name="subinfo_hours_left">تبقّى %d ساعة</string>
-    <string name="subinfo_days_left">تبقّى %d يومًا</string>
+    <string name="subinfo_hours_minutes_left">تبقّى %1$d ساعة و%2$d دقيقة</string>
+    <string name="subinfo_days_hours_left">تبقّى %1$d يومًا و%2$d ساعة</string>
     <string name="subinfo_expires">ينتهي: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

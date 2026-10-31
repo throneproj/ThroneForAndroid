@@ -144,7 +144,6 @@
     <string name="menu_dashboard">Dasbor sing-box</string>
     <string name="action_copy">Salin</string>
     <string name="update_all_subscription">Perbarui semua langganan</string>
-    <string name="layout">Tata letak</string>
     <string name="layout_single_column">Satu kolom</string>
     <string name="layout_double_column">Dua kolom</string>
     <string name="mux_max_connections">Koneksi maksimum</string>
@@ -1012,7 +1011,6 @@
     <string name="profiles_show">Tampilkan</string>
     <string name="profiles_show_out_ip">IP keluar</string>
     <string name="profiles_show_speed">Kecepatan</string>
-    <string name="profiles_appearance">Tampilan</string>
     <string name="confirm_clear">Kosongkan</string>
     <string name="confirm_restore">Pulihkan</string>
     <string name="confirm_replace">Ganti</string>
@@ -1726,8 +1724,8 @@
     <string name="subinfo_provider">Penyedia: %s</string>
     <string name="subinfo_expired">Kedaluwarsa</string>
     <string name="subinfo_minutes_left">Sisa %dm</string>
-    <string name="subinfo_hours_left">Sisa %dj</string>
-    <string name="subinfo_days_left">Sisa %dh</string>
+    <string name="subinfo_hours_minutes_left">Sisa %1$dj %2$dm</string>
+    <string name="subinfo_days_hours_left">Sisa %1$dh %2$dj</string>
     <string name="subinfo_expires">Berakhir: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

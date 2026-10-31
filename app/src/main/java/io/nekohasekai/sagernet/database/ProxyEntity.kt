@@ -149,6 +149,9 @@ data class ProxyEntity(
         latencyAt = if (ms == 0) 0L else System.currentTimeMillis() / 1000
     }
 
+    fun hasTestResults(): Boolean = latency != 0 || testCountry != null || ipOut != null || dlSpeed != null ||
+        ulSpeed != null || testError != null
+
     /** Profile::ClearTestResults, plus the Android-only error text. */
     fun clearTestResults() {
         testCountry = null

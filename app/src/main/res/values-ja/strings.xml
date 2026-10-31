@@ -56,7 +56,6 @@
     <string name="menu_dashboard">sing-box ダッシュボード</string>
     <string name="action_copy">コピー</string>
     <string name="update_all_subscription">すべてのサブスクリプションを更新</string>
-    <string name="layout">レイアウト</string>
     <string name="layout_single_column">1列</string>
     <string name="layout_double_column">2列</string>
     <string name="allow_insecure">安全でない接続を許可</string>
@@ -897,7 +896,6 @@
     <string name="profile_row_ip">IP %s</string>
     <string name="profile_row_traffic">アップ %1$s、ダウン %2$s</string>
     <string name="profile_row_upload">アップロード %s</string>
-    <string name="profiles_appearance">外観</string>
     <string name="profiles_copy_links">リンクをコピー</string>
     <string name="profiles_copy_share_links">共有リンク</string>
     <string name="profiles_copy_throne_links">Throne リンク</string>
@@ -1701,8 +1699,8 @@
     <string name="subinfo_provider">プロバイダ：%s</string>
     <string name="subinfo_expired">期限切れ</string>
     <string name="subinfo_minutes_left">残り %d 分</string>
-    <string name="subinfo_hours_left">残り %d 時間</string>
-    <string name="subinfo_days_left">残り %d 日</string>
+    <string name="subinfo_hours_minutes_left">残り %1$d 時間 %2$d 分</string>
+    <string name="subinfo_days_hours_left">残り %1$d 日 %2$d 時間</string>
     <string name="subinfo_expires">有効期限：%s</string>
     <string name="subinfo_quota">%1$s / %2$s（%3$d%%）</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

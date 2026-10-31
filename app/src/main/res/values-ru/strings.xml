@@ -234,7 +234,6 @@
 <string name="xtls_flow">Flow (подпротокол VLESS)</string>
 <string name="yes">Да</string>
     <string name="action_copy">Копировать</string>
-    <string name="layout">Макет</string>
     <string name="layout_single_column">Один столбец</string>
     <string name="layout_double_column">Два столбца</string>
     <string name="mux_max_connections">Макс. соединений</string>
@@ -899,7 +898,6 @@
     <string name="profile_row_ip">IP %s</string>
     <string name="profile_row_traffic">Отдано %1$s, получено %2$s</string>
     <string name="profile_row_upload">Отправка %s</string>
-    <string name="profiles_appearance">Внешний вид</string>
     <string name="profiles_copy_links">Копировать ссылки</string>
     <string name="profiles_copy_share_links">Ссылки для обмена</string>
     <string name="profiles_copy_throne_links">Ссылки Throne</string>
@@ -1776,8 +1774,8 @@
     <string name="subinfo_provider">Провайдер: %s</string>
     <string name="subinfo_expired">Истекла</string>
     <string name="subinfo_minutes_left">Осталось %d мин</string>
-    <string name="subinfo_hours_left">Осталось %d ч</string>
-    <string name="subinfo_days_left">Осталось %d дн.</string>
+    <string name="subinfo_hours_minutes_left">Осталось %1$d ч %2$d мин</string>
+    <string name="subinfo_days_hours_left">Осталось %1$d дн. %2$d ч</string>
     <string name="subinfo_expires">Истекает: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

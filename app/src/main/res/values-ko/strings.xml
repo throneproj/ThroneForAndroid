@@ -17,7 +17,6 @@
     <string name="action_copy">복사</string>
     <string name="group_update">업데이트</string>
     <string name="update_all_subscription">모든 구독 업데이트</string>
-    <string name="layout">레이아웃</string>
     <string name="layout_single_column">단일 열</string>
     <string name="layout_double_column">이중 열</string>
     <string name="service_mode">서비스 모드</string>
@@ -896,7 +895,6 @@
     <string name="profile_row_ip">IP %s</string>
     <string name="profile_row_traffic">업로드 %1$s, 다운로드 %2$s</string>
     <string name="profile_row_upload">업로드 %s</string>
-    <string name="profiles_appearance">화면</string>
     <string name="profiles_copy_links">링크 복사</string>
     <string name="profiles_copy_share_links">공유 링크</string>
     <string name="profiles_copy_throne_links">Throne 링크</string>
@@ -1700,8 +1698,8 @@
     <string name="subinfo_provider">제공자: %s</string>
     <string name="subinfo_expired">만료됨</string>
     <string name="subinfo_minutes_left">%d분 남음</string>
-    <string name="subinfo_hours_left">%d시간 남음</string>
-    <string name="subinfo_days_left">%d일 남음</string>
+    <string name="subinfo_hours_minutes_left">%1$d시간 %2$d분 남음</string>
+    <string name="subinfo_days_hours_left">%1$d일 %2$d시간 남음</string>
     <string name="subinfo_expires">만료: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

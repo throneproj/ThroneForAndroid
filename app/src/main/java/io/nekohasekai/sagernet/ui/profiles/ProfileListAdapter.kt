@@ -632,6 +632,15 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         notifyAllContent()
     }
 
+    fun clearTraffic(id: Long) {
+        liveTraffic.remove(id)
+        cache[id]?.apply {
+            tx = 0L
+            rx = 0L
+        }
+        notifyId(id, PAYLOAD_CONTENT)
+    }
+
     // ------------------------------------------------------------------------------------------------ order
 
     /** Drag and drop follows the desktop: refused while the list is filtered (and while selecting or picking). */

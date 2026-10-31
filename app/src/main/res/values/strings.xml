@@ -29,7 +29,6 @@
     <!-- group -->
     <string name="group_update">Update</string>
     <string name="update_all_subscription">Update all subscriptions</string>
-    <string name="layout">Layout</string>
     <string name="layout_single_column">Single column</string>
     <string name="layout_double_column">Double column</string>
     <!-- misc -->
@@ -1164,7 +1163,6 @@
     <string name="profiles_show">Show</string>
     <string name="profiles_show_out_ip">Out IP</string>
     <string name="profiles_show_speed">Speed</string>
-    <string name="profiles_appearance">Appearance</string>
 
     <!-- confirmations of destructive actions: the question as the title, what it affects below, Cancel and a verb -->
     <string name="confirm_clear">Clear</string>
@@ -1934,8 +1932,8 @@
     <string name="subinfo_provider">Provider: %s</string>
     <string name="subinfo_expired">Expired</string>
     <string name="subinfo_minutes_left">%dm left</string>
-    <string name="subinfo_hours_left">%dh left</string>
-    <string name="subinfo_days_left">%dd left</string>
+    <string name="subinfo_hours_minutes_left">%1$dh %2$dm left</string>
+    <string name="subinfo_days_hours_left">%1$dd %2$dh left</string>
     <string name="subinfo_expires">Expires: %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

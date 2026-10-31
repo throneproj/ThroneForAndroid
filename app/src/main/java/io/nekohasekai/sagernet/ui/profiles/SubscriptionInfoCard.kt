@@ -39,9 +39,6 @@ internal class SubscriptionInfoCard(val view: View) {
         private val SIZE_UNITS = arrayOf("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB")
         private val WHITESPACE = Regex("\\s+")
 
-        // Panels stamping expire as fetch time + N days land on a unit boundary; a count this close to stepping down shows stepped.
-        private const val COUNTDOWN_GRACE = 5 * 60L
-
         /** ReadableSize (Utils.cpp:223-243): 1024-based, two decimals. */
         fun readableSize(size: Long): String {
             var value = size.toDouble()
@@ -59,15 +56,14 @@ internal class SubscriptionInfoCard(val view: View) {
 
         private fun nowSeconds() = System.currentTimeMillis() / 1000
 
-        /** expiryText (SubscriptionInfoCard.cpp:322-334): the time left, "Expired", "" without an expiry. */
+        /** expiryText (SubscriptionInfoCard.cpp:319-330): the time left, "Expired", "" without an expiry. */
         fun expiryText(context: Context, expire: Long, now: Long = nowSeconds()): String {
             if (expire <= 0) return ""
             val left = expire - now
-            val settled = left - COUNTDOWN_GRACE
             return when {
                 left < 0 -> context.getString(R.string.subinfo_expired)
-                settled >= 86400 -> context.getString(R.string.subinfo_days_left, settled / 86400)
-                settled >= 3600 -> context.getString(R.string.subinfo_hours_left, settled / 3600)
+                left >= 86400 -> context.getString(R.string.subinfo_days_hours_left, left / 86400, left % 86400 / 3600)
+                left >= 3600 -> context.getString(R.string.subinfo_hours_minutes_left, left / 3600, left % 3600 / 60)
                 else -> context.getString(R.string.subinfo_minutes_left, maxOf(1L, left / 60))
             }
         }
@@ -142,7 +138,7 @@ internal class SubscriptionInfoCard(val view: View) {
         wanted = group != null && group.isSubscription && group.subOptions.showInfoCard && render(group, group.subInfo)
     }
 
-    /** updateData (SubscriptionInfoCard.cpp:469-544); false when there is nothing to show. */
+    /** updateData (SubscriptionInfoCard.cpp:465-540); false when there is nothing to show. */
     private fun render(group: ProxyGroup, info: SubUserInfo): Boolean {
         if (!info.valid) return false
         val now = nowSeconds()
@@ -170,7 +166,7 @@ internal class SubscriptionInfoCard(val view: View) {
 
         expiry.isVisible = info.expire > 0
         if (info.expire > 0) {
-            val urgent = (info.expire - now - COUNTDOWN_GRACE) / 86400 <= 3
+            val urgent = (info.expire - now) / 86400 <= 3
             val color = if (urgent) danger else secondary
             expiryIcon.setImageResource(if (urgent) R.drawable.ic_baseline_warning_24 else R.drawable.ic_baseline_hourglass_empty_24)
             ImageViewCompat.setImageTintList(expiryIcon, ColorStateList.valueOf(color))

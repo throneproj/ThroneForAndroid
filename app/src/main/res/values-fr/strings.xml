@@ -25,7 +25,6 @@
     <string name="navigation_cancel_selection">Annuler la sélection</string>
     <string name="group_update">Mettre à jour</string>
     <string name="update_all_subscription">Mettre à jour tous les abonnements</string>
-    <string name="layout">Disposition</string>
     <string name="layout_single_column">Une colonne</string>
     <string name="layout_double_column">Deux colonnes</string>
     <string name="service_mode">Mode service</string>
@@ -1008,7 +1007,6 @@
     <string name="profiles_show">Afficher</string>
     <string name="profiles_show_out_ip">IP sortante</string>
     <string name="profiles_show_speed">Vitesse</string>
-    <string name="profiles_appearance">Apparence</string>
     <string name="confirm_clear">Effacer</string>
     <string name="confirm_restore">Restaurer</string>
     <string name="confirm_replace">Remplacer</string>
@@ -1722,8 +1720,8 @@
     <string name="subinfo_provider">Fournisseur : %s</string>
     <string name="subinfo_expired">Expiré</string>
     <string name="subinfo_minutes_left">Reste %d min</string>
-    <string name="subinfo_hours_left">Reste %d h</string>
-    <string name="subinfo_days_left">Reste %d j</string>
+    <string name="subinfo_hours_minutes_left">Reste %1$d h %2$d min</string>
+    <string name="subinfo_days_hours_left">Reste %1$d j %2$d h</string>
     <string name="subinfo_expires">Expire : %s</string>
     <string name="subinfo_quota">%1$s / %2$s (%3$d %%)</string>
     <string name="subinfo_quota_unlimited">%1$s / ∞</string>

@@ -8,6 +8,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.bg.test.TestSpec
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.ProxyGroup
@@ -21,12 +22,13 @@ import io.nekohasekai.sagernet.ktx.showAllowingStateLoss
 import io.nekohasekai.sagernet.ktx.snackbar
 import io.nekohasekai.sagernet.ktx.startFilesForResult
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
+import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.ui.profile.ProfileConfigExport
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.profileSettingsIntent
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 
-/** The actions of one profile row: edit, share, the ⋮ menu (tests, move up/down, delete). */
+/** The actions of one profile row: edit, share, the ⋮ menu (tests, resolve, clearing results / traffic, move up/down on TV, delete). */
 class ProfileItemMenu(private val host: ConfigurationFragment) {
 
     private val exportConfig = host.registerForActivityResult(
@@ -61,9 +63,9 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         // the compact card has no edit / share buttons
         menu.findItem(R.id.action_edit).isVisible = adapter.isCompact
         menu.findItem(R.id.action_share).isVisible = adapter.isCompact
-        // positions of the stored order: a filtered list says nothing about it (like the desktop's drag and drop)
+        // TV only, where a D-pad cannot drag; a filtered list says nothing about the stored order
         val index = adapter.memberIds.indexOf(profile.id)
-        val movable = !adapter.isFiltered && index >= 0
+        val movable = SagerNet.isTv && !adapter.isFiltered && index >= 0
         menu.findItem(R.id.action_move_up).apply {
             isVisible = movable
             isEnabled = index > 0
@@ -76,6 +78,8 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         val address = profile.outbound.getAddress()
         menu.findItem(R.id.action_resolve_domain).isVisible =
             !profile.outbound.invalid && address.isNotEmpty() && !address.isIpAddress()
+        menu.findItem(R.id.action_clear_test_results).isVisible = profile.hasTestResults()
+        menu.findItem(R.id.action_clear_traffic_statistics).isVisible = profile.tx != 0L || profile.rx != 0L
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_edit -> edit(profile, adapter.group)
@@ -84,6 +88,8 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
                 R.id.action_test_ip -> test(profile, TestSpec.KIND_IP)
                 R.id.action_test_speed -> test(profile, TestSpec.KIND_SPEED)
                 R.id.action_resolve_domain -> resolve(profile)
+                R.id.action_clear_test_results -> clearTestResults(profile)
+                R.id.action_clear_traffic_statistics -> clearTraffic(profile, adapter)
                 R.id.action_move_up -> move(profile, -1)
                 R.id.action_move_down -> move(profile, 1)
                 R.id.action_delete -> delete(profile, adapter)
@@ -103,6 +109,28 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         host.launchIo {
             val report = SubscriptionClient.resolveProfiles(profile.groupId, listOf(profile.id))
             if (report.isNotBlank()) host.onUi { snackbar(report).show() }
+        }
+    }
+
+    /** One profile's share of the group actions, without their confirmation (like resolve). */
+    private fun clearTestResults(profile: ProxyEntity) {
+        host.launchIo {
+            ProfileManager.clearTestResults(listOf(profile.id))
+            GroupRepo.postReload(profile.groupId)
+        }
+    }
+
+    private fun clearTraffic(profile: ProxyEntity, adapter: ProfileListAdapter) {
+        val service = (host.activity as? MainActivity)?.connection?.service
+        val ids = longArrayOf(profile.id)
+        adapter.clearTraffic(profile.id)
+        host.launchIo {
+            try {
+                service?.resetTraffic(ids)
+            } catch (e: Exception) {
+                Logs.w(e)
+            }
+            ProfileManager.resetTraffic(ids)
         }
     }
 
