@@ -2,12 +2,16 @@ package io.nekohasekai.sagernet.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -30,6 +34,7 @@ import io.nekohasekai.sagernet.group.SubscriptionScheduler
 import io.nekohasekai.sagernet.ktx.FixedLinearLayoutManager
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.confirmAction
+import io.nekohasekai.sagernet.ktx.getColorAttr
 import io.nekohasekai.sagernet.ktx.needReload
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
@@ -61,6 +66,9 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group), Toolbar.OnMenuItem
             reloads.trySend(Unit)
         }
     }
+
+    /** compactGroupCards: no link, last update or info lines; a quota bar, the time left and a refresh icon instead. */
+    private val compactCards by lazy { DataStore.compactGroupCards }
 
     /** The group whose members "Export to file" writes, and whether as deep links. */
     private var exportGroup: ProxyGroup? = null
@@ -324,19 +332,23 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group), Toolbar.OnMenuItem
             val group = row.group
             binding.groupName.text = group.displayName()
             binding.groupType.text = typeText(group)
-            binding.groupUrl.isVisible = group.isSubscription
+            binding.groupUrl.isVisible = group.isSubscription && !compactCards
             binding.groupUrl.text = group.url
-            val info = if (group.isSubscription) infoText(group) else ""
+            val info = if (group.isSubscription && !compactCards) infoText(group) else ""
             binding.groupInfo.isVisible = info.isNotEmpty()
             binding.groupInfo.text = info
-            binding.groupUpdate.isVisible = group.isSubscription
+            binding.groupUpdate.isVisible = group.isSubscription && !compactCards
+            binding.groupRefresh.isVisible = group.isSubscription && compactCards
+            bindQuota(group)
             bindState()
 
             binding.root.setOnClickListener { edit(group) }
             binding.edit.setOnClickListener { edit(group) }
-            binding.groupUpdate.setOnClickListener {
+            val update = View.OnClickListener {
                 runOnDefaultDispatcher { SubscriptionClient.refreshGroup(group.id, true) }
             }
+            binding.groupUpdate.setOnClickListener(update)
+            binding.groupRefresh.setOnClickListener(update)
             binding.options.setOnClickListener { anchor ->
                 val popup = PopupMenu(requireContext(), anchor)
                 popup.menuInflater.inflate(R.menu.group_action_menu, popup.menu)
@@ -357,17 +369,56 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group), Toolbar.OnMenuItem
             }
         }
 
-        /** The progress bar and "N profiles · Queued/Updating…" follow the queue state only. */
+        /**
+         * The progress bar and "N profiles · Queued/Updating…" follow the queue state; a compact card adds the time
+         * left, in the error colour from three days before the expiry as SubscriptionInfoCard does.
+         */
         fun bindState() {
             val state = groupAdapter.states[row.group.id] ?: 0
             binding.subscriptionUpdateProgress.isVisible = state != 0
             binding.groupUpdate.isEnabled = state == 0
+            binding.groupRefresh.isEnabled = state == 0
+            binding.groupRefresh.alpha = if (state == 0) 1f else 0.38f
             val count = resources.getQuantityString(R.plurals.grp_profile_count, row.count.toInt(), row.count)
-            binding.groupStatus.text = when (state) {
-                1 -> count + " · " + getString(R.string.grp_state_queued)
-                2 -> count + " · " + getString(R.string.grp_state_running)
-                else -> count
+            val status = SpannableStringBuilder(
+                when (state) {
+                    1 -> count + " · " + getString(R.string.grp_state_queued)
+                    2 -> count + " · " + getString(R.string.grp_state_running)
+                    else -> count
+                }
+            )
+            val expire = if (compactCards && row.group.isSubscription) row.group.subInfo.expire else 0L
+            if (expire > 0) {
+                val now = System.currentTimeMillis() / 1000
+                status.append(" · ")
+                val left = SubscriptionInfoCard.expiryText(requireContext(), expire, now)
+                if ((expire - now) / 86400 <= 3) {
+                    val danger = requireContext().getColorAttr(R.attr.colorError)
+                    status.append(left, ForegroundColorSpan(danger), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                } else {
+                    status.append(left)
+                }
             }
+            binding.groupStatus.text = status
+        }
+
+        /** A compact card's quota as a thin bar, red from 90 % or once expired as on SubscriptionInfoCard. */
+        private fun bindQuota(group: ProxyGroup) {
+            val info = group.subInfo
+            val show = compactCards && group.isSubscription && info.valid && info.hasQuota && info.total > 0
+            binding.groupQuota.isVisible = show
+            if (!show) return
+            val context = requireContext()
+            val percent = info.percentUsed.toInt()
+            binding.groupQuota.setProgressCompat(percent, false)
+            binding.groupQuota.setIndicatorColor(
+                if (info.isExpired() || percent >= 90) context.getColorAttr(R.attr.colorError)
+                else ContextCompat.getColor(context, R.color.material_green_500)
+            )
+            binding.groupQuota.contentDescription = getString(
+                R.string.subinfo_quota,
+                SubscriptionInfoCard.readableSize(info.used), SubscriptionInfoCard.readableSize(info.total), percent,
+            )
         }
 
         override fun onMenuItemClick(item: MenuItem): Boolean {

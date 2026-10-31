@@ -199,6 +199,8 @@
     <string name="always_show_address_sum">Mostra sempre l\'indirizzo del server sulla scheda del profilo</string>
     <string name="compact_profile_rows">Righe profilo compatte</string>
     <string name="compact_profile_rows_sum">Mostra ogni profilo su un\'unica riga breve, con solo nome e latenza</string>
+    <string name="compact_group_cards">Schede gruppo compatte</string>
+    <string name="compact_group_cards_sum">Mostra una barra di utilizzo e il tempo rimanente al posto del link e dei dettagli dell\'abbonamento</string>
     <string name="clear_traffic_statistics">Cancella statistiche traffico</string>
     <string name="connection_test">Test di connessione</string>
     <string name="connection_test_clear_results">Cancella risultati dei test</string>

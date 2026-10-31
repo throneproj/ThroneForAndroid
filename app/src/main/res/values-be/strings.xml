@@ -120,6 +120,8 @@
     <string name="always_show_address_sum">Заўсёды паказваць адрас сервера на картцы профілю</string>
     <string name="compact_profile_rows">Кампактныя радкі профіляў</string>
     <string name="compact_profile_rows_sum">Паказваць кожны профіль адным кароткім радком толькі з назвай і затрымкай</string>
+    <string name="compact_group_cards">Кампактныя карткі груп</string>
+    <string name="compact_group_cards_sum">Паказваць шкалу выкарыстання і час, што застаўся, замест спасылкі на падпіску і падрабязнасцей</string>
     <string name="amnezia_content_padding_addition">Даданне запаўнення кантэнту</string>
     <string name="amnezia_disable_cookies">Адключыць cookie</string>
     <string name="amnezia_enable">Уключыць AmneziaWG</string>

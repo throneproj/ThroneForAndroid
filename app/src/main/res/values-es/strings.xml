@@ -199,6 +199,8 @@
     <string name="always_show_address_sum">Muestra siempre la dirección del servidor en la tarjeta de configuración</string>
     <string name="compact_profile_rows">Filas de perfil compactas</string>
     <string name="compact_profile_rows_sum">Muestra cada perfil en una sola línea corta, solo con su nombre y latencia</string>
+    <string name="compact_group_cards">Tarjetas de grupo compactas</string>
+    <string name="compact_group_cards_sum">Muestra una barra de uso y el tiempo restante en lugar del enlace y los detalles de la suscripción</string>
     <string name="clear_traffic_statistics">Borrar estadísticas de tráfico</string>
     <string name="connection_test">Prueba de conexión</string>
     <string name="connection_test_clear_results">Borrar resultados de la prueba</string>

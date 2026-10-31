@@ -171,6 +171,8 @@
     <string name="always_show_address_sum">設定カードに常にサーバーアドレスを表示</string>
     <string name="compact_profile_rows">コンパクトなプロファイル行</string>
     <string name="compact_profile_rows_sum">各プロファイルを名前と遅延だけの短い1行で表示</string>
+    <string name="compact_group_cards">コンパクトなグループカード</string>
+    <string name="compact_group_cards_sum">購読リンクと詳細の代わりに使用量バーと残り時間を表示</string>
     <string name="clear_traffic_statistics">トラフィック統計をクリア</string>
     <string name="connection_test">接続テスト</string>
     <string name="connection_test_clear_results">テスト結果をクリア</string>

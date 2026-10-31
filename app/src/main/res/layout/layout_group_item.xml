@@ -106,7 +106,30 @@
                     tools:text="Last update: 9/24/26, 5:07 AM\nUsed: 1.23 GiB Remain: 8.77 GiB Expire: 12/31/26, 12:00 AM"
                     tools:visibility="visible" />
 
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/group_quota"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:max="100"
+                    android:visibility="gone"
+                    app:trackCornerRadius="2dp"
+                    app:trackThickness="4dp"
+                    tools:progress="40" />
+
             </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/group_refresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/grp_update_subscription"
+                android:focusable="true"
+                android:padding="12dp"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_baseline_refresh_24" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/edit"

@@ -183,6 +183,8 @@
     <string name="always_show_address_sum">始终在配置卡片上显示服务器地址</string>
     <string name="compact_profile_rows">紧凑配置行</string>
     <string name="compact_profile_rows_sum">每个配置只显示为一行，仅含名称和延迟</string>
+    <string name="compact_group_cards">紧凑分组卡片</string>
+    <string name="compact_group_cards_sum">以用量进度条和剩余时间代替订阅链接与详细信息</string>
     <string name="clear_traffic_statistics">清空流量统计数据</string>
     <string name="connection_test">连接测试</string>
     <string name="connection_test_clear_results">清理测试结果</string>

@@ -173,6 +173,8 @@
     <string name="always_show_address_sum">使用在設定檔卡片中顯示伺服器位址</string>
     <string name="compact_profile_rows">精簡配置列</string>
     <string name="compact_profile_rows_sum">每個配置只顯示為一行，僅含名稱和延遲</string>
+    <string name="compact_group_cards">精簡群組卡片</string>
+    <string name="compact_group_cards_sum">以用量進度條和剩餘時間取代訂閱連結與詳細資訊</string>
     <string name="clear_traffic_statistics">清除流量統計資料</string>
     <string name="connection_test">連線測試</string>
     <string name="connection_test_clear_results">清除測試結果</string>

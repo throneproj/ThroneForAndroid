@@ -83,6 +83,8 @@
     <string name="always_show_address">Vis alltid adresse</string>
     <string name="compact_profile_rows">Kompakte profilrader</string>
     <string name="compact_profile_rows_sum">Vis hver profil på én kort linje med bare navn og forsinkelse</string>
+    <string name="compact_group_cards">Kompakte gruppekort</string>
+    <string name="compact_group_cards_sum">Vis en forbruksstolpe og gjenværende tid i stedet for abonnementslenken og detaljene</string>
     <string name="follow_battery_saver">Følg batterisparing</string>
     <string name="disable">Deaktiver</string>
     <string name="enable">Muliggjøre</string>

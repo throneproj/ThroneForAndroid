@@ -24,6 +24,8 @@
 <string name="always_show_address_sum">Всегда отображать адрес сервера на карте конфигурации</string>
 <string name="compact_profile_rows">Компактные строки профилей</string>
 <string name="compact_profile_rows_sum">Показывать каждый профиль одной короткой строкой только с именем и задержкой</string>
+<string name="compact_group_cards">Компактные карточки групп</string>
+<string name="compact_group_cards_sum">Показывать шкалу использования и оставшееся время вместо ссылки и подробностей подписки</string>
 <string name="app_desc">Универсальный набор инструментов прокси для Android, написанный на Kotlin.</string>
 <string name="app_tls_version">Минимальная версия TLS протокола</string>
 <string name="app_version">Версия</string>

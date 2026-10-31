@@ -170,6 +170,8 @@
     <string name="always_show_address_sum">구성 카드에 항상 서버 주소 표시</string>
     <string name="compact_profile_rows">간결한 프로필 행</string>
     <string name="compact_profile_rows_sum">각 프로필을 이름과 지연 시간만 있는 짧은 한 줄로 표시</string>
+    <string name="compact_group_cards">간결한 그룹 카드</string>
+    <string name="compact_group_cards_sum">구독 링크와 세부 정보 대신 사용량 막대와 남은 시간을 표시</string>
     <string name="clear_traffic_statistics">트래픽 통계 지우기</string>
     <string name="connection_test">연결 테스트</string>
     <string name="connection_test_clear_results">테스트 결과 지우기</string>

@@ -48,6 +48,11 @@
             app:summary="@string/compact_profile_rows_sum"
             app:title="@string/compact_profile_rows" />
         <SwitchPreference
+            app:icon="@drawable/ic_baseline_view_list_24"
+            app:key="compactGroupCards"
+            app:summary="@string/compact_group_cards_sum"
+            app:title="@string/compact_group_cards" />
+        <SwitchPreference
             app:icon="@drawable/ic_baseline_security_24"
             app:key="show_config_security"
             app:summary="@string/show_config_security_sum"

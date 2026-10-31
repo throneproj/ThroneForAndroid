@@ -102,6 +102,8 @@
     <string name="always_show_address">Her Zaman Adresi Göster</string>
     <string name="compact_profile_rows">Kompakt profil satırları</string>
     <string name="compact_profile_rows_sum">Her profili yalnızca adı ve gecikmesiyle tek bir kısa satırda göster</string>
+    <string name="compact_group_cards">Kompakt grup kartları</string>
+    <string name="compact_group_cards_sum">Abonelik bağlantısı ve ayrıntılar yerine kullanım çubuğunu ve kalan süreyi göster</string>
     <string name="unavailable">Kullanılamıyor</string>
     <string name="standard">Standart</string>
     <string name="follow_battery_saver">Pil Tasarrufunu Takip Et</string>

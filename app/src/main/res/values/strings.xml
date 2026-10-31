@@ -233,6 +233,8 @@
     <string name="always_show_address_sum">Always display the server address on the profile card</string>
     <string name="compact_profile_rows">Compact profile rows</string>
     <string name="compact_profile_rows_sum">Show each profile on one short line with only its name and latency</string>
+    <string name="compact_group_cards">Compact group cards</string>
+    <string name="compact_group_cards_sum">Show a usage bar and the time left instead of the subscription link and details</string>
     <string name="clear_traffic_statistics">Clear traffic statistics</string>
     <string name="connection_test">Connection test</string>
     <string name="connection_test_clear_results">Clear test results</string>

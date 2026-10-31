@@ -85,6 +85,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var showDirectSpeed by configurationStore.boolean(Key.SHOW_DIRECT_SPEED) { true }
     var alwaysShowAddress by configurationStore.boolean(Key.ALWAYS_SHOW_ADDRESS)
     var compactProfileRows by configurationStore.boolean(Key.COMPACT_PROFILE_ROWS)
+    var compactGroupCards by configurationStore.boolean(Key.COMPACT_GROUP_CARDS)
 
     var logBufSize by configurationStore.int(Key.LOG_BUF_SIZE) { 0 }
     var hideFromRecentApps by configurationStore.boolean(Key.HIDE_FROM_RECENT_APPS)

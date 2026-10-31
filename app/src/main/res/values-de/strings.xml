@@ -199,6 +199,8 @@
     <string name="always_show_address_sum">Die Serveradresse immer auf der Profilkarte anzeigen</string>
     <string name="compact_profile_rows">Kompakte Profilzeilen</string>
     <string name="compact_profile_rows_sum">Jedes Profil als eine kurze Zeile nur mit Name und Latenz anzeigen</string>
+    <string name="compact_group_cards">Kompakte Gruppenkarten</string>
+    <string name="compact_group_cards_sum">Statt Abonnement-Link und Details einen Verbrauchsbalken und die Restlaufzeit anzeigen</string>
     <string name="clear_traffic_statistics">Datenverkehrsstatistik löschen</string>
     <string name="connection_test">Verbindungstest</string>
     <string name="connection_test_clear_results">Testergebnisse löschen</string>

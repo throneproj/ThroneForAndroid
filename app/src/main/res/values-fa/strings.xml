@@ -180,6 +180,8 @@
     <string name="always_show_address_sum">همیشه نشانی سرور را روی کارت پیکربندی نمایش دهید</string>
     <string name="compact_profile_rows">ردیف‌های فشردهٔ پروفایل</string>
     <string name="compact_profile_rows_sum">هر پروفایل را در یک خط کوتاه، فقط با نام و تأخیر آن نمایش دهید</string>
+    <string name="compact_group_cards">کارت‌های فشردهٔ گروه</string>
+    <string name="compact_group_cards_sum">به‌جای پیوند و جزئیات اشتراک، نوار مصرف و زمان باقی‌مانده را نمایش دهید</string>
     <string name="clear_traffic_statistics">پاک کردن اطلاعات ترافیک</string>
     <string name="connection_test">آزمایش اتصال</string>
     <string name="connection_test_clear_results">پاک کردن نتایج آزمایش</string>

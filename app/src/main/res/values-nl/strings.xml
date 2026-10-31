@@ -199,6 +199,8 @@
     <string name="always_show_address_sum">Toon het serveradres altijd op de profielkaart</string>
     <string name="compact_profile_rows">Compacte profielrijen</string>
     <string name="compact_profile_rows_sum">Toon elk profiel op één korte regel met alleen de naam en de latentie</string>
+    <string name="compact_group_cards">Compacte groepskaarten</string>
+    <string name="compact_group_cards_sum">Toon een verbruiksbalk en de resterende tijd in plaats van de abonnementslink en details</string>
     <string name="clear_traffic_statistics">Verkeersstatistieken wissen</string>
     <string name="connection_test">Verbindingstest</string>
     <string name="connection_test_clear_results">Testresultaten wissen</string>
