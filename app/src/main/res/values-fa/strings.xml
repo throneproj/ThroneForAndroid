@@ -173,7 +173,7 @@
     <string name="follow_system">مانند سیستم</string>
     <string name="enable">فعال</string>
     <string name="disable">غیرفعال</string>
-    <string name="auto">خودکار</string>
+    <string name="follow_battery_saver">مانند حالت ذخیره باتری</string>
     <string name="standard">استاندارد</string>
     <string name="unavailable">در دسترس نیست</string>
     <string name="always_show_address">نشانی‌ها همواره نمایش داده شود</string>

@@ -81,7 +81,7 @@
     <string name="clear_traffic_statistics">Slett trafikkstatistikk</string>
     <string name="always_show_address_sum">Vis alltid serveradressen på konfigurasjonskortet</string>
     <string name="always_show_address">Vis alltid adresse</string>
-    <string name="auto">Automatisk</string>
+    <string name="follow_battery_saver">Følg batterisparing</string>
     <string name="disable">Deaktiver</string>
     <string name="enable">Muliggjøre</string>
     <string name="lines">%d linjer</string>

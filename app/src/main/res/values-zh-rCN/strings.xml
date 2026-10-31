@@ -171,7 +171,7 @@
     <string name="night_mode">夜间模式</string>
     <string name="language">语言</string>
     <string name="enable">启用</string>
-    <string name="auto">自动</string>
+    <string name="follow_battery_saver">跟随省电模式</string>
     <string name="follow_system">跟随系统</string>
     <string name="security_settings">TLS 安全设置</string>
     <string name="allow_insecure">允许不安全的连接</string>

@@ -166,7 +166,7 @@
     <string name="follow_system">跟隨系統</string>
     <string name="enable">啟用</string>
     <string name="disable">停用</string>
-    <string name="auto">自動</string>
+    <string name="follow_battery_saver">跟隨省電模式</string>
     <string name="standard">標準</string>
     <string name="unavailable">無法使用</string>
     <string name="always_show_address">始終顯示位址</string>

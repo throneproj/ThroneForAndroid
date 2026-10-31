@@ -193,7 +193,7 @@
     <string name="follow_system">Seguir sistema</string>
     <string name="enable">Permitir</string>
     <string name="disable">Desactivar</string>
-    <string name="auto">Automático</string>
+    <string name="follow_battery_saver">Seguir ahorro de batería</string>
     <string name="standard">Estándar</string>
     <string name="unavailable">No disponible</string>
     <string name="always_show_address">Mostrar siempre la dirección</string>

@@ -193,7 +193,7 @@
     <string name="follow_system">Ikuti sistem</string>
     <string name="enable">Aktifkan</string>
     <string name="disable">Nonaktifkan</string>
-    <string name="auto">Otomatis</string>
+    <string name="follow_battery_saver">Ikuti penghemat baterai</string>
     <string name="standard">Standar</string>
     <string name="unavailable">Tidak tersedia</string>
     <string name="always_show_address">Selalu tampilkan alamat</string>

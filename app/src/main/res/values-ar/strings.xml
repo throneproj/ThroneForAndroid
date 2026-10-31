@@ -150,7 +150,7 @@
     <string name="always_show_address">اعرض العنوان دائمًا</string>
     <string name="unavailable">غير متوفره</string>
     <string name="standard">معيار</string>
-    <string name="auto">تلقائي</string>
+    <string name="follow_battery_saver">اتبع وضع توفير الطاقة</string>
     <string name="disable">إلغاء</string>
     <string name="enable">مكن</string>
     <string name="follow_system">اتبع النظام</string>

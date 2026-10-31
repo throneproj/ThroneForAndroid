@@ -102,7 +102,7 @@
     <string name="always_show_address">Her Zaman Adresi Göster</string>
     <string name="unavailable">Kullanılamıyor</string>
     <string name="standard">Standart</string>
-    <string name="auto">Otomatik</string>
+    <string name="follow_battery_saver">Pil Tasarrufunu Takip Et</string>
     <string name="disable">Devre Dışı Bırak</string>
     <string name="enable">Etkinleştir</string>
     <string name="follow_system">Sistemi Takip Et</string>

@@ -176,7 +176,7 @@
     <string name="follow_system">Як у системі</string>
     <string name="enable">Увімкнути</string>
     <string name="disable">Вимкнути</string>
-    <string name="auto">Авто</string>
+    <string name="follow_battery_saver">Як режим енергозбереження</string>
     <string name="standard">Стандартний</string>
     <string name="unavailable">Недоступний</string>
     <string name="always_show_address">Завжди показувати адресу</string>

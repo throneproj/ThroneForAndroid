@@ -193,7 +193,7 @@
     <string name="follow_system">Systeem volgen</string>
     <string name="enable">Inschakelen</string>
     <string name="disable">Uitschakelen</string>
-    <string name="auto">Automatisch</string>
+    <string name="follow_battery_saver">Batterijbesparing volgen</string>
     <string name="standard">Standaard</string>
     <string name="unavailable">Niet beschikbaar</string>
     <string name="always_show_address">Adres altijd tonen</string>

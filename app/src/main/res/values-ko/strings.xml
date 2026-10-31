@@ -164,7 +164,7 @@
     <string name="follow_system">시스템 설정 따르기</string>
     <string name="enable">활성화</string>
     <string name="disable">비활성화</string>
-    <string name="auto">자동</string>
+    <string name="follow_battery_saver">절전 모드 따르기</string>
     <string name="standard">표준</string>
     <string name="unavailable">사용 불가</string>
     <string name="always_show_address">항상 주소 표시</string>

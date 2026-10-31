@@ -30,7 +30,7 @@
 <string name="apply">Применить</string>
 <string name="apps">Приложения</string>
 <string name="apps_message">%d приложений</string>
-<string name="auto">Авто</string>
+<string name="follow_battery_saver">Следовать режиму энергосбережения</string>
 <string name="auto_connect">Автоматическое подключение</string>
 <string name="auto_connect_summary">Включить прокси при запуске/обновлении приложения, если он был запущен до этого</string>
 <string name="auto_select_proxy_apps">Автоматический выбор прокси-приложений</string>

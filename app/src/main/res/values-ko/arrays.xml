@@ -129,7 +129,7 @@
         <item>@string/follow_system</item>
         <item>@string/enable</item>
         <item>@string/disable</item>
-        <item>@string/auto</item>
+        <item>@string/follow_battery_saver</item>
     </string-array>
 
     <string-array name="notification_action_entries">

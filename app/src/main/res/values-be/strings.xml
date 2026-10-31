@@ -140,7 +140,7 @@
     <string name="apply">Ужыць</string>
     <string name="apps">Праграмы</string>
     <string name="apps_message">%d праграм</string>
-    <string name="auto">Аўтаматычна</string>
+    <string name="follow_battery_saver">Па рэжыме эканоміі зараду</string>
     <string name="auto_connect">Аўтаматычнае падлучэнне</string>
     <string name="auto_connect_summary">Уключаць проксі пры запуску/абнаўленні праграмы, калі ён працаваў раней</string>
     <string name="auto_connect_superseded">Заменены заўсёды ўключаным VPN</string>

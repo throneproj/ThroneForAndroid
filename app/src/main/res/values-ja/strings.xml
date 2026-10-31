@@ -165,7 +165,7 @@
     <string name="follow_system">システムに従う</string>
     <string name="enable">有効</string>
     <string name="disable">無効</string>
-    <string name="auto">自動</string>
+    <string name="follow_battery_saver">バッテリーセーバーに従う</string>
     <string name="standard">標準</string>
     <string name="unavailable">利用不可</string>
     <string name="always_show_address">常にアドレスを表示</string>

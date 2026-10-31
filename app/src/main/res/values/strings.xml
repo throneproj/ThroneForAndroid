@@ -227,7 +227,7 @@
     <string name="follow_system">Follow system</string>
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
-    <string name="auto">Auto</string>
+    <string name="follow_battery_saver">Follow battery saver</string>
     <string name="standard">Standard</string>
     <string name="unavailable">Unavailable</string>
     <string name="always_show_address">Always show address</string>
