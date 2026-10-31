@@ -540,10 +540,13 @@ class BaseService {
             // Tracks the underlying network for VpnService.setUnderlyingNetworks only; the
             // "reset on network change" switch is applied by NativeInterface's monitor callback.
             DefaultNetworkListener.start(this) { network ->
-                if (network == null) return@start
+                SagerNet.underlyingNetwork = network
+                DataStore.vpnService?.updateUnderlyingNetwork()
+                if (network == null) {
+                    upstreamInterfaceName = null
+                    return@start
+                }
                 SagerNet.connectivity.getLinkProperties(network)?.also { link ->
-                    SagerNet.underlyingNetwork = network
-                    DataStore.vpnService?.updateUnderlyingNetwork()
                     val oldName = upstreamInterfaceName
                     if (oldName != link.interfaceName) {
                         Logs.d("Network changed: $oldName -> ${link.interfaceName}")
