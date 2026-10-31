@@ -26,6 +26,7 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyGroup
+import io.nekohasekai.sagernet.database.RouteManager
 import io.nekohasekai.sagernet.database.SendHwid
 import io.nekohasekai.sagernet.database.SubHttpVersion
 import io.nekohasekai.sagernet.database.SubTlsVersion
@@ -67,6 +68,9 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         /** A new group starts as a subscription with this URL. */
         const val EXTRA_GROUP_SUBSCRIPTION_LINK = "subscription_link"
 
+        /** Result extra: the save changed the routing profile of the running profile's group (dialog_edit_group restartNeeded). */
+        const val EXTRA_RESTART_NEEDED = "restartNeeded"
+
         /** Values of the "Type" menu (@array/group_types). */
         const val TYPE_BASIC = 0
         const val TYPE_SUBSCRIPTION = 1
@@ -77,8 +81,10 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         private const val KEY_FRONT = "groupFrontProxyId"
         private const val KEY_LANDING = "groupLandingProxyId"
         private const val KEY_AUTO_CLEAR = "groupAutoClearUnavailable"
+        private const val KEY_ROUTE = "groupRouteId"
         private const val KEY_SUBSCRIPTION = "groupSubscription"
         private const val KEY_SKIP_AUTO_UPDATE = "groupSkipAutoUpdate"
+        private const val KEY_IMPORT_ROUTE = "groupImportSubRoute"
         private const val KEY_SHOW_INFO_CARD = "groupSubShowInfoCard"
         private const val KEY_ADVANCED_TOGGLE = "groupAdvancedToggle"
         private val ADVANCED_CATEGORIES = listOf("groupAdvancedRequest", "groupAdvancedUpdate", "groupAdvancedAfterUpdate")
@@ -150,6 +156,12 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
     /** "[group] name" of the profiles the front/landing menus offer. */
     private val proxyLabels = HashMap<Long, String>()
 
+    /** The "Routing profile" menu as (route id, label), Default ("-1") first. */
+    private var routeChoices: List<Pair<String, String>> = emptyList()
+
+    /** The menu's value on open; while it stays, the stored route_id is kept, a raw one the menu does not offer included. */
+    private var initialRoute = "-1"
+
     private val fragment get() = supportFragmentManager.findFragmentById(R.id.settings) as? GroupPreferenceFragment
 
     private val selectFront = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -178,6 +190,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             val found = withContext(Dispatchers.IO) {
                 val group = if (editingId > 0) GroupRepo.get(editingId) ?: return@withContext false else ProxyGroup()
                 if (editingId > 0) resetDanglingProxies(group)
+                loadRouteChoices(group)
                 if (fresh) {
                     writeToCache(group)
                     val prefilled = editingId == 0L && !link.isNullOrBlank()
@@ -311,7 +324,9 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         store.putString(KEY_FRONT, group.frontProxyId.coerceAtLeast(-1L).toString())
         store.putString(KEY_LANDING, group.landingProxyId.coerceAtLeast(-1L).toString())
         store.putBoolean(KEY_AUTO_CLEAR, group.autoClearUnavailable)
+        store.putString(KEY_ROUTE, initialRoute)
         store.putBoolean(KEY_SKIP_AUTO_UPDATE, group.skipAutoUpdate)
+        store.putBoolean(KEY_IMPORT_ROUTE, group.importSubRoute)
         store.putBoolean(KEY_SHOW_INFO_CARD, group.subOptions.showInfoCard)
         val options = group.subOptions
         store.putString(KEY_USER_AGENT, options.userAgent)
@@ -380,11 +395,26 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
     private fun proxyId(key: String): Long =
         DataStore.profileCacheStore.getString(key)?.toLongOrNull()?.takeIf { it > 0 } ?: -1L
 
+    /**
+     * dialog_edit_group.cpp: "Default (<global profile>)", then every routing profile Android can use, this
+     * subscription's own marked. A dangling id builds with the global profile, so it shows as Default.
+     */
+    private fun loadRouteChoices(group: ProxyGroup) {
+        val choices = arrayListOf("-1" to getString(R.string.grp_route_profile_default, RouteManager.current().name))
+        for (route in RouteManager.usable()) {
+            val name = route.name.ifBlank { "#" + route.id }
+            val owned = editingId > 0 && route.source_gid == editingId
+            choices.add(route.id.toString() to if (owned) getString(R.string.grp_route_profile_from_subscription, name) else name)
+        }
+        routeChoices = choices
+        initialRoute = group.routeId.toString().takeIf { id -> choices.any { it.first == id } } ?: "-1"
+    }
+
     /** DialogEditGroup::accept and DialogEditGroupAdvanced::accept behind one save gate. */
     private suspend fun save() {
         if (fragment?.form?.validateAll() == false) return
-        withContext(Dispatchers.IO) {
-            val group = if (editingId > 0) GroupRepo.get(editingId) ?: return@withContext else ProxyGroup()
+        val restartNeeded = withContext(Dispatchers.IO) {
+            val group = if (editingId > 0) GroupRepo.get(editingId) ?: return@withContext false else ProxyGroup()
             val url = DataStore.subscriptionLink.trim()
             val store = DataStore.profileCacheStore
             // A basic group keeps no URL, even one typed before switching the type back.
@@ -402,9 +432,19 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             group.subOptions = optionsFromCache()
             group.frontProxyId = proxyId(KEY_FRONT)
             group.landingProxyId = proxyId(KEY_LANDING)
+            val pickedRoute = store.getString(KEY_ROUTE) ?: initialRoute
+            if (pickedRoute != initialRoute) group.routeId = pickedRoute.toLongOrNull()?.takeIf { it > 0 } ?: -1L
+            group.importSubRoute = newUrl.isNotEmpty() && store.getBoolean(KEY_IMPORT_ROUTE, false)
+            // dialog_edit_group.cpp: the running profile of this group now resolves to another routing profile.
+            val running = RouteManager.runningRouteId()
+            val restart = editingId > 0 && running > 0L &&
+                ProfileManager.getProfile(ProfileManager.runningProfileId())?.groupId == editingId &&
+                RouteManager.resolveRouteId(group.routeId) != running
             if (editingId > 0) GroupRepo.save(group) else GroupRepo.add(group)
             SubscriptionScheduler.schedule()
+            restart
         }
+        if (restartNeeded) setResult(RESULT_OK, Intent().putExtra(EXTRA_RESTART_NEEDED, true))
         finish()
     }
 
@@ -462,6 +502,14 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             findPreference<SimpleMenuPreference>(Key.GROUP_TYPE)!!.isEnabled = host.editingId == 0L
             setupProxyMenu(KEY_FRONT)
             setupProxyMenu(KEY_LANDING)
+            findPreference<SimpleMenuPreference>(KEY_ROUTE)!!.apply {
+                entries = host.routeChoices.map { it.second }.toTypedArray()
+                entryValues = host.routeChoices.map { it.first }.toTypedArray()
+                value = value?.takeIf { v -> host.routeChoices.any { it.first == v } } ?: "-1"
+                summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
+                    (it.entry ?: "").toString() + "\n" + getString(R.string.grp_route_profile_tip)
+                }
+            }
 
             findPreference<EditTextPreference>(KEY_USER_AGENT)!!.placeholder(host.defaultUserAgent)
             val device = host.defaultDevice

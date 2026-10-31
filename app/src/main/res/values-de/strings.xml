@@ -672,6 +672,7 @@
     <string name="route_options">Weitere Optionen</string>
     <string name="route_active">Aktuelles Routenprofil</string>
     <string name="route_switched">Routenprofil: %s</string>
+    <string name="route_group_keeps_own">Die Gruppe \"%1$s\" verwendet ein eigenes Routenprofil, daher behält das laufende Profil es bei.</string>
     <string name="route_item_default_outbound">Standard: %s</string>
     <plurals name="route_item_rules">
         <item quantity="one">%d Regel</item>
@@ -681,6 +682,9 @@
     <string name="route_item_remote_never">Remote · noch nicht aktualisiert</string>
     <string name="route_item_auto_update_on">Auto-Aktualisierung an</string>
     <string name="route_item_auto_update_off">Auto-Aktualisierung aus</string>
+    <string name="route_item_from_subscription">Aktualisiert durch Abonnement \"%1$s\"</string>
+    <string name="route_from_subscription_info">Jede Aktualisierung des Abonnements \"%1$s\" überschreibt die Regeln dieses Profils. Löschen beendet den Import.</string>
+    <string name="route_subscription_profile_name">Routing für %1$s</string>
     <string name="route_delete_last">Routenprofile dürfen nicht leer sein. Füge ein weiteres Profil hinzu oder bearbeite dieses.</string>
     <string name="route_link_copied">Kopiert!</string>
     <string name="route_export_warnings_title">Mit Warnungen exportiert</string>
@@ -874,9 +878,15 @@
     <string name="grp_landing_proxy">Landing-Proxy</string>
     <string name="grp_none">Keine</string>
     <string name="grp_missing_profile">Profil #%1$d (fehlt)</string>
+    <string name="grp_route_profile">Routenprofil</string>
+    <string name="grp_route_profile_default">Standard (%1$s)</string>
+    <string name="grp_route_profile_from_subscription">%1$s (aus diesem Abonnement)</string>
+    <string name="grp_route_profile_tip">Das Routenprofil, mit dem sich die Profile dieser Gruppe verbinden. \"Standard\" folgt dem im Menü \"Routing\" gewählten Routenprofil.</string>
     <string name="grp_auto_clear_unavailable">Nicht verfügbare Profile automatisch löschen</string>
     <string name="grp_url">URL</string>
     <string name="grp_skip_auto_update">Automatische Aktualisierung überspringen</string>
+    <string name="grp_import_sub_route">Routenprofil des Abonnements verwenden</string>
+    <string name="grp_import_sub_route_tip">Jede Aktualisierung speichert das vom Abonnement bereitgestellte Routenprofil (Happ-Format) als eigenes Routenprofil dieser Gruppe. DNS-Einstellungen aus dem Abonnement werden nie verwendet.</string>
     <string name="grp_no_auto_selector">Ein Auto-Selektor wechselt selbstständig Server und kann daher keinen festen Front-/Landing-Platz halten.</string>
     <string name="grp_advanced">Erweitert</string>
     <string name="grp_advanced_count">Erweitert (%d gesetzt)</string>
@@ -961,6 +971,8 @@
     <string name="subs_removed_unavailable">%1$d nicht verfügbare Profile entfernt:</string>
     <string name="subs_invalid_core_unreachable">Entfernen ungültiger Profile übersprungen: Der Kern ist nicht erreichbar.</string>
     <string name="subs_running_kept">Das laufende Profil wurde behalten.</string>
+    <string name="subs_running_replaced">%1$s wurde durch das Update ersetzt; Verbindung zum Profil mit demselben Namen wird hergestellt.</string>
+    <string name="subs_running_removed">%1$s wurde durch das Update entfernt und bleibt gestoppt: Kein einzelnes Profil mit demselben Namen ersetzt es.</string>
     <string name="subs_sort_skipped">Sortieren von %1$s übersprungen: Eine andere Sortierung läuft.</string>
     <string name="subs_after_url_test">Nach dem URL-Test von %1$s:</string>
     <string name="subs_imported">%1$d Profil(e) importiert</string>
@@ -1173,7 +1185,7 @@
     <string name="autosel_group_archived">%s (archiviert)</string>
     <string name="autosel_group_missing">Fehlende Gruppe (#%d)</string>
     <string name="autosel_name_filter">Nur Namen, die übereinstimmen</string>
-    <string name="autosel_name_filter_tip">Optionaler regulärer Ausdruck. Es werden nur Profile berücksichtigt, deren Name übereinstimmt — nützlich, um ein Land oder einen Anbieter herauszupicken.</string>
+    <string name="autosel_name_filter_tip">Optionaler regulärer Ausdruck, der an beliebiger Stelle im Profilnamen und ohne Beachtung der Groß-/Kleinschreibung gesucht wird. Nur Profile, deren Name übereinstimmt, werden verwendet.\nMehrere auswählen: germany|nl\nEinige auslassen: ^(?!.*(germany|🇩🇪)).*$ verwendet jeden Namen, der keines von beiden enthält.</string>
     <string name="autosel_name_filter_empty">Jedes Profil in der Gruppe</string>
     <string name="autosel_balance">Datenverkehr zwischen den besten Profilen aufteilen</string>
     <string name="autosel_balance_tip">Standardmäßig aus: Ein Profil trägt alles, die anderen bleiben im Bereitschaftsmodus. Einschalten, um den Datenverkehr auf die als funktionierend bestätigten Profile zu verteilen.</string>
@@ -1191,7 +1203,7 @@
     <string name="autosel_plan_kept_unavailable">Der letzte Test jedes Profils ist fehlgeschlagen, was meist auf einen ausgefallenen Netzwerk statt auf die Server hindeutet; alle %d werden behalten und erneut geprüft.</string>
     <string name="autosel_plan_truncated">Mehr als %d Profile stimmen überein, daher werden nur die am besten bewerteten behalten.</string>
     <string name="autosel_plan_reused">%d haben ein kürzliches Testergebnis, das wiederverwendet wird.</string>
-    <string name="autosel_plan_needs_ranking">Der Rest wird gemessen, bevor der Selektor startet.</string>
+    <string name="autosel_plan_needs_ranking">Der Rest wird beim Start des Selektors gemessen: Er läuft, sobald genug Profile funktionieren, und wechselt zur vollständigen Rangfolge, sobald alle gemessen sind.</string>
     <string name="autosel_error_no_group">Der Auto-Selektor zeigt auf eine Gruppe, die nicht mehr existiert</string>
     <string name="autosel_error_no_members">Der Auto-Selektor hat keine verwendbaren Mitglieder</string>
     <string name="autosel_skip_missing">fehlendes Profil</string>
@@ -1363,7 +1375,9 @@
     <string name="warp_enable">WARP aktivieren</string>
     <string name="warp_enable_sum">Ermöglicht die Verwendung der untenstehenden Konfiguration als Egress, nützlich zum Umgehen von Diensten, die Nicht-WARP-VPNs einschränken</string>
     <string name="warp_mode">Modus</string>
-    <string name="warp_mode_sum">%s\nWireGuard läuft über UDP. MASQUE tunnelt über HTTP/3 oder HTTP/2 und durchläuft Netzwerke, die WireGuard blockieren.</string>
+    <string name="warp_mode_sum">%s\nWireGuard läuft über UDP. AmneziaWG fügt WARP-kompatible Junk- und Verschleierungspakete hinzu. MASQUE tunnelt über HTTP/3 oder HTTP/2.</string>
+    <string name="warp_amnezia_generating">AmneziaWG-QUIC-Signatur wird generiert…</string>
+    <string name="warp_amnezia_missing">AmneziaWG hat noch keine QUIC-Signatur: Tippe auf \"WARP-Konfiguration generieren\".</string>
     <string name="warp_wireguard_note">WARP fährt auf deinem Proxy mit: WireGuard benötigt einen Proxy, der UDP weiterleitet.</string>
     <string name="warp_masque_note">WARP fährt auf deinem Proxy mit: MASQUE über HTTP/3 benötigt einen Proxy, der UDP weiterleitet, über HTTP/2 nur TCP.</string>
     <string name="warp_endpoint">Endpunkt</string>
@@ -1393,6 +1407,8 @@
     <string name="warp_tos_message"><![CDATA[Das Generieren einer WARP-Identität registriert ein neues Gerät bei Cloudflare.<br><br>Akzeptierst du die <a href="%1$s">Cloudflare-WARP-Nutzungsbedingungen</a>?]]></string>
     <string name="warp_proxy_not_started">Anfrage mit Proxy, aber kein Profil gestartet.</string>
     <string name="warp_core_unreachable">Der Kern war nicht erreichbar.</string>
+    <string name="warp_quic_signature_invalid">Der Kern hat eine ungültige QUIC-Signatur zurückgegeben.</string>
+    <string name="warp_quic_signature_failed">WARP-QUIC-Signatur konnte nicht generiert werden: %1$s</string>
     <string name="warp_disable">WARP deaktivieren</string>
     <string name="warp_enabled">WARP aktiviert</string>
     <string name="warp_disabled">WARP deaktiviert</string>
@@ -2101,7 +2117,7 @@
     <string name="validation_hysteria_hop_maximum_zero">Benötigt zusätzlich ein Hop-Intervall über 0, z. B. 30s mit einem Maximum von 60s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">Darf nicht kürzer als das Hop-Intervall sein.</string>
     <string name="validation_hysteria_hop_maximum_ignored">Wird ohne Hop-Intervall ignoriert; lege auch eines fest, z. B. 30s mit einem Maximum von 60s.</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1 benötigt sowohl Up Mbps als auch Down Mbps, z. B. 100.</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1 benötigt sowohl Up Mbps als auch Down Mbps; für einen fehlenden Wert werden %1$d (Up) bzw. %2$d (Down) verwendet. Gib deine echte Leitungsgeschwindigkeit an, um die besten Ergebnisse zu erzielen.</string>
     <string name="validation_hysteria_gecko_range">Paketgrößen müssen von 0 bis 2048 reichen; 0 verwendet den Standard.</string>
     <string name="validation_hysteria_gecko_order">Die minimale Paketgröße darf die maximale nicht überschreiten; 0 bedeutet den Standard, 512 für das Minimum und 1200 für das Maximum.</string>
     <string name="validation_hysteria_auth_base64">Kein gültiges Base64. Wähle STRING als Authentifizierungstyp für Nutzdaten in Klartext.</string>

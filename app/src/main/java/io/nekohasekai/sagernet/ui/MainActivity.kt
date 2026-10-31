@@ -561,7 +561,7 @@ class MainActivity : ThemedActivity(),
         if (DataStore.serviceState.canStop) SagerNet.stopService() else startFromUi()
     }
 
-    /** Wi-Fi rules of the current route profile ask for location access once before a start from here. */
+    /** Wi-Fi rules of the routing profile the selected profile starts with ask for location access once before a start from here. */
     private fun startFromUi() {
         if (DataStore.wifiPermissionAsked || WifiStateAccess.status(this) == WifiStateAccess.Status.OK) {
             return launchConnect()
@@ -569,7 +569,8 @@ class MainActivity : ThemedActivity(),
         lifecycleScope.launch {
             val usesWifi = withContext(Dispatchers.IO) {
                 runCatching {
-                    RouteManager.current().rules.any { rule ->
+                    val groupId = ProfileManager.getProfile(DataStore.selectedProxy)?.groupId ?: -1L
+                    RouteManager.routeFor(groupId).rules.any { rule ->
                         !rule.disabled && (rule.wifi_ssid.any { it.isNotBlank() } || rule.wifi_bssid.any { it.isNotBlank() })
                     }
                 }.getOrDefault(false)

@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.database
 
 import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.ktx.Logs
 import java.util.concurrent.Callable
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -116,7 +117,12 @@ object GroupRepo {
         }) ?: return false
         val running = ProfileManager.runningProfileId()
         if (running > 0 && ProfileManager.getProfile(running)?.groupId == id) SagerNet.stopService()
+        val name = dao.getById(id)?.displayName()
         dao.deleteById(id)
+        // GroupService.cpp:160-164: the routing profiles its subscription provided go with it.
+        if (RouteManager.deleteOwnedBy(id) > 0) {
+            Logs.i("[Groups] $name: deleted the routing profile(s) its subscription provided")
+        }
         if (SettingsRegistry.CURRENT_GROUP.read(DataStore.configurationStore) == id) setCurrent(remaining.first())
         if (DataStore.selectedProxy > 0 && ProfileManager.getProfile(DataStore.selectedProxy) == null) {
             DataStore.selectedProxy = 0L

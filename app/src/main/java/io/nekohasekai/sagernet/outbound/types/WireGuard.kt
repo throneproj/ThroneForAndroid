@@ -366,7 +366,7 @@ class WireGuard : Outbound("wireguard") {
         serverPort = peer.port
 
         when {
-            q.has("local_address") -> address = QtStrings.splitSkipEmpty(q.valueFully("local_address"), "-")
+            q.has("local_address") -> address = QtStrings.splitSkipEmpty(q.valueFully("local_address").replace(" ", "").replace('-', ','), ",")
             q.has("address") -> address = QtStrings.splitSkipEmpty(q.valueFully("address").replace(" ", ""), ",")
             q.has("ip") -> address = QtStrings.splitSkipEmpty(q.valueFully("ip").replace(" ", ""), ",")
         }

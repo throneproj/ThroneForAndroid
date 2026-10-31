@@ -680,6 +680,7 @@
     <string name="route_options">Diğer seçenekler</string>
     <string name="route_active">Geçerli rota profili</string>
     <string name="route_switched">Rota profili: %s</string>
+    <string name="route_group_keeps_own">\"%1$s\" grubu kendi rota profilini kullanıyor, bu yüzden çalışan profil onu korur.</string>
     <string name="route_item_default_outbound">Varsayılan: %s</string>
     <plurals name="route_item_rules">
         <item quantity="one">%d kural</item>
@@ -689,6 +690,9 @@
     <string name="route_item_remote_never">Uzak · henüz güncellenmedi</string>
     <string name="route_item_auto_update_on">otomatik güncelleme açık</string>
     <string name="route_item_auto_update_off">otomatik güncelleme kapalı</string>
+    <string name="route_item_from_subscription">\"%1$s\" aboneliği tarafından güncellenir</string>
+    <string name="route_from_subscription_info">\"%1$s\" aboneliğinin her güncellemesi bu profilin kurallarının üzerine yazar. Silmek içe aktarmayı durdurur.</string>
+    <string name="route_subscription_profile_name">%1$s yönlendirmesi</string>
     <string name="route_delete_last">Rota profilleri boş olamaz, başka bir profil eklemeyi deneyin veya bunu düzenleyin</string>
     <string name="route_link_copied">Kopyalandı!</string>
     <string name="route_export_warnings_title">Uyarılarla dışa aktarıldı</string>
@@ -882,9 +886,15 @@
     <string name="grp_landing_proxy">İniş vekil sunucusu</string>
     <string name="grp_none">Hiçbiri</string>
     <string name="grp_missing_profile">Profil #%1$d (eksik)</string>
+    <string name="grp_route_profile">Rota profili</string>
+    <string name="grp_route_profile_default">Varsayılan (%1$s)</string>
+    <string name="grp_route_profile_from_subscription">%1$s (bu abonelikten)</string>
+    <string name="grp_route_profile_tip">Bu gruptaki profillerin bağlanırken kullandığı rota profili. \"Varsayılan\", \"Rota\" menüsünde seçilen rota profilini izler.</string>
     <string name="grp_auto_clear_unavailable">Kullanılamayan profilleri otomatik temizle</string>
     <string name="grp_url">URL</string>
     <string name="grp_skip_auto_update">Otomatik güncellemeyi atla</string>
+    <string name="grp_import_sub_route">Aboneliğin rota profilini kullan</string>
+    <string name="grp_import_sub_route_tip">Her güncelleme, aboneliğin sağladığı rota profilini (Happ biçiminde) bu grubun kendi rota profili olarak kaydeder. Abonelikteki DNS ayarları hiçbir zaman kullanılmaz.</string>
     <string name="grp_no_auto_selector">Otomatik seçici sunucuyu kendisi taşıdığı için sabit bir ön/iniş yuvası tutamaz.</string>
     <string name="grp_advanced">Gelişmiş</string>
     <string name="grp_advanced_count">Gelişmiş (%d ayarlı)</string>
@@ -969,6 +979,8 @@
     <string name="subs_removed_unavailable">%1$d kullanılamayan profil kaldırıldı:</string>
     <string name="subs_invalid_core_unreachable">Geçersiz profilleri kaldırma atlandı: çekirdeğe ulaşılamıyor.</string>
     <string name="subs_running_kept">Çalışan profil korundu.</string>
+    <string name="subs_running_replaced">%1$s güncellemeyle değiştirildi; aynı ada sahip profile bağlanılıyor.</string>
+    <string name="subs_running_removed">%1$s güncellemeyle kaldırıldı ve durdurulmuş olarak kalıyor: yerini alacak aynı ada sahip tek bir profil yok.</string>
     <string name="subs_sort_skipped">%1$s sıralaması atlandı: başka bir sıralama devam ediyor.</string>
     <string name="subs_after_url_test">%1$s URL testinden sonra:</string>
     <string name="subs_imported">%1$d profil içe aktarıldı</string>
@@ -1181,7 +1193,7 @@
     <string name="autosel_group_archived">%s (arşivlenmiş)</string>
     <string name="autosel_group_missing">Eksik grup (#%d)</string>
     <string name="autosel_name_filter">Yalnızca eşleşen adlar</string>
-    <string name="autosel_name_filter_tip">İsteğe bağlı normal ifade. Yalnızca adı eşleşen profiller değerlendirilir — bir ülkeyi veya sağlayıcıyı ayıklamak için kullanışlıdır.</string>
+    <string name="autosel_name_filter_tip">İsteğe bağlı normal ifade; profil adının herhangi bir yerinde, büyük/küçük harf ayrımı yapılmadan aranır. Yalnızca adı eşleşen profiller kullanılır.\nBirkaçını seçin: germany|nl\nBazılarını hariç tutun: ^(?!.*(germany|🇩🇪)).*$ ikisini de içermeyen her adı kullanır.</string>
     <string name="autosel_name_filter_empty">Gruptaki her profil</string>
     <string name="autosel_balance">Trafiği en iyi profiller arasında paylaş</string>
     <string name="autosel_balance_tip">Varsayılan olarak kapalı: bir profil her şeyi taşır ve diğerleri hazır bekler. Trafiği çalıştığı doğrulanan profillere yaymak için açın.</string>
@@ -1199,7 +1211,7 @@
     <string name="autosel_plan_kept_unavailable">Her profilin son testi başarısız oldu, bu genellikle sunucular yerine ağın kapalı olduğu anlamına gelir, bu yüzden %d tanesinin tamamı korunur ve yeniden denetlenecektir.</string>
     <string name="autosel_plan_truncated">%d profilden fazlası eşleşiyor, bu yüzden yalnızca en iyi sıralamakiler korunur.</string>
     <string name="autosel_plan_reused">%d tanesinde yeniden kullanılacak yakın tarihli bir test sonucu var.</string>
-    <string name="autosel_plan_needs_ranking">Kalanlar seçici başlamadan önce ölçülecektir.</string>
+    <string name="autosel_plan_needs_ranking">Kalanlar seçici başlarken ölçülecektir: yeterli sayıda profil çalışır çalışmaz seçici devreye girer ve tümü ölçüldüğünde tam sıralamaya geçer.</string>
     <string name="autosel_error_no_group">Otomatik seçici artık var olmayan bir grubu gösteriyor</string>
     <string name="autosel_error_no_members">Otomatik seçicinin kullanılabilir üyesi yok</string>
     <string name="autosel_skip_missing">eksik profil</string>
@@ -1371,7 +1383,9 @@
     <string name="warp_enable">WARP\'ı etkinleştir</string>
     <string name="warp_enable_sum">Aşağıdaki yapılandırmanın çıkış olarak kullanılmasını sağlar, WARP dışı VPN\'leri kısıtlayan hizmetleri atlamak için kullanışlıdır</string>
     <string name="warp_mode">Mod</string>
-    <string name="warp_mode_sum">%s\nWireGuard UDP üzerinde çalışır. MASQUE, HTTP/3 veya HTTP/2 üzerinde tüneller ve WireGuard\'ı engelleyen ağlardan geçer.</string>
+    <string name="warp_mode_sum">%s\nWireGuard UDP üzerinde çalışır. AmneziaWG, WARP uyumlu çöp ve gizleme paketleri ekler. MASQUE, HTTP/3 veya HTTP/2 üzerinde tüneller.</string>
+    <string name="warp_amnezia_generating">AmneziaWG QUIC imzası oluşturuluyor…</string>
+    <string name="warp_amnezia_missing">AmneziaWG\'nin henüz QUIC imzası yok: \"Yapılandırma Oluştur\" düğmesine dokunun.</string>
     <string name="warp_wireguard_note">WARP vekil sunucunuzun üzerinde çalışır: WireGuard, UDP ileten bir vekil sunucuya ihtiyaç duyar.</string>
     <string name="warp_masque_note">WARP vekil sunucunuzun üzerinde çalışır: HTTP/3 üzerinde MASQUE, UDP ileten bir vekil sunucuya ihtiyaç duyar; HTTP/2 üzerinde yalnızca TCP\'ye ihtiyaç duyar.</string>
     <string name="warp_endpoint">Uç nokta</string>
@@ -1399,6 +1413,8 @@
     <string name="warp_tos_message"><![CDATA[Bir WARP kimliği oluşturmak Cloudflare\'e yeni bir cihaz kaydeder.<br><br><a href="%1$s">Cloudflare WARP hizmet şartlarını</a> kabul ediyor musunuz?]]></string>
     <string name="warp_proxy_not_started">Vekil sunucu ile istek ama hiçbir profil başlatılmadı.</string>
     <string name="warp_core_unreachable">Çekirdeğe ulaşılamadı.</string>
+    <string name="warp_quic_signature_invalid">Çekirdek geçersiz bir QUIC imzası döndürdü.</string>
+    <string name="warp_quic_signature_failed">WARP QUIC imzası oluşturulamadı: %1$s</string>
     <string name="warp_disable">WARP\'ı devre dışı bırak</string>
     <string name="warp_enabled">WARP etkin</string>
     <string name="warp_disabled">WARP devre dışı</string>
@@ -2107,7 +2123,7 @@
     <string name="validation_hysteria_hop_maximum_zero">Ayrıca 0\'dan büyük bir Port atlama aralığı gerekir, örneğin en fazla 60s ile 30s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">Port atlama aralığından kısa olmamalıdır.</string>
     <string name="validation_hysteria_hop_maximum_ignored">Port atlama aralığı olmadan yok sayılır; onu da ayarlayın, örneğin en fazla 60s ile 30s.</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1 için hem Yükleme (Mbps) hem de İndirme (Mbps) gerekir, örneğin 100.</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1 için hem Yükleme (Mbps) hem de İndirme (Mbps) gerekir; eksik olan için yüklemede %1$d, indirmede %2$d kullanılır. En iyi sonuç için hattınızın gerçek hızını girin.</string>
     <string name="validation_hysteria_gecko_range">Paket boyutları 0 ile 2048 arasında olmalıdır; 0 varsayılanı kullanır.</string>
     <string name="validation_hysteria_gecko_order">En düşük paket boyutu en yükseği aşmamalıdır; 0 varsayılan anlamına gelir: en düşük için 512, en yüksek için 1200.</string>
     <string name="validation_hysteria_auth_base64">Geçerli base64 değil. Düz metin içerik için doğrulama türü olarak STRING seçin.</string>

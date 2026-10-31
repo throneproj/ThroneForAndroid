@@ -33,6 +33,9 @@ class RouteProfile {
 
     @JvmField var rules: MutableList<RouteRule> = mutableListOf()
 
+    /** The subscription group whose refreshes overwrite [rules], -1 = none; local only, never shared. */
+    @JvmField var source_gid: Long = -1L
+
     fun copy(): RouteProfile {
         val c = RouteProfile()
         c.id = id
@@ -50,7 +53,48 @@ class RouteProfile {
         c.custom_dns = custom_dns
         c.dns = dns
         c.rules = rules.mapTo(ArrayList()) { it.copy() }
+        c.source_gid = source_gid
         return c
+    }
+
+    /**
+     * AppendSimpleRule (RouteProfile.cpp:1200-1240) for an address line ("suffix:example.com") and the simple rule of
+     * [outbound] (PROXY, DIRECT, BLOCK or WARP_BYPASS), which is added at the end when missing; false when the line is
+     * rejected. Values are kept once, domain/suffix/keyword lowercased (add_simple_address_rule).
+     */
+    fun appendSimpleAddressRule(rawLine: String, outbound: Long, catalog: RuleSetCatalog? = null): Boolean {
+        val line = rawLine.trim()
+        val colon = line.indexOf(':')
+        if (colon < 0) return false
+        val prefix = line.substring(0, colon).trim()
+        if (prefix !in ADDRESS_PREFIXES) return false
+        if (checkSimpleRule(line, catalog)?.severity == Severity.Error) return false
+        val value = line.substring(colon + 1).trim()
+        val type = when (outbound) {
+            OutboundIds.PROXY -> RuleType.SIMPLE_ADDRESS_PROXY
+            OutboundIds.DIRECT -> RuleType.SIMPLE_ADDRESS_BYPASS
+            OutboundIds.WARP_BYPASS -> RuleType.SIMPLE_ADDRESS_WARP_BYPASS
+            else -> RuleType.SIMPLE_ADDRESS_BLOCK
+        }
+        val existing = rules.firstOrNull { it.type == type.id }
+        val rule = existing ?: RouteRule().apply {
+            this.type = type.id
+            name = SIMPLE_ADDRESS_NAMES.getValue(type)
+            if (type == RuleType.SIMPLE_ADDRESS_BLOCK) action = "reject" else outbound_id = outbound
+        }
+        val values = when (prefix) {
+            "domain" -> rule.domain
+            "suffix" -> rule.domain_suffix
+            "keyword" -> rule.domain_keyword
+            "regex" -> rule.domain_regex
+            "ruleset" -> rule.rule_set
+            else -> rule.ip_cidr
+        }
+        // sing-box lowercases the host but takes these as written; a regex stays as written, lowercasing can change it.
+        val stored = if (prefix == "domain" || prefix == "suffix" || prefix == "keyword") value.lowercase() else value
+        if (stored !in values) values.add(stored)
+        if (existing == null) rules.add(rule)
+        return true
     }
 
     /** ActiveDns: the DNS this profile imposes; null while the global settings apply. */
@@ -169,9 +213,19 @@ class RouteProfile {
             "ruleset" to "rule_set", "ip" to "ip_cidr", "processName" to "process_name", "processPath" to "process_path",
         )
 
+        private val ADDRESS_PREFIXES = setOf("domain", "suffix", "keyword", "regex", "ruleset", "ip")
+
+        /** ruleTypeToString (RouteRule.h:47-56): the names get_simple_rules gives the address rules. */
+        private val SIMPLE_ADDRESS_NAMES = mapOf(
+            RuleType.SIMPLE_ADDRESS_PROXY to "Simple Address Proxy",
+            RuleType.SIMPLE_ADDRESS_BYPASS to "Simple Address Bypass",
+            RuleType.SIMPLE_ADDRESS_BLOCK to "Simple Address Block",
+            RuleType.SIMPLE_ADDRESS_WARP_BYPASS to "Simple Address Warp-bypass",
+        )
+
         /**
          * RouteProfile::CheckSimpleRule: one "prefix:value" line of the desktop's Basic tab on its own, null when
-         * acceptable. Android edits no simple rules, so nothing here applies them (UpdateSimpleRules, AppendSimpleRule).
+         * acceptable. Android edits no simple rules; only [appendSimpleAddressRule] applies them, for subscription imports.
          */
         @JvmStatic
         @JvmOverloads

@@ -423,7 +423,7 @@
     <string name="autosel_name_empty">名前は空にできません。</string>
     <string name="autosel_name_filter">名前が一致するもののみ</string>
     <string name="autosel_name_filter_empty">グループ内のすべてのプロファイル</string>
-    <string name="autosel_name_filter_tip">任意の正規表現。名前が一致するプロファイルのみを対象にします — 特定の国やプロバイダを選ぶのに便利です。</string>
+    <string name="autosel_name_filter_tip">任意の正規表現。プロファイル名のどの位置でも一致し、大文字と小文字は区別しません。名前が一致するプロファイルのみを使用します。\n複数を選ぶ：germany|nl\n一部を除外：^(?!.*(germany|🇩🇪)).*$ はどちらも含まないすべての名前を使用します。</string>
     <string name="autosel_never">なし</string>
     <string name="autosel_no_limit">無制限</string>
     <string name="autosel_note_checking">チェック中</string>
@@ -456,7 +456,7 @@
     <string name="autosel_plan_calculating">グループをチェック中…</string>
     <string name="autosel_plan_counts">グループの %2$d 個中 %1$d 個が使用可能、%3$d 個が稼働します。</string>
     <string name="autosel_plan_kept_unavailable">すべてのプロファイルの前回テストが失敗しており、通常はサーバーではなくネットワークの問題を意味するため、%d 個すべてを保持し再チェックします。</string>
-    <string name="autosel_plan_needs_ranking">残りはセレクタの開始前に測定されます。</string>
+    <string name="autosel_plan_needs_ranking">残りはセレクタの開始時に測定されます：十分な数のプロファイルが機能した時点で動作を始め、すべての測定が終わると完全なランキングに切り替わります。</string>
     <string name="autosel_plan_reused">%d 個に再利用可能な最近のテスト結果があります。</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">スキップ：%s。</string>
@@ -720,6 +720,10 @@
     <string name="grp_landing_proxy">ランディングプロキシ</string>
     <string name="grp_last_update">前回更新：%1$s</string>
     <string name="grp_missing_profile">プロファイル #%1$d（存在しません）</string>
+    <string name="grp_route_profile">ルーティングプロファイル</string>
+    <string name="grp_route_profile_default">既定（%1$s）</string>
+    <string name="grp_route_profile_from_subscription">%1$s（このサブスクリプションから）</string>
+    <string name="grp_route_profile_tip">このグループのプロファイルが接続に使うルーティングプロファイルです。「既定」は「ルート」メニューで選択したルーティングプロファイルに従います。</string>
     <string name="grp_more_options">その他のオプション</string>
     <string name="grp_move_down">下へ移動</string>
     <string name="grp_move_up">上へ移動</string>
@@ -745,6 +749,8 @@
     <string name="grp_settings_user_agent">UserAgent</string>
     <string name="grp_share_subscription">購読リンクを共有</string>
     <string name="grp_skip_auto_update">自動更新をスキップ</string>
+    <string name="grp_import_sub_route">サブスクリプションのルーティングプロファイルを使用</string>
+    <string name="grp_import_sub_route_tip">更新のたびに、サブスクリプションが提供するルーティングプロファイル（Happ 形式）をこのグループ独自のルーティングプロファイルとして保存します。サブスクリプションの DNS 設定は使用されません。</string>
     <string name="grp_sort_by_latency">レイテンシで並べ替え</string>
     <string name="grp_state_queued">キュー待ち</string>
     <string name="grp_state_running">更新中…</string>
@@ -997,6 +1003,9 @@
     <string name="route_imported">ルーティングプロファイル %s を追加しました</string>
     <string name="route_imported_default_name">インポートしたプロファイル</string>
     <string name="route_item_auto_update_off">自動更新オフ</string>
+    <string name="route_item_from_subscription">サブスクリプション「%1$s」により更新</string>
+    <string name="route_from_subscription_info">サブスクリプション「%1$s」が更新されるたびに、このプロファイルのルールは上書きされます。削除するとインポートは停止します。</string>
+    <string name="route_subscription_profile_name">%1$s のルーティング</string>
     <string name="route_item_auto_update_on">自動更新オン</string>
     <string name="route_item_default_outbound">既定：%s</string>
     <string name="route_item_remote_never">リモート · 未更新</string>
@@ -1116,6 +1125,7 @@
     <string name="route_summary_private_ip">プライベート IP</string>
     <string name="route_summary_private_source_ip">プライベート送信元 IP</string>
     <string name="route_switched">ルーティングプロファイル：%s</string>
+    <string name="route_group_keeps_own">グループ「%1$s」は独自のルーティングプロファイルを使用するため、実行中のプロファイルはそれを維持します。</string>
     <string name="route_update_all">すべてのリモートプロファイルを更新</string>
     <string name="route_update_cancelled">キャンセル：%2$d 件中 %1$d 件を更新、%3$d 件が失敗。</string>
     <string name="route_update_cancelled_title">更新をキャンセルしました</string>
@@ -1206,6 +1216,8 @@
     <string name="resolve_domains_failed">ドメインの解決に失敗しました：%1$s</string>
     <string name="subs_response_too_large">応答が %1$d MB を超えています</string>
     <string name="subs_running_kept">実行中のプロファイルは保持されました。</string>
+    <string name="subs_running_replaced">%1$s は更新で置き換えられました。同じ名前のプロファイルに接続しています。</string>
+    <string name="subs_running_removed">%1$s は更新で削除されたため停止したままです：置き換え先となる同じ名前のプロファイルが 1 つに定まりません。</string>
     <string name="subs_sort_skipped">%1$s の並べ替えをスキップ：別の並べ替えが進行中です。</string>
     <string name="subs_still_in_use">まだ使用中のため、削除せず保持：\n%1$s</string>
     <string name="subs_task_failed">購読タスクが失敗しました：%1$s</string>
@@ -1394,6 +1406,8 @@
     <string name="warp_api_hosts">登録ドメイン</string>
     <string name="warp_api_hosts_message">1 行に 1 ドメイン。順に試行し、最初に登録を受け付けたものを使用します。空欄なら %s を使用。</string>
     <string name="warp_core_unreachable">コアに到達できませんでした。</string>
+    <string name="warp_quic_signature_invalid">コアが無効な QUIC シグネチャを返しました。</string>
+    <string name="warp_quic_signature_failed">WARP の QUIC シグネチャの生成に失敗しました：%1$s</string>
     <string name="warp_disable">WARP を無効化</string>
     <string name="warp_disabled">WARP を無効にしました</string>
     <string name="warp_enable">WARP を有効化</string>
@@ -1414,7 +1428,9 @@
     <string name="warp_interface_addresses">インターフェースアドレス</string>
     <string name="warp_masque_note">WARP はプロキシ上を走行：HTTP/3 の MASQUE は UDP を転送するプロキシが必要で、HTTP/2 は TCP のみで足ります。</string>
     <string name="warp_mode">モード</string>
-    <string name="warp_mode_sum">%s\nWireGuard は UDP 上を走行。MASQUE は HTTP/3 または HTTP/2 でトンネリングし、WireGuard を遮断するネットワークを通過できます。</string>
+    <string name="warp_mode_sum">%s\nWireGuard は UDP 上を走行。AmneziaWG は WARP 互換のジャンクパケットとカモフラージュパケットを追加します。MASQUE は HTTP/3 または HTTP/2 でトンネリングします。</string>
+    <string name="warp_amnezia_generating">AmneziaWG の QUIC シグネチャを生成中…</string>
+    <string name="warp_amnezia_missing">AmneziaWG にはまだ QUIC シグネチャがありません：「設定を生成」をタップしてください。</string>
     <string name="warp_not_generated">WARP は有効ですが設定が未生成です。「設定 › ルーティング › WARP」で生成してください。</string>
     <string name="warp_peer_public_key">ピア公開鍵</string>
     <string name="warp_peer_public_key_message">サーバー公開鍵の Base64 DER。設定するとサーバー証明書をピン留めします。</string>
@@ -2072,7 +2088,7 @@
     <string name="validation_hysteria_hop_maximum_zero">ポートホッピング間隔も 0 より大きく設定する必要があります（例：間隔 30s、上限 60s）。</string>
     <string name="validation_hysteria_hop_maximum_shorter">ポートホッピング間隔より短くすることはできません。</string>
     <string name="validation_hysteria_hop_maximum_ignored">ポートホッピング間隔がないと無視されます。あわせて設定してください（例：間隔 30s、上限 60s）。</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1 にはアップロード速度とダウンロード速度（Mbps）の両方が必要です（例：100）。</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1 にはアップロード速度とダウンロード速度（Mbps）の両方が必要です。未設定の方にはアップロード %1$d、ダウンロード %2$d が使われます。最良の結果を得るには実際の回線速度を設定してください。</string>
     <string name="validation_hysteria_gecko_range">パケットサイズは 0〜2048 にしてください。0 は既定を使用します。</string>
     <string name="validation_hysteria_gecko_order">最小パケットサイズが最大を超えてはいけません。0 は既定（最小は 512、最大は 1200）を意味します。</string>
     <string name="validation_hysteria_auth_base64">base64 として無効です。プレーンテキストのペイロードには、認証タイプとして STRING を選んでください。</string>

@@ -27,6 +27,7 @@ import com.google.android.material.textfield.TextInputLayout
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.RouteManager
 import io.nekohasekai.sagernet.database.RouteRepo
 import io.nekohasekai.sagernet.databinding.LayoutProgressListBinding
@@ -78,8 +79,8 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
     private val editor = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
         val id = result.data?.getLongExtra(RouteProfileActivity.EXTRA_SAVED_ID, 0L) ?: 0L
-        // D15: editing the active profile prompts a reload like other config-affecting settings.
-        if (id != 0L && id == DataStore.currentRouteId) needReload()
+        // D15: editing the profile in effect prompts a reload like other config-affecting settings.
+        if (id != 0L && id == RouteManager.activeRouteId()) needReload()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -115,8 +116,10 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
         runOnLifecycleDispatcher {
             val profiles = RouteManager.all()
             val currentId = RouteManager.current().id
+            // dialog_manage_routes.cpp: a profile counts as the subscription's while its group still imports it.
+            val owners = GroupRepo.all().filter { it.importSubRoute }.associate { it.id to it.displayName() }
             onMainDispatcher {
-                if (view != null) adapter.submit(profiles, currentId)
+                if (view != null) adapter.submit(profiles, currentId, owners)
             }
         }
     }
@@ -160,9 +163,11 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
             return
         }
         if (profile.id == adapter.currentId) return
-        RouteQuickSwitch.switchTo(profile.id)
         adapter.setCurrent(profile.id)
-        snackbar(getString(R.string.route_switched, profile.name)).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val kept = RouteQuickSwitch.switchTo(profile.id)
+            snackbar(RouteQuickSwitch.switchedMessage(this@RouteFragment, profile.name, kept)).show()
+        }
     }
 
     private fun clone(id: Long) = runOnLifecycleDispatcher {
@@ -175,6 +180,8 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
             remote_url = ""
             auto_update = false
             remote_last_update = 0L
+            // the subscription keeps updating only the original
+            source_gid = -1L
         }
         RouteManager.save(copy)
         onMainDispatcher {
@@ -226,18 +233,20 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
             return
         }
         fun doDelete() = runOnLifecycleDispatcher {
-            val wasCurrent = DataStore.currentRouteId == profile.id
+            val wasActive = RouteManager.activeRouteId() == profile.id
             val deleted = RouteManager.delete(profile.id)
             onMainDispatcher {
                 if (!isAdded) return@onMainDispatcher
-                if (!deleted) lastProfileError() else if (wasCurrent) needReload()
+                if (!deleted) lastProfileError() else if (wasActive) needReload()
             }
         }
         if (DataStore.skipDeleteConfirmation) {
             doDelete()
             return
         }
-        requireContext().confirmAction(getString(R.string.confirm_remove_route_profile), profile.name, R.string.delete) {
+        val owner = adapter.ownerOf(profile)
+        val message = if (owner == null) profile.name else profile.name + "\n\n" + getString(R.string.route_from_subscription_info, owner)
+        requireContext().confirmAction(getString(R.string.confirm_remove_route_profile), message, R.string.delete) {
             doDelete()
         }
     }
@@ -419,7 +428,7 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
                 val error = result.second
                 if (error == null) {
                     updated++
-                    if (id == DataStore.currentRouteId) currentChanged = true
+                    if (id == RouteManager.activeRouteId()) currentChanged = true
                 } else {
                     failures.add(result.first + ": " + error)
                 }
@@ -510,16 +519,23 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
         var profiles: List<RouteProfile> = emptyList()
         var currentId = 0L
 
+        /** The names of the groups importing their subscription's routing profile, by id. */
+        private var owners: Map<Long, String> = emptyMap()
+
         init {
             setHasStableIds(true)
         }
 
         @SuppressLint("NotifyDataSetChanged")
-        fun submit(profiles: List<RouteProfile>, currentId: Long) {
+        fun submit(profiles: List<RouteProfile>, currentId: Long, owners: Map<Long, String>) {
             this.profiles = profiles
             this.currentId = currentId
+            this.owners = owners
             notifyDataSetChanged()
         }
+
+        /** The name of the group whose subscription keeps [profile] updated, null when none does. */
+        fun ownerOf(profile: RouteProfile): String? = owners[profile.source_gid]
 
         fun setCurrent(id: Long) {
             val old = profiles.indexOfFirst { it.id == currentId }
@@ -556,7 +572,8 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
             binding.profileSummary.text = if (profile.is_raw) getString(R.string.route_raw_summary) else getString(
                 R.string.route_item_default_outbound, RouteTexts.outboundName(context, profile.default_outbound_id, emptyMap())
             ) + " · " + resources.getQuantityString(R.plurals.route_item_rules, profile.rules.size, profile.rules.size)
-            binding.profileRemote.isVisible = profile.is_remote
+            val owner = adapter.ownerOf(profile)
+            val notes = ArrayList<String>()
             if (profile.is_remote) {
                 val updated = if (profile.remote_last_update > 0) {
                     getString(R.string.route_item_remote_updated, RouteTexts.dateTime(context, profile.remote_last_update))
@@ -564,10 +581,22 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
                     getString(R.string.route_item_remote_never)
                 }
                 val auto = getString(if (profile.auto_update) R.string.route_item_auto_update_on else R.string.route_item_auto_update_off)
-                binding.profileRemote.text = "$updated · $auto"
+                notes.add("$updated · $auto")
             }
+            if (owner != null) notes.add(getString(R.string.route_item_from_subscription, owner))
+            binding.profileRemote.isVisible = notes.isNotEmpty()
+            binding.profileRemote.text = notes.joinToString("\n")
             binding.updateProgress.isVisible = profile.id in updating
             itemView.setOnClickListener { select(profile) }
+            if (owner != null) {
+                itemView.setOnLongClickListener {
+                    snackbar(getString(R.string.route_from_subscription_info, owner)).show()
+                    true
+                }
+            } else {
+                itemView.setOnLongClickListener(null)
+                itemView.isLongClickable = false
+            }
             binding.edit.setOnClickListener { edit(profile.id) }
             binding.options.setOnClickListener { showMenu(it, profile) }
         }

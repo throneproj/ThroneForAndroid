@@ -6,7 +6,6 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.SwitchPreference
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.DnsServerHistory
 import io.nekohasekai.sagernet.database.RouteManager
 import io.nekohasekai.sagernet.database.SagerDatabase
@@ -113,12 +112,12 @@ class DnsSettingsFragment : SettingsScreenFragment(R.xml.settings_dns) {
         showRouteOverride()
     }
 
-    /** The current routing profile's own DNS replaces the servers and behaviour here (RouteDns::Current). */
+    /** The own DNS of the routing profile in effect replaces the servers and behaviour here (RouteDns::Current). */
     private fun showRouteOverride() {
         val note = findPreference<Preference>(KEY_ROUTE_OVERRIDE) ?: return
         lifecycleScope.launch {
             val name = withContext(Dispatchers.IO) {
-                val id = DataStore.currentRouteId
+                val id = RouteManager.activeRouteId()
                 if (RouteManager.customDns(id) == null) null else SagerDatabase.routeDao.getProfile(id)?.name
             }
             note.summary = name?.let { getString(R.string.dns_route_override_note, it) }

@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.bg.test
 
 import io.nekohasekai.sagernet.aidl.ITestSessionCallback
+import io.nekohasekai.sagernet.database.ProxyEntity
 import io.throneproj.mobile.Mobile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,12 +67,13 @@ object TestEngine {
 
     /**
      * Waits for a running session to finish, then URL-tests [ids] and persists the results (desktop queueUrlTests);
-     * cancelling the caller stops the tests.
+     * cancelling the caller stops the tests. [onResult] gets each stored result on a test thread, a profile possibly
+     * twice (a failure, then its Connect OK verdict).
      */
-    suspend fun queueUrlTests(ids: List<Long>) {
+    suspend fun queueUrlTests(ids: List<Long>, onResult: ((ProxyEntity) -> Unit)? = null) {
         if (ids.isEmpty()) return
         session.lock()
-        val test = TestSession(sessionIds.incrementAndGet(), TestSpec(TestSpec.KIND_URL, ids.toLongArray()), null)
+        val test = TestSession(sessionIds.incrementAndGet(), TestSpec(TestSpec.KIND_URL, ids.toLongArray()), null, onResult)
         current = test
         try {
             coroutineScope {

@@ -222,7 +222,7 @@
     <string name="autosel_name_empty">Назва не можа быць пустой.</string>
     <string name="autosel_name_filter">Толькі адпаведныя назвы</string>
     <string name="autosel_name_filter_empty">Кожны профіль у групе</string>
-    <string name="autosel_name_filter_tip">Неабавязковы рэгулярны выраз. Разглядаюцца толькі профілі, чыя назва адпавядае — карысна, каб вылучыць адну краіну або пастаўшчыка.</string>
+    <string name="autosel_name_filter_tip">Неабавязковы рэгулярны выраз; шукаецца ў любым месцы назвы профілю без уліку рэгістра. Выкарыстоўваюцца толькі профілі, чыя назва адпавядае.\nВыбраць некалькі: germany|nl\nВыключыць некаторыя: ^(?!.*(germany|🇩🇪)).*$ бярэ ўсе назвы, дзе няма ні аднаго, ні другога.</string>
     <string name="autosel_never">Ніколі</string>
     <string name="autosel_no_limit">Без абмежавання</string>
     <string name="autosel_note_checking">Праверка ў ходзе</string>
@@ -255,7 +255,7 @@
     <string name="autosel_plan_calculating">Праверка групы…</string>
     <string name="autosel_plan_counts">%1$d з %2$d профіляў у групе могуць быць выкарыстаны; %3$d запусцяцца.</string>
     <string name="autosel_plan_kept_unavailable">Апошні тэст кожнага профілю прайграў, што звычайна значыць, што сетка была адключана, а не серверы, таму ўсе %d захоўваюцца і будуць правераны зноў.</string>
-    <string name="autosel_plan_needs_ranking">Астатнія будуць вымераны перад запускам выбару.</string>
+    <string name="autosel_plan_needs_ranking">Астатнія будуць вымераны пры запуску выбару: ён пачне працаваць, як толькі набярэцца дастаткова працоўных профіляў, і пяройдзе на поўны рэйтынг, калі вымераны ўсе.</string>
     <string name="autosel_plan_reused">%d маюць нядаўні вынік тэсту, які будзе выкарыстаны паўторна.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">Прапушчана: %s.</string>
@@ -561,6 +561,10 @@
     <string name="grp_landing_proxy">Прызямляльны проксі</string>
     <string name="grp_last_update">Апошняе абнаўленне: %1$s</string>
     <string name="grp_missing_profile">Профіль #%1$d (адсутнічае)</string>
+    <string name="grp_route_profile">Профіль маршрутызацыі</string>
+    <string name="grp_route_profile_default">Прадвызначаны (%1$s)</string>
+    <string name="grp_route_profile_from_subscription">%1$s (з гэтай падпіскі)</string>
+    <string name="grp_route_profile_tip">Профіль маршрутызацыі, з якім падключаюцца профілі гэтай групы. «Прадвызначаны» адпавядае профілю маршрутызацыі, выбранаму ў меню «Маршрутызацыя».</string>
     <string name="grp_more_options">Больш опцый</string>
     <string name="grp_move_down">Перамясціць уніз</string>
     <string name="grp_move_up">Перамясціць уверх</string>
@@ -586,6 +590,8 @@
     <string name="grp_settings_user_agent">Агент карыстальніка</string>
     <string name="grp_share_subscription">Падзяліцца спасылкай на падпіску</string>
     <string name="grp_skip_auto_update">Прапусціць аўтаматычнае абнаўленне</string>
+    <string name="grp_import_sub_route">Выкарыстоўваць профіль маршрутызацыі падпіскі</string>
+    <string name="grp_import_sub_route_tip">Пры кожным абнаўленні профіль маршрутызацыі, які дае падпіска (фармат Happ), захоўваецца як уласны профіль маршрутызацыі гэтай групы. Налады DNS з падпіскі ніколі не выкарыстоўваюцца.</string>
     <string name="grp_sort_by_latency">Сартаваць па затрымцы</string>
     <string name="grp_state_queued">У чарзе</string>
     <string name="grp_state_running">Абнаўленне…</string>
@@ -914,6 +920,9 @@
     <string name="route_imported">Дададзены профіль маршрутызацыі %s</string>
     <string name="route_imported_default_name">Імпартаваны профіль</string>
     <string name="route_item_auto_update_off">аўтаматычнае абнаўленне выключана</string>
+    <string name="route_item_from_subscription">Абнаўляецца падпіскай «%1$s»</string>
+    <string name="route_from_subscription_info">Кожнае абнаўленне падпіскі «%1$s» перазапісвае правілы гэтага профілю. Выдаленне спыняе імпарт.</string>
+    <string name="route_subscription_profile_name">%1$s — маршрутызацыя</string>
     <string name="route_item_auto_update_on">аўтаматычнае абнаўленне ўключана</string>
     <string name="route_item_default_outbound">Прадвызначаны: %s</string>
     <string name="route_item_remote_never">Аддалены · яшчэ не абноўлены</string>
@@ -1034,6 +1043,7 @@
     <string name="route_summary_private_ip">прыватны IP</string>
     <string name="route_summary_private_source_ip">прыватны IP крыніцы</string>
     <string name="route_switched">Профіль маршрутызацыі: %s</string>
+    <string name="route_group_keeps_own">Група «%1$s» выкарыстоўвае ўласны профіль маршрутызацыі, таму прафіль у запуску захоўвае яго.</string>
     <string name="route_update_all">Абнавіць усе аддаленыя профілі</string>
     <string name="route_update_cancelled">Скасавана: абноўлена %1$d з %2$d, %3$d прайгравалі.</string>
     <string name="route_update_cancelled_title">Абнаўленне скасавана</string>
@@ -1154,6 +1164,8 @@
     <string name="resolve_domains_failed">Не ўдалося развязаць дамены: %1$s</string>
     <string name="subs_response_too_large">Адказ большы за %1$d МБ</string>
     <string name="subs_running_kept">Прафіль у запуску быў захаваны.</string>
+    <string name="subs_running_replaced">%1$s заменены абнаўленнем; падключэнне да профілю з той жа назвай.</string>
+    <string name="subs_running_removed">%1$s выдалены абнаўленнем і застаецца спыненым: няма адзінага профілю з той жа назвай, які б яго замяніў.</string>
     <string name="subs_sort_skipped">Прапушчана сартаванне %1$s: іншае сартаванне выконваецца.</string>
     <string name="subs_still_in_use">Усё яшчэ выкарыстоўваецца, таму захаваны замест выдалення:\n%1$s</string>
     <string name="subs_task_failed">Заданне падпіскі прайграў: %1$s</string>
@@ -1363,6 +1375,8 @@
     <string name="warp_api_hosts">Дамены рэгістрацыі</string>
     <string name="warp_api_hosts_message">Адзін дамен на радок. Яны спрабуюцца па парадку, і выкарыстоўваецца першы, які прымае рэгістрацыю. Пакіньце пустым, каб выкарыстоўваць %s.</string>
     <string name="warp_core_unreachable">Не атрымалася дасягнуць ядра.</string>
+    <string name="warp_quic_signature_invalid">Ядро вярнула несапраўдны подпіс QUIC.</string>
+    <string name="warp_quic_signature_failed">Не атрымалася стварыць подпіс QUIC для WARP: %1$s</string>
     <string name="warp_disable">Адключыць WARP</string>
     <string name="warp_disabled">WARP адключаны</string>
     <string name="warp_enable">Уключыць WARP</string>
@@ -1384,7 +1398,9 @@
     <string name="warp_interface_addresses">Адрасы інтэрфейсу</string>
     <string name="warp_masque_note">WARP ідзе на вашым проксі: MASQUE праз HTTP/3 патрабуе проксі, які перадае UDP, праз HTTP/2 патрэбен толькі TCP.</string>
     <string name="warp_mode">Рэжым</string>
-    <string name="warp_mode_sum">%s\nWireGuard працуе праз UDP. MASQUE тунэлюе праз HTTP/3 або HTTP/2 і праходзіць сеткі, якія блакіруюць WireGuard.</string>
+    <string name="warp_mode_sum">%s\nWireGuard працуе праз UDP. AmneziaWG дадае сумяшчальныя з WARP смеццевыя і маскіровачныя пакеты. MASQUE тунэлюе праз HTTP/3 або HTTP/2.</string>
+    <string name="warp_amnezia_generating">Стварэнне подпісу QUIC для AmneziaWG…</string>
+    <string name="warp_amnezia_missing">У AmneziaWG яшчэ няма подпісу QUIC: націсніце «Згенераваць канфігурацыю WARP».</string>
     <string name="warp_not_generated">WARP уключаны, але яго канфігурацыя не згенеравана. Згенеруйце яе ў Налады › Маршрутызацыя › WARP.</string>
     <string name="warp_peer_public_key">Публічны ключ равесніка</string>
     <string name="warp_peer_public_key_message">Base64 DER публічнага ключа сервера. Калі зададзена, замацоўвае сертыфікат сервера.</string>
@@ -2170,7 +2186,7 @@
     <string name="validation_hysteria_hop_maximum_zero">Таксама патрэбен інтэрвал скачкоў партоў больш за 0, напрыклад 30s з максімумам 60s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">Не павінна быць карацейшым за інтэрвал скачкоў партоў.</string>
     <string name="validation_hysteria_hop_maximum_ignored">Ігнаруецца без інтэрвалу скачкоў партоў; задайце і яго, напрыклад 30s з максімумам 60s.</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1 патрабуе і Up Mbps, і Down Mbps, напрыклад 100.</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1 патрабуе і Up Mbps, і Down Mbps; замест адсутнага значэння выкарыстоўваецца %1$d на адпраўку і %2$d на загрузку. Для лепшага выніку ўкажыце рэальную хуткасць канала.</string>
     <string name="validation_hysteria_gecko_range">Памеры пакетаў павінны быць ад 0 да 2048; 0 выкарыстоўвае прадвызначанае.</string>
     <string name="validation_hysteria_gecko_order">Мінімальны памер пакета не павінен перавышаць максімальны; 0 азначае прадвызначанае: 512 для мінімуму і 1200 для максімуму.</string>
     <string name="validation_hysteria_auth_base64">Не сапраўдны base64. Абярыце STRING як тып аўтэнтыфікацыі для тэкставага змесціва.</string>

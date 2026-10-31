@@ -1,6 +1,9 @@
 package io.nekohasekai.sagernet.group
 
+import android.os.SystemClock
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.GroupSort
@@ -13,11 +16,13 @@ import io.nekohasekai.sagernet.database.SubUserInfo
 import io.nekohasekai.sagernet.database.SubscriptionOptions
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
+import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.`import`.ImportReport
 import io.nekohasekai.sagernet.outbound.`import`.ProfileImport
 import io.nekohasekai.sagernet.validation.vplural
 import io.nekohasekai.sagernet.validation.vtr
+import kotlinx.coroutines.delay
 
 /** GroupUpdater::refresh, importDocuments and afterUrlTest (GroupUpdater.cpp:465-683) over the Room data layer. */
 internal object SubscriptionRefresh {
@@ -26,6 +31,9 @@ internal object SubscriptionRefresh {
 
     /** kInsertChunk (GroupUpdater.cpp:23). */
     private const val INSERT_CHUNK = 500
+
+    /** How long a replaced running profile waits for the service to finish stopping. */
+    private const val RECONNECT_WAIT_MS = 15_000L
 
     private val BOM = Char(0xFEFF)
 
@@ -65,7 +73,7 @@ internal object SubscriptionRefresh {
         val options = group.subOptions
         val url = group.url.trim()
 
-        val (info, result) = fetchAndParse(group, url, surface, notifyErrors) ?: return
+        val (info, result, routing) = fetchAndParse(group, url, surface, notifyErrors) ?: return
         val parsed = result.outbounds
         // Android-only (#53): filtered servers never enter the sink, so the diff deletes the ones already stored.
         val servers = SubscriptionNameFilter.apply(parsed, options, group.name)
@@ -89,6 +97,8 @@ internal object SubscriptionRefresh {
         val old = snapshot.old
         val working = snapshot.working
         val cleared = snapshot.cleared
+        var stoppedRunning = snapshot.stopped
+        var dbFailed = false
         val index = ContentIndex(old)
         val sink = ImportSink(gid, if (cleared) null else index)
 
@@ -119,9 +129,13 @@ internal object SubscriptionRefresh {
             for ((position, id) in sticky) order.add(minOf(position, order.size), id)
 
             val outcome = ProfileManager.batchDeleteProfiles(stale)
-            if (!outcome.ok) dbError(gid)
+            if (!outcome.ok) {
+                dbError(gid)
+                dbFailed = true
+            }
             disturbed.addAll(outcome.deleted)
             removed.addAll(outcome.deleted)
+            outcome.stopped?.let { stoppedRunning = it }
 
             // Survivors of the deletion (the running profile, working ones) return to their previous position.
             val ordered = order.toHashSet()
@@ -171,6 +185,8 @@ internal object SubscriptionRefresh {
         changeText += filtered.report
         disturbed.addAll(filtered.deleted)
         removed.addAll(filtered.deleted)
+        filtered.stopped?.let { stoppedRunning = it }
+        if (!filtered.ok) dbFailed = true
 
         SubscriptionRouteRebind.rebind(gid, removed, snapshot.routeNames)
         // The subscription's own order replaced the group's above.
@@ -190,21 +206,25 @@ internal object SubscriptionRefresh {
         if (!diffPopup && surface != Surface.Log && report.hasProblems()) {
             SubscriptionQueue.report(gid, reportTitle(surface, group.name), report.text(), true)
         }
+        stoppedRunning?.let { reconnectSuccessor(gid, it) }
         SubscriptionQueue.groupChanged(gid, disturbed)
+        // GroupUpdater.cpp:996: only after an update that went through.
+        if (routing.isNotEmpty() && !dbFailed) SubscriptionRoute.importRoute(gid, routing)
 
         if (options.urlTest) SubscriptionQueue.requestUrlTest(gid, ProfileManager.memberIds(gid).filter { it !in stickyIds })
     }
 
     /**
-     * The answer's subscription info and parse result, null when the update stops here (already reported). The body
-     * dies with this frame instead of living through the whole refresh.
+     * The answer's subscription info, parse result and routing profile value ([SubscriptionRoute.valueOf], "" unless
+     * the group imports it), null when the update stops here (already reported). The body dies with this frame
+     * instead of living through the whole refresh.
      */
     private suspend fun fetchAndParse(
         group: ProxyGroup,
         url: String,
         surface: Surface,
         notifyErrors: Boolean,
-    ): Pair<SubUserInfo, ProfileImport.Result>? {
+    ): Triple<SubUserInfo, ProfileImport.Result, String>? {
         val gid = group.id
         val fetched = SubscriptionFetch.fetch(url, group.name, RequestIdentity.resolve(group))
         if (fetched.error != null) {
@@ -243,7 +263,49 @@ internal object SubscriptionRefresh {
             else if (notifyErrors) SubscriptionQueue.error(gid, message)
             return null
         }
-        return info to result
+        val routing = if (current.importSubRoute) SubscriptionRoute.valueOf(fetched.routing, fetched.body) else ""
+        return Triple(info, result, routing)
+    }
+
+    /**
+     * reconnectSuccessor (GroupUpdater.cpp, #2051): the refresh deleted the running profile, so only an unambiguous
+     * successor (same type and name) takes over; with none or several, the profile stays stopped.
+     */
+    private fun reconnectSuccessor(gid: Long, stopped: ProxyEntity) {
+        val name = stopped.name.orEmpty()
+        val matches = if (name.isEmpty()) emptyList() else {
+            SagerDatabase.proxyDao.getNamesByGroup(gid).filter { it.type == stopped.type && it.name == name }
+        }
+        val display = stopped.outbound.displayTypeAndName()
+        if (matches.size != 1) {
+            Logs.w(str(R.string.subs_running_removed, display))
+            return
+        }
+        Logs.i(str(R.string.subs_running_replaced, display))
+        val successor = matches.first().id
+        runOnDefaultDispatcher { startWhenStopped(stopped.id, successor) }
+    }
+
+    /**
+     * EngineHost's subscriptionReplacedRunning: the delete only asked the service to stop, and a start while it is
+     * stopping is ignored, so this waits for Stopped. Whatever the user started meanwhile wins.
+     */
+    private suspend fun startWhenStopped(stoppedId: Long, successor: Long) {
+        val deadline = SystemClock.elapsedRealtime() + RECONNECT_WAIT_MS
+        while (SystemClock.elapsedRealtime() < deadline) {
+            val state = DataStore.serviceState
+            if (state == BaseService.State.Stopped) {
+                DataStore.selectedProxy = successor
+                try {
+                    SagerNet.startService()
+                } catch (e: Exception) {
+                    Logs.w(e)
+                }
+                return
+            }
+            if (state.started && DataStore.currentProfile != stoppedId) return
+            delay(200)
+        }
     }
 
     /** The group as the diff starts from it; [routeNames] is [SubscriptionRouteRebind.referencedNames]' result. */
@@ -255,6 +317,7 @@ internal object SubscriptionRefresh {
         @JvmField val old: ArrayList<OldEntry>,
         @JvmField val working: HashSet<Long>,
         @JvmField val cleared: Boolean,
+        @JvmField val stopped: ProxyEntity?,
     )
 
     /**
@@ -278,6 +341,7 @@ internal object SubscriptionRefresh {
 
         val routeNames = SubscriptionRouteRebind.referencedNames(members)
         var cleared = false
+        var stopped: ProxyEntity? = null
         if (DataStore.subClear) {
             Logs.i(str(R.string.subs_clearing))
             val doomed = if (options.keepWorking) members.filter { !it.isWorking() } else members
@@ -290,6 +354,7 @@ internal object SubscriptionRefresh {
             }
             disturbed.addAll(outcome.deleted)
             removed.addAll(outcome.deleted)
+            stopped = outcome.stopped
             // A survivor still belongs to the subscription: fall through to the diff. A row gone meanwhile is none.
             val alive = ProfileManager.memberIds(gid).toHashSet()
             members = members.filter { it.id in alive }
@@ -304,7 +369,7 @@ internal object SubscriptionRefresh {
                 if (options.keepWorking && profile.isWorking()) working.add(profile.id)
             }
         }
-        return Snapshot(sticky, stickyIds, membersBefore, routeNames, old, working, cleared)
+        return Snapshot(sticky, stickyIds, membersBefore, routeNames, old, working, cleared, stopped)
     }
 
     /**

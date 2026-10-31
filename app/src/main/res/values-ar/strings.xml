@@ -341,7 +341,7 @@
     <string name="autosel_name_empty">لا يمكن أن يكون الاسم فارغًا.</string>
     <string name="autosel_name_filter">الأسماء المطابقة فقط</string>
     <string name="autosel_name_filter_empty">كل ملف في المجموعة</string>
-    <string name="autosel_name_filter_tip">تعبير نمطي اختياري. تُؤخذ فقط الملفات التي يطابق اسمها — مفيد لاستخراج بلد أو مزود واحد.</string>
+    <string name="autosel_name_filter_tip">تعبير نمطي اختياري يُطابَق في أي موضع من اسم الملف دون مراعاة حالة الأحرف. تُستخدم فقط الملفات التي يطابق اسمها.\nاختيار عدة أسماء: germany|nl\nاستبعاد بعضها: ^(?!.*(germany|🇩🇪)).*$ يستخدم كل اسم لا يحتوي على أيٍّ منهما.</string>
     <string name="autosel_never">أبدًا</string>
     <string name="autosel_no_limit">بلا حد</string>
     <string name="autosel_note_checking">فحص جارٍ</string>
@@ -374,7 +374,7 @@
     <string name="autosel_plan_calculating">فحص المجموعة…</string>
     <string name="autosel_plan_counts">%1$d من %2$d ملف في المجموعة قابل للاستخدام؛ وسيعمل %3$d.</string>
     <string name="autosel_plan_kept_unavailable">فشل آخر اختبار لكل الملف، ما يعني عادة أن الشبكة هي المشكلة لا الخوادم، لذا تُبقي كل الملفات وعددها %d وستُفحص مجددًا.</string>
-    <string name="autosel_plan_needs_ranking">ستُعاير البقية قبل بدء المنتقي.</string>
+    <string name="autosel_plan_needs_ranking">ستُقاس البقية عند بدء المنتقي: يعمل بمجرد أن تعمل ملفات كافية، وينتقل إلى الترتيب الكامل بعد قياسها جميعًا.</string>
     <string name="autosel_plan_reused">لدى %d نتيجة اختبار حديثة ستُعاد استخدامها.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">تم التخطي: %s.</string>
@@ -651,6 +651,10 @@
     <string name="grp_landing_proxy">بروکسي الهبوط</string>
     <string name="grp_last_update">آخر تحديث: %1$s</string>
     <string name="grp_missing_profile">ملف #%1$d (مفقود)</string>
+    <string name="grp_route_profile">ملف التوجيه</string>
+    <string name="grp_route_profile_default">افتراضي (%1$s)</string>
+    <string name="grp_route_profile_from_subscription">%1$s (من هذا الاشتراك)</string>
+    <string name="grp_route_profile_tip">ملف التوجيه الذي تستخدمه ملفات هذه المجموعة عند الاتصال. يتبع «افتراضي» ملف التوجيه المختار في قائمة «طريق».</string>
     <string name="grp_more_options">خيارات أخرى</string>
     <string name="grp_move_down">نزول</string>
     <string name="grp_move_up">صعود</string>
@@ -676,6 +680,8 @@
     <string name="grp_settings_user_agent">وكيل المستخدم</string>
     <string name="grp_share_subscription">مشاركة رابط الاشتراك</string>
     <string name="grp_skip_auto_update">تخطي التحديث التلقائي</string>
+    <string name="grp_import_sub_route">استخدام ملف التوجيه الخاص بالاشتراك</string>
+    <string name="grp_import_sub_route_tip">يحفظ كل تحديث ملف التوجيه الذي يوفّره الاشتراك (بتنسيق Happ) كملف توجيه خاص بهذه المجموعة. لا تُستخدم إعدادات DNS الواردة من الاشتراك أبدًا.</string>
     <string name="grp_sort_by_latency">الترتيب حسب زمن الاستجابة</string>
     <string name="grp_state_queued">في قائمة الانتظار</string>
     <string name="grp_state_running">جارٍ التحديث…</string>
@@ -969,6 +975,9 @@
     <string name="route_imported">تمت إضافة ملف التوجيه %s</string>
     <string name="route_imported_default_name">ملف مستورد</string>
     <string name="route_item_auto_update_off">التحديث التلقائي معطّل</string>
+    <string name="route_item_from_subscription">يُحدَّث بواسطة الاشتراك «%1$s»</string>
+    <string name="route_from_subscription_info">كل تحديث للاشتراك «%1$s» يستبدل قواعد هذا الملف. يؤدي حذفه إلى إيقاف الاستيراد.</string>
+    <string name="route_subscription_profile_name">توجيه %1$s</string>
     <string name="route_item_auto_update_on">التحديث التلقائي مفعّل</string>
     <string name="route_item_default_outbound">الافتراضي: %s</string>
     <string name="route_item_remote_never">بعيد · لم يُحدَّث بعد</string>
@@ -1088,6 +1097,7 @@
     <string name="route_summary_private_ip">IP خاص</string>
     <string name="route_summary_private_source_ip">IP مصدر خاص</string>
     <string name="route_switched">ملف التوجيه: %s</string>
+    <string name="route_group_keeps_own">تستخدم المجموعة «%1$s» ملف توجيه خاصًا بها، لذا يحتفظ الملف قيد التشغيل به.</string>
     <string name="route_update_all">تحديث كل الملفات البعيدة</string>
     <string name="route_update_cancelled">أُلغي: تم تحديث %1$d من %2$d، وفشل %3$d.</string>
     <string name="route_update_cancelled_title">أُلغي التحديث</string>
@@ -1188,6 +1198,8 @@
     <string name="resolve_domains_failed">تعذّر تحليل النطاقات: %1$s</string>
     <string name="subs_response_too_large">استجابة أكبر من %1$d ميغابايت</string>
     <string name="subs_running_kept">أُبقي الملف قيد التشغيل.</string>
+    <string name="subs_running_replaced">استُبدل %1$s بالتحديث؛ جارٍ الاتصال بالملف الذي يحمل الاسم نفسه.</string>
+    <string name="subs_running_removed">أُزيل %1$s بالتحديث ويبقى متوقفًا: لا يوجد ملف واحد بالاسم نفسه يحلّ محله.</string>
     <string name="subs_sort_skipped">تم تخطي ترتيب %1$s: ترتيب آخر جارٍ.</string>
     <string name="subs_still_in_use">ما زال قيد الاستخدام، لذا أُبقي بدل حذفه:\n%1$s</string>
     <string name="subs_task_failed">فشلت مهمة الاشتراك: %1$s</string>
@@ -1388,6 +1400,8 @@
     <string name="warp_api_hosts">نطاقات التسجيل</string>
     <string name="warp_api_hosts_message">نطاق في كل سطر. تُجرَّب بالترتيب ويُستخدم أول من يقبل التسجيل. اتركه فارغًا لاستخدام %s.</string>
     <string name="warp_core_unreachable">تعذّر الوصول إلى النواة.</string>
+    <string name="warp_quic_signature_invalid">أعادت النواة توقيع QUIC غير صالح.</string>
+    <string name="warp_quic_signature_failed">فشل إنشاء توقيع QUIC لـ WARP: %1$s</string>
     <string name="warp_disable">تعطيل WARP</string>
     <string name="warp_disabled">عُطّل WARP</string>
     <string name="warp_enable">تمكين WARP</string>
@@ -1409,7 +1423,9 @@
     <string name="warp_interface_addresses">عناوين الواجهة</string>
     <string name="warp_masque_note">يعتمد WARP على بروکسيك: يحتاج MASQUE فوق HTTP/3 إلى بروکسي يمرر UDP، وفوق HTTP/2 يكفي TCP.</string>
     <string name="warp_mode">الوضع</string>
-    <string name="warp_mode_sum">%s\nيعمل WireGuard فوق UDP. يعمل MASQUE عبر HTTP/3 أو HTTP/2 ويعبر الشبكات التي تحجب WireGuard.</string>
+    <string name="warp_mode_sum">%s\nيعمل WireGuard فوق UDP. يضيف AmneziaWG حزمًا وهمية وحزم تمويه متوافقة مع WARP. يعمل MASQUE عبر HTTP/3 أو HTTP/2.</string>
+    <string name="warp_amnezia_generating">جارٍ إنشاء توقيع QUIC لـ AmneziaWG…</string>
+    <string name="warp_amnezia_missing">لا يملك AmneziaWG توقيع QUIC بعد: اضغط «إنشاء تكوين WARP».</string>
     <string name="warp_not_generated">WARP مفعّل لكن تكوينه لم يُنشأ بعد. أنشئه في الإعدادات › التوجيه › WARP.</string>
     <string name="warp_peer_public_key">المفتاح العام للنظير</string>
     <string name="warp_peer_public_key_message">Base64 DER للمفتاح العام للخادم. عند ضبطه، يثبّت شهادة الخادم.</string>
@@ -2240,7 +2256,7 @@
     <string name="validation_hysteria_hop_maximum_zero">يحتاج أيضًا إلى فترة قفز أكبر من 0، مثل 30s بحد أقصى 60s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">يجب ألا يكون أقصر من فترة القفز.</string>
     <string name="validation_hysteria_hop_maximum_ignored">يُتجاهل بدون فترة قفز؛ اضبط واحدة أيضًا، مثل 30s بحد أقصى 60s.</string>
-    <string name="validation_hysteria_v1_speed">يحتاج Hysteria v1 إلى سرعتي الرفع والتنزيل (ميغابت/ث) معًا، مثل 100.</string>
+    <string name="validation_hysteria_v1_speed">يحتاج Hysteria v1 إلى سرعتي الرفع والتنزيل (ميغابت/ث) معًا؛ وعند غياب إحداهما تُستخدم %1$d للرفع و%2$d للتنزيل. اضبط السرعة الفعلية لخطك للحصول على أفضل النتائج.</string>
     <string name="validation_hysteria_gecko_range">يجب أن تكون أحجام الحزم من 0 إلى 2048؛ و0 يستخدم الافتراضي.</string>
     <string name="validation_hysteria_gecko_order">يجب ألا يتجاوز الحد الأدنى لحجم الحزمة الحد الأقصى؛ و0 يعني الافتراضي، 512 للأدنى و1200 للأقصى.</string>
     <string name="validation_hysteria_auth_base64">base64 غير صالح. اختر STRING كنوع المصادقة لحمولة النص العادي.</string>

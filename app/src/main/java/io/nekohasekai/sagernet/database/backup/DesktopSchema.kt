@@ -3,8 +3,9 @@ package io.nekohasekai.sagernet.database.backup
 /**
  * The tables of a fresh desktop `throne.db` (Throne @ 31a6562b, plus ccf3b459's `groups.sub_metadata_json`, 6906912f's
  * `groups.sort_method` / `sort_descending`, a6d042c2's `route_rules.tls_fragment` / `tls_fragment_fallback_delay` /
- * `tls_record_fragment`, 23b5bfcb's `route_rules.disabled` and 67261f7d's `route_profiles.dns_json` / `custom_dns`;
- * the later `groups.endpoint_json` of 1809cb0e is not carried), created in
+ * `tls_record_fragment`, 23b5bfcb's `route_rules.disabled`, 67261f7d's `route_profiles.dns_json` / `custom_dns` and
+ * 3c7cab39's `groups.route_id` / `import_sub_route` and `route_profiles.source_gid`; the later `groups.endpoint_json`
+ * of 1809cb0e is not carried), created in
  * DatabaseManager.cpp:65-128 order:
  * `entity_ids` (DatabaseManager.cpp:83-110), ProfilesRepo.cpp:17-43, GroupsRepo.cpp:19-56, RoutesRepo.cpp:13-106,
  * OtpProfilesRepo.cpp:10-29, SettingsRepo.cpp:222-229, MarkersRepo.cpp:8-15. Update together with the desktop.
@@ -77,6 +78,8 @@ object DesktopSchema {
             sub_metadata_json TEXT NOT NULL DEFAULT '{}',
             sort_method INTEGER NOT NULL DEFAULT 0,
             sort_descending INTEGER NOT NULL DEFAULT 0,
+            route_id INTEGER NOT NULL DEFAULT -1,
+            import_sub_route INTEGER NOT NULL DEFAULT 0,
             created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
             updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         )
@@ -103,6 +106,7 @@ object DesktopSchema {
             inner_hop_endpoint_ids TEXT NOT NULL DEFAULT '[]',
             dns_json TEXT NOT NULL DEFAULT '',
             custom_dns INTEGER NOT NULL DEFAULT 0,
+            source_gid INTEGER NOT NULL DEFAULT -1,
             created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
             updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         )

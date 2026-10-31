@@ -33,7 +33,7 @@ object MieruChecks {
     private val RANGE_STYLE = Validation.PortRangeStyle(sep = Validation.RangeSep.Dash, checkOrder = false)
 
     /** mieruPortRange: validateMieruOptions wants both ends within 1-65535 and begin <= end. */
-    private fun mieruPortRange(item: String): String {
+    internal fun mieruPortRange(item: String): String {
         Validation.portRange(item, RANGE_STYLE).let { if (it.isNotEmpty()) return it }
         val sides = item.trim().split('-')
         val begin = sides[0].toIntOrNull() ?: 0
@@ -89,8 +89,8 @@ class Mieru : Outbound("mieru") {
             val port = item.second.trim()
             if (port.isEmpty()) continue
             if (port.contains('-')) {
-                ranges.add(port)
-            } else if (!ParseDiag.accept("port", Validation.port(port), port, Severity.Error)) {
+                if (acceptOptional("port", MieruChecks.mieruPortRange(port), port)) ranges.add(port)
+            } else if (!acceptOptional("port", Validation.port(port), port)) {
                 continue
             } else if (!haveSinglePort) {
                 serverPort = QtStrings.toInt(port)

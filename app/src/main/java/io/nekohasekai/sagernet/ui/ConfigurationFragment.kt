@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.SearchView
@@ -41,6 +42,7 @@ import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.group.SubscriptionClient
 import io.nekohasekai.sagernet.ktx.dp2px
+import io.nekohasekai.sagernet.ktx.needReload
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
@@ -137,6 +139,10 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
     val selection = SelectionMode(this)
     val itemMenu = ProfileItemMenu(this)
     private val imports = ProfileImports(this)
+
+    private val groupEditor = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.data?.getBooleanExtra(GroupSettingsActivity.EXTRA_RESTART_NEEDED, false) == true) needReload()
+    }
 
     private lateinit var tabLayout: TabLayout
     private lateinit var pager: ViewPager2
@@ -459,7 +465,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
 
     /** A tab's long press: the group editor, as the groups screen opens it. */
     private fun editGroup(group: ProxyGroup) {
-        startActivity(Intent(requireContext(), GroupSettingsActivity::class.java).apply {
+        groupEditor.launch(Intent(requireContext(), GroupSettingsActivity::class.java).apply {
             putExtra(GroupSettingsActivity.EXTRA_GROUP_ID, group.id)
         })
     }

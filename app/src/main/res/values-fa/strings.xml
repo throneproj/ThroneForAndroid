@@ -452,7 +452,7 @@
     <string name="autosel_name_empty">نام نمی‌تواند خالی باشد.</string>
     <string name="autosel_name_filter">فقط نام‌های منطبق</string>
     <string name="autosel_name_filter_empty">هر پروفایل در گروه</string>
-    <string name="autosel_name_filter_tip">یک عبارت باقاعده اختیاری. فقط پروفایل‌هایی که نامشان منطبق است در نظر گرفته می‌شوند — برای بیرون کشیدن یک کشور یا ارائه‌دهنده مفید است.</string>
+    <string name="autosel_name_filter_tip">یک عبارت باقاعده اختیاری که در هر جای نام پروفایل و بدون توجه به کوچکی و بزرگی حروف جستجو می‌شود. فقط پروفایل‌هایی که نامشان منطبق است استفاده می‌شوند.\nانتخاب چند مورد: germany|nl\nکنار گذاشتن برخی: ^(?!.*(germany|🇩🇪)).*$ هر نامی را که هیچ‌کدام را ندارد استفاده می‌کند.</string>
     <string name="autosel_never">هرگز</string>
     <string name="autosel_no_limit">بدون محدودیت</string>
     <string name="autosel_note_checking">در حال بررسی</string>
@@ -485,7 +485,7 @@
     <string name="autosel_plan_calculating">در حال بررسی گروه…</string>
     <string name="autosel_plan_counts">%1$d از %2$d پروفایل در گروه قابل استفاده‌اند؛ %3$d اجرا خواهند شد.</string>
     <string name="autosel_plan_kept_unavailable">آخرین آزمایش همه پروفایل‌ها شکست خورد، که معمولاً یعنی شبکه قطع بوده نه سرورها، بنابراین هر %d تا نگه داشته می‌شوند و دوباره بررسی خواهند شد.</string>
-    <string name="autosel_plan_needs_ranking">بقیه پیش از شروع انتخابگر اندازه‌گیری می‌شوند.</string>
+    <string name="autosel_plan_needs_ranking">بقیه هنگام شروع انتخابگر اندازه‌گیری می‌شوند: انتخابگر به محض اینکه به اندازه کافی پروفایل کار کند اجرا می‌شود و پس از اندازه‌گیری همه، به رتبه‌بندی کامل تغییر می‌کند.</string>
     <string name="autosel_plan_reused">%d نتیجه آزمایش اخیر دارند که دوباره استفاده می‌شود.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">رد شد: %s.</string>
@@ -748,6 +748,10 @@
     <string name="grp_landing_proxy">پراکسی فرود</string>
     <string name="grp_last_update">آخرین به‌روزرسانی: %1$s</string>
     <string name="grp_missing_profile">پروفایل #%1$d (مفقود)</string>
+    <string name="grp_route_profile">پروفایل مسیریابی</string>
+    <string name="grp_route_profile_default">پیش‌فرض (%1$s)</string>
+    <string name="grp_route_profile_from_subscription">%1$s (از این اشتراک)</string>
+    <string name="grp_route_profile_tip">پروفایل مسیریابی‌ای که پروفایل‌های این گروه هنگام اتصال از آن استفاده می‌کنند. \"پیش‌فرض\" از پروفایل مسیریابی انتخاب‌شده در منوی \"مسیریابی\" پیروی می‌کند.</string>
     <string name="grp_more_options">گزینه‌های بیشتر</string>
     <string name="grp_move_down">انتقال به پایین</string>
     <string name="grp_move_up">انتقال به بالا</string>
@@ -773,6 +777,8 @@
     <string name="grp_settings_user_agent">عامل کاربر</string>
     <string name="grp_share_subscription">اشتراک‌گذاری پیوند اشتراک</string>
     <string name="grp_skip_auto_update">رد کردن به‌روزرسانی خودکار</string>
+    <string name="grp_import_sub_route">استفاده از پروفایل مسیریابی اشتراک</string>
+    <string name="grp_import_sub_route_tip">هر به‌روزرسانی، پروفایل مسیریابی ارائه‌شده توسط اشتراک (قالب Happ) را به‌عنوان پروفایل مسیریابی خود این گروه ذخیره می‌کند. تنظیمات DNS اشتراک هرگز استفاده نمی‌شوند.</string>
     <string name="grp_sort_by_latency">مرتب‌سازی بر اساس تأخیر</string>
     <string name="grp_state_queued">در صف</string>
     <string name="grp_state_running">در حال به‌روزرسانی…</string>
@@ -1025,6 +1031,9 @@
     <string name="route_imported">پروفایل مسیریابی %s اضافه شد</string>
     <string name="route_imported_default_name">پروفایل درون‌ریزی‌شده</string>
     <string name="route_item_auto_update_off">به‌روزرسانی خودکار خاموش</string>
+    <string name="route_item_from_subscription">به‌روزرسانی‌شده توسط اشتراک \"%1$s\"</string>
+    <string name="route_from_subscription_info">هر به‌روزرسانی اشتراک \"%1$s\" قوانین این پروفایل را بازنویسی می‌کند. حذف آن، درون‌ریزی را متوقف می‌کند.</string>
+    <string name="route_subscription_profile_name">مسیریابی %1$s</string>
     <string name="route_item_auto_update_on">به‌روزرسانی خودکار روشن</string>
     <string name="route_item_default_outbound">پیش‌فرض: %s</string>
     <string name="route_item_remote_never">راه دور · هنوز به‌روزرسانی نشده</string>
@@ -1144,6 +1153,7 @@
     <string name="route_summary_private_ip">IP خصوصی</string>
     <string name="route_summary_private_source_ip">IP مبدأ خصوصی</string>
     <string name="route_switched">پروفایل مسیریابی: %s</string>
+    <string name="route_group_keeps_own">گروه \"%1$s\" از پروفایل مسیریابی خودش استفاده می‌کند، بنابراین پروفایل در حال اجرا همان را نگه می‌دارد.</string>
     <string name="route_update_all">به‌روزرسانی همه پروفایل‌های راه دور</string>
     <string name="route_update_cancelled">لغو شد: %1$d از %2$d به‌روزرسانی شد، %3$d شکست خورد.</string>
     <string name="route_update_cancelled_title">به‌روزرسانی لغو شد</string>
@@ -1234,6 +1244,8 @@
     <string name="resolve_domains_failed">حل کردن دامنه‌ها ناموفق بود: %1$s</string>
     <string name="subs_response_too_large">پاسخ بزرگ‌تر از %1$d مگابایت</string>
     <string name="subs_running_kept">پروفایل در حال اجرا نگه داشته شد.</string>
+    <string name="subs_running_replaced">%1$s با به‌روزرسانی جایگزین شد؛ در حال اتصال به پروفایل هم‌نام.</string>
+    <string name="subs_running_removed">%1$s با به‌روزرسانی حذف شد و متوقف می‌ماند: هیچ پروفایل یکتایی با همین نام جایگزین آن نیست.</string>
     <string name="subs_sort_skipped">مرتب‌سازی %1$s رد شد: مرتب‌سازی دیگری در حال انجام است.</string>
     <string name="subs_still_in_use">هنوز در استفاده است، بنابراین به‌جای حذف نگه داشته شد:\n%1$s</string>
     <string name="subs_task_failed">کار اشتراک شکست خورد: %1$s</string>
@@ -1422,6 +1434,8 @@
     <string name="warp_api_hosts">دامنه‌های ثبت</string>
     <string name="warp_api_hosts_message">یک دامنه در هر خط. به ترتیب امتحان می‌شوند و اولین موردی که ثبت را بپذیرد استفاده می‌شود. برای استفاده از %s خالی بگذارید.</string>
     <string name="warp_core_unreachable">دسترسی به هسته ممکن نشد.</string>
+    <string name="warp_quic_signature_invalid">هسته یک امضای QUIC نامعتبر برگرداند.</string>
+    <string name="warp_quic_signature_failed">ایجاد امضای QUIC برای WARP شکست خورد: %1$s</string>
     <string name="warp_disable">غیرفعال‌سازی WARP</string>
     <string name="warp_disabled">WARP غیرفعال شد</string>
     <string name="warp_enable">فعال‌سازی WARP</string>
@@ -1442,7 +1456,9 @@
     <string name="warp_interface_addresses">آدرس‌های واسط</string>
     <string name="warp_masque_note">WARP روی پراکسی شما سوار می‌شود: MASQUE روی HTTP/3 به پراکسی‌ای نیاز دارد که UDP را منتقل کند، روی HTTP/2 فقط TCP کافی است.</string>
     <string name="warp_mode">حالت</string>
-    <string name="warp_mode_sum">%s\nWireGuard روی UDP اجرا می‌شود. MASQUE روی HTTP/3 یا HTTP/2 تونل می‌زند و از شبکه‌هایی که WireGuard را مسدود می‌کنند عبور می‌کند.</string>
+    <string name="warp_mode_sum">%s\nWireGuard روی UDP اجرا می‌شود. AmneziaWG بسته‌های junk و استتار سازگار با WARP اضافه می‌کند. MASQUE روی HTTP/3 یا HTTP/2 تونل می‌زند.</string>
+    <string name="warp_amnezia_generating">در حال ایجاد امضای QUIC برای AmneziaWG…</string>
+    <string name="warp_amnezia_missing">AmneziaWG هنوز امضای QUIC ندارد: روی «ایجاد پیکربندی» بزنید.</string>
     <string name="warp_not_generated">WARP فعال است اما پیکربندی آن ایجاد نشده. آن را در تنظیمات › مسیریابی › WARP ایجاد کنید.</string>
     <string name="warp_peer_public_key">کلید عمومی همتا</string>
     <string name="warp_peer_public_key_message">Base64 DER از کلید عمومی سرور. هنگام تنظیم، گواهی سرور را pin می‌کند.</string>
@@ -2125,7 +2141,7 @@
     <string name="validation_hysteria_hop_maximum_zero">«بازه پرش» بالاتر از 0 نیز لازم است، مثلاً 30s با حداکثر 60s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">نباید کوتاه‌تر از «بازه پرش» باشد.</string>
     <string name="validation_hysteria_hop_maximum_ignored">بدون «بازه پرش» نادیده گرفته می‌شود؛ آن را هم تنظیم کنید، مثلاً 30s با حداکثر 60s.</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1 به هر دو مقدار Up Mbps و Down Mbps نیاز دارد، مثلاً 100.</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1 به هر دو مقدار Up Mbps و Down Mbps نیاز دارد؛ برای مقدار خالی، %1$d برای آپلود و %2$d برای دانلود استفاده می‌شود. برای بهترین نتیجه، سرعت واقعی خط خود را تنظیم کنید.</string>
     <string name="validation_hysteria_gecko_range">اندازه بسته‌ها باید از 0 تا 2048 باشد؛ 0 مقدار پیش‌فرض را استفاده می‌کند.</string>
     <string name="validation_hysteria_gecko_order">حداقل اندازه بسته نباید از حداکثر بیشتر باشد؛ 0 یعنی پیش‌فرض، که برای حداقل 512 و برای حداکثر 1200 است.</string>
     <string name="validation_hysteria_auth_base64">base64 معتبر نیست. برای محتوای متن ساده، STRING را به‌عنوان نوع احراز هویت انتخاب کنید.</string>

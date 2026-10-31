@@ -13,6 +13,7 @@ import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.outbound.config.AutoSelectorBuild
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -20,10 +21,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.coroutineContext
@@ -34,7 +37,8 @@ import kotlin.coroutines.coroutineContext
  * the monitor of the core's status (AutoSelectorMonitor: the status the UI shows, PersistHealth, the exhausted-pool
  * rebuild), pin / automatic / recheck applied to the running core, and the rebuild after a subscription refresh
  * touched the running members (on_subscription_group_changed). The running instance keeps serving while anything is
- * measured.
+ * measured, and a (re)start goes ahead as soon as enough members work, rebuilt on the full ranking once every one is
+ * measured when that changes what runs.
  */
 object AutoSelectorRuntime {
 
@@ -44,6 +48,7 @@ object AutoSelectorRuntime {
     private const val EXHAUSTED_GRACE_MS = 20_000L
     private const val REBUILD_BACKOFF_MIN_S = 60
     private const val REBUILD_BACKOFF_MAX_S = 600
+    private const val SETTLE_POLL_MS = 250L
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, e -> Logs.w(e) })
     private val lock = Any()
@@ -66,12 +71,22 @@ object AutoSelectorRuntime {
         var lastHealthPersistMs = System.currentTimeMillis()
     }
 
-    private class Measuring(val selectorId: Long, val selectorName: String, val count: Int)
+    /** [sweep] is the token of the sweep that shows it. */
+    private class Measuring(val sweep: Any, val selectorId: Long, val selectorName: String, val count: Int)
 
     private var service: BaseService.Interface? = null
     private var startedProxy: ProxyInstance? = null
     private var run: Run? = null
     private var measuring: Measuring? = null
+
+    /**
+     * A token of the ranking sweep still running (rankingInFlight_): a start of any selector meanwhile does not rank,
+     * as the test session would only take its sweep after this one.
+     */
+    private var sweep: Any? = null
+
+    /** The selector of a ranked restart under way, so that its [beforeStart] skips ranking (rankedFor_); -1 = none. */
+    private var rankedFor = -1L
     private var pending: Job? = null
     private var notice = ""
     private var noticeAtMs = 0L
@@ -99,15 +114,23 @@ object AutoSelectorRuntime {
 
     // ------------------------------------------------------------------------------------------------ start path
 
-    /** ProxyInstance.init, before the config is built: ranks the selector when its plan asks for measurements. */
+    /**
+     * ProxyInstance.init, before the config is built: ranks the selector when its plan asks for measurements, until
+     * enough members work.
+     */
     suspend fun beforeStart(proxy: ProxyInstance) {
         val service = proxy.service ?: return
         val profile = proxy.profile
-        synchronized(lock) { this.service = service }
+        // Right after a sweep a pool can still want ranking (validity 0): a ranked restart must not measure again.
+        val justRanked = synchronized(lock) {
+            this.service = service
+            (rankedFor == profile.id).also { rankedFor = -1L }
+        }
         if (profile.type != AutoSelectorProfiles.TYPE) {
             publish()
             return
         }
+        if (justRanked) return
         if (!withContext(Dispatchers.IO) { runCatching { AutoSelectorProfiles.needsRanking(profile.id) }.getOrDefault(false) }) {
             return
         }
@@ -132,23 +155,26 @@ object AutoSelectorRuntime {
         scope.launch(Dispatchers.IO) {
             val profiles = ProfileManager.getProfiles(build.memberIds).associateBy { it.id }
             val names = build.memberIds.associateWith { id -> profiles[id]?.outbound?.displayName().orEmpty() }
-            val selector = AutoSelectorProfiles.load(build.selectorId)
-            val selectorName = selector?.displayName().orEmpty().ifEmpty { proxy.profile.displayName() }
-            val started = Run(service, proxy, build, AutoSelectorCore(box, build.groupTag), selectorName, names)
-            val attached = synchronized(lock) {
-                if (startedProxy !== proxy) return@synchronized false
-                run?.monitor?.cancel()
-                run = started
-                true
-            }
-            if (!attached) return@launch
-            if (selector != null) {
-                val now = System.currentTimeMillis() / 1000
-                selector.lastBuilt = build.memberIds.toMutableList()
-                selector.lastBuiltAt = now
-                selector.recordHistory(build.memberIds, names, now)
-                AutoSelectorProfiles.save(build.selectorId, selector)
-                Logs.i("[Auto selector] Running the best ${build.memberIds.size} of ${selector.pool.size} ranked profiles.")
+            val started = AutoSelectorProfiles.writes.withLock {
+                val selector = AutoSelectorProfiles.load(build.selectorId)
+                val selectorName = selector?.displayName().orEmpty().ifEmpty { proxy.profile.displayName() }
+                val attaching = Run(service, proxy, build, AutoSelectorCore(box, build.groupTag), selectorName, names)
+                val attached = synchronized(lock) {
+                    if (startedProxy !== proxy) return@synchronized false
+                    run?.monitor?.cancel()
+                    run = attaching
+                    true
+                }
+                if (!attached) return@launch
+                if (selector != null) {
+                    val now = System.currentTimeMillis() / 1000
+                    selector.lastBuilt = build.memberIds.toMutableList()
+                    selector.lastBuiltAt = now
+                    selector.recordHistory(build.memberIds, names, now)
+                    AutoSelectorProfiles.save(build.selectorId, selector)
+                    Logs.i("[Auto selector] Running the best ${build.memberIds.size} of ${selector.pool.size} ranked profiles.")
+                }
+                attaching
             }
             publish()
             startMonitor(started)
@@ -169,10 +195,16 @@ object AutoSelectorRuntime {
         publish()
     }
 
+    /** BaseService ended stopped: a ranked restart that never got to start must not spare a later start its ranking. */
+    fun serviceStopped() {
+        synchronized(lock) { rankedFor = -1L }
+    }
+
     /**
      * BaseService reload / switch of a running service: when the profile about to start is an auto-selector whose plan
-     * wants measurements, the running instance keeps serving while they run, then [proceed] restarts (profile_start
-     * ranks before it stops the running profile). Anything else proceeds at once.
+     * wants measurements, the running instance keeps serving while they run until enough members work, then [proceed]
+     * restarts without ranking again (profile_start ranks before it stops the running profile). Anything else proceeds
+     * at once.
      */
     fun restart(service: BaseService.Interface, proceed: () -> Unit) {
         cancelPending()
@@ -188,7 +220,10 @@ object AutoSelectorRuntime {
                 runCatching { AutoSelectorProfiles.needsRanking(target) }.getOrDefault(false)
             }
             if (needed) measure(service, target, emptyList())
-            if (claim() && service.data.state.canStop) proceed()
+            if (claim() && service.data.state.canStop) {
+                if (needed) synchronized(lock) { rankedFor = target }
+                proceed()
+            }
         }
     }
 
@@ -204,10 +239,12 @@ object AutoSelectorRuntime {
         val tag = if (memberId < 0) "" else run.build.tagOf(memberId) ?: return post(R.string.autosel_notice_not_in_pool)
         scope.launch(Dispatchers.IO) {
             // Stored as a profile id, not a tag: tags are positional within one build.
-            val selector = AutoSelectorProfiles.load(run.build.selectorId)
-            if (selector != null && selector.pinnedID != memberId) {
-                selector.pinnedID = memberId
-                AutoSelectorProfiles.save(run.build.selectorId, selector)
+            AutoSelectorProfiles.writes.withLock {
+                val selector = AutoSelectorProfiles.load(run.build.selectorId)
+                if (selector != null && selector.pinnedID != memberId) {
+                    selector.pinnedID = memberId
+                    AutoSelectorProfiles.save(run.build.selectorId, selector)
+                }
             }
             try {
                 run.core.select(tag)
@@ -243,18 +280,20 @@ object AutoSelectorRuntime {
     // ------------------------------------------------------------------------------------------------ rebuilds
 
     /**
-     * Measures while [run] keeps serving, then restarts it: with [stale] the unmeasured candidates plus [stale]
-     * (on_auto_selector_exhausted), without it only when the plan wants measurements (profile_start).
+     * Measures while [run] keeps serving, until enough members work, then restarts it without ranking again: with
+     * [stale] the unmeasured candidates plus [stale] (onPoolExhausted), without it only when the plan wants
+     * measurements (profile_start).
      */
     private fun rebuild(run: Run, stale: Collection<Long>?) {
         val id = run.build.selectorId
         launchPending {
-            if (stale != null) {
-                measure(run.service, id, stale)
-            } else if (withContext(Dispatchers.IO) { runCatching { AutoSelectorProfiles.needsRanking(id) }.getOrDefault(false) }) {
-                measure(run.service, id, emptyList())
+            val ranked = stale != null ||
+                withContext(Dispatchers.IO) { runCatching { AutoSelectorProfiles.needsRanking(id) }.getOrDefault(false) }
+            if (ranked) measure(run.service, id, stale.orEmpty())
+            if (claim() && current() === run && run.service.data.state.canStop) {
+                if (ranked) synchronized(lock) { rankedFor = id }
+                run.service.stopRunner(true)
             }
-            if (claim() && current() === run && run.service.data.state.canStop) run.service.stopRunner(true)
         }
     }
 
@@ -266,12 +305,14 @@ object AutoSelectorRuntime {
             val running = current()
             var restart = false
             for (id in AutoSelectorProfiles.ids()) {
-                val selector = AutoSelectorProfiles.load(id) ?: continue
-                if (gid !in selector.gids) continue
-                val alive = AutoSelectorProfiles.existing(selector.pool + selector.lastBuilt)
-                val prunedPool = selector.pool.removeAll { it !in alive }
-                val prunedBuilt = selector.lastBuilt.removeAll { it !in alive }
-                if (prunedPool || prunedBuilt) AutoSelectorProfiles.save(id, selector)
+                val (selector, prunedBuilt) = AutoSelectorProfiles.writes.withLock {
+                    val selector = AutoSelectorProfiles.load(id)?.takeIf { gid in it.gids } ?: return@withLock null
+                    val alive = AutoSelectorProfiles.existing(selector.pool + selector.lastBuilt)
+                    val prunedPool = selector.pool.removeAll { it !in alive }
+                    val prunedBuilt = selector.lastBuilt.removeAll { it !in alive }
+                    if (prunedPool || prunedBuilt) AutoSelectorProfiles.save(id, selector)
+                    selector to prunedBuilt
+                } ?: continue
                 if (running == null || running.build.selectorId != id) continue
                 // A replaced member keeps its id, so only the disturbed set spots it.
                 if (prunedBuilt || selector.lastBuilt.any { it in disturbedSet }) restart = true
@@ -297,26 +338,116 @@ object AutoSelectorRuntime {
         }
     }
 
-    /** rank_auto_selector with the "Measuring N profiles" state in the status and the service notification. */
+    /**
+     * rank_auto_selector with the "Measuring N profiles" state in the status and the service notification. Returns once
+     * the selector may be built: as soon as enough members work, the sweep then going on and [finishEarly] after it,
+     * else once every candidate is measured. While a sweep still runs it returns at once, and the start builds from the
+     * pool as it stands, with [stale] ranked as untested.
+     */
     private suspend fun measure(service: BaseService.Interface, selectorId: Long, stale: Collection<Long>) {
-        val name = withContext(Dispatchers.IO) { AutoSelectorProfiles.load(selectorId)?.displayName().orEmpty() }
-            .ifEmpty { app.getString(R.string.autosel_title) }
-        try {
-            AutoSelectorProfiles.rank(selectorId, stale) { count ->
-                synchronized(lock) { measuring = Measuring(selectorId, name, count) }
-                publish()
-                service.data.notification?.postNotificationTitle(
-                    app.getString(R.string.autosel_notification_measuring, name, count)
-                )
+        val token = Any()
+        val claimed = synchronized(lock) { (sweep == null).also { if (it) sweep = token } }
+        if (!claimed) {
+            // The members that just died must not lead the rebuild again.
+            if (stale.isNotEmpty()) withContext(Dispatchers.IO) {
+                runCatching { AutoSelectorProfiles.writes.withLock { AutoSelectorProfiles.rerank(selectorId, stale) } }
+                    .onFailure { Logs.w(it) }
             }
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Logs.w(e)
-        } finally {
-            val cleared = synchronized(lock) { measuring?.takeIf { it.selectorId == selectorId }?.also { measuring = null } }
-            if (cleared != null) publish()
+            return
         }
+        val ready = CompletableDeferred<Unit>()
+        // In the runtime's scope, not the caller's: after an early start the sweep outlives the call.
+        val job = scope.launch(Dispatchers.IO) {
+            var startedEarly = false
+            try {
+                val name = AutoSelectorProfiles.load(selectorId)?.displayName().orEmpty()
+                    .ifEmpty { app.getString(R.string.autosel_title) }
+                startedEarly = AutoSelectorProfiles.rank(
+                    selectorId,
+                    stale,
+                    onMeasuring = { count ->
+                        synchronized(lock) { measuring = Measuring(token, selectorId, name, count) }
+                        publish()
+                        service.data.notification?.postNotificationTitle(
+                            app.getString(R.string.autosel_notification_measuring, name, count)
+                        )
+                    },
+                    startEarly = {
+                        stopMeasuring(token)
+                        ready.complete(Unit)
+                    },
+                )
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Logs.w(e)
+            } finally {
+                releaseSweep(token)
+                stopMeasuring(token)
+                ready.complete(Unit)
+            }
+            if (startedEarly) finishEarly(service, selectorId)
+        }
+        try {
+            ready.await()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            // The start was abandoned before the selector could run: nothing waits for the ranking any more. The token
+            // goes now, so a start right after ranks anew instead of building on what this sweep left.
+            releaseSweep(token)
+            job.cancel()
+            throw e
+        }
+    }
+
+    /**
+     * finishEarlySweep (AutoSelectorController.cpp:192-216): once the start the early ranking let through has settled,
+     * reranks with every result in and, when that changes the build still running, restarts the selector on the full
+     * ranking without ranking again.
+     */
+    private suspend fun finishEarly(service: BaseService.Interface, selectorId: Long) {
+        val proxy = settled(service)?.takeIf { it.profile.id == selectorId }
+        val built = proxy?.config?.autoSelector?.memberIds
+        val changed = AutoSelectorProfiles.writes.withLock { AutoSelectorProfiles.rerankChanges(selectorId, built) }
+        if (!changed) return
+        withContext(Dispatchers.Main) {
+            val data = service.data
+            val same = data.proxy === proxy && data.state == BaseService.State.Connected && DataStore.selectedProxy == selectorId
+            // A pending restart (another profile, a rebuild) replaces this run anyway.
+            if (!same || synchronized(lock) { pending != null }) return@withContext
+            Logs.i("[Auto selector] Every profile is measured and the best ones changed — rebuilding with the full ranking.")
+            synchronized(lock) { rankedFor = selectorId }
+            service.stopRunner(true)
+        }
+    }
+
+    /**
+     * Waits out a start or restart under way on [service] (BaseService state and start job are main-thread only): the
+     * proxy running after it, null when the service ended stopped.
+     */
+    private suspend fun settled(service: BaseService.Interface): ProxyInstance? {
+        while (true) {
+            val (state, starting, proxy) = withContext(Dispatchers.Main) {
+                Triple(service.data.state, service.data.connectingJob, service.data.proxy)
+            }
+            when (state) {
+                BaseService.State.Connected -> return proxy
+                // A restart's stop has no start job yet.
+                BaseService.State.Connecting, BaseService.State.Stopping ->
+                    if (starting != null) starting.join() else delay(SETTLE_POLL_MS)
+
+                else -> return null
+            }
+        }
+    }
+
+    private fun releaseSweep(token: Any) {
+        synchronized(lock) { if (sweep === token) sweep = null }
+    }
+
+    /** A cancelled sweep winding down must not clear the status of the sweep that replaced it. */
+    private fun stopMeasuring(token: Any) {
+        val cleared = synchronized(lock) { measuring?.takeIf { it.sweep === token }?.also { measuring = null } }
+        if (cleared != null) publish()
     }
 
     private fun launchPending(block: suspend CoroutineScope.() -> Unit) {

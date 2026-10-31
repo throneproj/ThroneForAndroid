@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
@@ -28,6 +29,7 @@ import io.nekohasekai.sagernet.group.SubscriptionScheduler
 import io.nekohasekai.sagernet.ktx.FixedLinearLayoutManager
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.confirmAction
+import io.nekohasekai.sagernet.ktx.needReload
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ktx.showAllowingStateLoss
@@ -81,6 +83,10 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group), Toolbar.OnMenuItem
         }
     }
 
+    private val groupEditor = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.data?.getBooleanExtra(GroupSettingsActivity.EXTRA_RESTART_NEEDED, false) == true) needReload()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -127,7 +133,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group), Toolbar.OnMenuItem
     }
 
     private fun edit(group: ProxyGroup) {
-        startActivity(Intent(requireContext(), GroupSettingsActivity::class.java).apply {
+        groupEditor.launch(Intent(requireContext(), GroupSettingsActivity::class.java).apply {
             putExtra(GroupSettingsActivity.EXTRA_GROUP_ID, group.id)
         })
     }

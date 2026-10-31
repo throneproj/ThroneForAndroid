@@ -29,11 +29,15 @@ object ProfileManager {
         suspend fun onCredited(profileId: Long, rx: Long, tx: Long)
     }
 
-    /** The result of [batchDeleteProfiles]: [kept] holds the requested ids that were not deleted. */
+    /**
+     * The result of [batchDeleteProfiles]: [kept] holds the requested ids that were not deleted, [stopped] the running
+     * profile this delete stopped (allow_stopping_active_profile).
+     */
     class DeleteOutcome(
         @JvmField val ok: Boolean,
         @JvmField val deleted: List<Long>,
         @JvmField val kept: List<Long>,
+        @JvmField val stopped: ProxyEntity? = null,
     )
 
     /** SQLite's bound-parameter limit is 999; id lists are split below it. */
@@ -237,8 +241,14 @@ object ProfileManager {
         if (requested.isEmpty()) return DeleteOutcome(true, emptyList(), emptyList())
         val toDelete = ArrayList(requested)
         val running = runningProfileId()
+        var stopping: ProxyEntity? = null
         if (running > 0 && running in toDelete) {
-            if (stopRunning) SagerNet.stopService() else toDelete.remove(running)
+            if (stopRunning) {
+                stopping = dao.getById(running)
+                SagerNet.stopService()
+            } else {
+                toDelete.remove(running)
+            }
         }
         val groups = HashSet<Long>()
         val deleted = ArrayList<Long>()
@@ -261,7 +271,7 @@ object ProfileManager {
         if (DataStore.selectedProxy in deleted) DataStore.selectedProxy = 0L
         for (gid in groups) GroupRepo.postReload(gid)
         val deletedSet = deleted.toHashSet()
-        return DeleteOutcome(ok, deleted, requested.filter { it !in deletedSet })
+        return DeleteOutcome(ok, deleted, requested.filter { it !in deletedSet }, stopping?.takeIf { ok && it.id in deletedSet })
     }
 
     // ------------------------------------------------------------------------------------------------ order

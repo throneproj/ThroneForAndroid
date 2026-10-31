@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
         ProxyGroup::class, ProxyEntity::class, RouteProfileEntity::class, RouteRuleEntity::class,
         SettingEntry::class, MarkerEntity::class,
     ],
-    version = 18,
+    version = 19,
     autoMigrations = [
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 12, to = 13),
@@ -164,6 +164,15 @@ abstract class SagerDatabase : RoomDatabase() {
             }
         }
 
+        /** 18 -> 19: groups.route_id / import_sub_route and route_profiles.source_gid (3c7cab39). */
+        val MIGRATION_18_19: Migration = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `groups` ADD COLUMN `route_id` INTEGER NOT NULL DEFAULT -1")
+                db.execSQL("ALTER TABLE `groups` ADD COLUMN `import_sub_route` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `route_profiles` ADD COLUMN `source_gid` INTEGER NOT NULL DEFAULT -1")
+            }
+        }
+
         /** Configs.cpp:35-39: a new database starts with an ordinary group named "Default". */
         private val callback = object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
@@ -183,7 +192,7 @@ abstract class SagerDatabase : RoomDatabase() {
         @OptIn(DelicateCoroutinesApi::class)
         private fun buildProfileDatabase(): SagerDatabase =
             Room.databaseBuilder(SagerNet.application, SagerDatabase::class.java, Key.DB_PROFILE)
-                .addMigrations(MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_17_18)
+                .addMigrations(MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_17_18, MIGRATION_18_19)
                 .addCallback(callback)
                 // both processes use the file: WAL lets readers in either one run while the other writes
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)

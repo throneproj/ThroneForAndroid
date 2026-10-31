@@ -422,7 +422,7 @@
     <string name="autosel_name_empty">이름은 비울 수 없습니다.</string>
     <string name="autosel_name_filter">이름이 일치하는 것만</string>
     <string name="autosel_name_filter_empty">그룹의 모든 프로필</string>
-    <string name="autosel_name_filter_tip">선택적 정규식. 이름이 일치하는 프로필만 고려합니다 — 특정 국가나 제공자를 고르기에 유용합니다.</string>
+    <string name="autosel_name_filter_tip">선택적 정규식으로, 대소문자를 구분하지 않고 프로필 이름의 어느 위치에서든 일치합니다. 이름이 일치하는 프로필만 사용됩니다.\n여러 개 선택: germany|nl\n일부 제외: ^(?!.*(germany|🇩🇪)).*$ 는 둘 다 포함하지 않는 모든 이름을 사용합니다.</string>
     <string name="autosel_never">없음</string>
     <string name="autosel_no_limit">무제한</string>
     <string name="autosel_note_checking">확인 중</string>
@@ -455,7 +455,7 @@
     <string name="autosel_plan_calculating">그룹 확인 중…</string>
     <string name="autosel_plan_counts">그룹의 %2$d개 중 %1$d개를 사용할 수 있고, %3$d개가 실행됩니다.</string>
     <string name="autosel_plan_kept_unavailable">모든 프로필의 마지막 테스트가 실패했습니다. 보통 서버가 아니라 네트워크 문제이므로 %d개 모두 유지하고 다시 확인합니다.</string>
-    <string name="autosel_plan_needs_ranking">나머지는 선택기가 시작되기 전에 측정됩니다.</string>
+    <string name="autosel_plan_needs_ranking">나머지는 선택기가 시작될 때 측정됩니다. 충분한 프로필이 작동하면 바로 실행되고, 모두 측정되면 전체 순위로 전환됩니다.</string>
     <string name="autosel_plan_reused">%d개에 최근 테스트 결과가 있어 재사용됩니다.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">건너뜀: %s.</string>
@@ -719,6 +719,10 @@
     <string name="grp_landing_proxy">랜딩 프록시</string>
     <string name="grp_last_update">마지막 업데이트: %1$s</string>
     <string name="grp_missing_profile">프로필 #%1$d (없음)</string>
+    <string name="grp_route_profile">라우팅 프로필</string>
+    <string name="grp_route_profile_default">기본 (%1$s)</string>
+    <string name="grp_route_profile_from_subscription">%1$s (이 구독에서)</string>
+    <string name="grp_route_profile_tip">이 그룹의 프로필이 연결할 때 사용하는 라우팅 프로필입니다. \"기본\"은 \"라우팅\" 메뉴에서 선택한 라우팅 프로필을 따릅니다.</string>
     <string name="grp_more_options">추가 옵션</string>
     <string name="grp_move_down">아래로</string>
     <string name="grp_move_up">위로</string>
@@ -744,6 +748,8 @@
     <string name="grp_settings_user_agent">UserAgent</string>
     <string name="grp_share_subscription">구독 링크 공유</string>
     <string name="grp_skip_auto_update">자동 업데이트 건너뛰기</string>
+    <string name="grp_import_sub_route">구독의 라우팅 프로필 사용</string>
+    <string name="grp_import_sub_route_tip">업데이트할 때마다 구독이 제공하는 라우팅 프로필(Happ 형식)을 이 그룹 자체의 라우팅 프로필로 저장합니다. 구독의 DNS 설정은 사용하지 않습니다.</string>
     <string name="grp_sort_by_latency">지연으로 정렬</string>
     <string name="grp_state_queued">대기 중</string>
     <string name="grp_state_running">업데이트 중…</string>
@@ -996,6 +1002,9 @@
     <string name="route_imported">라우팅 프로필 %s 추가됨</string>
     <string name="route_imported_default_name">가져온 프로필</string>
     <string name="route_item_auto_update_off">자동 업데이트 꺼짐</string>
+    <string name="route_item_from_subscription">구독 \"%1$s\"에서 업데이트됨</string>
+    <string name="route_from_subscription_info">구독 \"%1$s\"이(가) 업데이트될 때마다 이 프로필의 규칙을 덮어씁니다. 삭제하면 가져오기가 중단됩니다.</string>
+    <string name="route_subscription_profile_name">%1$s 라우팅</string>
     <string name="route_item_auto_update_on">자동 업데이트 켜짐</string>
     <string name="route_item_default_outbound">기본: %s</string>
     <string name="route_item_remote_never">원격 · 아직 업데이트 안 됨</string>
@@ -1115,6 +1124,7 @@
     <string name="route_summary_private_ip">사설 IP</string>
     <string name="route_summary_private_source_ip">사설 소스 IP</string>
     <string name="route_switched">라우팅 프로필: %s</string>
+    <string name="route_group_keeps_own">그룹 \"%1$s\"은(는) 자체 라우팅 프로필을 사용하므로 실행 중인 프로필은 이를 유지합니다.</string>
     <string name="route_update_all">모든 원격 프로필 업데이트</string>
     <string name="route_update_cancelled">취소됨: %2$d개 중 %1$d개 업데이트, %3$d개 실패.</string>
     <string name="route_update_cancelled_title">업데이트 취소됨</string>
@@ -1205,6 +1215,8 @@
     <string name="resolve_domains_failed">도메인 해석 실패: %1$s</string>
     <string name="subs_response_too_large">응답이 %1$d MB를 초과함</string>
     <string name="subs_running_kept">실행 중인 프로필은 유지되었습니다.</string>
+    <string name="subs_running_replaced">%1$s이(가) 업데이트로 교체되었습니다. 같은 이름의 프로필에 연결하는 중입니다.</string>
+    <string name="subs_running_removed">%1$s이(가) 업데이트로 삭제되어 중지된 상태로 남습니다: 이를 대체할 같은 이름의 프로필이 하나로 정해지지 않습니다.</string>
     <string name="subs_sort_skipped">%1$s 정렬 건너뜀: 다른 정렬이 진행 중입니다.</string>
     <string name="subs_still_in_use">여전히 사용 중이므로 삭제 대신 유지:\n%1$s</string>
     <string name="subs_task_failed">구독 작업 실패: %1$s</string>
@@ -1393,6 +1405,8 @@
     <string name="warp_api_hosts">등록 도메인</string>
     <string name="warp_api_hosts_message">한 줄에 도메인 하나. 순서대로 시도해 처음 등록을 받은 것을 사용합니다. 비워 두면 %s를 사용합니다.</string>
     <string name="warp_core_unreachable">코어에 연결하지 못했습니다.</string>
+    <string name="warp_quic_signature_invalid">코어가 잘못된 QUIC 시그니처를 반환했습니다.</string>
+    <string name="warp_quic_signature_failed">WARP QUIC 시그니처를 생성하지 못했습니다: %1$s</string>
     <string name="warp_disable">WARP 사용 안 함</string>
     <string name="warp_disabled">WARP 꺼짐</string>
     <string name="warp_enable">WARP 사용</string>
@@ -1413,7 +1427,9 @@
     <string name="warp_interface_addresses">인터페이스 주소</string>
     <string name="warp_masque_note">WARP는 프록시 위를 달립니다: HTTP/3의 MASQUE는 UDP를 전달하는 프록시가 필요하고, HTTP/2는 TCP만 있으면 됩니다.</string>
     <string name="warp_mode">모드</string>
-    <string name="warp_mode_sum">%s\nWireGuard는 UDP 위를 달립니다. MASQUE는 HTTP/3 또는 HTTP/2로 터널링해 WireGuard를 차단하는 네트워크를 통과할 수 있습니다.</string>
+    <string name="warp_mode_sum">%s\nWireGuard는 UDP 위를 달립니다. AmneziaWG는 WARP 호환 정크 패킷과 위장 패킷을 추가합니다. MASQUE는 HTTP/3 또는 HTTP/2로 터널링합니다.</string>
+    <string name="warp_amnezia_generating">AmneziaWG QUIC 시그니처 생성 중…</string>
+    <string name="warp_amnezia_missing">AmneziaWG에 아직 QUIC 시그니처가 없습니다: \"구성 생성\"을 탭하세요.</string>
     <string name="warp_not_generated">WARP는 켜져 있지만 구성이 아직 생성되지 않았습니다. 설정 › 라우팅 › WARP에서 생성하세요.</string>
     <string name="warp_peer_public_key">피어 공개키</string>
     <string name="warp_peer_public_key_message">서버 공개키의 Base64 DER. 설정하면 서버 인증서를 고정합니다.</string>
@@ -2071,7 +2087,7 @@
     <string name="validation_hysteria_hop_maximum_zero">0보다 큰 호핑 간격도 필요합니다. 예: 최대 60s에 30s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">호핑 간격보다 짧을 수 없습니다.</string>
     <string name="validation_hysteria_hop_maximum_ignored">호핑 간격이 없으면 무시됩니다. 함께 설정하세요. 예: 최대 60s에 30s.</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1에는 업로드 Mbps와 다운로드 Mbps가 모두 필요합니다. 예: 100.</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1에는 업로드 Mbps와 다운로드 Mbps가 모두 필요합니다. 없는 값에는 업로드 %1$d, 다운로드 %2$d가 사용됩니다. 최상의 결과를 얻으려면 실제 회선 속도를 설정하세요.</string>
     <string name="validation_hysteria_gecko_range">패킷 크기는 0~2048이어야 하며, 0은 기본값을 사용합니다.</string>
     <string name="validation_hysteria_gecko_order">최소 패킷 크기는 최대값을 넘을 수 없습니다. 0은 기본값으로, 최소는 512, 최대는 1200입니다.</string>
     <string name="validation_hysteria_auth_base64">올바른 base64가 아닙니다. 일반 텍스트 페이로드이면 인증 유형으로 STRING을 선택하세요.</string>

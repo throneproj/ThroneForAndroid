@@ -86,6 +86,33 @@ object ProfileImport {
         return Result(parser.produced, parser.reports)
     }
 
+    /** ShippedRoutingLink (SubscriptionParser.cpp:1223): the first `<scheme>://routing/...` line of a body, plain or base64; "" when none. */
+    fun shippedRoutingLink(text: String): String {
+        var body = Scan.trim(text)
+        if (body.isEmpty()) return ""
+        if (Scan.looksLikeBase64(body)) {
+            Scan.decodeBase64(body)?.let { body = it }
+        } else if (Scan.looksLikeWrappedBase64(body)) {
+            Scan.decodeBase64Lenient(body)?.let { body = it }
+        } else if (Scan.looksLikeUrlSafeBase64(body)) {
+            Scan.decodeBase64UrlSafe(body)?.let { body = it }
+        }
+        var found = ""
+        Scan.forEachLine(body) { raw ->
+            val line = Scan.trim(raw)
+            if (!isRoutingLink(line)) return@forEachLine true
+            found = line
+            false
+        }
+        return found
+    }
+
+    /** "happ://routing/onadd/...": a routing profile for the group, read by [shippedRoutingLink], not a proxy. */
+    fun isRoutingLink(line: String): Boolean {
+        val scheme = linkScheme(line)
+        return scheme.isNotEmpty() && line.regionMatches(scheme.length, "://routing/", 0, 11, ignoreCase = true)
+    }
+
     private enum class SingBoxSubType { OutboundInJson, OutboundJsonArray, OutboundObject, Invalid }
     private enum class XraySubType { OutboundInJson, OutboundJsonArray, OutboundObject, ConfigJsonArray, Invalid }
 
@@ -850,6 +877,7 @@ object ProfileImport {
             }
             val profileType = OutboundFactory.typeForScheme(line)
             if (profileType == null) {
+                if (isRoutingLink(line)) return
                 val written = linkScheme(line)
                 if (written.isNotEmpty()) {
                     val lower = written.lowercase()

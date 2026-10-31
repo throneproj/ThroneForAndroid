@@ -20,8 +20,16 @@ object SubscriptionFetch {
     /** The body of an HTTP error status is logged up to this size. */
     private const val MAX_LOGGED_BODY = 4096
 
-    /** [error] is null on success; [subInfo] is what the headers and the body's head said ([SubscriptionMetadata]). */
-    class Result(@JvmField val body: String, @JvmField val subInfo: SubUserInfo, @JvmField val error: String?)
+    /**
+     * [error] is null on success; [subInfo] is what the headers and the body's head said ([SubscriptionMetadata]);
+     * [routing] is the trimmed `routing` header (GroupUpdater.cpp fetch), "" when absent.
+     */
+    class Result(
+        @JvmField val body: String,
+        @JvmField val subInfo: SubUserInfo,
+        @JvmField val error: String?,
+        @JvmField val routing: String = "",
+    )
 
     fun fetch(url: String, rawName: String, identity: RequestIdentity): Result {
         // ImportUrl names the request by its URL, whose userinfo is the Basic auth credential.
@@ -70,7 +78,7 @@ object SubscriptionFetch {
             return Result(body, SubUserInfo(), response.error)
         }
         val body = String(response.data, Charsets.UTF_8)
-        return Result(body, SubscriptionMetadata.read(response::header, body), null)
+        return Result(body, SubscriptionMetadata.read(response::header, body), null, response.header(SubscriptionRoute.HEADER).trim())
     }
 
     private fun readContent(url: String): Result = try {

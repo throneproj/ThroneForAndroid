@@ -789,6 +789,7 @@
     <string name="route_options">More options</string>
     <string name="route_active">Current routing profile</string>
     <string name="route_switched">Routing profile: %s</string>
+    <string name="route_group_keeps_own">The group \"%1$s\" uses its own routing profile, so the running profile keeps it.</string>
     <string name="route_item_default_outbound">Default: %s</string>
     <plurals name="route_item_rules">
         <item quantity="one">%d rule</item>
@@ -798,6 +799,9 @@
     <string name="route_item_remote_never">Remote · not updated yet</string>
     <string name="route_item_auto_update_on">auto update on</string>
     <string name="route_item_auto_update_off">auto update off</string>
+    <string name="route_item_from_subscription">Updated by subscription \"%1$s\"</string>
+    <string name="route_from_subscription_info">Every update of the subscription \"%1$s\" overwrites its rules. Deleting it stops the import.</string>
+    <string name="route_subscription_profile_name">%1$s routing</string>
     <string name="route_delete_last">Routing profiles cannot be empty, try adding another profile or editing this one</string>
     <string name="route_link_copied">Copied!</string>
     <string name="route_export_warnings_title">Exported with warnings</string>
@@ -1010,9 +1014,15 @@
     <string name="grp_landing_proxy">Landing proxy</string>
     <string name="grp_none">None</string>
     <string name="grp_missing_profile">Profile #%1$d (missing)</string>
+    <string name="grp_route_profile">Routing profile</string>
+    <string name="grp_route_profile_default">Default (%1$s)</string>
+    <string name="grp_route_profile_from_subscription">%1$s (from this subscription)</string>
+    <string name="grp_route_profile_tip">The routing profile this group\'s profiles connect with. Default follows the routing profile chosen in the Routing menu.</string>
     <string name="grp_auto_clear_unavailable">Auto clear unavailable profiles</string>
     <string name="grp_url">URL</string>
     <string name="grp_skip_auto_update">Skip automatic update</string>
+    <string name="grp_import_sub_route">Use the subscription\'s routing profile</string>
+    <string name="grp_import_sub_route_tip">Each update saves the routing profile the subscription provides (Happ format) as this group\'s own routing profile. DNS settings from the subscription are never used.</string>
     <string name="grp_no_auto_selector">An auto selector moves server on its own, so it cannot hold a fixed front/landing slot.</string>
 
     <!-- Advanced Subscription Settings (dialog_edit_group_advanced) -->
@@ -1110,6 +1120,8 @@
     <string name="subs_removed_unavailable">Removed %1$d unavailable profiles:</string>
     <string name="subs_invalid_core_unreachable">Skipped removing invalid profiles: the core is unreachable.</string>
     <string name="subs_running_kept">The running profile was kept.</string>
+    <string name="subs_running_replaced">%1$s was replaced by the update; connecting to the profile with the same name.</string>
+    <string name="subs_running_removed">%1$s was removed by the update and stays stopped: no single profile with the same name replaces it.</string>
     <string name="subs_sort_skipped">Skipped sorting %1$s: another sort is in progress.</string>
     <string name="subs_after_url_test">After the URL test of %1$s:</string>
     <string name="subs_imported">Imported %1$d profile(s)</string>
@@ -1353,7 +1365,7 @@
     <string name="autosel_group_missing">Missing group (#%d)</string>
     <string name="autosel_groups_none">No group selected</string>
     <string name="autosel_name_filter">Only names matching</string>
-    <string name="autosel_name_filter_tip">Optional regular expression. Only profiles whose name matches are considered — useful to pick out one country or provider.</string>
+    <string name="autosel_name_filter_tip">Optional regular expression, matched anywhere in the profile name and ignoring case. Only profiles whose name matches are used.\nPick several: germany|nl\nLeave some out: ^(?!.*(germany|🇩🇪)).*$ uses every name that contains neither.</string>
     <string name="autosel_name_filter_empty">Every profile in the group</string>
     <string name="autosel_balance">Share traffic between the best profiles</string>
     <string name="autosel_balance_tip">Off by default: one profile carries everything and the rest stand by. Turn on to spread traffic over the profiles that are confirmed working.</string>
@@ -1376,7 +1388,7 @@
     <string name="autosel_plan_kept_unavailable">Every profile\'s last test failed, which usually means the network was down rather than the servers, so all %d are kept and will be re-checked.</string>
     <string name="autosel_plan_truncated">More than %d profiles match, so only the best-ranked ones are kept.</string>
     <string name="autosel_plan_reused">%d have a recent test result that will be reused.</string>
-    <string name="autosel_plan_needs_ranking">The rest will be measured before the selector starts.</string>
+    <string name="autosel_plan_needs_ranking">The rest will be measured as the selector starts: it runs as soon as enough profiles work, and switches to the full ranking once all are measured.</string>
     <string name="autosel_error_no_group">Auto selector points at a group that no longer exists</string>
     <string name="autosel_error_no_tracked_group">Auto selector tracks no group</string>
     <string name="autosel_error_no_members">Auto selector has no usable members</string>
@@ -1558,9 +1570,12 @@
     <string name="warp_enable">Enable WARP</string>
     <string name="warp_enable_sum">Enables the config below to be used as egress, useful for bypassing services restricting non-WARP VPNs</string>
     <string name="warp_mode">Mode</string>
-    <string name="warp_mode_sum">%s\nWireGuard runs over UDP. MASQUE tunnels over HTTP/3 or HTTP/2 and passes networks that block WireGuard.</string>
+    <string name="warp_mode_sum">%s\nWireGuard runs over UDP. AmneziaWG adds WARP-compatible junk and camouflage packets. MASQUE tunnels over HTTP/3 or HTTP/2.</string>
     <string name="warp_mode_wireguard" translatable="false">WireGuard</string>
     <string name="warp_mode_masque" translatable="false">MASQUE</string>
+    <string name="warp_mode_amnezia" translatable="false">AmneziaWG</string>
+    <string name="warp_amnezia_generating">Generating the AmneziaWG QUIC signature…</string>
+    <string name="warp_amnezia_missing">AmneziaWG has no QUIC signature yet: tap Generate WARP config.</string>
     <string name="warp_wireguard_note">WARP rides on your proxy: WireGuard needs a proxy that forwards UDP.</string>
     <string name="warp_masque_note">WARP rides on your proxy: MASQUE over HTTP/3 needs a proxy that forwards UDP, over HTTP/2 it needs only TCP.</string>
     <string name="warp_endpoint">Endpoint</string>
@@ -1596,6 +1611,8 @@
     <string name="warp_tos_message"><![CDATA[Generating a WARP identity registers a new device with Cloudflare.<br><br>Do you accept the <a href="%1$s">Cloudflare WARP terms of service</a>?]]></string>
     <string name="warp_proxy_not_started">Request with proxy but no profile started.</string>
     <string name="warp_core_unreachable">Failed to reach the core.</string>
+    <string name="warp_quic_signature_invalid">The core returned an invalid QUIC signature.</string>
+    <string name="warp_quic_signature_failed">Failed to generate WARP QUIC signature: %1$s</string>
 
     <!-- Routing quick switch -->
     <string name="warp_disable">Disable WARP</string>
@@ -2322,7 +2339,7 @@
     <string name="validation_hysteria_hop_maximum_zero">Needs a Hop Interval above 0 as well, for example 30s with a maximum of 60s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">Must not be shorter than Hop Interval.</string>
     <string name="validation_hysteria_hop_maximum_ignored">Ignored without a Hop Interval; set one as well, for example 30s with a maximum of 60s.</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1 needs both Up Mbps and Down Mbps, for example 100.</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1 needs both Up Mbps and Down Mbps; %1$d up and %2$d down is used for a missing one. Set your real line speed for the best results.</string>
     <string name="validation_hysteria_gecko_range">Packet sizes must be from 0 to 2048; 0 uses the default.</string>
     <string name="validation_hysteria_gecko_order">The minimum packet size must not exceed the maximum; 0 means the default, 512 for the minimum and 1200 for the maximum.</string>
     <string name="validation_hysteria_auth_base64">Not valid base64. Choose STRING as the authentication type for a plain-text payload.</string>

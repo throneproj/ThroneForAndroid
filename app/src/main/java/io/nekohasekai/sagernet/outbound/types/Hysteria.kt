@@ -40,6 +40,10 @@ val hysteriaBBRProfiles = listOf("standard", "conservative", "aggressive")
 /** hysteria.h */
 val hysteriaObfsTypes = listOf("salamander", "gecko")
 
+/** hysteria.h: the core refuses Hysteria v1 without both rates; [Hysteria.build] falls back to these. */
+const val HYSTERIA_V1_DEFAULT_UP_MBPS = 10
+const val HYSTERIA_V1_DEFAULT_DOWN_MBPS = 50
+
 /**
  * The Checks of hysteria.h, shared by the editor (field text) and [Hysteria.validate]. Android only: the hop
  * intervals read a bare number as seconds ([Hysteria.hopDuration]).
@@ -106,7 +110,7 @@ object HysteriaChecks {
     @JvmStatic
     fun hysteriaV1Speed(upMbps: Long, downMbps: Long): String {
         if (upMbps > 0 && downMbps > 0) return ""
-        return vtr(R.string.validation_hysteria_v1_speed)
+        return vtr(R.string.validation_hysteria_v1_speed, HYSTERIA_V1_DEFAULT_UP_MBPS, HYSTERIA_V1_DEFAULT_DOWN_MBPS)
     }
 
     /** 0 means the core default (512 / 1200). */
@@ -230,7 +234,7 @@ class Hysteria : Outbound("hysteria") {
         issues.addIssue(Severity.Error, "hop_interval", HysteriaChecks.hysteriaHopMinimum(hopping, hop_interval))
 
         if (protocol_version == "1") {
-            issues.addIssue(Severity.Error, "up_mbps", HysteriaChecks.hysteriaV1Speed(up_mbps.toLong(), down_mbps.toLong()))
+            issues.addIssue(Severity.Warning, "up_mbps", HysteriaChecks.hysteriaV1Speed(up_mbps.toLong(), down_mbps.toLong()))
             issues.addIssue(Severity.Error, "auth", HysteriaChecks.hysteriaAuth(auth_type, auth))
             issues.addIssue(Severity.Warning, "auth", HysteriaChecks.hysteriaAuthType(auth_type, auth))
             return
@@ -376,14 +380,9 @@ class Hysteria : Outbound("hysteria") {
             }
             if (q.has("disable_chrome_parrot")) disable_chrome_parrot = q.value("disable_chrome_parrot") == "true"
         }
-        if (q.has("upmbps")) {
-            val value = q.value("upmbps").trim()
-            if (keep("upmbps", value, Validation.Rules.int(0, Int.MAX_VALUE.toLong()))) up_mbps = QtStrings.toInt(value)
-        }
-        if (q.has("downmbps")) {
-            val value = q.value("downmbps").trim()
-            if (keep("downmbps", value, Validation.Rules.int(0, Int.MAX_VALUE.toLong()))) down_mbps = QtStrings.toInt(value)
-        }
+        // The URI scheme says a bare number, but panels commonly write "55Mbps".
+        if (q.has("upmbps")) up_mbps = bandwidth("upmbps", q.valueFully("upmbps"))
+        if (q.has("downmbps")) down_mbps = bandwidth("downmbps", q.valueFully("downmbps"))
         var bareInterval: String? = null
         if (q.has("hop_interval")) {
             val raw = q.value("hop_interval").trim()
@@ -424,9 +423,9 @@ class Hysteria : Outbound("hysteria") {
             dropBadBareHops("hop-interval", rawHop.takeIf { it != hopInterval }, null)
         }
         val up = proxy.string("up")
-        if (up.isNotEmpty()) up_mbps = clashSpeed("up", up)
+        if (up.isNotEmpty()) up_mbps = bandwidth("up", up)
         val down = proxy.string("down")
-        if (down.isNotEmpty()) down_mbps = clashSpeed("down", down)
+        if (down.isNotEmpty()) down_mbps = bandwidth("down", down)
         if (protocol_version == "1") {
             rejectTransport("protocol", proxy.string("protocol"))
             val authString = proxy.string("auth-str").ifEmpty { proxy.string("auth_str") }
@@ -688,9 +687,10 @@ class Hysteria : Outbound("hysteria") {
         val realm = realmActive()
         if (server_ports.isNotEmpty()) obj["server_ports"] = JsonValues.stringArray(portsToPorts(server_ports))
         if (hop_interval.isNotEmpty() && !realm) obj["hop_interval"] = hopDuration(hop_interval)
-        if (up_mbps > 0) obj["up_mbps"] = up_mbps
-        if (down_mbps > 0) obj["down_mbps"] = down_mbps
-        if (protocol_version == "1") {
+        val v1 = protocol_version == "1"
+        if (up_mbps > 0 || v1) obj["up_mbps"] = if (up_mbps > 0) up_mbps else HYSTERIA_V1_DEFAULT_UP_MBPS
+        if (down_mbps > 0 || v1) obj["down_mbps"] = if (down_mbps > 0) down_mbps else HYSTERIA_V1_DEFAULT_DOWN_MBPS
+        if (v1) {
             if (obfs.isNotEmpty()) obj["obfs"] = obfs
             if (auth.isNotEmpty()) {
                 if (auth_type == "BASE64") obj["auth"] = auth
@@ -804,8 +804,8 @@ class Hysteria : Outbound("hysteria") {
             ParseDiag.error(field, vtr(R.string.validation_hysteria_transport), transport)
         }
 
-        /** hysteriaClashSpeed (hysteria.cpp). */
-        private fun clashSpeed(field: String, text: String): Int {
+        /** hysteriaBandwidth (hysteria.cpp). */
+        private fun bandwidth(field: String, text: String): Int {
             val mbps = clashBandwidthToMbps(text)
             if (mbps == 0 && Validation.toInt(text) != 0L) ParseDiag.warn(field, vtr(R.string.validation_hysteria_clash_bandwidth), text)
             return mbps

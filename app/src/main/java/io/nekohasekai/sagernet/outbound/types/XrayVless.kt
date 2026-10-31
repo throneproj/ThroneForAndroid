@@ -22,6 +22,7 @@ import io.nekohasekai.sagernet.validation.Issue
 import io.nekohasekai.sagernet.validation.ParseDiag
 import io.nekohasekai.sagernet.validation.Severity
 import io.nekohasekai.sagernet.validation.Validation
+import io.nekohasekai.sagernet.validation.acceptOptional
 import io.nekohasekai.sagernet.validation.addIssue
 import io.nekohasekai.sagernet.validation.vtr
 
@@ -109,6 +110,7 @@ class XrayVless : Outbound("xrayvless") {
         if (clashEncryption.isNotEmpty()) encryption = importEncryption(clashEncryption)
         streamSetting.parseFromClash(proxy)
         multiplex.parseFromClash(proxy)
+        dropUnusableFlow()
         return true
     }
 
@@ -123,6 +125,7 @@ class XrayVless : Outbound("xrayvless") {
         flow = importFlow(q.value("flow"))
         if (!streamSetting.parseFromLink(url)) return false
         multiplex.parseFromLink(url)
+        dropUnusableFlow()
         return !(uuid.isEmpty() || server.isEmpty())
     }
 
@@ -152,6 +155,7 @@ class XrayVless : Outbound("xrayvless") {
         if (ParseDiag.active()) {
             flow = importFlow(flow)
             encryption = importEncryption(encryption)
+            dropUnusableFlow()
         }
         return streamParsed
     }
@@ -265,16 +269,22 @@ class XrayVless : Outbound("xrayvless") {
         super.validate(issues, ctx)
         issues.addIssue(Severity.Error, "id", Validation.xrayId(uuid))
         issues.addIssue(Severity.Error, "encryption", XrayVlessChecks.xrayVlessEncryption(encryption))
-        val flowMessage = Validation.oneOf(flow, listOf("", "none") + xrayFlows)
-        if (flowMessage.isNotEmpty()) {
-            issues.addIssue(Severity.Error, "flow", flowMessage, flow)
-        } else {
-            val vision = XrayVlessChecks.xrayVlessVision(flow, encryption, streamSetting.network, streamSetting.security)
-            issues.addIssue(Severity.Error, "flow", vision.ifEmpty { XrayVlessChecks.xrayXDriveFlow(flow, streamSetting.network) }, flow)
-        }
+        issues.addIssue(Severity.Error, "flow", flowProblem(), flow)
         issues.addIssue(Severity.Error, "encryption", XrayVlessChecks.xrayXDriveEncryption(encryption, streamSetting.network))
         issues.addIssue(Severity.Error, "mux", XrayVlessChecks.xrayXDriveMux(multiplex.getMuxState(), streamSetting.network))
         multiplex.validate(issues)
+    }
+
+    /** xrayVlessFlowProblem: shared by [validate] and the import's [dropUnusableFlow]. */
+    private fun flowProblem(): String {
+        Validation.oneOf(flow, listOf("", "none") + xrayFlows).let { if (it.isNotEmpty()) return it }
+        XrayVlessChecks.xrayVlessVision(flow, encryption, streamSetting.network, streamSetting.security).let { if (it.isNotEmpty()) return it }
+        return XrayVlessChecks.xrayXDriveFlow(flow, streamSetting.network)
+    }
+
+    /** dropUnusableXrayVlessFlow: no flow is Xray's default; an unknown one stops it and a misplaced Vision fails every connection. */
+    private fun dropUnusableFlow() {
+        if (!acceptOptional("flow", flowProblem(), flow)) flow = ""
     }
 
     companion object {
@@ -288,10 +298,13 @@ class XrayVless : Outbound("xrayvless") {
         /** xrayVlessImportFlow: Xray compares flow names exactly. */
         private fun importFlow(raw: String): String = raw.trim().lowercase()
 
-        /** xrayVlessImportEncryption: "none" in any case becomes "none"; key strings are kept as written. */
+        /**
+         * xrayVlessImportEncryption: empty (share links leave it out for none, which Xray refuses) or "none" in any
+         * case becomes "none"; key strings are kept as written.
+         */
         private fun importEncryption(raw: String): String {
             val value = raw.trim()
-            return if (value.equals("none", ignoreCase = true)) "none" else value
+            return if (value.isEmpty() || value.equals("none", ignoreCase = true)) "none" else value
         }
 
         /**

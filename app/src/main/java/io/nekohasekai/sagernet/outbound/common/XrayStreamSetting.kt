@@ -713,7 +713,10 @@ class XrayReality {
         if (q.has("pbk")) password = importRealityPublicKey(q.value("pbk"), "pbk")
         if (q.has("fp")) fingerprint = xrayKnownFingerprint(q.value("fp"), true, "fp")
         if (q.has("sid")) shortId = q.value("sid").trim()
-        if (q.has("spx")) spiderX = q.valueFully("spx")
+        if (q.has("spx")) {
+            val value = q.valueFully("spx")
+            if (acceptOptional("spx", XrayChecks.xraySpiderX(value), value)) spiderX = value
+        }
         if (q.has("pqv")) mldsa65Verify = q.valueFully("pqv").trim()
         return true
     }
@@ -733,7 +736,10 @@ class XrayReality {
             password = if (ParseDiag.active()) importRealityPublicKey(key, "realitySettings.$field") else key.trim()
         }
         if (obj.contains("shortId")) shortId = obj.string("shortId").trim()
-        if (obj.contains("spiderX")) spiderX = obj.string("spiderX")
+        if (obj.contains("spiderX")) {
+            val value = obj.string("spiderX")
+            if (!ParseDiag.active() || acceptOptional("realitySettings.spiderX", XrayChecks.xraySpiderX(value), value)) spiderX = value
+        }
         if (obj.contains("mldsa65Verify")) mldsa65Verify = obj.string("mldsa65Verify").trim()
         return true
     }
@@ -841,6 +847,20 @@ class XrayXhttp {
             "maxConcurrency", "maxConnections", "cMaxReuseTimes", "hMaxRequestTimes", "hMaxReusableSecs", "hKeepAlivePeriod",
         )
 
+        /** The Int32Range fields dropUnusableXHTTPValues (xrayStreamSetting.cpp) checks, by import field name. */
+        private val INT32_RANGE_FIELDS: List<Pair<String, KMutableProperty1<XrayXhttp, String>>> = listOf(
+            "sessionIDLength" to XrayXhttp::sessionIDLength,
+            "uplinkChunkSize" to XrayXhttp::uplinkChunkSize,
+            "scMaxEachPostBytes" to XrayXhttp::scMaxEachPostBytes,
+            "scMinPostsIntervalMs" to XrayXhttp::scMinPostsIntervalMs,
+            "scStreamUpServerSecs" to XrayXhttp::scStreamUpServerSecs,
+            "xmux.maxConcurrency" to XrayXhttp::maxConcurrency,
+            "xmux.maxConnections" to XrayXhttp::maxConnections,
+            "xmux.cMaxReuseTimes" to XrayXhttp::cMaxReuseTimes,
+            "xmux.hMaxRequestTimes" to XrayXhttp::hMaxRequestTimes,
+            "xmux.hMaxReusableSecs" to XrayXhttp::hMaxReusableSecs,
+        )
+
         private fun exportString(obj: JsonObject, key: String, value: String) {
             if (value.isEmpty()) obj.remove(key) else obj[key] = value
         }
@@ -914,6 +934,22 @@ class XrayXhttp {
         if (xmuxObj.isNotEmpty()) parseXmuxObject(xmuxObj)
     }
 
+    /** dropUnusableXHTTPValues (xrayStreamSetting.cpp): Xray refuses these at start but picks its own default for an empty one. */
+    private fun dropUnusableValues() {
+        fun drop(field: String, property: KMutableProperty1<XrayXhttp, String>, check: (String) -> String) {
+            val value = property.get(this)
+            if (!acceptOptional(field, check(value), value)) property.set(this, "")
+        }
+        if (!acceptOptional("mode", XrayChecks.xrayXHTTPMode(mode), mode)) mode = "auto"
+        drop("xPaddingBytes", XrayXhttp::xPaddingBytes, XrayChecks::xrayXPaddingBytes)
+        drop("xPaddingMethod", XrayXhttp::xPaddingMethod, XrayChecks::xrayPaddingMethod)
+        drop("xPaddingPlacement", XrayXhttp::xPaddingPlacement, XrayChecks::xrayPaddingPlacement)
+        drop("uplinkDataPlacement", XrayXhttp::uplinkDataPlacement) { Validation.oneOf(it, xrayXhttpUplinkDataPlacements) }
+        drop("sessionIDPlacement", XrayXhttp::sessionIDPlacement, XrayChecks::xrayMetaPlacement)
+        drop("seqPlacement", XrayXhttp::seqPlacement, XrayChecks::xrayMetaPlacement)
+        for ((name, property) in INT32_RANGE_FIELDS) drop(name, property, XrayChecks::xrayInt32Range)
+    }
+
     /** xrayXHTTP::ParseExtraJson: Python dict repr ('key': True) is rewritten only when the JSON parse fails. */
     fun parseExtraJson(text: String): Boolean {
         var obj = JsonInput.parseObject(text)
@@ -952,6 +988,7 @@ class XrayXhttp {
                 hKeepAlivePeriod = Validation.toInt(value) ?: 0L
             }
         }
+        dropUnusableValues()
         return true
     }
 
@@ -973,6 +1010,7 @@ class XrayXhttp {
         } else if (obj.isString("extra") && !parseExtraJson(obj.string("extra"))) {
             xrayWarnUnparsableExtra(obj.string("extra"))
         }
+        if (ParseDiag.active()) dropUnusableValues()
         return true
     }
 
@@ -997,6 +1035,7 @@ class XrayXhttp {
         val keepAlivePeriod = reuse.string("h-keep-alive-period")
         if (keepAlivePeriod.isNotEmpty()) hKeepAlivePeriod = QtStrings.toLong(keepAlivePeriod)
         if (opts.present("download-settings")) downloadSettings = clashDownloadSettings(proxy).toCompact()
+        dropUnusableValues()
         return true
     }
 

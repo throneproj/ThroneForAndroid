@@ -672,6 +672,7 @@
     <string name="route_options">Meer opties</string>
     <string name="route_active">Huidig routeringsprofiel</string>
     <string name="route_switched">Routeringsprofiel: %s</string>
+    <string name="route_group_keeps_own">De groep \"%1$s\" gebruikt een eigen routeringsprofiel, dus het actieve profiel behoudt het.</string>
     <string name="route_item_default_outbound">Standaard: %s</string>
     <plurals name="route_item_rules">
         <item quantity="one">%d regel</item>
@@ -681,6 +682,9 @@
     <string name="route_item_remote_never">Externe · nog niet bijgewerkt</string>
     <string name="route_item_auto_update_on">automatisch bijwerken aan</string>
     <string name="route_item_auto_update_off">automatisch bijwerken uit</string>
+    <string name="route_item_from_subscription">Bijgewerkt door abonnement \"%1$s\"</string>
+    <string name="route_from_subscription_info">Elke update van het abonnement \"%1$s\" overschrijft de regels van dit profiel. Verwijderen stopt de import.</string>
+    <string name="route_subscription_profile_name">Routering voor %1$s</string>
     <string name="route_delete_last">Routeringsprofielen mogen niet leeg zijn, probeer een ander profiel toe te voegen of dit te bewerken</string>
     <string name="route_link_copied">Gekopieerd!</string>
     <string name="route_export_warnings_title">Geëxporteerd met waarschuwingen</string>
@@ -874,9 +878,15 @@
     <string name="grp_landing_proxy">Landingproxy</string>
     <string name="grp_none">Geen</string>
     <string name="grp_missing_profile">Profiel #%1$d (ontbreekt)</string>
+    <string name="grp_route_profile">Routeringsprofiel</string>
+    <string name="grp_route_profile_default">Standaard (%1$s)</string>
+    <string name="grp_route_profile_from_subscription">%1$s (van dit abonnement)</string>
+    <string name="grp_route_profile_tip">Het routeringsprofiel dat de profielen van deze groep gebruiken om te verbinden. \"Standaard\" volgt het routeringsprofiel dat in het menu \"Routering\" is gekozen.</string>
     <string name="grp_auto_clear_unavailable">Niet beschikbare profielen automatisch verwijderen</string>
     <string name="grp_url">URL</string>
     <string name="grp_skip_auto_update">Automatisch bijwerken overslaan</string>
+    <string name="grp_import_sub_route">Routeringsprofiel van het abonnement gebruiken</string>
+    <string name="grp_import_sub_route_tip">Elke update slaat het routeringsprofiel dat het abonnement levert (Happ-formaat) op als eigen routeringsprofiel van deze groep. DNS-instellingen uit het abonnement worden nooit gebruikt.</string>
     <string name="grp_no_auto_selector">Een automatische selector wisselt zelf van server en kan dus geen vaste front-/landingplek houden.</string>
     <string name="grp_advanced">Geavanceerd</string>
     <string name="grp_advanced_count">Geavanceerd (%d ingesteld)</string>
@@ -961,6 +971,8 @@
     <string name="subs_removed_unavailable">%1$d niet beschikbare profielen verwijderd:</string>
     <string name="subs_invalid_core_unreachable">Verwijderen van ongeldige profielen overgeslagen: de core is onbereikbaar.</string>
     <string name="subs_running_kept">Het actieve profiel is behouden.</string>
+    <string name="subs_running_replaced">%1$s is door de update vervangen; verbinding maken met het profiel met dezelfde naam.</string>
+    <string name="subs_running_removed">%1$s is door de update verwijderd en blijft gestopt: er is geen enkel profiel met dezelfde naam dat het vervangt.</string>
     <string name="subs_sort_skipped">Sorteren van %1$s overgeslagen: er is al een sortering bezig.</string>
     <string name="subs_after_url_test">Na de URL-test van %1$s:</string>
     <string name="subs_imported">%1$d profiel(en) geïmporteerd</string>
@@ -1173,7 +1185,7 @@
     <string name="autosel_group_archived">%s (gearchiveerd)</string>
     <string name="autosel_group_missing">Ontbrekende groep (#%d)</string>
     <string name="autosel_name_filter">Alleen overeenkomende namen</string>
-    <string name="autosel_name_filter_tip">Optionele reguliere expressie. Alleen profielen waarvan de naam overeenkomt worden beschouwd; handig om één land of provider uit te kiezen.</string>
+    <string name="autosel_name_filter_tip">Optionele reguliere expressie, die overal in de profielnaam wordt gezocht zonder op hoofdletters te letten. Alleen profielen waarvan de naam overeenkomt worden gebruikt.\nMeerdere kiezen: germany|nl\nSommige uitsluiten: ^(?!.*(germany|🇩🇪)).*$ gebruikt elke naam die geen van beide bevat.</string>
     <string name="autosel_name_filter_empty">Elk profiel in de groep</string>
     <string name="autosel_balance">Verkeer verdelen over de beste profielen</string>
     <string name="autosel_balance_tip">Standaard uit: één profiel draagt alles en de rest blijft standby. Schakel in om het verkeer te verdelen over de profielen die als werkend zijn bevestigd.</string>
@@ -1191,7 +1203,7 @@
     <string name="autosel_plan_kept_unavailable">De laatste test van elk profiel is mislukt, wat meestal betekent dat het netwerk plat lag in plaats van de servers, dus alle %d worden behouden en opnieuw gecontroleerd.</string>
     <string name="autosel_plan_truncated">Meer dan %d profielen komen in aanmerking, dus alleen de best beoordeelde worden behouden.</string>
     <string name="autosel_plan_reused">%d hebben een recent testresultaat dat wordt hergebruikt.</string>
-    <string name="autosel_plan_needs_ranking">De rest wordt gemeten voordat de selector start.</string>
+    <string name="autosel_plan_needs_ranking">De rest wordt gemeten wanneer de selector start: die draait zodra genoeg profielen werken en schakelt over op de volledige rangschikking zodra alle zijn gemeten.</string>
     <string name="autosel_error_no_group">Automatische selector wijst naar een groep die niet meer bestaat</string>
     <string name="autosel_error_no_members">Automatische selector heeft geen bruikbare leden</string>
     <string name="autosel_skip_missing">ontbrekend profiel</string>
@@ -1363,7 +1375,9 @@
     <string name="warp_enable">WARP inschakelen</string>
     <string name="warp_enable_sum">Maakt het mogelijk de onderstaande configuratie als egress te gebruiken, handig voor het omzeilen van diensten die niet-WARP-VPN\'s beperken</string>
     <string name="warp_mode">Modus</string>
-    <string name="warp_mode_sum">%s\nWireGuard draait over UDP. MASQUE tunnelt over HTTP/3 of HTTP/2 en passeert netwerken die WireGuard blokkeren.</string>
+    <string name="warp_mode_sum">%s\nWireGuard draait over UDP. AmneziaWG voegt WARP-compatibele junk- en camouflagepakketten toe. MASQUE tunnelt over HTTP/3 of HTTP/2.</string>
+    <string name="warp_amnezia_generating">AmneziaWG-QUIC-handtekening genereren…</string>
+    <string name="warp_amnezia_missing">AmneziaWG heeft nog geen QUIC-handtekening: tik op \"WARP-configuratie genereren\".</string>
     <string name="warp_wireguard_note">WARP rijdt op uw proxy: WireGuard heeft een proxy nodig die UDP doorstuurt.</string>
     <string name="warp_masque_note">WARP rijdt op uw proxy: MASQUE over HTTP/3 heeft een proxy nodig die UDP doorstuurt, over HTTP/2 is alleen TCP nodig.</string>
     <string name="warp_endpoint">Endpoint</string>
@@ -1393,6 +1407,8 @@
     <string name="warp_tos_message"><![CDATA[Het genereren van een WARP-identiteit registreert een nieuw apparaat bij Cloudflare.<br><br>Accepteert u de <a href="%1$s">Cloudflare WARP-gebruiksvoorwaarden</a>?]]></string>
     <string name="warp_proxy_not_started">Verzoek met proxy maar geen profiel gestart.</string>
     <string name="warp_core_unreachable">Kon de core niet bereiken.</string>
+    <string name="warp_quic_signature_invalid">De core gaf een ongeldige QUIC-handtekening terug.</string>
+    <string name="warp_quic_signature_failed">WARP-QUIC-handtekening genereren mislukt: %1$s</string>
     <string name="warp_disable">WARP uitschakelen</string>
     <string name="warp_enabled">WARP ingeschakeld</string>
     <string name="warp_disabled">WARP uitgeschakeld</string>
@@ -2101,7 +2117,7 @@
     <string name="validation_hysteria_hop_maximum_zero">Vereist ook een port-hopping-interval boven 0, bijvoorbeeld 30s met een maximum van 60s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">Mag niet korter zijn dan het port-hopping-interval.</string>
     <string name="validation_hysteria_hop_maximum_ignored">Genegeerd zonder port-hopping-interval; stel er ook een in, bijvoorbeeld 30s met een maximum van 60s.</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1 vereist zowel upload als download in Mbps, bijvoorbeeld 100.</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1 vereist zowel upload als download in Mbps; voor een ontbrekende waarde wordt %1$d upload en %2$d download gebruikt. Stel uw echte lijnsnelheid in voor de beste resultaten.</string>
     <string name="validation_hysteria_gecko_range">Pakketgroottes moeten van 0 tot 2048 zijn; 0 gebruikt de standaard.</string>
     <string name="validation_hysteria_gecko_order">De minimale pakketgrootte mag de maximale niet overschrijden; 0 betekent de standaard, 512 voor het minimum en 1200 voor het maximum.</string>
     <string name="validation_hysteria_auth_base64">Geen geldige base64. Kies STRING als authenticatietype voor een payload in platte tekst.</string>

@@ -447,7 +447,7 @@
     <string name="autosel_name_empty">名称不能为空。</string>
     <string name="autosel_name_filter">仅限名称匹配</string>
     <string name="autosel_name_filter_empty">分组中的每个配置</string>
-    <string name="autosel_name_filter_tip">可选的正则表达式。只考虑名称匹配的配置——便于挑选某个国家或供应商。</string>
+    <string name="autosel_name_filter_tip">可选的正则表达式，在配置名称的任意位置匹配，不区分大小写。仅使用名称匹配的配置。\n选择多个：germany|nl\n排除部分：^(?!.*(germany|🇩🇪)).*$ 会使用所有两者都不包含的名称。</string>
     <string name="autosel_never">从未</string>
     <string name="autosel_no_limit">不限</string>
     <string name="autosel_note_checking">检查中</string>
@@ -480,7 +480,7 @@
     <string name="autosel_plan_calculating">正在检查分组…</string>
     <string name="autosel_plan_counts">分组中 %2$d 个配置有 %1$d 个可用；将运行 %3$d 个。</string>
     <string name="autosel_plan_kept_unavailable">每个配置的上次测试都失败了，这通常意味着是网络而非服务器的问题，因此全部 %d 个都保留并将重新检查。</string>
-    <string name="autosel_plan_needs_ranking">其余配置将在选择器启动前进行测量。</string>
+    <string name="autosel_plan_needs_ranking">其余配置将在选择器启动时测量：一旦有足够的配置可用，选择器就会运行，并在全部测量完成后切换到完整排名。</string>
     <string name="autosel_plan_reused">%d 个有近期测试结果将被复用。</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">已跳过：%s。</string>
@@ -743,6 +743,10 @@
     <string name="grp_landing_proxy">落地代理</string>
     <string name="grp_last_update">上次更新：%1$s</string>
     <string name="grp_missing_profile">配置 #%1$d（缺失）</string>
+    <string name="grp_route_profile">路由配置</string>
+    <string name="grp_route_profile_default">默认（%1$s）</string>
+    <string name="grp_route_profile_from_subscription">%1$s（来自此订阅）</string>
+    <string name="grp_route_profile_tip">此分组中的配置连接时使用的路由配置。「默认」跟随在「路由」菜单中选择的路由配置。</string>
     <string name="grp_more_options">更多选项</string>
     <string name="grp_move_down">下移</string>
     <string name="grp_move_up">上移</string>
@@ -768,6 +772,8 @@
     <string name="grp_settings_user_agent">UserAgent</string>
     <string name="grp_share_subscription">分享订阅链接</string>
     <string name="grp_skip_auto_update">跳过自动更新</string>
+    <string name="grp_import_sub_route">使用订阅提供的路由配置</string>
+    <string name="grp_import_sub_route_tip">每次更新都会将订阅提供的路由配置（Happ 格式）保存为此分组自己的路由配置。从不使用订阅中的 DNS 设置。</string>
     <string name="grp_sort_by_latency">按延迟排序</string>
     <string name="grp_state_queued">排队中</string>
     <string name="grp_state_running">更新中…</string>
@@ -1022,6 +1028,9 @@
     <string name="route_imported">已添加路由配置 %s</string>
     <string name="route_imported_default_name">导入的配置</string>
     <string name="route_item_auto_update_off">自动更新关闭</string>
+    <string name="route_item_from_subscription">由订阅 \"%1$s\" 更新</string>
+    <string name="route_from_subscription_info">订阅 \"%1$s\" 每次更新都会覆盖此路由配置的规则。删除后将停止导入。</string>
+    <string name="route_subscription_profile_name">%1$s 路由</string>
     <string name="route_item_auto_update_on">自动更新开启</string>
     <string name="route_item_default_outbound">默认：%s</string>
     <string name="route_item_remote_never">远程 · 尚未更新</string>
@@ -1141,6 +1150,7 @@
     <string name="route_summary_private_ip">私有 IP</string>
     <string name="route_summary_private_source_ip">私有源 IP</string>
     <string name="route_switched">路由配置：%s</string>
+    <string name="route_group_keeps_own">分组 \"%1$s\" 使用自己的路由配置，因此正在运行的配置会继续使用它。</string>
     <string name="route_update_all">更新全部远程配置</string>
     <string name="route_update_cancelled">已取消：更新了 %2$d 个中的 %1$d 个，%3$d 个失败。</string>
     <string name="route_update_cancelled_title">更新已取消</string>
@@ -1231,6 +1241,8 @@
     <string name="resolve_domains_failed">解析域名失败：%1$s</string>
     <string name="subs_response_too_large">响应超过 %1$d MB</string>
     <string name="subs_running_kept">已保留正在运行的配置。</string>
+    <string name="subs_running_replaced">%1$s 已在更新中被替换；正在连接到同名配置。</string>
+    <string name="subs_running_removed">%1$s 已在更新中被移除并保持停止：没有唯一的同名配置可以替代它。</string>
     <string name="subs_sort_skipped">已跳过 %1$s 的排序：另有排序进行中。</string>
     <string name="subs_still_in_use">仍在使用，因此保留而非删除：\n%1$s</string>
     <string name="subs_task_failed">订阅任务失败：%1$s</string>
@@ -1417,6 +1429,8 @@
     <string name="warp_api_hosts">注册域名</string>
     <string name="warp_api_hosts_message">每行一个域名。按顺序尝试，使用第一个接受注册的域名。留空则使用 %s。</string>
     <string name="warp_core_unreachable">无法连接核心。</string>
+    <string name="warp_quic_signature_invalid">核心返回了无效的 QUIC 签名。</string>
+    <string name="warp_quic_signature_failed">生成 WARP QUIC 签名失败：%1$s</string>
     <string name="warp_disable">禁用 WARP</string>
     <string name="warp_disabled">WARP 已禁用</string>
     <string name="warp_enable">启用 WARP</string>
@@ -1437,7 +1451,9 @@
     <string name="warp_interface_addresses">接口地址</string>
     <string name="warp_masque_note">WARP 依托你的代理：HTTP/3 上的 MASQUE 需要转发 UDP 的代理，HTTP/2 上只需 TCP。</string>
     <string name="warp_mode">模式</string>
-    <string name="warp_mode_sum">%s\nWireGuard 基于 UDP。MASQUE 通过 HTTP/3 或 HTTP/2 隧道传输，可穿过封锁 WireGuard 的网络。</string>
+    <string name="warp_mode_sum">%s\nWireGuard 基于 UDP。AmneziaWG 会添加兼容 WARP 的垃圾包和伪装包。MASQUE 通过 HTTP/3 或 HTTP/2 隧道传输。</string>
+    <string name="warp_amnezia_generating">正在生成 AmneziaWG 的 QUIC 签名…</string>
+    <string name="warp_amnezia_missing">AmneziaWG 尚无 QUIC 签名：请点按「生成配置」。</string>
     <string name="warp_not_generated">WARP 已启用但尚未生成配置。请在「设置 › 路由 › WARP」中生成。</string>
     <string name="warp_peer_public_key">对端公钥</string>
     <string name="warp_peer_public_key_message">服务器公钥的 Base64 DER。设置后将固定服务器证书。</string>
@@ -2087,7 +2103,7 @@
     <string name="validation_hysteria_hop_maximum_zero">还需要大于 0 的跳跃间隔，例如间隔 30s、最大值 60s。</string>
     <string name="validation_hysteria_hop_maximum_shorter">不能小于跳跃间隔。</string>
     <string name="validation_hysteria_hop_maximum_ignored">未设置跳跃间隔时会被忽略；请同时设置，例如间隔 30s、最大值 60s。</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1 需要同时设置上行 Mbps 和下行 Mbps，例如 100。</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1 需要同时设置上行 Mbps 和下行 Mbps；缺少的一项将使用上行 %1$d、下行 %2$d。请设置你的实际线路速度以获得最佳效果。</string>
     <string name="validation_hysteria_gecko_range">包大小必须在 0 到 2048 之间；0 表示使用默认值。</string>
     <string name="validation_hysteria_gecko_order">最小包大小不能超过最大值；0 表示默认值，最小值默认为 512，最大值默认为 1200。</string>
     <string name="validation_hysteria_auth_base64">不是有效的 base64。如果载荷是纯文本，请将认证类型选为 STRING。</string>

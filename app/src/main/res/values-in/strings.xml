@@ -676,6 +676,7 @@
     <string name="route_options">Opsi lainnya</string>
     <string name="route_active">Profil rute saat ini</string>
     <string name="route_switched">Profil rute: %s</string>
+    <string name="route_group_keeps_own">Grup \"%1$s\" menggunakan profil rutenya sendiri, jadi profil yang sedang berjalan tetap memakainya.</string>
     <string name="route_item_default_outbound">Default: %s</string>
     <plurals name="route_item_rules">
         <item quantity="one">%d aturan</item>
@@ -685,6 +686,9 @@
     <string name="route_item_remote_never">Remote · belum diperbarui</string>
     <string name="route_item_auto_update_on">pembaruan otomatis aktif</string>
     <string name="route_item_auto_update_off">pembaruan otomatis nonaktif</string>
+    <string name="route_item_from_subscription">Diperbarui oleh langganan \"%1$s\"</string>
+    <string name="route_from_subscription_info">Setiap pembaruan langganan \"%1$s\" menimpa aturan profil ini. Menghapusnya menghentikan impor.</string>
+    <string name="route_subscription_profile_name">Rute %1$s</string>
     <string name="route_delete_last">Profil rute tidak boleh kosong, coba tambah profil lain atau sunting yang ini</string>
     <string name="route_link_copied">Disalin!</string>
     <string name="route_export_warnings_title">Diekspor dengan peringatan</string>
@@ -878,9 +882,15 @@
     <string name="grp_landing_proxy">Proksi pendarat</string>
     <string name="grp_none">Tidak ada</string>
     <string name="grp_missing_profile">Profil #%1$d (hilang)</string>
+    <string name="grp_route_profile">Profil rute</string>
+    <string name="grp_route_profile_default">Default (%1$s)</string>
+    <string name="grp_route_profile_from_subscription">%1$s (dari langganan ini)</string>
+    <string name="grp_route_profile_tip">Profil rute yang digunakan profil di grup ini untuk terhubung. \"Default\" mengikuti profil rute yang dipilih di menu \"Rute\".</string>
     <string name="grp_auto_clear_unavailable">Hapus otomatis profil yang tidak tersedia</string>
     <string name="grp_url">URL</string>
     <string name="grp_skip_auto_update">Lewati pembaruan otomatis</string>
+    <string name="grp_import_sub_route">Gunakan profil rute dari langganan</string>
+    <string name="grp_import_sub_route_tip">Setiap pembaruan menyimpan profil rute yang disediakan langganan (format Happ) sebagai profil rute milik grup ini sendiri. Pengaturan DNS dari langganan tidak pernah digunakan.</string>
     <string name="grp_no_auto_selector">Pemilih otomatis memindahkan server sendiri, jadi tidak dapat memegang slot depan/pendarat tetap.</string>
     <string name="grp_advanced">Lanjutan</string>
     <string name="grp_advanced_count">Lanjutan (%d disetel)</string>
@@ -965,6 +975,8 @@
     <string name="subs_removed_unavailable">Menghapus %1$d profil yang tidak tersedia:</string>
     <string name="subs_invalid_core_unreachable">Dilewati penghapusan profil tidak valid: inti tidak dapat dihubungi.</string>
     <string name="subs_running_kept">Profil yang sedang berjalan dipertahankan.</string>
+    <string name="subs_running_replaced">%1$s diganti oleh pembaruan; menyambung ke profil dengan nama yang sama.</string>
+    <string name="subs_running_removed">%1$s dihapus oleh pembaruan dan tetap berhenti: tidak ada satu profil pun dengan nama yang sama yang menggantikannya.</string>
     <string name="subs_sort_skipped">Melewatkan pengurutan %1$s: pengurutan lain sedang berlangsung.</string>
     <string name="subs_after_url_test">Setelah tes URL %1$s:</string>
     <string name="subs_imported">Mengimpor %1$d profil</string>
@@ -1177,7 +1189,7 @@
     <string name="autosel_group_archived">%s (diarsipkan)</string>
     <string name="autosel_group_missing">Grup hilang (#%d)</string>
     <string name="autosel_name_filter">Hanya nama yang cocok</string>
-    <string name="autosel_name_filter_tip">Ekspresi reguler opsional. Hanya profil yang namanya cocok yang dipertimbangkan — berguna untuk memilih satu negara atau penyedia.</string>
+    <string name="autosel_name_filter_tip">Ekspresi reguler opsional, dicocokkan di bagian mana pun dari nama profil tanpa membedakan huruf besar/kecil. Hanya profil yang namanya cocok yang digunakan.\nPilih beberapa: germany|nl\nKecualikan sebagian: ^(?!.*(germany|🇩🇪)).*$ menggunakan setiap nama yang tidak mengandung keduanya.</string>
     <string name="autosel_name_filter_empty">Setiap profil dalam grup</string>
     <string name="autosel_balance">Bagikan lalu lintas antara profil terbaik</string>
     <string name="autosel_balance_tip">Nonaktif secara default: satu profil membawa semuanya dan sisanya siaga. Aktifkan untuk menyebarkan lalu lintas ke profil yang dikonfirmasi berfungsi.</string>
@@ -1195,7 +1207,7 @@
     <string name="autosel_plan_kept_unavailable">Tes terakhir setiap profil gagal, yang biasanya berarti jaringan sedang mati, bukan servernya, jadi semua %d dipertahankan dan akan diperiksa ulang.</string>
     <string name="autosel_plan_truncated">Lebih dari %d profil cocok, jadi hanya yang berperingkat terbaik yang dipertahankan.</string>
     <string name="autosel_plan_reused">%d memiliki hasil tes terkini yang akan digunakan ulang.</string>
-    <string name="autosel_plan_needs_ranking">Sisanya akan diukur sebelum pemilih dimulai.</string>
+    <string name="autosel_plan_needs_ranking">Sisanya akan diukur saat pemilih dimulai: pemilih berjalan begitu cukup profil berfungsi, lalu beralih ke peringkat lengkap setelah semuanya terukur.</string>
     <string name="autosel_error_no_group">Pemilih otomatis menunjuk grup yang tidak lagi ada</string>
     <string name="autosel_error_no_members">Pemilih otomatis tidak memiliki anggota yang dapat digunakan</string>
     <string name="autosel_skip_missing">profil hilang</string>
@@ -1367,7 +1379,9 @@
     <string name="warp_enable">Aktifkan WARP</string>
     <string name="warp_enable_sum">Mengaktifkan konfigurasi di bawah untuk digunakan sebagai keluar, berguna untuk melewati layanan yang membatasi VPN non-WARP</string>
     <string name="warp_mode">Mode</string>
-    <string name="warp_mode_sum">%s\nWireGuard berjalan di atas UDP. MASQUE menunnel di atas HTTP/3 atau HTTP/2 dan melewati jaringan yang memblokir WireGuard.</string>
+    <string name="warp_mode_sum">%s\nWireGuard berjalan di atas UDP. AmneziaWG menambahkan paket sampah dan kamuflase yang kompatibel dengan WARP. MASQUE menunnel di atas HTTP/3 atau HTTP/2.</string>
+    <string name="warp_amnezia_generating">Membuat tanda tangan QUIC AmneziaWG…</string>
+    <string name="warp_amnezia_missing">AmneziaWG belum memiliki tanda tangan QUIC: ketuk \"Buat konfigurasi WARP\".</string>
     <string name="warp_wireguard_note">WARP menumpang pada proksi Anda: WireGuard membutuhkan proksi yang meneruskan UDP.</string>
     <string name="warp_masque_note">WARP menumpang pada proksi Anda: MASQUE di atas HTTP/3 membutuhkan proksi yang meneruskan UDP, di atas HTTP/2 hanya membutuhkan TCP.</string>
     <string name="warp_endpoint">Titik akhir</string>
@@ -1397,6 +1411,8 @@
     <string name="warp_tos_message"><![CDATA[Membuat identitas WARP mendaftarkan perangkat baru dengan Cloudflare.<br><br>Apakah Anda menerima <a href="%1$s">layanan Cloudflare WARP</a>?]]></string>
     <string name="warp_proxy_not_started">Permintaan dengan proksi tetapi tidak ada profil yang dimulai.</string>
     <string name="warp_core_unreachable">Gagal mencapai inti.</string>
+    <string name="warp_quic_signature_invalid">Inti mengembalikan tanda tangan QUIC yang tidak valid.</string>
+    <string name="warp_quic_signature_failed">Gagal membuat tanda tangan QUIC WARP: %1$s</string>
     <string name="warp_disable">Nonaktifkan WARP</string>
     <string name="warp_enabled">WARP diaktifkan</string>
     <string name="warp_disabled">WARP dinonaktifkan</string>
@@ -2097,7 +2113,7 @@
     <string name="validation_hysteria_hop_maximum_zero">Juga membutuhkan Interval lompatan di atas 0, mis. 30s dengan maksimum 60s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">Tidak boleh lebih pendek dari Interval lompatan.</string>
     <string name="validation_hysteria_hop_maximum_ignored">Diabaikan tanpa Interval lompatan; setel juga, mis. 30s dengan maksimum 60s.</string>
-    <string name="validation_hysteria_v1_speed">Hysteria v1 membutuhkan kecepatan unggah dan unduh dalam Mbps, mis. 100.</string>
+    <string name="validation_hysteria_v1_speed">Hysteria v1 membutuhkan kecepatan unggah dan unduh dalam Mbps; jika salah satunya kosong, digunakan %1$d untuk unggah dan %2$d untuk unduh. Setel kecepatan jalur Anda yang sebenarnya untuk hasil terbaik.</string>
     <string name="validation_hysteria_gecko_range">Ukuran paket harus dari 0 hingga 2048; 0 menggunakan default.</string>
     <string name="validation_hysteria_gecko_order">Ukuran paket minimum tidak boleh melebihi maksimum; 0 berarti default, 512 untuk minimum dan 1200 untuk maksimum.</string>
     <string name="validation_hysteria_auth_base64">Bukan base64 yang valid. Pilih STRING sebagai jenis autentikasi untuk muatan teks biasa.</string>

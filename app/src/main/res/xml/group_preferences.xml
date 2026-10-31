@@ -30,6 +30,12 @@
             app:persistent="false"
             app:title="@string/grp_landing_proxy" />
 
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:defaultValue="-1"
+            app:icon="@drawable/ic_maps_directions"
+            app:key="groupRouteId"
+            app:title="@string/grp_route_profile" />
+
         <SwitchPreference
             app:icon="@drawable/baseline_delete_sweep_24"
             app:key="groupAutoClearUnavailable"
@@ -51,6 +57,12 @@
             app:icon="@drawable/ic_baseline_update_24"
             app:key="groupSkipAutoUpdate"
             app:title="@string/grp_skip_auto_update" />
+
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_download_24"
+            app:key="groupImportSubRoute"
+            app:summary="@string/grp_import_sub_route_tip"
+            app:title="@string/grp_import_sub_route" />
 
         <SwitchPreference
             app:defaultValue="true"

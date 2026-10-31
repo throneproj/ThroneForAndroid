@@ -27,8 +27,13 @@ import kotlinx.coroutines.withContext
 /** The post-update filters (GroupUpdater.cpp:183-296) and the manual group actions that need the core. */
 internal object SubscriptionFilters {
 
-    /** [deleted] ids and the report sections to append to the change text. */
-    class Outcome(@JvmField val deleted: List<Long>, @JvmField val report: String)
+    /** [deleted] ids and the report sections to append to the change text; [ok] is false after a database error. */
+    class Outcome(
+        @JvmField val deleted: List<Long>,
+        @JvmField val report: String,
+        @JvmField val stopped: ProxyEntity? = null,
+        @JvmField val ok: Boolean = true,
+    )
 
     private val NONE = Outcome(emptyList(), "")
 
@@ -85,7 +90,7 @@ internal object SubscriptionFilters {
         val outcome = ProfileManager.batchDeleteProfiles(doomed)
         if (!outcome.ok) SubscriptionRefresh.dbError(gid)
         if (outcome.kept.isNotEmpty()) sections.append('\n').append(app.getString(R.string.subs_running_kept))
-        return Outcome(outcome.deleted, sections.toString())
+        return Outcome(outcome.deleted, sections.toString(), outcome.stopped, outcome.ok)
     }
 
     /** removeUnavailableAndSort (GroupUpdater.cpp:266-296): the follow-ups of the subscription's URL test. */

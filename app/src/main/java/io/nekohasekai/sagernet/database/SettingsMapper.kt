@@ -17,6 +17,7 @@ import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
 import io.nekohasekai.sagernet.outbound.types.AutoSelector
 import io.nekohasekai.sagernet.outbound.types.Custom
 import io.nekohasekai.sagernet.route.RouteDns
+import io.nekohasekai.sagernet.route.RouteProfile
 import io.throneproj.mobile.Mobile
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
@@ -31,11 +32,11 @@ import java.util.concurrent.Executors
 object SettingsMapper {
 
     /**
-     * The route profile of current_route_id (the first profile when it is gone), the rule-set list, the tracked
-     * groups of auto-selectors and, in :bg, the core's member check.
+     * [profile] (by default that of current_route_id, the first profile when it is gone), the rule-set list, the
+     * tracked groups of auto-selectors and, in :bg, the core's member check.
      */
-    fun routingInput(): RoutingInput = RoutingInput(
-        RouteManager.current(),
+    fun routingInput(profile: RouteProfile = RouteManager.current()): RoutingInput = RoutingInput(
+        profile,
         RouteManager.catalog(),
         selectorStore(),
         if (SagerNet.application.isBgProcess) CoreMemberCheck else null,
@@ -125,6 +126,7 @@ object SettingsMapper {
             warpPublicKey = DataStore.warpPublicKey,
             warpIfcAddrs = DataStore.warpIfcAddrs,
             warpReserved = DataStore.warpReserved,
+            warpAmneziaPackets = DataStore.warpAmneziaPackets,
             warpMasqueEp = DataStore.warpMasqueEp,
             warpMasquePrivateKey = DataStore.warpMasquePrivateKey,
             warpMasquePeerPublicKey = DataStore.warpMasquePeerPublicKey,

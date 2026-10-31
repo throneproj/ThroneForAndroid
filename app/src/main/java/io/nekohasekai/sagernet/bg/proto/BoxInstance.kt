@@ -6,6 +6,7 @@ import io.nekohasekai.sagernet.bg.SingBoxDashboard
 import io.nekohasekai.sagernet.bg.XrayGeoAssets
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
+import io.nekohasekai.sagernet.database.RouteManager
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.isLoopbackPortFree
 import io.nekohasekai.sagernet.ktx.mkPort
@@ -34,6 +35,10 @@ abstract class BoxInstance(
     /** This start does not wait for remote rule-sets the core has no copy of ([DeferredRuleSets]). */
     var deferRuleSets = false
 
+    /** The routing profile [config] was built with (BuildConfigResult::routeId), 0 for a custom full config. */
+    var routeId = 0L
+        private set
+
     /** The bridge ports [config] listens on (Xray may bind them late), no other box's until [close]. */
     private val ports = PortLease()
 
@@ -53,7 +58,9 @@ abstract class BoxInstance(
         }
         // A custom full config keeps its own rule-sets as written.
         if (isCustomFullConfig()) deferRuleSets = false
-        config = CoreConfigs.buildMain(profile, deferRuleSets, ports)
+        val route = RouteManager.routeFor(profile.groupId)
+        routeId = if (isCustomFullConfig()) 0L else route.id
+        config = CoreConfigs.buildMain(profile, deferRuleSets, ports, route)
     }
 
     protected open suspend fun loadConfig() {

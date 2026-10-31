@@ -125,7 +125,7 @@ object SettingsRegistry {
     val NTP_OUTBOUNDS = listOf("direct", "proxy")
 
     @JvmField
-    val WARP_MODES = listOf("wireguard", "masque")
+    val WARP_MODES = listOf("wireguard", "masque", "amnezia")
 
     /** defaultTunPrivateRanges (SettingsRepo.h:18-21). */
     @JvmField
@@ -309,6 +309,8 @@ object SettingsRegistry {
     @JvmField val WARP_PUBLIC_KEY = string("warp_public_key", "")
     @JvmField val WARP_IFC_ADDRS = stringList("warp_ifc_addrs", emptyList())
     @JvmField val WARP_RESERVED = stringList("warp_reserved", emptyList())
+    /** AmneziaWG I1-I5 of warp_mode "amnezia", generated with the identity so config builds need no core call. */
+    @JvmField val WARP_AMNEZIA_PACKETS = stringList("warp_amnezia_packets", emptyList())
     @JvmField val WARP_TOS_ACCEPTED = bool("warp_tos_accepted", false)
     @JvmField val WARP_MASQUE_EP = string("warp_masque_ep", "")
     @JvmField val WARP_MASQUE_PRIVATE_KEY = string("warp_masque_private_key", "")
@@ -373,7 +375,7 @@ object SettingsRegistry {
         Key.ALWAYS_SHOW_ADDRESS, Key.GROUP_LAYOUT_MODE,
         Key.HIDE_FROM_RECENT_APPS, Key.LOG_BUF_SIZE, Key.LOG_FONT_SIZE, Key.APP_TLS_VERSION,
         Key.WEBDAV_SERVER, Key.WEBDAV_USERNAME, Key.WEBDAV_PASSWORD, Key.WEBDAV_PATH, Key.DEVICE_ID, Key.DEVICE_NAME,
-        Key.PROFILE_CURRENT, Key.RUNNING_PROFILES, Key.PROFILE_ID, Key.PREVIEW_HINT_DISMISSED_VERSION,
+        Key.PROFILE_CURRENT, Key.RUNNING_PROFILES, Key.RUNNING_ROUTE, Key.PROFILE_ID, Key.PREVIEW_HINT_DISMISSED_VERSION,
         Key.UPDATE_CHECK_AUTO, Key.UPDATE_SKIPPED_VERSION_CODE, Key.RESUME_AFTER_UPDATE, Key.BATTERY_PROMPT_SHOWN,
         Key.LOG_EXPORT_REDACT, Key.HWID_FALLBACK, Key.WIFI_PERMISSION_ASKED, Key.SERVICE_ERROR,
         Key.SERVICE_ERROR_DNS, Key.SERVICE_ERROR_GEO, Key.SERVICE_ERROR_RULE_SETS, Key.START_WITHOUT_RULE_SETS,
@@ -388,7 +390,8 @@ object SettingsRegistry {
         Key.WEBDAV_SERVER, Key.WEBDAV_USERNAME, Key.WEBDAV_PASSWORD, Key.WEBDAV_PATH, Key.DEVICE_ID, Key.DEVICE_NAME,
         Key.BATTERY_PROMPT_SHOWN, Key.HWID_FALLBACK, Key.RESUME_AFTER_UPDATE, Key.UPDATE_SKIPPED_VERSION_CODE,
         Key.WIFI_PERMISSION_ASKED, Key.SERVICE_ERROR, Key.SERVICE_ERROR_DNS, Key.SERVICE_ERROR_GEO,
-        Key.SERVICE_ERROR_RULE_SETS, Key.START_WITHOUT_RULE_SETS, Key.RUNNING_PROFILES, CORE_BOX_API_PORT.key,
+        Key.SERVICE_ERROR_RULE_SETS, Key.START_WITHOUT_RULE_SETS, Key.RUNNING_PROFILES, Key.RUNNING_ROUTE,
+        CORE_BOX_API_PORT.key,
     )
 
     // ------------------------------------------------------------------------------------------------ lookup

@@ -42,7 +42,9 @@ object WarpGenerate {
 
     /**
      * After the terms, registers a [tunnelType] identity off the main thread while [button] is disabled and says
-     * "Generating…"; [onIdentity] runs on the main thread, a failure shows [failedTitle] with the error.
+     * "Generating…"; [onIdentity] runs on the main thread, a failure shows [failedTitle] with the error. With
+     * [onPackets] the amnezia packets are generated next and handed over before [onIdentity]; when they fail the
+     * identity is still filled, then the error is shown the same way.
      */
     fun generate(
         owner: LifecycleOwner,
@@ -50,27 +52,36 @@ object WarpGenerate {
         button: Preference,
         tunnelType: String,
         @StringRes failedTitle: Int,
+        onPackets: ((Result<List<String>>) -> Unit)? = null,
         onIdentity: (WarpClient.Identity) -> Unit,
     ) = confirmTerms(context) {
         val idle = button.summary
         button.isEnabled = false
         button.summary = context.getString(R.string.generating)
+        fun fail(e: Throwable) {
+            button.summary = idle
+            button.isEnabled = true
+            MaterialAlertDialogBuilder(context)
+                .setTitle(failedTitle)
+                .setMessage(e.readableMessage)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        }
         owner.lifecycleScope.launch {
             val identity = try {
                 WarpClient.register(tunnelType)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                button.summary = idle
-                button.isEnabled = true
-                MaterialAlertDialogBuilder(context)
-                    .setTitle(failedTitle)
-                    .setMessage(e.readableMessage)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
+                fail(e)
                 return@launch
             }
+            val packets = onPackets?.let { handOver -> WarpClient.generateCamouflage().also(handOver) }
             onIdentity(identity)
+            packets?.exceptionOrNull()?.let {
+                fail(it)
+                return@launch
+            }
             button.summary = context.getString(R.string.warp_generate_success)
             delay(2000)
             button.summary = idle

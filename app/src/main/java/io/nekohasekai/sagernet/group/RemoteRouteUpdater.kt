@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.RouteManager
 import io.nekohasekai.sagernet.database.RouteRepo
+import io.nekohasekai.sagernet.database.RouteRuleEntity
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.fetchText
@@ -22,6 +23,7 @@ import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ktx.runOnIoDispatcher
 import io.nekohasekai.sagernet.route.RouteProfile
+import io.nekohasekai.sagernet.route.RouteRule
 import io.nekohasekai.sagernet.route.RouteShare
 import io.nekohasekai.sagernet.route.RuleSets
 import io.nekohasekai.sagernet.route.RuleType
@@ -85,7 +87,10 @@ object RemoteRouteUpdater {
         return null
     }
 
-    /** UI_update_all_remote_routes (RouteUpdater.cpp:54-78): (updated count, "name: error" failures). */
+    /**
+     * UI_update_all_remote_routes (RouteUpdater.cpp:54-78): (updated count, "name: error" failures). An update that
+     * changed the running routing profile asks for a reload.
+     */
     fun updateAll(onlyAutoUpdate: Boolean): Pair<Int, List<String>> {
         var updated = 0
         val failures = ArrayList<String>()
@@ -94,6 +99,7 @@ object RemoteRouteUpdater {
             if (!p.is_remote || p.remote_url.isBlank()) continue
             if (onlyAutoUpdate && !p.auto_update) continue
             Logs.i("Updating remote routing profile: ${p.name}")
+            val before = if (p.id == RouteManager.runningRouteId()) routeFingerprint(p) else null
             val error = update(p)
             if (error != null) {
                 failures.add("${p.name}: $error")
@@ -101,6 +107,7 @@ object RemoteRouteUpdater {
                 continue
             }
             updated++
+            if (before != null && routeFingerprint(p) != before) SubscriptionQueue.reloadNeeded(-1L)
         }
         Logs.i("Remote routing profiles: $updated updated, ${failures.size} failed")
         return updated to failures
@@ -135,18 +142,42 @@ object RemoteRouteUpdater {
     }
 
     /**
-     * The swap of UpdateProfile: rules, default outbound and an empty name are taken; a fetched `dns` is not, so [p]
-     * keeps its own DNS settings. Rules switched off locally stay off, matched by name.
+     * replaceRules (RouteUpdater.cpp:29-51): [p] takes [fetched]'s rules and default outbound and stops being raw.
+     * Endpoint rules belong to the local profile, so they stay at their index; rules switched off locally stay off,
+     * matched by name. [fetched] is left as it is.
+     */
+    internal fun replaceRules(p: RouteProfile, fetched: RouteProfile) {
+        val endpointRules = ArrayList<Pair<Int, RouteRule>>()
+        val disabledNames = HashSet<String>()
+        p.rules.forEachIndexed { i, rule ->
+            if (rule.type == RuleType.ENDPOINT_PREFERRED_BY.id) endpointRules.add(i to rule)
+            else if (rule.disabled) disabledNames.add(rule.name)
+        }
+        p.is_raw = false
+        p.raw_route = ""
+        val rules = ArrayList<RouteRule>()
+        for (rule in fetched.rules) {
+            if (rule.type == RuleType.ENDPOINT_PREFERRED_BY.id) continue
+            rules.add(rule.copy().also { if (it.name in disabledNames) it.disabled = true })
+        }
+        for ((index, rule) in endpointRules) rules.add(minOf(index, rules.size), rule)
+        p.rules = rules
+        p.default_outbound_id = fetched.default_outbound_id
+    }
+
+    /** routeFingerprint (RouteUpdater.cpp): what a rule swap can change, compared to skip or flag an update. */
+    internal fun routeFingerprint(p: RouteProfile): List<Any> =
+        listOf<Any>(p.default_outbound_id, p.is_raw, p.raw_route) + p.rules.mapIndexed { i, rule -> RouteRuleEntity.of(0L, i, rule) }
+
+    /**
+     * The swap of UpdateProfile: rules, default outbound and an empty name are taken ([replaceRules]); a fetched
+     * `dns` is not, so [p] keeps its own DNS settings.
      */
     private fun applyContent(p: RouteProfile, content: String, warnings: MutableList<String>?, fetched: Boolean): String? {
         val imported = RouteShare.fromShareInput(content, RouteManager.profileIdResolver())
         val remote = imported.profile
             ?: return imported.fatal.ifEmpty { "could not parse a routing profile from the response" }
-        val disabledNames = p.rules.filter { it.disabled && it.type != RuleType.ENDPOINT_PREFERRED_BY.id }
-            .mapTo(HashSet()) { it.name }
-        for (rule in remote.rules) if (rule.name in disabledNames) rule.disabled = true
-        p.rules = remote.rules
-        p.default_outbound_id = remote.default_outbound_id
+        replaceRules(p, remote)
         if (p.name.isBlank() && remote.name.isNotBlank()) p.name = remote.name
         if (fetched) p.remote_last_update = System.currentTimeMillis() / 1000
         warnings?.addAll(imported.warnings)

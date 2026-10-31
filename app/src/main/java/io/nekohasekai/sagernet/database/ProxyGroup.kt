@@ -51,6 +51,10 @@ data class ProxyGroup(
     @ColumnInfo(name = "sort_method", defaultValue = "0") var sortMethod: Int = 0,
     @ColumnInfo(name = "sort_descending", defaultValue = "0") var sortDescending: Boolean = false,
     @ColumnInfo(name = "display_order", defaultValue = "0") var displayOrder: Long = 0L,
+    /** The routing profile this group's profiles connect with; -1 (or a profile that is gone) follows the global one (Group.h). */
+    @ColumnInfo(name = "route_id", defaultValue = "-1") var routeId: Long = -1L,
+    /** Subscription refreshes save the routing profile the subscription provides as this group's own (Group.h). */
+    @ColumnInfo(name = "import_sub_route", defaultValue = "0") var importSubRoute: Boolean = false,
 ) : Parcelable {
 
     @get:Ignore
@@ -134,6 +138,12 @@ data class ProxyGroup(
         /** An answer without profiles still keeps what it said, e.g. why (GroupUpdater.cpp:746-752); no update time. */
         @Query("UPDATE `groups` SET `info` = '', `sub_metadata_json` = :metadata WHERE `id` = :groupId")
         fun setSubscriptionMetadata(groupId: Long, metadata: String): Int
+
+        @Query("UPDATE `groups` SET `route_id` = :routeId WHERE `id` = :groupId")
+        fun setRouteId(groupId: Long, routeId: Long): Int
+
+        @Query("UPDATE `groups` SET `import_sub_route` = 0 WHERE `id` = :groupId")
+        fun stopRouteImport(groupId: Long): Int
 
         /** The group's profiles go by the foreign key cascade. */
         @Query("DELETE FROM `groups` WHERE `id` = :groupId")

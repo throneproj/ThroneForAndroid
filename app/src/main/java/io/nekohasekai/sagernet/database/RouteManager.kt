@@ -51,6 +51,83 @@ object RouteManager {
     /** Every profile but the desktop's raw ones, which Android keeps read-only and never uses. */
     fun usable(): List<RouteProfile> = all().filterNot { it.is_raw }
 
+    fun isUsable(id: Long): Boolean = id > 0L && dao.isUsable(id)
+
+    /**
+     * ResolveRouteId (RunningProfiles.cpp): a group override naming a profile Android can use, else the global one.
+     * Raw profiles count as gone, like for [current].
+     */
+    fun resolveRouteId(groupRouteId: Long): Long =
+        if (isUsable(groupRouteId)) groupRouteId else globalRouteId()
+
+    /** RouteIdFor: the routing profile a profile of group [gid] is built with. */
+    fun routeIdFor(gid: Long): Long = resolveRouteId(groupRouteId(gid))
+
+    /** The profile [routeIdFor] names. */
+    fun routeFor(gid: Long): RouteProfile =
+        groupRouteId(gid).takeIf { it > 0L }?.let { get(it) }?.takeIf { !it.is_raw } ?: current()
+
+    /** RunningRouteId: the routing profile the running config was built with; 0 when stopped or for a custom full config. */
+    fun runningRouteId(): Long = if (DataStore.serviceState.started) DataStore.runningRouteId else 0L
+
+    /**
+     * ActiveRouteId: the routing profile in effect, the running config's else the global one. For "which route
+     * applies"; the user's global choice stays current_route_id.
+     */
+    fun activeRouteId(): Long = runningRouteId().takeIf { it > 0L } ?: DataStore.currentRouteId
+
+    /**
+     * ConnectionModes.cpp:220-226: the group of the running profile when its own routing profile is the one running,
+     * so switching the global profile leaves the running config as it is; null otherwise.
+     */
+    fun groupKeepingRunningRoute(): ProxyGroup? {
+        val running = runningRouteId().takeIf { it > 0L } ?: return null
+        val profileId = ProfileManager.runningProfileId().takeIf { it > 0L } ?: return null
+        val gid = SagerDatabase.proxyDao.getById(profileId)?.groupId ?: return null
+        val group = SagerDatabase.groupDao.getById(gid) ?: return null
+        return group.takeIf { it.routeId == running && isUsable(running) }
+    }
+
+    /** RoutesRepo::OwnedBy: the profiles the subscription of group [gid] keeps updated, in id order. */
+    fun ownedBy(gid: Long): List<Long> = if (gid > 0L) dao.ownedBy(gid) else emptyList()
+
+    /**
+     * GroupService.cpp:160-164: deletes the profiles group [gid] owns, current_route_id moving off them; the number
+     * deleted. Unlike [delete], it may take the last profile, [current] then creates a new Default one.
+     */
+    fun deleteOwnedBy(gid: Long): Int {
+        val ids = ownedBy(gid)
+        if (ids.isEmpty()) return 0
+        SagerDatabase.instance.runInTransaction {
+            for (id in ids) dao.deleteProfile(id)
+            forgetDeleted(ids.toSet(), emptySet())
+        }
+        if (DataStore.currentRouteId in ids) current()
+        return ids.size
+    }
+
+    private fun groupRouteId(gid: Long): Long =
+        (if (gid > 0L) SagerDatabase.groupDao.getById(gid)?.routeId else null) ?: -1L
+
+    private fun globalRouteId(): Long = DataStore.currentRouteId.takeIf { isUsable(it) } ?: current().id
+
+    /**
+     * RoutesRepo::forgetDeleted: groups routed by a deleted profile follow the global one again, and the groups that
+     * owned one stop importing it.
+     */
+    private fun forgetDeleted(deleted: Set<Long>, owners: Collection<Long>) {
+        for (group in SagerDatabase.groupDao.allGroups()) {
+            if (group.routeId in deleted) {
+                SagerDatabase.groupDao.setRouteId(group.id, -1L)
+                Logs.i("[Groups] ${group.displayName()}: routing profile reset to Default (its profile was deleted)")
+            }
+            if (group.id in owners && group.importSubRoute) {
+                SagerDatabase.groupDao.stopRouteImport(group.id)
+                Logs.i("[Groups] ${group.displayName()}: stopped importing the subscription's routing profile (it was deleted)")
+            }
+        }
+    }
+
     /** Inserts when [p] has no id (and assigns it), else upserts the row; the rules are replaced in list order. */
     fun save(p: RouteProfile): Long {
         SagerDatabase.instance.runInTransaction {
@@ -69,12 +146,17 @@ object RouteManager {
         return p.id
     }
 
-    /** Refuses to delete the last profile; deleting the current one makes the first remaining profile current. */
+    /**
+     * Refuses to delete the last profile; deleting the current one makes the first remaining profile current. Groups
+     * routed by it follow the global profile again, and the group owning it stops importing (RoutesRepo::forgetDeleted).
+     */
     fun delete(id: Long): Boolean {
         val remaining = SagerDatabase.instance.runInTransaction(Callable {
             val ids = dao.allIds()
             if (id !in ids || ids.size <= 1) return@Callable null
+            val owners = dao.sourceGroups(listOf(id))
             dao.deleteProfile(id)
+            forgetDeleted(setOf(id), owners)
             ids - id
         }) ?: return false
         if (DataStore.currentRouteId == id) DataStore.currentRouteId = remaining.first()

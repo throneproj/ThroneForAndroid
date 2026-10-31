@@ -30,6 +30,8 @@ data class RouteProfileEntity(
     /** The profile's RouteDns as Qt-compact JSON, '' when it has none. */
     @ColumnInfo(name = "dns_json", defaultValue = "") var dnsJson: String = "",
     @ColumnInfo(name = "custom_dns", defaultValue = "0") var customDns: Boolean = false,
+    /** The subscription group whose refreshes overwrite this profile's rules, -1 = none (RoutesRepo.cpp). */
+    @ColumnInfo(name = "source_gid", defaultValue = "-1") var sourceGid: Long = -1L,
 ) {
 
     /** custom_dns only counts when dns_json holds an object (RoutesRepo.cpp routeProfileFromJson). */
@@ -48,6 +50,7 @@ data class RouteProfileEntity(
         it.inner_hop_endpoint_ids = innerHopEndpointIds
         it.dns = dnsFromJson(dnsJson)
         it.custom_dns = customDns && it.dns != null
+        it.source_gid = sourceGid
         it.rules = rules.sortedBy { r -> r.ruleOrder }.mapTo(ArrayList<RouteRule>()) { r -> r.toModel() }
     }
 
@@ -69,6 +72,7 @@ data class RouteProfileEntity(
             innerHopEndpointIds = p.inner_hop_endpoint_ids,
             dnsJson = p.dns?.toJson()?.toCompact() ?: "",
             customDns = p.custom_dns,
+            sourceGid = p.source_gid,
         )
 
         /** A stored dns_json; anything but a JSON object reads as no DNS. */

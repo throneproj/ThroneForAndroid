@@ -35,6 +35,8 @@ internal class TestSession(
     val id: Int,
     val spec: TestSpec,
     client: ITestSessionCallback?,
+    /** Gets each URL result once stored (TestRunner's ResultHook). */
+    private val onUrlStored: ((ProxyEntity) -> Unit)? = null,
 ) {
 
     /** The spec's values, else the desktop settings. */
@@ -239,7 +241,13 @@ internal class TestSession(
      * turns the failure its profile already reported into a success.
      */
     fun reportUrl(results: List<ProbeResult>) {
-        persist(results) { ProfileManager.saveUrlTestResult(it.profileId, it.latency, it.error, it.connectOnly) }
+        val stored = ArrayList<ProxyEntity>()
+        persist(results) {
+            ProfileManager.saveUrlTestResult(it.profileId, it.latency, it.error, it.connectOnly)?.let(stored::add)
+        }
+        val hook = onUrlStored
+        // A failing hook must not end the session, whose other results are still to come.
+        if (hook != null) for (profile in stored) runCatching { hook(profile) }.onFailure { Logs.w(it) }
         for (result in results) {
             val latency = if (result.measured) latencyCode(result.latency, result.error, result.connectOnly) else 0
             if (result.connectOnly) {

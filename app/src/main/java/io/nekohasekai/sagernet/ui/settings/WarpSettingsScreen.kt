@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -13,10 +14,12 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SettingsRegistry
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.ktx.needReload
+import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import io.nekohasekai.sagernet.ui.warp.WarpClient
 import io.nekohasekai.sagernet.ui.warp.WarpGenerate
+import kotlinx.coroutines.launch
 import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 /**
@@ -25,8 +28,12 @@ import moe.matsuri.nb4a.ui.SimpleMenuPreference
  */
 class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
 
+    private var amneziaPending = false
+    private var amneziaError = ""
+
     override fun bind() {
-        pref<SwitchPreference>(SettingsRegistry.ENABLE_WARP.key).setOnPreferenceChangeListener { _, newValue ->
+        val enable = pref<SwitchPreference>(SettingsRegistry.ENABLE_WARP.key)
+        enable.setOnPreferenceChangeListener { _, newValue ->
             val enabled = newValue as Boolean
             DataStore.enableWarp = enabled
             if (DataStore.serviceState.started) SagerNet.reloadService()
@@ -43,12 +50,21 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         fun showMode(value: String?) {
             masque.isVisible = value == WarpClient.TUNNEL_MASQUE
             wireGuard.isVisible = !masque.isVisible
+            if (value == WarpClient.MODE_AMNEZIA && DataStore.warpAmneziaPackets.isEmpty()) generateAmneziaPackets()
         }
         showMode(mode.value)
         mode.setOnPreferenceChangeListener { _, newValue ->
             showMode(newValue as String)
             reloadIfEnabled()
             true
+        }
+        validation.addRule(listOf(enable.key, mode.key), label = mode.title?.toString()) {
+            when {
+                !enable.isChecked || mode.value != WarpClient.MODE_AMNEZIA -> ""
+                DataStore.warpAmneziaPackets.isNotEmpty() -> ""
+                amneziaPending -> getString(R.string.warp_amnezia_generating)
+                else -> amneziaError.ifEmpty { getString(R.string.warp_amnezia_missing) }
+            }
         }
 
         for (setting in listOf(
@@ -75,9 +91,10 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         pref<Preference>(KEY_GENERATE).setOnPreferenceClickListener { button ->
             val masqueMode = mode.value == WarpClient.TUNNEL_MASQUE
             val tunnelType = if (masqueMode) WarpClient.TUNNEL_MASQUE else WarpClient.TUNNEL_WIREGUARD
-            WarpGenerate.generate(this, requireContext(), button, tunnelType, R.string.warp_generate_failed) {
-                fill(it, masqueMode)
-            }
+            val onPackets = if (mode.value == WarpClient.MODE_AMNEZIA) ::packetsGenerated else null
+            WarpGenerate.generate(
+                this, requireContext(), button, tunnelType, R.string.warp_generate_failed, onPackets,
+            ) { fill(it, masqueMode) }
             true
         }
 
@@ -118,6 +135,26 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
             setText(SettingsRegistry.WARP_RESERVED, identity.reserved.joinToString("\n"))
         }
         reloadIfEnabled()
+    }
+
+    /** generate_amnezia_packets (dialog_manage_routes.cpp): picking the amnezia mode without packets makes them. */
+    private fun generateAmneziaPackets() {
+        if (amneziaPending) return
+        amneziaPending = true
+        validation.refresh()
+        lifecycleScope.launch {
+            val result = WarpClient.generateCamouflage()
+            amneziaPending = false
+            packetsGenerated(result)
+            if (result.isSuccess && DataStore.warpMode == WarpClient.MODE_AMNEZIA) reloadIfEnabled()
+        }
+    }
+
+    /** New packets are saved at once; a failure keeps the old ones and is shown on the mode row. */
+    private fun packetsGenerated(result: Result<List<String>>) {
+        result.onSuccess { DataStore.warpAmneziaPackets = it }
+        amneziaError = result.exceptionOrNull()?.readableMessage.orEmpty()
+        validation.refresh()
     }
 
     private fun setText(setting: SettingsRegistry.Setting<*>, value: String) {

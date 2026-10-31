@@ -34,6 +34,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     /** The involvedProfileIds of the config [currentProfile] last started with, for ProfileManager.runningUses. */
     var runningProfiles by configurationStore.stringList(Key.RUNNING_PROFILES)
 
+    /** The routing profile the config [currentProfile] last started with was built with, 0 for a custom full config; read it through RouteManager.runningRouteId. */
+    var runningRouteId by configurationStore.long(Key.RUNNING_ROUTE)
+
     var selectedProxy by configurationStore.long(Key.PROFILE_ID)
 
     // only in bg process
@@ -282,6 +285,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var warpPublicKey by SettingsRegistry.WARP_PUBLIC_KEY
     var warpIfcAddrs by SettingsRegistry.WARP_IFC_ADDRS
     var warpReserved by SettingsRegistry.WARP_RESERVED
+    var warpAmneziaPackets by SettingsRegistry.WARP_AMNEZIA_PACKETS
     var warpTosAccepted by SettingsRegistry.WARP_TOS_ACCEPTED
     var warpMasqueEp by SettingsRegistry.WARP_MASQUE_EP
     var warpMasquePrivateKey by SettingsRegistry.WARP_MASQUE_PRIVATE_KEY

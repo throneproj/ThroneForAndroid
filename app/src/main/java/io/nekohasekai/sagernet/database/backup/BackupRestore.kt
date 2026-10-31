@@ -363,6 +363,11 @@ object BackupRestore {
                 insertRows(db, ROUTE_PROFILES, staged.routeProfiles!!)
                 insertRows(db, ROUTE_RULES, staged.routeRules!!)
             }
+            // Database.cpp:590-594: route_id and source_gid point across the two parts; restored apart, they would name unrelated rows.
+            if (choice.profiles != choice.routes) {
+                db.execSQL("UPDATE `$GROUPS` SET `route_id` = -1")
+                db.execSQL("UPDATE `$ROUTE_PROFILES` SET `source_gid` = -1")
+            }
             if (choice.profiles || choice.routes) {
                 // Database.cpp:364-377 raises all three counters whichever of the two parts was restored.
                 for ((table, value) in staged.counters) raiseSequence(db, table, value)

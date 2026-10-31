@@ -24,6 +24,18 @@ interface RouteDao {
     @Query("SELECT dns_json FROM route_profiles WHERE id = :id AND custom_dns != 0")
     fun customDnsJson(id: Long): String?
 
+    /** Whether [id] names a profile Android can build with (not raw). */
+    @Query("SELECT EXISTS(SELECT 1 FROM route_profiles WHERE id = :id AND is_raw = 0)")
+    fun isUsable(id: Long): Boolean
+
+    /** RoutesRepo::OwnedBy: the profiles the subscription group [gid] keeps updated. */
+    @Query("SELECT id FROM route_profiles WHERE source_gid = :gid ORDER BY id")
+    fun ownedBy(gid: Long): List<Long>
+
+    /** The groups owning any of [ids]. */
+    @Query("SELECT DISTINCT source_gid FROM route_profiles WHERE id IN (:ids) AND source_gid > 0")
+    fun sourceGroups(ids: List<Long>): List<Long>
+
     @Query("SELECT * FROM route_rules ORDER BY route_profile_id, rule_order")
     fun allRules(): List<RouteRuleEntity>
 

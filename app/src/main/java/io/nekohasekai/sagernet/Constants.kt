@@ -41,6 +41,7 @@ object Key {
     const val PROFILE_GROUP = "profileGroup"
     const val PROFILE_CURRENT = "profileCurrent"
     const val RUNNING_PROFILES = "runningProfiles"
+    const val RUNNING_ROUTE = "runningRoute"
 
     const val SERVER_CONFIG = "serverConfig"
 

@@ -17,6 +17,7 @@ import io.nekohasekai.sagernet.validation.Issue
 import io.nekohasekai.sagernet.validation.ParseDiag
 import io.nekohasekai.sagernet.validation.Severity
 import io.nekohasekai.sagernet.validation.Validation
+import io.nekohasekai.sagernet.validation.acceptOptional
 import io.nekohasekai.sagernet.validation.addIssue
 import io.nekohasekai.sagernet.validation.vtr
 
@@ -36,6 +37,12 @@ private fun vlessImportPacketEncoding(raw: String): String {
     if (value in vPacketEncoding) return value
     ParseDiag.warn("packet_encoding", vtr(R.string.validation_vmess_packet_encoding_unknown), value)
     return ""
+}
+
+/** No flow is the core's default; an unknown one stops it and a misplaced Vision fails every connection. */
+private fun dropUnusableVlessFlow(v: Vless) {
+    if (v.flow == "xtls-rprx-vision-udp443") return
+    if (!acceptOptional("flow", VlessChecks.vlessFlow(v.flow, v.tls.enabled, v.transport.type), v.flow)) v.flow = ""
 }
 
 /** The Checks of vless.h. */
@@ -81,6 +88,7 @@ class Vless : Outbound("vless") {
         val packetEncoding = q.value("packetEncoding")
         packet_encoding = if (packetEncoding.isEmpty()) "xudp" else vlessImportPacketEncoding(packetEncoding)
         multiplex.parseFromLink(url)
+        dropUnusableVlessFlow(this)
         return !(uuid.isEmpty() || server.isEmpty())
     }
 
@@ -96,6 +104,7 @@ class Vless : Outbound("vless") {
         tls.parseFromClash(node, clashTlsOn(proxy))
         transport.parseFromClash(proxy)
         multiplex.parseFromClash(proxy)
+        dropUnusableVlessFlow(this)
         return true
     }
 
@@ -112,6 +121,7 @@ class Vless : Outbound("vless") {
         if (ParseDiag.active()) {
             flow = vlessImportFlow(flow)
             packet_encoding = vlessImportPacketEncoding(packet_encoding)
+            dropUnusableVlessFlow(this)
         }
         return true
     }
