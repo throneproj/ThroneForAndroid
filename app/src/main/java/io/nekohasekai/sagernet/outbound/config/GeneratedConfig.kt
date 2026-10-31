@@ -62,7 +62,7 @@ class GeneratedConfig(
  * core status names members by [members] tags, and pinning maps a profile id back to its tag.
  */
 class AutoSelectorBuild(
-    /** The core `auto-selector` outbound: `proxy`, or `warp-bypass` under WARP. */
+    /** The core auto-selector group, including its WARP placement. */
     @JvmField val groupTag: String,
     @JvmField val selectorId: Long,
     /** Member ingress tag (`pool-<i>-0`) -> member profile id, in pool order: the plan's build minus [rejected]. */

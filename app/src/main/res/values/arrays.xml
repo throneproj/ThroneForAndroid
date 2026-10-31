@@ -696,15 +696,27 @@
     <!-- WARP -->
     <string-array name="warp_mode_entries" translatable="false">
         <item>@string/warp_mode_wireguard</item>
+        <item>@string/warp_mode_amnezia</item>
         <item>@string/warp_mode_masque</item>
     </string-array>
     <string-array name="warp_mode_values" translatable="false">
         <item>wireguard</item>
+        <item>amnezia</item>
         <item>masque</item>
     </string-array>
     <string-array name="warp_masque_http_mode_entries">
         <item>@string/warp_http3_fallback</item>
         <item>@string/warp_http3_only</item>
         <item>HTTP/2</item>
+    </string-array>
+    <string-array name="warp_chain_order_entries" translatable="false">
+        <item>@string/warp_order_exit</item>
+        <item>@string/warp_order_entry</item>
+        <item>@string/warp_order_both</item>
+    </string-array>
+    <string-array name="warp_chain_order_values" translatable="false">
+        <item>proxy-first</item>
+        <item>warp-first</item>
+        <item>warp-both</item>
     </string-array>
 </resources>

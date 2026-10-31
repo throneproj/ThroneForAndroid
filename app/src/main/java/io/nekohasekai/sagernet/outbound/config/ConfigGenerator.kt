@@ -89,7 +89,11 @@ class ConfigGenerator @JvmOverloads constructor(
         val front = if (plan != null) -1L else frontProxyId
 
         val state = BuildState(forTest = false, ports)
-        val chains = ChainBuilder(reads, buildContext, state, if (settings.enableWarp) WarpHop.outbound(settings) else null)
+        val chains = ChainBuilder(
+            reads, buildContext, state,
+            if (settings.enableWarp) WarpHop.outbound(settings) else null,
+            if (WarpHop.before(settings)) WarpHop.outbound(settings, entry = true) else null,
+        )
         calculatePrerequisites(state, chains, reads, profile, route, landing, front, plan)
         if (state.failed) return GeneratedConfig.failure(state.error)
 
@@ -612,12 +616,17 @@ class ConfigGenerator @JvmOverloads constructor(
         state: BuildState, chains: ChainBuilder, reads: ProfileProvider, profile: Outbound, profileId: Long,
         landingProxyId: Long, frontProxyId: Long, plan: AutoSelectorPlan?, origin: HopOrigin,
     ) {
-        val warpWrap = settings.enableWarp
+        val warpBefore = WarpHop.before(settings)
+        val warpAfter = WarpHop.after(settings)
+        val warpWrap = warpAfter && !warpBefore
         if (profile is AutoSelector && plan != null) {
-            buildAutoSelectorGroup(state, chains, reads, profile, profileId, plan, warpWrap)
+            val groupTag = if (warpAfter) { if (warpBefore) "warp-main" else Tags.WARP_BYPASS } else Tags.PROXY
+            buildAutoSelectorGroup(state, chains, reads, profile, profileId, plan, groupTag, warpBefore)
             if (state.failed) return
-            if (warpWrap) {
-                buildWarpInFrontOfSelector(state)
+            if (warpBefore) buildAutoSelectorGroup(state, chains, reads, profile, profileId, plan, Tags.WARP_BYPASS, false, track = false)
+            if (state.failed) return
+            if (warpAfter) {
+                buildWarpInFrontOfSelector(state, groupTag)
                 if (state.failed) return
             }
         } else {
@@ -630,7 +639,13 @@ class ConfigGenerator @JvmOverloads constructor(
                 state.error = "The chain has no hops"
                 return
             }
-            if (warpWrap) hopIds.add(0, WarpHop.PROFILE_ID)
+            if (warpBefore) {
+                val bypassTag = chains.buildOutboundChain(ChainRequest(hopIds.toList(), "warp-bypass-chain", origin = origin))
+                if (state.failed) return
+                state.outbounds.add(jsonObjectOf("type" to "selector", "tag" to Tags.WARP_BYPASS, "outbounds" to JsonArray.of(bypassTag)))
+                hopIds.add(WarpHop.ENTRY_PROFILE_ID)
+            }
+            if (warpAfter) hopIds.add(0, WarpHop.PROFILE_ID)
             chains.buildOutboundChain(
                 ChainRequest(hopIds, Tags.MAIN_CHAIN_PREFIX, includeProxy = true, warpWrap = warpWrap, origin = origin),
             )
@@ -672,18 +687,17 @@ class ConfigGenerator @JvmOverloads constructor(
      */
     private fun buildAutoSelectorGroup(
         state: BuildState, chains: ChainBuilder, reads: ProfileProvider, selector: AutoSelector, selectorId: Long,
-        plan: AutoSelectorPlan, warpWrap: Boolean,
+        plan: AutoSelectorPlan, groupTag: String, warpBefore: Boolean, track: Boolean = true,
     ) {
         if (!plan.ok) {
             state.error = plan.error
             return
         }
-        val groupTag = if (warpWrap) Tags.WARP_BYPASS else Tags.PROXY
 
         class PlannedMember(val member: SelectorMember, val hopIds: List<Long>, val bridges: MemberBridges, val origin: HopOrigin)
 
         // One member the core rejects fails the whole group's start, so drop it instead.
-        val rejected = rejectedMembers(chains, reads, plan.build)
+        val rejected = rejectedMembers(chains, reads, plan.build).toMutableMap()
         val plannedMembers = ArrayList<PlannedMember>()
         var bridgeCount = 0
         for (id in plan.build) {
@@ -695,9 +709,17 @@ class ConfigGenerator @JvmOverloads constructor(
             if (memberGroup.landingProxyId > 0) hopIds.add(memberGroup.landingProxyId)
             hopIds.add(id)
             if (memberGroup.frontProxyId > 0) hopIds.add(memberGroup.frontProxyId)
+            if (warpBefore) hopIds.add(WarpHop.ENTRY_PROFILE_ID)
+            val origin = HopOrigin(selector, listOf(ChainGroup(memberGroup.name, memberGroup.landingProxyId, memberGroup.frontProxyId)))
+            if (warpBefore) {
+                val error = chains.candidateError(hopIds, origin)
+                if (error.isNotEmpty() && error != OutboundChecks.fragmentSettingsError(buildContext)) {
+                    rejected[id] = error
+                    continue
+                }
+            }
             val bridges = chains.bridgesFor(hopIds)
             bridgeCount += bridges.count
-            val origin = HopOrigin(selector, listOf(ChainGroup(memberGroup.name, memberGroup.landingProxyId, memberGroup.frontProxyId)))
             plannedMembers.add(PlannedMember(member, hopIds, bridges, origin))
         }
         // One batch for every member: reserving per member can deal the same port twice.
@@ -714,7 +736,7 @@ class ConfigGenerator @JvmOverloads constructor(
             val tag = chains.buildOutboundChain(
                 ChainRequest(
                     planned.hopIds,
-                    hopTag(Tags.POOL_CHAIN_PREFIX, idx),
+                    hopTag(if (track) Tags.POOL_CHAIN_PREFIX else "pool-warp-bypass", idx),
                     singToXrayPort = if (bridges.singToXray) bridgePorts[portIdx++] else -1,
                     xrayToSingPort = if (bridges.xrayToSing) bridgePorts[portIdx++] else -1,
                     xrayFullConfigPort = if (bridges.xrayFullConfig) bridgePorts[portIdx++] else -1,
@@ -777,13 +799,13 @@ class ConfigGenerator @JvmOverloads constructor(
             group["balance_interval"] = "${selector.balanceIntervalSec}s"
         }
         state.outbounds.add(group)
-        state.autoSelector = AutoSelectorBuild(
+        if (track) state.autoSelector = AutoSelectorBuild(
             groupTag = groupTag,
             selectorId = selectorId,
             members = members,
             rejected = rejected,
             intervalSec = selector.intervalSec,
-            warp = warpWrap,
+            warp = WarpHop.after(settings),
         )
     }
 
@@ -806,8 +828,8 @@ class ConfigGenerator @JvmOverloads constructor(
         return rejected
     }
 
-    /** buildWarpInFrontOfSelector (:1779-1792): the group holds warp-bypass, so WARP is `proxy` dialing through it. */
-    private fun buildWarpInFrontOfSelector(state: BuildState) {
+    /** Exit WARP dials through the selected group, which may itself use entry WARP. */
+    private fun buildWarpInFrontOfSelector(state: BuildState, detour: String) {
         val warp = WarpHop.outbound(settings)
         val result = warp.buildChecked(buildContext)
         if (!result.ok) {
@@ -816,7 +838,7 @@ class ConfigGenerator @JvmOverloads constructor(
         }
         val obj = result.json
         obj["tag"] = Tags.PROXY
-        obj["detour"] = Tags.WARP_BYPASS
+        obj["detour"] = detour
         if (warp.isEndpoint()) state.endpoints.add(obj) else state.outbounds.add(obj)
     }
 

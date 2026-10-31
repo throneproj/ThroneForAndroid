@@ -41,8 +41,15 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
             getString(R.string.warp_mode_sum, it.entry ?: "")
         }
         fun showMode(value: String?) {
+            wireGuard.title = WarpClient.modeName(value.orEmpty())
             masque.isVisible = value == WarpClient.TUNNEL_MASQUE
             wireGuard.isVisible = !masque.isVisible
+        }
+        val order = pref<SimpleMenuPreference>(SettingsRegistry.WARP_CHAIN_ORDER.key)
+        order.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> { it.entry }
+        order.setOnPreferenceChangeListener { _, _ ->
+            reloadIfEnabled()
+            true
         }
         showMode(mode.value)
         mode.setOnPreferenceChangeListener { _, newValue ->
@@ -75,8 +82,14 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         pref<Preference>(KEY_GENERATE).setOnPreferenceClickListener { button ->
             val masqueMode = mode.value == WarpClient.TUNNEL_MASQUE
             val tunnelType = if (masqueMode) WarpClient.TUNNEL_MASQUE else WarpClient.TUNNEL_WIREGUARD
-            WarpGenerate.generate(this, requireContext(), button, tunnelType, R.string.warp_generate_failed) {
-                fill(it, masqueMode)
+            val selectedMode = mode.value
+            val selectedOrder = order.value
+            val count = if (selectedOrder == "warp-both") 2 else 1
+            WarpGenerate.generateIdentities(this, requireContext(), button, tunnelType, R.string.warp_generate_failed, count) {
+                check(mode.value == selectedMode && order.value == selectedOrder) { getString(R.string.warp_settings_changed) }
+                // Save only after every registration succeeds; a failed second registration preserves the old pair.
+                if (count == 2) DataStore.warpEntryConfig = it[1].toBeanJson(tunnelType)
+                fill(it[0], masqueMode)
             }
             true
         }

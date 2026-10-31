@@ -125,7 +125,7 @@ object SettingsRegistry {
     val NTP_OUTBOUNDS = listOf("direct", "proxy")
 
     @JvmField
-    val WARP_MODES = listOf("wireguard", "masque")
+    val WARP_MODES = listOf("wireguard", "amnezia", "masque")
 
     /** defaultTunPrivateRanges (SettingsRepo.h:18-21). */
     @JvmField
@@ -303,6 +303,8 @@ object SettingsRegistry {
     // ------------------------------------------------------------------------------------------------ warp
 
     @JvmField val ENABLE_WARP = bool("enable_warp", false)
+    @JvmField val WARP_CHAIN_ORDER = oneOf("warp_chain_order", "proxy-first", listOf("proxy-first", "warp-first", "warp-both"))
+    @JvmField val WARP_ENTRY_CONFIG = string("warp_entry_config", "")
     @JvmField val WARP_MODE = oneOf("warp_mode", "wireguard", WARP_MODES)
     @JvmField val WARP_EP = string("warp_ep", "")
     @JvmField val WARP_PRIVATE_KEY = string("warp_private_key", "")

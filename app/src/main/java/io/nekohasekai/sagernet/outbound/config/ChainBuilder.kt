@@ -100,6 +100,7 @@ internal class ChainBuilder(
     private val ctx: BuildContext,
     private val state: BuildState,
     private val warp: Outbound? = null,
+    private val entryWarp: Outbound? = null,
 ) {
     /** usesXrayCore (generate.cpp:428-431). */
     fun usesXrayCore(outbound: Outbound): Boolean = outbound.isXray() || outbound.isXrayFullConfig()
@@ -128,7 +129,11 @@ internal class ChainBuilder(
         var xrayFullConfig = false
         var inXray = false
         for (id in hopIds) {
-            val hop = profiles.get(id) ?: continue
+            val hop = when (id) {
+                WarpHop.PROFILE_ID -> warp
+                WarpHop.ENTRY_PROFILE_ID -> entryWarp
+                else -> profiles.get(id)
+            } ?: continue
             if (hop.isXrayFullConfig()) xrayFullConfig = true
             val xray = hop.isXray()
             if (xray && !inXray) singToXray = true
@@ -189,8 +194,9 @@ internal class ChainBuilder(
         val scan = ChainScan()
         var inXray = false
         for (id in hopIds) {
-            if (id == WarpHop.PROFILE_ID) {
-                val warpHop = warp ?: return missingHopError(id, origin)
+            if (id == WarpHop.PROFILE_ID || id == WarpHop.ENTRY_PROFILE_ID) {
+                val warpHop = (if (id == WarpHop.ENTRY_PROFILE_ID) entryWarp else warp)
+                    ?: return missingHopError(id, origin)
                 if (inXray) {
                     state.xrayToSingTransitioned = true
                     scan.coreTransitions++
@@ -395,6 +401,15 @@ internal class ChainBuilder(
             }
             val obj = result.json
             obj["tag"] = tag
+            if (hop.id == WarpHop.ENTRY_PROFILE_ID && nextTag.isEmpty()) {
+                // A separate WireGuard device per selector member would reuse one identity and race handshakes.
+                if (state.endpoints.none { (it as? JsonObject)?.string("tag") == "warp-entry" }) {
+                    obj["tag"] = "warp-entry"
+                    state.endpoints.add(obj)
+                }
+                state.outbounds.add(jsonObjectOf("type" to "selector", "tag" to tag, "outbounds" to JsonArray.of("warp-entry")))
+                continue
+            }
             state.collectEchQueryName(hop.outbound)
             // Realm reads its STUN resolver off this key only; without it the hosts go through DNS rules (:1356-1358).
             if (TypeAccess.realmActive(hop.outbound)) obj["domain_resolver"] = jsonObjectOf("server" to Tags.DNS_DIRECT)

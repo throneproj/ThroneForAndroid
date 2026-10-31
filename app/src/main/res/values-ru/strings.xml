@@ -1401,7 +1401,7 @@
     <string name="warp_disable">Отключить WARP</string>
     <string name="warp_disabled">WARP отключён</string>
     <string name="warp_enable">Включить WARP</string>
-    <string name="warp_enable_sum">Позволяет использовать конфигурацию ниже как выход, полезно для обхода сервисов, ограничивающих не-WARP VPN</string>
+    <string name="warp_enable_sum">Использовать WARP на входе, выходе или с обеих сторон выбранного подключения.</string>
     <string name="warp_enabled">WARP включён</string>
     <string name="warp_endpoint">Конечная точка</string>
     <string name="warp_generate_failed">Не удалось создать конфигурацию WARP</string>
@@ -1416,9 +1416,9 @@
     <string name="warp_http_version_sum">%s\nHTTP/3 работает поверх UDP; HTTP/2 — поверх TLS на TCP и работает там, где UDP заблокирован.</string>
     <string name="warp_identity_failed">Не удалось создать идентификатор WARP</string>
     <string name="warp_interface_addresses">Адреса интерфейса</string>
-    <string name="warp_masque_note">WARP едет поверх вашего прокси: MASQUE через HTTP/3 требует прокси, пересылающего UDP, через HTTP/2 достаточно только TCP.</string>
+    <string name="warp_masque_note">На выходе MASQUE через HTTP/3 требует поддержки UDP, через HTTP/2 — TCP. На входе адрес WARP должен быть доступен напрямую.</string>
     <string name="warp_mode">Режим</string>
-    <string name="warp_mode_sum">%s\nWireGuard работает поверх UDP. MASQUE туннелирует через HTTP/3 или HTTP/2 и проходит сети, блокирующие WireGuard.</string>
+    <string name="warp_mode_sum">%s\nWireGuard и AmneziaWG используют UDP. AmneziaWG добавляет маскировку пакетов. MASQUE использует HTTP/3 или HTTP/2.</string>
     <string name="warp_not_generated">WARP включён, но его конфигурация не создана. Создайте её в Настройки › Маршрутизация › WARP.</string>
     <string name="warp_peer_public_key">Открытый ключ пары</string>
     <string name="warp_peer_public_key_message">Base64 DER открытого ключа сервера. При задании закрепляет сертификат сервера.</string>
@@ -1431,7 +1431,7 @@
     <string name="warp_state_off">Выкл.</string>
     <string name="warp_state_on">Вкл. · %s</string>
     <string name="warp_tos_message"><![CDATA[Создание идентификатора WARP регистрирует новое устройство в Cloudflare.<br><br>Принимаете ли вы <a href="%1$s">условия использования Cloudflare WARP</a>?]]></string>
-    <string name="warp_wireguard_note">WARP едет поверх вашего прокси: WireGuard требует прокси, пересылающего UDP.</string>
+    <string name="warp_wireguard_note">На выходе WireGuard и AmneziaWG требуют поддержки UDP в выбранном подключении. На входе адрес WARP должен быть доступен напрямую.</string>
     <string name="webdav_choose_backup">Выбрать резервную копию</string>
     <string name="webdav_downloading">Загрузка из WebDAV…</string>
     <string name="webdav_listing">Чтение папки WebDAV…</string>
@@ -2496,4 +2496,11 @@
     <string name="validation_route_dns_dropped">Собственные настройки DNS профиля отброшены, поэтому он использует глобальные: %1$s</string>
     <string name="route_dns_global_servers">Удаленный %1$s, прямой %2$s</string>
     <string name="dns_server_suggestions">Недавние и предлагаемые серверы</string>
+    <string name="warp_mode_amnezia">AmneziaWG</string>
+    <string name="warp_chain_order">Расположение WARP</string>
+    <string name="warp_order_exit">На выходе: подключение → WARP</string>
+    <string name="warp_order_entry">На входе: WARP → подключение</string>
+    <string name="warp_order_both">На входе и выходе: WARP → подключение → WARP</string>
+    <string name="warp_chain_order_note">Подключение — выбранный профиль или цепочка. Входной WARP доставляет подключение до сервера, выходной — трафик от сервера до сайта. Для двойного режима кнопка «Сгенерировать» создаёт две независимые регистрации WARP. Правила обхода WARP обходят оба туннеля.</string>
+    <string name="warp_settings_changed">Настройки WARP изменились во время регистрации. Повторите генерацию для выбранного режима.</string>
 </resources>

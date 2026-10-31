@@ -51,30 +51,39 @@ object WarpGenerate {
         tunnelType: String,
         @StringRes failedTitle: Int,
         onIdentity: (WarpClient.Identity) -> Unit,
+    ) = generateIdentities(owner, context, button, tunnelType, failedTitle, 1) { onIdentity(it.single()) }
+
+    fun generateIdentities(
+        owner: LifecycleOwner,
+        context: Context,
+        button: Preference,
+        tunnelType: String,
+        @StringRes failedTitle: Int,
+        count: Int,
+        onIdentities: (List<WarpClient.Identity>) -> Unit,
     ) = confirmTerms(context) {
         val idle = button.summary
         button.isEnabled = false
         button.summary = context.getString(R.string.generating)
         owner.lifecycleScope.launch {
-            val identity = try {
-                WarpClient.register(tunnelType)
+            try {
+                val identities = List(count) { WarpClient.register(tunnelType) }
+                check(identities.map { it.privateKey }.distinct().size == count) { "WARP registrations returned duplicate identities" }
+                onIdentities(identities)
+                button.summary = context.getString(R.string.warp_generate_success)
+                delay(2000)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                button.summary = idle
-                button.isEnabled = true
                 MaterialAlertDialogBuilder(context)
                     .setTitle(failedTitle)
                     .setMessage(e.readableMessage)
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
-                return@launch
+            } finally {
+                button.summary = idle
+                button.isEnabled = true
             }
-            onIdentity(identity)
-            button.summary = context.getString(R.string.warp_generate_success)
-            delay(2000)
-            button.summary = idle
-            button.isEnabled = true
         }
     }
 

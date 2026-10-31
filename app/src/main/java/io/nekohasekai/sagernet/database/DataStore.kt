@@ -277,6 +277,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     // warp
     var enableWarp by SettingsRegistry.ENABLE_WARP
     var warpMode by SettingsRegistry.WARP_MODE
+    var warpChainOrder by SettingsRegistry.WARP_CHAIN_ORDER
+    var warpEntryConfig by SettingsRegistry.WARP_ENTRY_CONFIG
     var warpEp by SettingsRegistry.WARP_EP
     var warpPrivateKey by SettingsRegistry.WARP_PRIVATE_KEY
     var warpPublicKey by SettingsRegistry.WARP_PUBLIC_KEY

@@ -120,6 +120,8 @@ object SettingsMapper {
             directTestUrl = DataStore.directTestUrl,
             enableWarp = DataStore.enableWarp,
             warpMode = DataStore.warpMode,
+            warpChainOrder = DataStore.warpChainOrder,
+            warpEntryConfig = DataStore.warpEntryConfig,
             warpEp = DataStore.warpEp,
             warpPrivateKey = DataStore.warpPrivateKey,
             warpPublicKey = DataStore.warpPublicKey,

@@ -12,6 +12,15 @@
         app:key="warp_mode"
         app:title="@string/warp_mode" />
 
+    <moe.matsuri.nb4a.ui.SimpleMenuPreference
+        app:entries="@array/warp_chain_order_entries"
+        app:entryValues="@array/warp_chain_order_values"
+        app:key="warp_chain_order"
+        app:title="@string/warp_chain_order" />
+    <Preference
+        app:selectable="false"
+        app:summary="@string/warp_chain_order_note" />
+
     <PreferenceCategory
         app:key="warpWireGuard"
         app:summary="@string/warp_wireguard_note"

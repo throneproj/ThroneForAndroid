@@ -1558,13 +1558,13 @@
     <string name="warp_state_on">On · %s</string>
     <string name="warp_state_off">Off</string>
     <string name="warp_enable">Enable WARP</string>
-    <string name="warp_enable_sum">Enables the config below to be used as egress, useful for bypassing services restricting non-WARP VPNs</string>
+    <string name="warp_enable_sum">Use WARP at the entry, exit, or both ends of the selected connection.</string>
     <string name="warp_mode">Mode</string>
-    <string name="warp_mode_sum">%s\nWireGuard runs over UDP. MASQUE tunnels over HTTP/3 or HTTP/2 and passes networks that block WireGuard.</string>
+    <string name="warp_mode_sum">%s\nWireGuard and AmneziaWG use UDP. AmneziaWG adds packet camouflage. MASQUE uses HTTP/3 or HTTP/2.</string>
     <string name="warp_mode_wireguard" translatable="false">WireGuard</string>
     <string name="warp_mode_masque" translatable="false">MASQUE</string>
-    <string name="warp_wireguard_note">WARP rides on your proxy: WireGuard needs a proxy that forwards UDP.</string>
-    <string name="warp_masque_note">WARP rides on your proxy: MASQUE over HTTP/3 needs a proxy that forwards UDP, over HTTP/2 it needs only TCP.</string>
+    <string name="warp_wireguard_note">At exit, WireGuard and AmneziaWG require a connection that forwards UDP. At entry, the WARP endpoint must be reachable directly.</string>
+    <string name="warp_masque_note">At exit, MASQUE over HTTP/3 requires UDP forwarding; HTTP/2 requires TCP. At entry, the WARP endpoint must be reachable directly.</string>
     <string name="warp_endpoint">Endpoint</string>
     <string name="warp_private_key">Private key</string>
     <string name="warp_public_key">Public key</string>
@@ -2641,4 +2641,11 @@
     <string name="validation_route_dns_dropped">The profile\'s own DNS settings were dropped, so it uses the global ones: %1$s</string>
     <string name="route_dns_global_servers">Remote %1$s, direct %2$s</string>
     <string name="dns_server_suggestions">Recent and suggested servers</string>
+    <string name="warp_mode_amnezia">AmneziaWG</string>
+    <string name="warp_chain_order">WARP placement</string>
+    <string name="warp_order_exit">At exit: Connection → WARP</string>
+    <string name="warp_order_entry">At entry: WARP → Connection</string>
+    <string name="warp_order_both">At entry and exit: WARP → Connection → WARP</string>
+    <string name="warp_chain_order_note">Connection means the selected profile or chain. Entry WARP carries the connection to its server; exit WARP carries traffic from the server to the destination. For both, Generate registers two independent WARP identities. WARP bypass rules skip both tunnels.</string>
+    <string name="warp_settings_changed">WARP settings changed during registration. Generate again for the selected mode.</string>
 </resources>

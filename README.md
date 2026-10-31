@@ -22,7 +22,7 @@ Releases from v2.0.0 on are signed with a new key, so Android refuses to install
 - Backups in the desktop's `.thrbackup` format, restorable on either side: save, share or sync over WebDAV
 - Route profiles shared with desktop, preloaded from [routeprofiles](https://github.com/throneproj/routeprofiles), plus Android-only rule conditions: apps, Wi-Fi network (SSID / BSSID), network type and metered networks
 - Auto Selector profiles that keep the best server of one or more groups ranked and switch automatically
-- Cloudflare WARP: registration (WireGuard or MASQUE identity) and a built-in WARP mode for routing
+- Cloudflare WARP: WireGuard, AmneziaWG or MASQUE at entry, exit, or both ends of the selected connection
 - URL, IP / country and speed tests, with a bulk-test panel (live progress, latency histogram, fastest servers, sort / remove unavailable / connect to fastest)
 - The sing-box dashboard built in (live traffic, connections, logs)
 - JSON editor with sing-box schema checking, completion and formatting

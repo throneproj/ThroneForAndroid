@@ -8,6 +8,8 @@ import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.appRequestsNeedProxy
 import io.nekohasekai.sagernet.ktx.appRequestsViaProxy
+import io.nekohasekai.sagernet.outbound.config.GeneratorSettings
+import io.nekohasekai.sagernet.outbound.config.WarpHop
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.link.LinkCodec
 import kotlinx.coroutines.CancellationException
@@ -41,6 +43,19 @@ object WarpClient {
                 ipv6.takeIf { it.isNotEmpty() }?.let { "$it/128" },
             )
 
+        init {
+            require(privateKey.isNotBlank() && peerPublicKey.isNotBlank() && endpoint.isNotBlank() &&
+                (ipv4.isNotBlank() || ipv6.isNotBlank())) { "WARP registration returned an incomplete identity" }
+        }
+
+        fun toBeanJson(tunnelType: String): String = WarpHop.outbound(GeneratorSettings(
+            warpMode = tunnelType,
+            warpPrivateKey = privateKey, warpPublicKey = peerPublicKey,
+            warpEp = endpoint, warpIfcAddrs = addresses, warpReserved = reserved,
+            warpMasquePrivateKey = privateKey, warpMasquePeerPublicKey = peerPublicKey,
+            warpMasqueEp = endpoint, warpMasqueIfcAddrs = addresses,
+        )).exportToJson().toCompact()
+
         /** The endpoint split into host (IPv6 unbracketed) and port (edit_wireguard.cpp:44-49); null without a port. */
         fun endpointHostPort(): Pair<String, String>? {
             val sep = endpoint.lastIndexOf(':')
@@ -52,10 +67,19 @@ object WarpClient {
     }
 
     fun modeName(mode: String): String =
-        app.getString(if (mode == TUNNEL_MASQUE) R.string.warp_mode_masque else R.string.warp_mode_wireguard)
+        app.getString(when (mode) {
+            TUNNEL_MASQUE -> R.string.warp_mode_masque
+            "amnezia" -> R.string.warp_mode_amnezia
+            else -> R.string.warp_mode_wireguard
+        })
 
     /** generate.cpp:559-571: the key, endpoint or addresses of the active mode are missing. */
-    fun isGenerated(): Boolean = if (DataStore.warpMode == TUNNEL_MASQUE) {
+    fun isGenerated(): Boolean = (DataStore.warpChainOrder != "warp-both" || WarpHop.validEntry(GeneratorSettings(
+        warpMode = DataStore.warpMode, warpEntryConfig = DataStore.warpEntryConfig,
+        warpPrivateKey = DataStore.warpPrivateKey, warpMasquePrivateKey = DataStore.warpMasquePrivateKey,
+    ))) && primaryGenerated()
+
+    private fun primaryGenerated(): Boolean = if (DataStore.warpMode == TUNNEL_MASQUE) {
         DataStore.warpMasquePrivateKey.isNotEmpty() && DataStore.warpMasquePeerPublicKey.isNotEmpty() &&
             DataStore.warpMasqueEp.isNotEmpty() && DataStore.warpMasqueIfcAddrs.isNotEmpty()
     } else {

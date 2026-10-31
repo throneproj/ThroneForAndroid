@@ -145,8 +145,10 @@ data class GeneratorSettings(
     // ---- warp (SettingsRepo.h:252-267), the built-in WARP hop of WarpHop
     /** enable_warp. */
     val enableWarp: Boolean = false,
-    /** warp_mode: "wireguard" or "masque". */
+    /** warp_mode: "wireguard", "amnezia" or "masque". */
     val warpMode: String = "wireguard",
+    val warpChainOrder: String = "proxy-first",
+    val warpEntryConfig: String = "",
     /** warp_ep, warp_private_key, warp_public_key, warp_ifc_addrs, warp_reserved (decimal strings). */
     val warpEp: String = "",
     val warpPrivateKey: String = "",
