@@ -22,6 +22,8 @@
 <string name="alter_id">Изменить ID</string>
 <string name="always_show_address">Всегда показывать адрес</string>
 <string name="always_show_address_sum">Всегда отображать адрес сервера на карте конфигурации</string>
+<string name="compact_profile_rows">Компактные строки профилей</string>
+<string name="compact_profile_rows_sum">Показывать каждый профиль одной короткой строкой только с именем и задержкой</string>
 <string name="app_desc">Универсальный набор инструментов прокси для Android, написанный на Kotlin.</string>
 <string name="app_tls_version">Минимальная версия TLS протокола</string>
 <string name="app_version">Версия</string>

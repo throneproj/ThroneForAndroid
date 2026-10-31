@@ -43,6 +43,11 @@
             app:summary="@string/always_show_address_sum"
             app:title="@string/always_show_address" />
         <SwitchPreference
+            app:icon="@drawable/ic_baseline_format_align_left_24"
+            app:key="compactProfileRows"
+            app:summary="@string/compact_profile_rows_sum"
+            app:title="@string/compact_profile_rows" />
+        <SwitchPreference
             app:icon="@drawable/ic_baseline_security_24"
             app:key="show_config_security"
             app:summary="@string/show_config_security_sum"

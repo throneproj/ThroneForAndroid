@@ -36,7 +36,8 @@ import java.util.Locale
  * The texts of one card, computed apart from the views so the grid can align the error lines of neighbours: the
  * result holds the desktop DisplayTestResult as separate items that wrap between each other (or the live test phase)
  * and sits beside the type when it fits ([TypeLineLayout]); the error line is the Android-only `test_error` of a
- * failed test.
+ * failed test. A [brief] row (compactProfileRows) keeps the first result item only and has no address, traffic or
+ * error line: its result still opens the error.
  */
 internal class RowContent(
     val result: CharSequence,
@@ -47,10 +48,11 @@ internal class RowContent(
     val trafficDescription: String?,
     val address: String,
     val error: String?,
+    private val brief: Boolean,
 ) {
     /** The lines under the type line, which a grid neighbour keeps room for; the lines above align by themselves. */
     val rows: Int
-        get() = if (error != null) ROW_ERROR else 0
+        get() = if (error != null && !brief) ROW_ERROR else 0
 
     /** One result item: [spoken] stands in for its symbols. */
     private class Item(val text: String, @ColorInt val color: Int, val spoken: String)
@@ -69,10 +71,11 @@ internal class RowContent(
 
         fun of(context: Context, profile: ProxyEntity, adapter: ProfileListAdapter): RowContent {
             val secondary = context.getColorAttr(android.R.attr.textColorSecondary)
-            val showTraffic = profile.rx + profile.tx != 0L
+            val brief = adapter.isCompactRow
+            val showTraffic = !brief && profile.rx + profile.tx != 0L
             val up = Formatter.formatShortFileSize(context, profile.tx)
             val down = Formatter.formatShortFileSize(context, profile.rx)
-            val address = if (adapter.host?.alwaysShowAddress == true && profile.outbound.name.isNotBlank()) {
+            val address = if (!brief && adapter.host?.alwaysShowAddress == true && profile.outbound.name.isNotBlank()) {
                 profile.displayAddress()
             } else ""
 
@@ -94,6 +97,7 @@ internal class RowContent(
 
                 else -> {
                     val items = testResult(context, profile, TestShowItems.of(adapter.testItemsToShow), color, secondary)
+                        .let { if (brief) it.take(1) else it }
                     if (items.isNotEmpty()) {
                         result.append(LRO)
                         items.forEachIndexed { index, item ->
@@ -116,6 +120,7 @@ internal class RowContent(
                 trafficDescription = if (showTraffic) context.getString(R.string.profile_row_traffic, up, down) else null,
                 address = address,
                 error = error,
+                brief = brief,
             )
         }
 
@@ -356,8 +361,8 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
         val buttons = !host.select && !selecting
         selectCheck.isVisible = selecting
         selectCheck.isChecked = selecting && host.selection.isChecked(id)
-        editButton.isVisible = buttons && !adapter.isCompact
-        shareButton.isVisible = buttons && !adapter.isCompact
+        editButton.isVisible = buttons && !adapter.isCompact && !adapter.isCompactRow
+        shareButton.isVisible = buttons && !adapter.isCompact && !adapter.isCompactRow
         moreButton.isVisible = buttons
         applyCardColors(host.isSelectedProfile(id), selectCheck.isChecked)
     }

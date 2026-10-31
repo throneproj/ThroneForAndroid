@@ -197,6 +197,8 @@
     <string name="unavailable">Niet beschikbaar</string>
     <string name="always_show_address">Adres altijd tonen</string>
     <string name="always_show_address_sum">Toon het serveradres altijd op de profielkaart</string>
+    <string name="compact_profile_rows">Compacte profielrijen</string>
+    <string name="compact_profile_rows_sum">Toon elk profiel op één korte regel met alleen de naam en de latentie</string>
     <string name="clear_traffic_statistics">Verkeersstatistieken wissen</string>
     <string name="connection_test">Verbindingstest</string>
     <string name="connection_test_clear_results">Testresultaten wissen</string>

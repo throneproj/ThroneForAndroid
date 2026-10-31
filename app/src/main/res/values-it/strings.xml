@@ -197,6 +197,8 @@
     <string name="unavailable">Non disponibile</string>
     <string name="always_show_address">Mostra sempre l\'indirizzo</string>
     <string name="always_show_address_sum">Mostra sempre l\'indirizzo del server sulla scheda del profilo</string>
+    <string name="compact_profile_rows">Righe profilo compatte</string>
+    <string name="compact_profile_rows_sum">Mostra ogni profilo su un\'unica riga breve, con solo nome e latenza</string>
     <string name="clear_traffic_statistics">Cancella statistiche traffico</string>
     <string name="connection_test">Test di connessione</string>
     <string name="connection_test_clear_results">Cancella risultati dei test</string>

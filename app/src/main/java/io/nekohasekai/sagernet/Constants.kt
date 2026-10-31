@@ -35,6 +35,7 @@ object Key {
     const val HIDE_FROM_RECENT_APPS = "hideFromRecentApps"
     const val PREVIEW_HINT_DISMISSED_VERSION = "previewHintDismissedVersion"
     const val GROUP_LAYOUT_MODE = "groupLayoutMode"
+    const val COMPACT_PROFILE_ROWS = "compactProfileRows"
 
     const val PROFILE_DIRTY = "profileDirty"
     const val PROFILE_ID = "profileId"

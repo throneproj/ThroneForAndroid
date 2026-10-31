@@ -181,6 +181,8 @@
     <string name="unavailable">Недоступний</string>
     <string name="always_show_address">Завжди показувати адресу</string>
     <string name="always_show_address_sum">Завжди відображати адресу сервера на картці конфігурації</string>
+    <string name="compact_profile_rows">Компактні рядки профілів</string>
+    <string name="compact_profile_rows_sum">Показувати кожен профіль одним коротким рядком лише з назвою та затримкою</string>
     <string name="clear_traffic_statistics">Очистити статистику трафіку</string>
     <string name="connection_test">Тест з\'єднання</string>
     <string name="connection_test_clear_results">Очистити результати тесту</string>

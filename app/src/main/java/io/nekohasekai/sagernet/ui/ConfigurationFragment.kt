@@ -126,6 +126,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
     private val pickedGroup: Long get() = arguments?.getLong(ARG_PICKED_GROUP) ?: 0L
 
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
+    val compactRows by lazy { DataStore.compactProfileRows }
 
     /**
      * Double column (groupLayoutMode 1): the compact card, two columns at least (the width may give more). Landscape

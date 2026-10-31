@@ -60,9 +60,10 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         val popup = PopupMenu(anchor.context, anchor)
         popup.menuInflater.inflate(R.menu.double_column_item_menu, popup.menu)
         val menu = popup.menu
-        // the compact card has no edit / share buttons
-        menu.findItem(R.id.action_edit).isVisible = adapter.isCompact
-        menu.findItem(R.id.action_share).isVisible = adapter.isCompact
+        // the compact card and the compact row have no edit / share buttons
+        val noButtons = adapter.isCompact || adapter.isCompactRow
+        menu.findItem(R.id.action_edit).isVisible = noButtons
+        menu.findItem(R.id.action_share).isVisible = noButtons
         // TV only, where a D-pad cannot drag; a filtered list says nothing about the stored order
         val index = adapter.memberIds.indexOf(profile.id)
         val movable = SagerNet.isTv && !adapter.isFiltered && index >= 0

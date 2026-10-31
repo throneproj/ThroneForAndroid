@@ -73,6 +73,9 @@ class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
     /** Double column mode: the compact card (no edit / share buttons, a one-line error). */
     internal val isCompact: Boolean get() = host?.doubleColumn == true
 
+    /** compactProfileRows, in either column mode: one-line rows with the name, the first result item and the menu. */
+    internal val isCompactRow: Boolean get() = host?.compactRows == true
+
     /** Cards side by side (the list's width decides): a grid row pairs their heights, drags go sideways too. */
     internal val isMultiColumn: Boolean
         get() = ::list.isInitialized && ((list.layoutManager as? GridLayoutManager)?.spanCount ?: 1) > 1

@@ -197,6 +197,8 @@
     <string name="unavailable">Tidak tersedia</string>
     <string name="always_show_address">Selalu tampilkan alamat</string>
     <string name="always_show_address_sum">Selalu tampilkan alamat server pada kartu profil</string>
+    <string name="compact_profile_rows">Baris profil ringkas</string>
+    <string name="compact_profile_rows_sum">Tampilkan setiap profil dalam satu baris pendek, hanya dengan nama dan latensinya</string>
     <string name="clear_traffic_statistics">Hapus statistik lalu lintas</string>
     <string name="connection_test">Tes koneksi</string>
     <string name="connection_test_clear_results">Hapus hasil tes</string>

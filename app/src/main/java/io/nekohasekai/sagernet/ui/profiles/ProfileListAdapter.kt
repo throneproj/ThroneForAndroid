@@ -83,6 +83,9 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
     /** The compact card of double column mode. */
     val isCompact: Boolean get() = fragment.isCompact
 
+    /** The one-line rows of compactProfileRows (layout_profile_compact). */
+    val isCompactRow: Boolean get() = fragment.isCompactRow
+
     /** Cards side by side: a grid row pairs their heights. */
     private val multiColumn: Boolean get() = fragment.isMultiColumn
 
@@ -168,8 +171,11 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
 
     override fun getItemId(position: Int) = ids[position]
 
+    override fun getItemViewType(position: Int) =
+        if (isCompactRow) R.layout.layout_profile_compact else R.layout.layout_profile
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ProfileRowHolder(
-        LayoutInflater.from(parent.context).inflate(R.layout.layout_profile, parent, false), this
+        LayoutInflater.from(parent.context).inflate(viewType, parent, false), this
     )
 
     override fun onBindViewHolder(holder: ProfileRowHolder, position: Int) =

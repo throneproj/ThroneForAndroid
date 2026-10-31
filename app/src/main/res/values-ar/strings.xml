@@ -148,6 +148,8 @@
     <string name="clear_traffic_statistics">مسح إحصائيات حركة المرور</string>
     <string name="always_show_address_sum">اعرض دائمًا عنوان الخادم على بطاقة التكوين</string>
     <string name="always_show_address">اعرض العنوان دائمًا</string>
+    <string name="compact_profile_rows">صفوف ملفات مضغوطة</string>
+    <string name="compact_profile_rows_sum">اعرض كل ملف في سطر قصير واحد بالاسم وزمن الاستجابة فقط</string>
     <string name="unavailable">غير متوفره</string>
     <string name="standard">معيار</string>
     <string name="follow_battery_saver">اتبع وضع توفير الطاقة</string>

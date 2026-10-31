@@ -197,6 +197,8 @@
     <string name="unavailable">No disponible</string>
     <string name="always_show_address">Mostrar siempre la dirección</string>
     <string name="always_show_address_sum">Muestra siempre la dirección del servidor en la tarjeta de configuración</string>
+    <string name="compact_profile_rows">Filas de perfil compactas</string>
+    <string name="compact_profile_rows_sum">Muestra cada perfil en una sola línea corta, solo con su nombre y latencia</string>
     <string name="clear_traffic_statistics">Borrar estadísticas de tráfico</string>
     <string name="connection_test">Prueba de conexión</string>
     <string name="connection_test_clear_results">Borrar resultados de la prueba</string>
