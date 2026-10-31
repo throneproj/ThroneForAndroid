@@ -10,8 +10,13 @@ class LogRedactor(private val hideDestinations: Boolean) {
 
     private companion object {
         val URL = Regex("""\b([a-zA-Z][a-zA-Z0-9+.\-]*)://([^\s/@"'<>]*@)?([^\s/?#"'<>]+)([^\s"'<>]*)""")
+        // A JSON string, and arrays / objects nested up to two levels (XDRIVE "secrets", a template "auth"), matched
+        // whole. Runs are consumed possessively: Java's regex recurses per loop iteration, not per character.
+        const val STRING = """"(?:[^"\\]++|\\.)*+""""
+        const val ARRAY = """\[(?:[^\[\]"]++|$STRING|\[(?:[^\[\]"]++|$STRING)*+])*+]"""
+        const val OBJECT = """\{(?:[^{}"]++|$STRING|\{(?:[^{}"]++|$STRING)*+})*+}"""
         val SECRET = Regex(
-            """(?i)("?)([\w\-]*(?:password|passwd|pass|secret|token|key|uuid|auth|psk|short_id)[\w\-]*)\1(\s*[:=]\s*)("(?:[^"\\]|\\.)*"|[^\s,;&}\]]+)"""
+            """(?i)("?)([\w\-]*(?:password|passwd|pass|secret|token|key|uuid|auth|psk|short_id)[\w\-]*)\1(\s*[:=]\s*)($STRING|$ARRAY|$OBJECT|[^\s,;&}\]]+)"""
         )
         // The logged start config names the servers by domain as well as by IP.
         val SERVER = Regex(
@@ -59,7 +64,12 @@ class LogRedactor(private val hideDestinations: Boolean) {
 
     private fun redactValues(pairs: Regex, s: String): String = pairs.replaceEach(s) { m ->
         val (_, quote, key, separator, value) = m.groupValues
-        val redacted = if (value.startsWith("\"")) "\"<redacted>\"" else "<redacted>"
+        val redacted = when (value.firstOrNull()) {
+            '"' -> "\"<redacted>\""
+            '[' -> "[\"<redacted>\"]"
+            '{' -> "{<redacted>}"
+            else -> "<redacted>"
+        }
         "$quote$key$quote$separator$redacted"
     }
 
