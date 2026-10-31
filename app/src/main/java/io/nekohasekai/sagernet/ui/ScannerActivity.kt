@@ -16,6 +16,7 @@ import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import com.google.zxing.Result
 import com.king.zxing.CameraScan
+import com.king.zxing.DecodeConfig
 import com.king.zxing.DecodeFormatManager
 import com.king.zxing.DefaultCameraScan
 import com.king.zxing.analyze.QRCodeAnalyzer
@@ -165,7 +166,10 @@ class ScannerActivity : ThemedActivity(),
 
     fun initCameraScan() {
         cameraScan = DefaultCameraScan(this, binding.previewView)
-        cameraScan.setAnalyzer(QRCodeAnalyzer())
+        // The whole preview is decoded, not just the frame drawn on it (0.8 of the short side by default).
+        cameraScan.setAnalyzer(
+            QRCodeAnalyzer(DecodeConfig().setHints(DecodeFormatManager.QR_CODE_HINTS).setFullAreaScan(true))
+        )
         cameraScan.setOnScanResultCallback(this)
         cameraScan.setNeedAutoZoom(true)
     }
