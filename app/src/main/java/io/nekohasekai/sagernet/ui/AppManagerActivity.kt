@@ -363,6 +363,7 @@ class AppManagerActivity : ThemedActivity() {
                     Snackbar.make(binding.list, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
                     return true
                 }
+                if (PackageNameInput.rejectInvalid(binding.list, packages)) return true
                 if (bypass != null) {
                     binding.bypassGroup.check(if (bypass) R.id.appProxyModeBypass else R.id.appProxyModeOn)
                 }

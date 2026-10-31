@@ -320,7 +320,7 @@ class AppListActivity : ThemedActivity() {
                     .let { if (it.firstOrNull() == "true" || it.firstOrNull() == "false") it.drop(1) else it }
                 if (lines.isEmpty()) {
                     Snackbar.make(binding.list, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
-                } else {
+                } else if (!PackageNameInput.rejectInvalid(binding.list, lines.filter { it != RouteRule.UNKNOWN_PACKAGE })) {
                     selected.clear()
                     selected.addAll(lines)
                     updateSubtitle()

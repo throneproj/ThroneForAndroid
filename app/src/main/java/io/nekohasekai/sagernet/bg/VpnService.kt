@@ -165,12 +165,16 @@ class VpnService : BaseVpnService(),
 
         val includePackage = options.getIncludePackage()
         if (includePackage.hasNext()) {
-            includePackage.toList().forEach {
+            val added = includePackage.toList().count {
                 try {
                     builder.addAllowedApplication(it)
+                    true
                 } catch (_: PackageManager.NameNotFoundException) {
+                    false
                 }
             }
+            // None of the chosen apps is installed: an empty allow list would capture every app instead of none.
+            if (added == 0) builder.addAllowedApplication(packageName)
         }
         val excludePackage = options.getExcludePackage()
         if (excludePackage.hasNext()) {

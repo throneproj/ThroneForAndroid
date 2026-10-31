@@ -2,10 +2,12 @@ package io.nekohasekai.sagernet.ui
 
 import android.content.Context
 import android.text.InputType
+import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.dp2px
 
@@ -16,6 +18,19 @@ import io.nekohasekai.sagernet.ktx.dp2px
 object PackageNameInput {
 
     private val PACKAGE_NAME = Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)*$")
+
+    fun isPackageName(name: String) = PACKAGE_NAME.matches(name)
+
+    /** A clipboard import's names that are no package (a URL, a sentence): the import is refused, not cleaned up. */
+    fun rejectInvalid(view: View, names: List<String>): Boolean {
+        val invalid = names.filterNot(::isPackageName)
+        if (invalid.isEmpty()) return false
+        Snackbar.make(
+            view, view.context.getString(R.string.picker_invalid_package, invalid.take(3).joinToString(", ")),
+            Snackbar.LENGTH_LONG,
+        ).show()
+        return true
+    }
 
     fun show(context: Context, onResult: (List<String>) -> Unit) {
         val input = EditText(context).apply {
