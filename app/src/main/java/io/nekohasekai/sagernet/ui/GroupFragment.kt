@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.room.InvalidationTracker
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -185,8 +186,13 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group), Toolbar.OnMenuItem
 
     /** GroupItem::on_remove_clicked: never the last group; a running profile of the group is stopped first. */
     private fun confirmRemove(group: ProxyGroup) {
+        val remove = { runOnDefaultDispatcher { if (GroupRepo.delete(group.id)) SubscriptionScheduler.schedule() } }
+        if (DataStore.skipDeleteConfirmation) {
+            remove()
+            return
+        }
         requireContext().confirmAction(getString(R.string.confirm_remove_group), group.displayName(), R.string.delete) {
-            runOnDefaultDispatcher { if (GroupRepo.delete(group.id)) SubscriptionScheduler.schedule() }
+            remove()
         }
     }
 
@@ -342,8 +348,9 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group), Toolbar.OnMenuItem
                 menu.findItem(R.id.action_copy_deep_links).isVisible = !empty
                 menu.findItem(R.id.action_export_file).isVisible = !empty
                 menu.findItem(R.id.action_clear).isVisible = !empty
-                menu.findItem(R.id.action_move_up).isVisible = index > 0
-                menu.findItem(R.id.action_move_down).isVisible = index in 0 until groupAdapter.rows.size - 1
+                // TV only, where a D-pad cannot drag
+                menu.findItem(R.id.action_move_up).isVisible = SagerNet.isTv && index > 0
+                menu.findItem(R.id.action_move_down).isVisible = SagerNet.isTv && index in 0 until groupAdapter.rows.size - 1
                 menu.findItem(R.id.action_remove).isVisible = groupAdapter.rows.size > 1
                 popup.setOnMenuItemClickListener(this)
                 popup.show()
