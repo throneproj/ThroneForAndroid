@@ -1,33 +1,30 @@
+<div align="center">
+
+<img src=".github/images/logo.png" width="128" alt="Throne logo">
+
 # Throne for Android
 
-Android GUI proxy utility, empowered by [Sing-box](https://github.com/SagerNet/sing-box)
+**Android proxy client, powered by [sing-box](https://github.com/SagerNet/sing-box)**
 
-Supports Android 7.0 (API 24) and newer, including Android TV.
+[![Release](https://img.shields.io/github/v/release/throneproj/ThroneForAndroid?style=flat-square&label=release&color=2F80ED)](https://github.com/throneproj/ThroneForAndroid/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/throneproj/ThroneForAndroid/total?style=flat-square&logo=github&label=downloads)](https://github.com/throneproj/ThroneForAndroid/releases)
+[![Stars](https://img.shields.io/github/stars/throneproj/ThroneForAndroid?style=flat-square&logo=github&label=stars)](https://github.com/throneproj/ThroneForAndroid/stargazers)
+[![License](https://img.shields.io/github/license/throneproj/ThroneForAndroid?style=flat-square&color=6E7781)](LICENSE)
 
-Documentation: [throneproj.github.io](https://throneproj.github.io)
+</div>
 
-### Supporting Throne
-If Throne is useful to you, you can support its development with [crypto](https://github.com/throneproj/Throne/blob/dev/.github/donate/Donate.md) (USDT, USDC, TRX or Monero) or through [GitHub Sponsors](https://github.com/sponsors/Mahdi-zarei).
+Throne for Android manages proxy profiles and subscriptions, routes traffic with rule-based routing profiles, and works either as a VPN or as a proxy-only service. It shares [Throne](https://github.com/throneproj/Throne) desktop's core and data model, so profiles, share links, route profiles and `.thrbackup` backups move freely between the two. See the [documentation](https://throneproj.github.io) for guides.
 
-### Note on upgrading from 1.x
+<p align="center">
+  <img width="300" alt="Throne for Android main screen" src=".github/images/screenshot.png" />
+</p>
+
+## Installation
+
+APKs for arm64-v8a, armeabi-v7a and x86_64 are on [GitHub Releases](https://github.com/throneproj/ThroneForAndroid/releases), with a `SHA256SUMS` file to verify them. Throne runs on Android 7.0 (API 24) or newer, including Android TV.
+
+### Upgrading from 1.x
 Releases from v2.0.0 on are signed with a new key, so Android refuses to install them over a 1.x release (signature conflict). Uninstall the old release first, then import your subscriptions and profiles again: old local configurations are not migrated.
-
-### GitHub Releases (APK)
-
-[![GitHub All Releases](https://img.shields.io/github/downloads/throneproj/ThroneForAndroid/total?label=downloads-total&logo=github&style=flat-square)](https://github.com/throneproj/ThroneForAndroid/releases)
-
-## Features
-
-- Groups and subscriptions that work like Throne desktop: per-group subscription options (filters, clean-up, URL test after an update), front / landing proxy, HWID headers, scheduled updates with change reports
-- Backups in the desktop's `.thrbackup` format, restorable on either side: save, share or sync over WebDAV
-- Route profiles shared with desktop, preloaded from [routeprofiles](https://github.com/throneproj/routeprofiles), plus Android-only rule conditions: apps, Wi-Fi network (SSID / BSSID), network type and metered networks
-- Auto Selector profiles that keep the best server of one or more groups ranked and switch automatically
-- Cloudflare WARP: registration (WireGuard or MASQUE identity) and a built-in WARP mode for routing
-- URL, IP / country and speed tests, with a bulk-test panel (live progress, latency histogram, fastest servers, sort / remove unavailable / connect to fastest)
-- The sing-box dashboard built in (live traffic, connections, logs)
-- JSON editor with sing-box schema checking, completion and formatting
-- Home-screen widgets, a quick settings tile, and server switching from the notification
-- Android TV: launcher banner, D-pad navigation, previous / next server
 
 ## Supported protocols
 
@@ -51,7 +48,7 @@ Releases from v2.0.0 on are signed with a new key, so Android refuses to install
 - AmneziaWG
 - MASQUE
 - SSH
-- Xray VLESS
+- Xray VLESS (XHTTP/XDrive)
 - OpenVPN/OpenConnect
 - Custom Outbound (Both Sing-box and Xray)
 - Custom Config (Both Sing-box and Xray)
@@ -59,37 +56,25 @@ Releases from v2.0.0 on are signed with a new key, so Android refuses to install
 
 ## Subscription Formats
 
-Various formats are supported, including share links, various JSON representation of Sing-box configs, and v2rayN link format as well as limited support for Shadowsocks and Clash formats. Only the outbounds (servers) of a subscription are imported; its routing rules are ignored.
+Various formats are supported, including share links, various JSON representation of Sing-box configs, and v2rayN link format as well as limited support for Shadowsocks and Clash formats.
 
 Deeplinks are also supported, read the [documentation](https://throneproj.github.io/advanced/deeplinks/) for more information.
 
 ## Credits
 
-- [throneproj/sing-box](https://github.com/throneproj/sing-box), a fork of [SagerNet/sing-box](https://github.com/SagerNet/sing-box)
-- [throneproj/Xray-core](https://github.com/throneproj/Xray-core), a fork of [XTLS/Xray-core](https://github.com/XTLS/Xray-core)
-
-Android GUI:
-
+- [SagerNet/sing-box](https://github.com/SagerNet/sing-box)
+- [XTLS/Xray-core](https://github.com/xtls/xray-core)
+- [SagerNet/sing-box-dashboard](https://github.com/SagerNet/sing-box-dashboard)
 - [MatsuriDayo/NekoBoxForAndroid](https://github.com/MatsuriDayo/NekoBoxForAndroid)
 - [SagerNet/SagerNet](https://github.com/SagerNet/SagerNet)
 - [shadowsocks/shadowsocks-android](https://github.com/shadowsocks/shadowsocks-android)
 
-## FAQ
-**How does this project differ from NekoBox for Android?** <br/>
-It started as a NekoBox for Android fork. v2.0.0 replaced its core and data model with Throne desktop's: the same sing-box and Xray core, profile types, share links, route profiles and backup format. The legacy plugin system was removed, since the built-in core covers what the plugins provided.
+## Supporting Throne
 
-**Where are the downloadable route profiles/rulesets coming from?**<br/>
-They are located at the [routeprofiles](https://github.com/throneproj/routeprofiles) repository, the same one Throne desktop uses.
+If Throne is useful to you, you can support its development through [GitHub Sponsors](https://github.com/sponsors/Mahdi-zarei) or with a crypto donation to one of these addresses:
 
-**Why are some servers skipped when I import a link or a subscription?**<br/>
-As on desktop, Extra Core, Chain and Auto Selector profiles are never imported from links, subscriptions or shared route profiles; create them in the app instead. Nodes the app cannot run are skipped too, and the import reports what was left out.
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=throneproj%2FThroneForAndroid&type=date&legend=bottom-right">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=throneproj/ThroneForAndroid&type=date&theme=dark&legend=bottom-right&sealed_token=vVh7Hn3UTnDoalet423u1x-LDNiIZQ2VfWY7GGmbMR8V-4feGR0yTT_IpVxBrxSTOwF7xFnsTcZjyHqNufLeTmdL5f-lw36iYWXcJSlXuJwapM1s8wChkg" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=throneproj/ThroneForAndroid&type=date&legend=bottom-right&sealed_token=vVh7Hn3UTnDoalet423u1x-LDNiIZQ2VfWY7GGmbMR8V-4feGR0yTT_IpVxBrxSTOwF7xFnsTcZjyHqNufLeTmdL5f-lw36iYWXcJSlXuJwapM1s8wChkg" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=throneproj/ThroneForAndroid&type=date&legend=bottom-right&sealed_token=vVh7Hn3UTnDoalet423u1x-LDNiIZQ2VfWY7GGmbMR8V-4feGR0yTT_IpVxBrxSTOwF7xFnsTcZjyHqNufLeTmdL5f-lw36iYWXcJSlXuJwapM1s8wChkg" />
- </picture>
-</a>
+| Coin | Network | Address |
+|:--|:--|:--|
+| **USDT** · **TRX** | TRON (TRC20) | `THR2gbWMaTZh8ACk3VYAAyNRVffvdTRikj` |
+| **USDT** · **USDC** | BNB Smart Chain (BEP20) · Ethereum (ERC20) | `0x7c2dF1867f5AaEE807a835fB3c55E4de4507888A` |
+| **XMR** | Monero | `4AYwwN8qMQCSUb3XfwzfrLNPMHfDme6U7CmNtQY4idCF8GtHHLG68VA3iZK867ypuKFr8J7CjXiJ96eFUA2T6aLVRUbgY3A` |
