@@ -76,6 +76,8 @@
     <!-- feature category -->
     <string name="metered">اتصال اندازه‌گیری‌شده</string>
     <string name="metered_summary">تنظیم VPN برای سیستم به عنوان اتصال اندازه‌گیری‌شده</string>
+    <string name="allow_bypass">اجازه دور زدن VPN به برنامه‌ها</string>
+    <string name="allow_bypass_summary">برنامه‌هایی که درخواست کنند می‌توانند خارج از VPN متصل شوند، مانند اعلان‌های پوش گوگل (FCM)</string>
     <string name="menu_route">مسیریابی</string>
     <string name="route_proxy">اتصال با پراکسی</string>
     <string name="route_profile">انتخاب پراکسی...</string>

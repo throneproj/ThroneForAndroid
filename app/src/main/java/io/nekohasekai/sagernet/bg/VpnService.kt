@@ -196,6 +196,8 @@ class VpnService : BaseVpnService(),
             )
         }
 
+        // Apps may then bind sockets to the underlying network themselves; FCM does this for its push channel.
+        if (DataStore.allowBypass) builder.allowBypass()
         updateUnderlyingNetwork(builder)
         metered = DataStore.meteredNetwork
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) builder.setMetered(metered)

@@ -92,6 +92,8 @@
     <string name="extra_headers">Entêtes supplémentaires</string>
     <string name="metered">Indication forfaitaire</string>
     <string name="metered_summary">Indiquer au système de traiter le VPN comme forfaitaire</string>
+    <string name="allow_bypass">Autoriser les applis à contourner le VPN</string>
+    <string name="allow_bypass_summary">Les applis qui le demandent peuvent se connecter hors du VPN, comme les notifications push de Google (FCM)</string>
     <string name="menu_route">Route</string>
     <string name="route_proxy">Proxy</string>
     <string name="route_profile">Sélectionner un profil…</string>

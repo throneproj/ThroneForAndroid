@@ -49,6 +49,11 @@
             app:summary="@string/metered_summary"
             app:title="@string/metered" />
         <SwitchPreference
+            app:icon="@drawable/ic_maps_directions"
+            app:key="allowBypass"
+            app:summary="@string/allow_bypass_summary"
+            app:title="@string/allow_bypass" />
+        <SwitchPreference
             app:icon="@drawable/ic_baseline_visibility_off_24"
             app:key="hideFromRecentApps"
             app:summary="@string/hide_from_recent_apps_summary"

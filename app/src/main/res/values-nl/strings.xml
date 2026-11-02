@@ -92,6 +92,8 @@
     <string name="extra_headers">Extra headers</string>
     <string name="metered">Afgerekende hint</string>
     <string name="metered_summary">Systeem hinten om VPN als afgerekend te behandelen</string>
+    <string name="allow_bypass">Apps toestaan de VPN te omzeilen</string>
+    <string name="allow_bypass_summary">Apps die erom vragen kunnen buiten de VPN verbinden, zoals pushmeldingen van Google (FCM)</string>
     <string name="menu_route">Routering</string>
     <string name="route_proxy">Proxy</string>
     <string name="route_profile">Profiel selecteren…</string>

@@ -105,6 +105,8 @@
     <!-- feature category -->
     <string name="metered">Metered hint</string>
     <string name="metered_summary">Hint system to treat VPN as metered</string>
+    <string name="allow_bypass">Allow apps to bypass VPN</string>
+    <string name="allow_bypass_summary">Apps that ask can connect outside the VPN, such as Google push notifications (FCM)</string>
     <string name="menu_route">Routing</string>
     <string name="route_proxy">Proxy</string>
     <string name="route_profile">Select profile…</string>

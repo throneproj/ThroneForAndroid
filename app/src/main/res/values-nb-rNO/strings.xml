@@ -131,6 +131,8 @@
     <string name="enable_mux">Aktiver Multiplexer</string>
     <string name="menu_route">Rute</string>
     <string name="metered_summary">Tips system for å behandle VPN som målt</string>
+    <string name="allow_bypass">La apper omgå VPN</string>
+    <string name="allow_bypass_summary">Apper som ber om det kan koble til utenfor VPN, for eksempel Google-pushvarsler (FCM)</string>
     <string name="metered">Målt hint</string>
     <string name="early_data_header_name">Tidlig navn på dataoverskrift</string>
     <string name="certificates">Sertifikater</string>

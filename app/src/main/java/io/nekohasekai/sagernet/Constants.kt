@@ -19,6 +19,7 @@ object Key {
     const val BYPASS_MODE = "bypassMode"
     const val INDIVIDUAL = "individual"
     const val METERED_NETWORK = "meteredNetwork"
+    const val ALLOW_BYPASS = "allowBypass"
 
     const val SHOW_DIRECT_SPEED = "showDirectSpeed"
     const val SHOW_GROUP_IN_NOTIFICATION = "showGroupInNotification"

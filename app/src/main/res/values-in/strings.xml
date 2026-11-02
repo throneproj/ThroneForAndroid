@@ -103,6 +103,8 @@
     <string name="mux_concurrency">Aliran maksimum</string>
     <string name="menu_route">Rute</string>
     <string name="metered_summary">Sistem petunjuk untuk memperlakukan VPN sebagai terukur</string>
+    <string name="allow_bypass">Izinkan aplikasi melewati VPN</string>
+    <string name="allow_bypass_summary">Aplikasi yang memintanya dapat terhubung di luar VPN, seperti notifikasi push Google (FCM)</string>
     <string name="metered">Petunjuk Terukur</string>
     <string name="extra_headers">Header Ekstra</string>
     <string name="early_data_header_name">Nama Header Data Awal</string>

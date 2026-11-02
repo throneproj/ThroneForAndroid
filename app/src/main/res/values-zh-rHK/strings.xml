@@ -1386,6 +1386,8 @@
     <string name="sni">伺服器名稱指示</string>
     <string name="metered">計量付費提示</string>
     <string name="metered_summary">提示系統將 VPN 視為計量付費</string>
+    <string name="allow_bypass">允許應用程式繞過 VPN</string>
+    <string name="allow_bypass_summary">要求繞過的應用程式可直接連線而不經過 VPN，例如 Google 推送通知（FCM）</string>
     <string name="menu_route">路由</string>
     <string name="proxied_apps">應用程式 VPN 模式</string>
     <string name="proxied_apps_summary">為被選取的應用程式設定 VPN 模式</string>

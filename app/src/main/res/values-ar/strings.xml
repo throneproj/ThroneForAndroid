@@ -67,6 +67,8 @@
     <string name="route_proxy">بروکسی</string>
     <string name="menu_route">طريق</string>
     <string name="metered_summary">نظام تلميح لمعاملة VPN على أنها محسوبة</string>
+    <string name="allow_bypass">السماح للتطبيقات بتجاوز VPN</string>
+    <string name="allow_bypass_summary">يمكن للتطبيقات التي تطلب ذلك الاتصال خارج VPN، مثل إشعارات Google الفورية (FCM)</string>
     <string name="metered">تلميح مقنن</string>
     <string name="extra_headers">رؤوس إضافية</string>
     <string name="encryption">التشفير</string>

@@ -73,6 +73,8 @@
     <string name="extra_headers">추가 헤더</string>
     <string name="metered">종량제 힌트</string>
     <string name="metered_summary">VPN을 종량제로 처리하도록 시스템에 알림</string>
+    <string name="allow_bypass">앱의 VPN 우회 허용</string>
+    <string name="allow_bypass_summary">요청한 앱은 VPN을 거치지 않고 연결할 수 있습니다(예: Google 푸시 알림 FCM)</string>
     <string name="menu_route">라우팅</string>
     <string name="route_proxy">프록시</string>
     <string name="route_profile">프로파일 선택…</string>

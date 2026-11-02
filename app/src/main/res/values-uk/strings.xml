@@ -76,6 +76,8 @@
     <!-- feature category -->
     <string name="metered">Лімітне підключення</string>
     <string name="metered_summary">Повідомляти системі, що VPN-з\'єднання є лімітним</string>
+    <string name="allow_bypass">Дозволити застосункам обходити VPN</string>
+    <string name="allow_bypass_summary">Застосунки, які цього просять, можуть підключатися в обхід VPN, наприклад push-сповіщення Google (FCM)</string>
     <string name="menu_route">Маршрут</string>
     <string name="route_proxy">Проксі</string>
     <string name="route_profile">Вибрати профіль…</string>

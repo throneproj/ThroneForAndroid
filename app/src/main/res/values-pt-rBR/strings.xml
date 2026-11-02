@@ -92,6 +92,8 @@
     <string name="extra_headers">Cabeçalhos adicionais</string>
     <string name="metered">Dica de rede tarifada</string>
     <string name="metered_summary">Sugerir ao sistema tratar a VPN como tarifada</string>
+    <string name="allow_bypass">Permitir que apps ignorem a VPN</string>
+    <string name="allow_bypass_summary">Apps que solicitarem podem se conectar fora da VPN, como as notificações push do Google (FCM)</string>
     <string name="menu_route">Roteamento</string>
     <string name="route_proxy">Proxy</string>
     <string name="route_profile">Selecionar perfil…</string>

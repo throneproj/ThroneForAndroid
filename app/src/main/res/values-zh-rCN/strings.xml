@@ -47,6 +47,8 @@
     <!-- feature category -->
     <string name="metered">按流量计费</string>
     <string name="metered_summary">让系统认为此 VPN 按流量计费</string>
+    <string name="allow_bypass">允许应用绕过 VPN</string>
+    <string name="allow_bypass_summary">请求绕过的应用可直接连接而不经过 VPN，例如 Google 推送通知（FCM）</string>
     <string name="menu_route">路由</string>
     <string name="proxied_apps">分应用代理</string>
     <string name="proxied_apps_summary">代理被勾选应用的流量</string>

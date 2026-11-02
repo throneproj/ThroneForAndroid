@@ -93,6 +93,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var previewHintDismissedVersion by configurationStore.string(Key.PREVIEW_HINT_DISMISSED_VERSION) { "" }
 
     var meteredNetwork by configurationStore.boolean(Key.METERED_NETWORK)
+    var allowBypass by configurationStore.boolean(Key.ALLOW_BYPASS)
     var proxyApps by configurationStore.boolean(Key.PROXY_APPS)
     var bypass by configurationStore.boolean(Key.BYPASS_MODE) { true }
     var individual by configurationStore.string(Key.INDIVIDUAL)

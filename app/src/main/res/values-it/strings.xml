@@ -92,6 +92,8 @@
     <string name="extra_headers">Header aggiuntivi</string>
     <string name="metered">Suggerimento a consumo</string>
     <string name="metered_summary">Suggerisci al sistema di trattare la VPN come a consumo</string>
+    <string name="allow_bypass">Consenti alle app di aggirare la VPN</string>
+    <string name="allow_bypass_summary">Le app che lo richiedono possono connettersi fuori dalla VPN, come le notifiche push di Google (FCM)</string>
     <string name="menu_route">Instradamento</string>
     <string name="route_proxy">Proxy</string>
     <string name="route_profile">Seleziona profilo…</string>

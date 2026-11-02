@@ -715,6 +715,8 @@
     <string name="menu_tools">Інструменты</string>
     <string name="metered">Падказка абмежаванага</string>
     <string name="metered_summary">Падказваць сістэме лічыць VPN абмежаваным</string>
+    <string name="allow_bypass">Дазволіць праграмам абыходзіць VPN</string>
+    <string name="allow_bypass_summary">Праграмы, якія просяць, могуць падключацца па-за VPN, напрыклад push-апавяшчэнні Google (FCM)</string>
     <string name="mieru_multiplexing">Мультыплексінг</string>
     <string name="mieru_server_ports">Дыяпазоны партоў</string>
     <string name="mieru_traffic_pattern">Узор трафіку</string>

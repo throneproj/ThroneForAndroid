@@ -92,6 +92,8 @@
     <string name="extra_headers">Zusätzliche Header</string>
     <string name="metered">Getaktet-Hinweis</string>
     <string name="metered_summary">System anweisen, die VPN als getaktet zu behandeln</string>
+    <string name="allow_bypass">Apps das Umgehen des VPN erlauben</string>
+    <string name="allow_bypass_summary">Apps, die es anfordern, können sich außerhalb des VPN verbinden, etwa Google-Push-Benachrichtigungen (FCM)</string>
     <string name="menu_route">Routing</string>
     <string name="route_proxy">Proxy</string>
     <string name="route_profile">Profil auswählen…</string>

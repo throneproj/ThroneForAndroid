@@ -54,7 +54,7 @@ class GeneralSettingsFragment : SettingsScreenFragment(R.xml.settings_general) {
             (activity as? MainActivity)?.applyHideFromRecentApps(newValue as Boolean)
             true
         }
-        reloadOn(Key.METERED_NETWORK)
+        reloadOn(Key.METERED_NETWORK, Key.ALLOW_BYPASS)
 
         alwaysOn = pref(KEY_ALWAYS_ON_VPN)
         alwaysOn.setOnPreferenceClickListener {

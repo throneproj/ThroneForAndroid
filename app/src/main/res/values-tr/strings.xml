@@ -65,6 +65,8 @@
     <string name="route_proxy">Vekil Sunucu</string>
     <string name="metered">Kota Belirteci</string>
     <string name="metered_summary">Sisteme VPN\'i kotalı olarak belirt</string>
+    <string name="allow_bypass">Uygulamaların VPN\'i atlamasına izin ver</string>
+    <string name="allow_bypass_summary">İsteyen uygulamalar VPN dışından bağlanabilir, örneğin Google anlık bildirimleri (FCM)</string>
     <string name="menu_route">Rota</string>
     <string name="extra_headers">Ekstra Başlıklar</string>
     <string name="encryption">Şifreleme</string>

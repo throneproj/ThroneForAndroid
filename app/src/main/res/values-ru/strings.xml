@@ -119,6 +119,8 @@
 <string name="menu_tools">Инструменты</string>
 <string name="metered">Подсказка о соединении с лимитным тарифным планом</string>
 <string name="metered_summary">Подсказывать системе, что VPN следует рассматривать как сеть с лимитным тарифным планом</string>
+<string name="allow_bypass">Разрешить приложениям обходить VPN</string>
+<string name="allow_bypass_summary">Приложения, которые это запрашивают, могут подключаться в обход VPN, например push-уведомления Google (FCM)</string>
 <string name="move">Переместить</string>
 <string name="mtu_help">Удерживайте для настройки своего MTU.</string>
 <string name="mux_concurrency">Макс. потоков</string>

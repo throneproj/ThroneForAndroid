@@ -92,6 +92,8 @@
     <string name="extra_headers">Encabezados adicionales</string>
     <string name="metered">Sugerencia medida</string>
     <string name="metered_summary">Sistema de sugerencias para tratar la VPN como medida</string>
+    <string name="allow_bypass">Permitir que las apps omitan la VPN</string>
+    <string name="allow_bypass_summary">Las apps que lo soliciten pueden conectarse fuera de la VPN, como las notificaciones push de Google (FCM)</string>
     <string name="menu_route">Ruta</string>
     <string name="route_proxy">Proxy</string>
     <string name="route_profile">Seleccionar perfil…</string>

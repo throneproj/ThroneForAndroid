@@ -75,6 +75,8 @@
     <string name="extra_headers">追加ヘッダー</string>
     <string name="metered">従量制ヒント</string>
     <string name="metered_summary">VPN を従量制として扱うようシステムに通知</string>
+    <string name="allow_bypass">アプリによる VPN のバイパスを許可</string>
+    <string name="allow_bypass_summary">要求したアプリは VPN を経由せずに接続できます（Google のプッシュ通知 FCM など）</string>
     <string name="route_proxy">プロキシ</string>
     <string name="route_profile">プロファイルを選択…</string>
     <string name="enable_mux">マルチプレクサーを有効化</string>
