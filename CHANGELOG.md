@@ -1,3 +1,40 @@
+#### 2.0.5
+
+* Add per-group routing profiles **1**
+* Add routing profile import from subscriptions **2**
+* Add AmneziaWG mode to WARP
+* Add compact profile rows and compact group cards **3**
+* Add Allow apps to bypass VPN **4**
+* Allow excluding countries in the Auto Selector **5**
+* Start the Auto Selector as soon as enough profiles work
+* Reconnect to the replacement when a subscription update removes the running profile **6**
+* Add Clear test results and Clear traffic statistics to the profile menu
+* Show Xray logs in the app log
+* Fix Xray profiles stalling for about a minute after a network change
+* Fix Xray XHTTP connection leak
+* Fix connections not recovering after a network loss
+* Fix AmneziaWG on devices with UDP GSO, again
+* Fix the per-app proxy switch not turning off
+* Fixes and Improvements
+
+**1**:
+A group can connect with its own routing profile instead of the one chosen in the Routing menu. Set it in the group's settings.
+
+**2**:
+A subscription that provides a routing profile (Happ format) can save it as its group's own routing profile on every update. Turn it on with Use the subscription's routing profile in the group's settings. DNS settings from the subscription are never used.
+
+**3**:
+Turn them on in Settings › Appearance. Compact rows show only the profile's name and latency; compact group cards show a usage bar and the time left instead of the subscription link and details.
+
+**4**:
+Off by default, in Settings › General. When on, apps that ask can connect outside the VPN, such as Google push notifications (FCM). An always-on VPN with Block connections without VPN ignores it.
+
+**5**:
+Put ! before a country code in Only countries to leave that country out, e.g. !RU uses every country but Russia.
+
+**6**:
+When an update replaces the running profile, Throne connects to the single new profile with the same name and type. If there is none, it stays stopped.
+
 #### 2.0.4
 
 * Add DNS settings to routing profiles **1**
