@@ -415,19 +415,13 @@ class StatsBar @JvmOverloads constructor(
         runOnDefaultDispatcher {
             try {
                 val elapsed = activity.urlTest()
-                onMainDispatcher {
+        onMainDispatcher {
                     isEnabled = true
                     setStatus(
                         if (elapsed == ProxyEntity.LATENCY_CONNECT_ONLY) {
                             app.getText(R.string.test_connect_ok)
                         } else {
-                            app.getString(
-                                if (DataStore.testUrl.startsWith("https://")) {
-                                    R.string.connection_test_available
-                                } else {
-                                    R.string.connection_test_available_http
-                                }, elapsed
-                            )
+                            "$elapsed ms"
                         }
                     )
                 }
