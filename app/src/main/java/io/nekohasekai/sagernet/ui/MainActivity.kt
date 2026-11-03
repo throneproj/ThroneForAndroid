@@ -345,7 +345,6 @@ class MainActivity : ThemedActivity(),
         return true
     }
 
-
     @SuppressLint("CommitTransaction")
     fun displayFragment(fragment: ToolbarFragment) {
         currentMainFragment = fragment
@@ -442,6 +441,9 @@ class MainActivity : ThemedActivity(),
             showWhenConnected = state == BaseService.State.Connected,
             animate = animateControls,
         )
+        if (state == BaseService.State.Connected) {
+            binding.stats.testConnection()
+        }
         if (state == BaseService.State.Connecting) errorBar?.dismiss()
         if (msg == null) return
         if (msg == DataStore.serviceError) showServiceError(msg) else snackbar(getString(R.string.vpn_error, msg)).show()
