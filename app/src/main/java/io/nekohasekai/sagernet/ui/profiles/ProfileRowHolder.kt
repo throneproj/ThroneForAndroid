@@ -372,7 +372,10 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
         val surface = context.getColorAttr(R.attr.colorSurface)
         var background = surface
         selectedIndicator.isVisible = selected
-        card.strokeWidth = 0
+        // The shadow does not show on OLED black, so that theme outlines the card instead
+        val stroke = context.getColorAttr(R.attr.profileCardStrokeColor)
+        if (stroke != 0) card.strokeColor = stroke
+        card.strokeWidth = if (stroke != 0) context.resources.getDimensionPixelSize(R.dimen.card_stroke_width) else 0
         card.cardElevation = context.resources.getDimension(R.dimen.profile_card_elevation_classic)
         if (selected) {
             val primary = context.getColorAttr(R.attr.selectedColorPrimary)

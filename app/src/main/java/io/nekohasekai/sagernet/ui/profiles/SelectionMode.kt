@@ -17,11 +17,15 @@ import io.nekohasekai.sagernet.ui.ConfigurationFragment
 
 /**
  * Multi-selection in the current tab (the desktop's selected rows): long press starts it, taps toggle, the toolbar
- * turns into its contextual actions. Switching tabs, Back or the close icon end it.
+ * turns into its contextual actions. Back or the close icon end it. Like the desktop's per-group selected rows, a
+ * tab switch parks the selection and the tab gets it back when it is shown again.
  */
 class SelectionMode(private val host: ConfigurationFragment) {
 
     private val checked = LinkedHashSet<Long>()
+
+    /** The selections of the tabs not shown, by group. */
+    private val parked = HashMap<Long, LinkedHashSet<Long>>()
 
     /** The row whose long press (and drag) started the selection. */
     private var dragStartedId = 0L
@@ -73,6 +77,30 @@ class SelectionMode(private val host: ConfigurationFragment) {
         checked.clear()
         dragStartedId = 0L
         host.onSelectionModeChanged(false)
+    }
+
+    /** The screen goes away: every tab's selection ends. */
+    fun reset() {
+        parked.clear()
+        finish()
+    }
+
+    /** The tab of [shownGroupId] came into view: the previous tab's selection is parked and this one's restored. */
+    fun onGroupShown(shownGroupId: Long) {
+        if (active && shownGroupId == groupId) return
+        if (active) parked[groupId] = LinkedHashSet(checked)
+        val restored = parked.remove(shownGroupId)
+        // the rows deleted meanwhile, when the list already knows its members
+        host.listFor(shownGroupId)?.adapter?.takeIf { it.loaded }?.memberIds?.let { members ->
+            restored?.retainAll(members.toHashSet())
+        }
+        if (restored.isNullOrEmpty()) return finish()
+        active = true
+        groupId = shownGroupId
+        checked.clear()
+        checked.addAll(restored)
+        dragStartedId = 0L
+        host.onSelectionModeChanged(true)
     }
 
     val count: Int get() = checked.size

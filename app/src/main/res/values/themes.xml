@@ -665,6 +665,7 @@
         <item name="android:colorBackground">@android:color/black</item>
         <item name="colorSurface">@android:color/black</item>
         <item name="cardElevatedSurfaceColor">@color/card_elevated_amoled</item>
+        <item name="profileCardStrokeColor">@color/card_stroke</item>
         <!-- No elevation overlay on OLED black: it would lighten black surfaces by elevation (a 4dp toolbar becomes #181818) -->
         <item name="elevationOverlayEnabled">false</item>
     </style>

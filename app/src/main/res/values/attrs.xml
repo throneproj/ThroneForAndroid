@@ -10,6 +10,8 @@
     <attr name="dialogButtonColor" format="color" />
     <!-- Tinted elevated surface of the raised cards (routes, groups); each theme tints it towards its primary -->
     <attr name="cardElevatedSurfaceColor" format="color" />
+    <!-- Outline of the profile cards, set only where their shadow does not show (OLED black); unset means none -->
+    <attr name="profileCardStrokeColor" format="color" />
 
     <!-- JSON editor preference -->
     <declare-styleable name="EditConfigPreference">

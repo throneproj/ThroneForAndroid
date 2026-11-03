@@ -333,7 +333,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         pager.unregisterOnPageChangeCallback(pageCallback)
         mediator?.detach()
         mediator = null
-        selection.finish()
+        selection.reset()
         lists.clear()
         pendingReveal = null
         searchView = null
@@ -524,7 +524,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         if (group.id == shownGroupId) return
         shownGroupId = group.id
         if (!select) GroupRepo.setCurrent(group.id)
-        selection.finish()
+        selection.onGroupShown(group.id)
         currentList()?.adapter?.onShown()
         applyQuery()
         updateGroupProgress()
