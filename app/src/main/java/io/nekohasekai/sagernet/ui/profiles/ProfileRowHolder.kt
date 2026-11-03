@@ -20,7 +20,6 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.SettingsRegistry
-import io.nekohasekai.sagernet.database.TestShowItems
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.ktx.alert
 import io.nekohasekai.sagernet.ktx.getColorAttr
@@ -63,16 +62,12 @@ internal class RowContent(
         private const val LRO = "\u202D"
         private const val NBSP = "\u00A0"
 
-        /** Between items, where the line may break. */
-        private const val GAP = "\u2002 "
-
         /** A core rate: "34.13Mbps". */
         private val RATE = Regex("""(\d+(?:\.\d+)?)\s*([KMG]bps)""", RegexOption.IGNORE_CASE)
 
         fun of(context: Context, profile: ProxyEntity, adapter: ProfileListAdapter): RowContent {
             val secondary = context.getColorAttr(android.R.attr.textColorSecondary)
             val brief = adapter.isCompactRow
-            val showTraffic = !brief && profile.rx + profile.tx != 0L
             val up = Formatter.formatShortFileSize(context, profile.tx)
             val down = Formatter.formatShortFileSize(context, profile.rx)
             val address = if (!brief && adapter.host?.alwaysShowAddress == true && profile.outbound.name.isNotBlank()) {
@@ -84,9 +79,10 @@ internal class RowContent(
             val color = profile.latencyColor().takeIf { it != 0 } ?: secondary
             val result = SpannableStringBuilder()
             var description: String? = null
-            // Profile::DisplayTestResult: a failed or connect-only test shows its verdict alone
+
             when {
                 phase == RowPhase.TESTING -> result.append(context.getString(R.string.connection_test_testing))
+                phase == RowPhase.QUEUED -> result.append(context.getString(R.string.profiles_test_queued))
                 latency == ProxyEntity.LATENCY_CONNECT_ONLY || latency < 0 -> result.append(
                     context.getString(
                         if (latency == ProxyEntity.LATENCY_CONNECT_ONLY) R.string.test_connect_ok else R.string.unavailable
@@ -96,28 +92,30 @@ internal class RowContent(
                 )
 
                 else -> {
-                    val items = testResult(context, profile, TestShowItems.of(adapter.testItemsToShow), color, secondary)
-                        .let { if (brief) it.take(1) else it }
-                    if (items.isNotEmpty()) {
+                    // 获取覆盖互斥的单一最新测试结果
+                    val singleItem = singleTestResult(context, profile, color, secondary)
+                    if (singleItem != null) {
                         result.append(LRO)
-                        items.forEachIndexed { index, item ->
-                            if (index > 0) result.append(GAP)
-                            result.append(item.text, ForegroundColorSpan(item.color), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        }
-                        description = items.joinToString(", ") { it.spoken }
-                    } else if (phase == RowPhase.QUEUED) {
-                        result.append(context.getString(R.string.profiles_test_queued))
+                        result.append(singleItem.text, ForegroundColorSpan(singleItem.color), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        description = singleItem.spoken
+                    } else if (profile.rx + profile.tx > 0L) {
+                        // 无测试结果，但产生了流量，回退显示流量统计
+                        val trafficText = context.getString(R.string.traffic, up, down)
+                        result.append(trafficText, ForegroundColorSpan(secondary), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        description = context.getString(R.string.profile_row_traffic, up, down)
                     }
+                    // 流量为 0 且无测试结果时，result 保持为空，不会在卡片右侧留有任何占位
                 }
             }
+
             val error = if (phase == null) profile.testError?.takeIf { it.isNotBlank() } else null
             return RowContent(
                 result = result,
                 resultDescription = description,
                 resultDimmed = phase == RowPhase.QUEUED,
                 testing = phase == RowPhase.TESTING,
-                traffic = if (showTraffic) context.getString(R.string.traffic, up, down) else "",
-                trafficDescription = if (showTraffic) context.getString(R.string.profile_row_traffic, up, down) else null,
+                traffic = "",
+                trafficDescription = null,
                 address = address,
                 error = error,
                 brief = brief,
@@ -125,18 +123,20 @@ internal class RowContent(
         }
 
         /**
-         * The items of Profile::DisplayTestResult (Profile.cpp:36-56): flag and latency in the latency colour, then
-         * the speeds and the egress IP as the group's test_items_to_show allows.
+         * 互斥单选展示：测速 > 延迟与国旗 > IP
+         * 保证只显示一个结果，新测试触发后自动覆盖
          */
-        private fun testResult(
+        private fun singleTestResult(
             context: Context,
             profile: ProxyEntity,
-            show: TestShowItems,
             @ColorInt color: Int,
             @ColorInt secondary: Int,
-        ): List<Item> {
+        ): Item? {
+            // 1. 优先展示上下行速率（如果存在测速结果）
+            speeds(context, profile.dlSpeed, profile.ulSpeed, secondary)?.let { return it }
+
+            // 2. 其次展示基础：延迟与国家代码
             val latency = profile.latency
-            val items = ArrayList<Item>()
             val head = ArrayList<String>()
             val headSpoken = ArrayList<String>()
             profile.testCountry?.takeIf { it.isNotEmpty() }?.let { country ->
@@ -148,13 +148,17 @@ internal class RowContent(
                 head += "$latency${NBSP}ms"
                 headSpoken += "$latency ms"
             }
-            if (head.isNotEmpty()) items += Item(head.joinToString(NBSP), color, headSpoken.joinToString(", "))
-            if (show.showSpeed) speeds(context, profile.dlSpeed, profile.ulSpeed, secondary)?.let { items += it }
-            val ip = profile.ipOut.orEmpty()
-            if (show.showIp && ip.isNotEmpty()) {
-                items += Item("🌐$NBSP$ip", secondary, context.getString(R.string.profile_row_ip, ip))
+            if (head.isNotEmpty()) {
+                return Item(head.joinToString(NBSP), color, headSpoken.joinToString(", "))
             }
-            return items
+
+            // 3. 兜底展示出口 IP
+            val ip = profile.ipOut.orEmpty()
+            if (ip.isNotEmpty()) {
+                return Item("🌐$NBSP$ip", secondary, context.getString(R.string.profile_row_ip, ip))
+            }
+
+            return null
         }
 
         /** "↓34.1 ↑11.6 Mbps": three significant digits, one unit when both rates share it; "N/A" is left out. */
