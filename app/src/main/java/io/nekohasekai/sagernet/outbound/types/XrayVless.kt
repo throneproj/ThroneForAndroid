@@ -10,6 +10,7 @@ import io.nekohasekai.sagernet.outbound.common.XrayMultiplex
 import io.nekohasekai.sagernet.outbound.common.XrayStreamSetting
 import io.nekohasekai.sagernet.outbound.common.normalizeXrayNetwork
 import io.nekohasekai.sagernet.outbound.common.stripXrayDialerState
+import io.nekohasekai.sagernet.outbound.common.stripXrayFinalmaskKeyLog
 import io.nekohasekai.sagernet.outbound.common.withXrayDownloadLeg
 import io.nekohasekai.sagernet.outbound.common.xrayDownloadLeg
 import io.nekohasekai.sagernet.outbound.import.ClashProxy
@@ -204,11 +205,13 @@ class XrayVless : Outbound("xrayvless") {
         val obj = JsonObject()
         obj["protocol"] = "vless"
         obj["settings"] = settingsJson()
-        val streamObj = streamSetting.build(ctx)
-        if (streamObj.isNotEmpty()) obj["streamSettings"] = streamObj
+        val stream = streamSetting.build(ctx, displayTypeAndName())
+        if (!stream.ok) return BuildResult(JsonObject(), stream.error)
+        if (stream.json.isNotEmpty()) obj["streamSettings"] = stream.json
         // Xray refuses XDRIVE without Mux, so Keep Default turns it on there.
         val muxRequired = normalizeXrayNetwork(streamSetting.network) == "xdrive"
-        val muxObj = multiplex.buildMux(ctx, muxRequired || ctx.xrayMuxDefaultOn)
+        // Each XDNS connection is its own mKCP session that opens a socket per resolver; Mux shares one.
+        val muxObj = multiplex.buildMux(ctx, muxRequired || streamSetting.isXdns() || ctx.xrayMuxDefaultOn)
         if (muxObj.isNotEmpty()) {
             // It also refuses any traffic leaving the mux there, which a preset may ask for.
             if (muxRequired) {
@@ -262,6 +265,7 @@ class XrayVless : Outbound("xrayvless") {
             val extraDownload = x.rawExtra[key] as? JsonObject ?: continue
             strip(extraDownload, "$at$key.")
         }
+        stripXrayFinalmaskKeyLog(streamSetting.finalmask, "streamSettings.finalmask.", issues)
     }
 
     /** xrayVless::Validate. */

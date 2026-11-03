@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.outbound.common
 
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.outbound.BuildContext
+import io.nekohasekai.sagernet.outbound.BuildResult
 import io.nekohasekai.sagernet.outbound.QtStrings
 import io.nekohasekai.sagernet.outbound.SecurityInfo
 import io.nekohasekai.sagernet.outbound.SecurityLevel
@@ -29,23 +30,25 @@ import io.nekohasekai.sagernet.validation.addIssue
 import io.nekohasekai.sagernet.validation.jsonStringList
 import io.nekohasekai.sagernet.validation.readQueryInt
 import io.nekohasekai.sagernet.validation.vtr
+import java.util.Locale
 import kotlin.reflect.KMutableProperty1
 
 /** XrayNetworks (xrayStreamSetting.h). */
-val xrayNetworks = listOf("raw", "xhttp", "ws", "httpupgrade", "grpc", "xdrive")
+val xrayNetworks = listOf("raw", "xhttp", "ws", "httpupgrade", "grpc", "kcp", "xdrive")
 
 /** XrayXDriveServices (xrayStreamSetting.h): Xray still takes "Google Drive" for google-drive; XrayXDrive.parseFromJson folds it. */
-val xrayXDriveServices = listOf("google-drive", "template", "local")
+val xrayXDriveServices = listOf("google-drive", "s3", "template", "local")
 val xrayXhttpModes = listOf("auto", "packet-up", "stream-up", "stream-one")
 val xrayXhttpMetaPlacements = listOf("", "path", "cookie", "header", "query")
 val xrayXhttpUplinkDataPlacements = listOf("", "auto", "body", "cookie", "header")
 val xrayXhttpUplinkMethods = listOf("", "POST", "PUT", "PATCH", "GET")
 
-/** NormalizeXrayNetwork (xrayStreamSetting.cpp): the aliases Xray itself accepts (tcp, splithttp, websocket), case-insensitively. */
+/** NormalizeXrayNetwork (xrayStreamSetting.cpp): the aliases Xray itself accepts (tcp, splithttp, websocket, mkcp), case-insensitively. */
 fun normalizeXrayNetwork(network: String): String = when (val lower = network.lowercase()) {
     "tcp" -> "raw"
     "splithttp" -> "xhttp"
     "websocket" -> "ws"
+    "mkcp" -> "kcp"
     else -> lower
 }
 
@@ -360,6 +363,385 @@ private inline fun <T> unreported(read: () -> T): T {
     }
 }
 
+private fun xrayValue(obj: JsonObject, name: String, pointer: Boolean): Any? = xrayLast(xrayRoot(obj), name, pointer).first
+
+private fun xrayArrayOf(items: List<Any>): JsonArray = JsonArray().also { array -> items.forEach { array.add(it) } }
+
+private fun xrayMaskType(mask: Any?): String = xrayLower(xrayValue(mask as? JsonObject ?: JsonObject(), "type", false) as? String ?: "")
+
+// Go reads a mask's keys case-insensitively, and LoadWithID lower-cases its type.
+private fun xrayCanonicalMask(mask: JsonObject): Boolean {
+    val original = mask.copy()
+    val type = xrayValue(mask, "type", false)
+    val settings = xrayValue(mask, "settings", true)
+    xrayRemoveNamed(mask, "type")
+    xrayRemoveNamed(mask, "settings")
+    if (type != null) mask["type"] = if (type is String) xrayLower(type) else type
+    if (!xrayUnset(settings)) mask["settings"] = settings
+    return mask != original
+}
+
+private val XRAY_MKCP_HEADERS = listOf("dns", "dtls", "srtp", "utp", "wechat", "wireguard")
+
+// Xray 26.5.29 folded these into mkcp-legacy and dropped the names; null leaves the mask as it is. An empty AES password has no mkcp-legacy form.
+private fun xrayUpgradeMkcpMask(mask: JsonObject): JsonObject? {
+    val type = mask.string("type")
+    val settings = mask.obj("settings")
+    val legacy = JsonObject()
+    if (type == "mkcp-aes128gcm") {
+        val password = xrayValue(settings, "password", false) as? String ?: ""
+        if (password.isEmpty()) return null
+        legacy["value"] = password
+    } else if (type.startsWith("header-") && type.substring(7) in XRAY_MKCP_HEADERS) {
+        legacy["header"] = type.substring(7)
+        val domain = xrayValue(settings, "domain", false) as? String ?: ""
+        if (type == "header-dns" && domain.isNotEmpty()) legacy["value"] = domain
+    } else if (type != "mkcp-original") {
+        return null
+    }
+    val upgraded = jsonObjectOf("type" to "mkcp-legacy")
+    if (legacy.isNotEmpty()) upgraded["settings"] = legacy
+    return upgraded
+}
+
+private val XRAY_LEGACY_XDNS_TYPES = mapOf("" to 16, "txt" to 16, "a" to 1, "aaaa" to 28)
+
+// The "name[:txt|a|aaaa]" spec of the pre-26.9.30 xdns lists, which always queried with a 1232-byte EDNS0 payload.
+private fun xrayLegacyXdnsDomain(spec: String): JsonObject? {
+    var name = spec.trim()
+    var method = ""
+    val colon = name.lastIndexOf(':')
+    if (colon >= 0) {
+        method = name.substring(colon + 1).lowercase()
+        name = name.substring(0, colon)
+    }
+    name = name.trimStart('.').trimEnd('.')
+    val type = XRAY_LEGACY_XDNS_TYPES[method]
+    if (name.isEmpty() || type == null) return null
+    return jsonObjectOf("names" to JsonArray.of(name), "types" to JsonArray.of(type), "edns0" to 1232)
+}
+
+// 3x-ui's maskcompat.UpgradeLegacyXdns: Xray 26.10.5 refuses the string lists and silently ignores 26.9.30's objects.
+private fun xrayUpgradeXdnsSettings(settings: JsonObject): Boolean {
+    val rawDomains = settings.array("domains")
+    val rawResolvers = settings.array("resolvers")
+    fun legacyDomain(v: Any) = v is String || (v is JsonObject && v.contains("name"))
+    fun legacyResolver(v: Any) = v is String || (v is JsonObject && !v.contains("addrs"))
+    if (rawDomains.none { legacyDomain(it) } && rawResolvers.none { legacyResolver(it) }) return false
+
+    val domains = JsonArray()
+    val listed = HashSet<String>()
+    fun addDomain(domain: JsonObject) {
+        for (name in domain.array("names")) if (name is String) listed.add(xrayLower(name))
+        domains.add(domain)
+    }
+    fun addLegacyDomain(domain: JsonObject) {
+        if (xrayLower(domain.array("names").firstOrNull() as? String ?: "") !in listed) addDomain(domain)
+    }
+    for (entry in rawDomains) {
+        if (entry is JsonObject) {
+            val domain = entry.copy()
+            if (domain.contains("name")) {
+                val name = (domain.remove("name") as? String ?: "").trim()
+                val names = domain.array("names")
+                domain["names"] = if (name.isNotEmpty() && name !in names) xrayArrayOf(listOf<Any>(name) + names) else names
+            }
+            addDomain(domain)
+        } else if (entry is String) {
+            xrayLegacyXdnsDomain(entry)?.let { addLegacyDomain(it) }
+        }
+    }
+    val resolvers = JsonArray()
+    for (entry in rawResolvers) {
+        if (entry is String) {
+            val cut = entry.indexOf("+udp://")
+            val addr = if (cut < 0) "" else entry.substring(cut + 7).trim()
+            if (addr.isEmpty()) continue
+            val domain = xrayLegacyXdnsDomain(entry.substring(0, cut)) ?: continue
+            addLegacyDomain(domain)
+            resolvers.add(jsonObjectOf("addrs" to JsonArray.of("udp://$addr")))
+        } else if (entry is JsonObject && legacyResolver(entry)) {
+            val kind = (entry["type"] as? String ?: "").trim().lowercase()
+            val addr = (entry.obj("settings")["addr"] as? String ?: "").trim()
+            if ((kind == "udp" || kind == "tcp") && addr.isNotEmpty()) resolvers.add(jsonObjectOf("addrs" to JsonArray.of("$kind://$addr")))
+        } else {
+            resolvers.add(entry)
+        }
+    }
+    settings["domains"] = domains
+    if (resolvers.isEmpty()) settings.remove("resolvers") else settings["resolvers"] = resolvers
+    return true
+}
+
+private val XRAY_KCP_SAME_HEADERS = listOf("dns", "dtls", "srtp", "utp", "wireguard")
+
+// The mKCP header types links and kcpSettings carried before finalmask, as the mkcp-legacy header ("" for none); null for one Xray never had.
+private fun xrayKcpLegacyHeader(type: String): String? {
+    val t = xrayLower(type.trim())
+    if (t.isEmpty() || t == "none") return ""
+    if (t == "wechat-video") return "wechat"
+    return if (t in XRAY_KCP_SAME_HEADERS) t else null
+}
+
+// Old mKCP ran the seed's AES-128-GCM, else its original obfuscation, inside the header; xdns has to stay the last mask.
+private fun xrayKcpLegacyMasks(finalmask: JsonObject, header: String, domain: String, seed: String) {
+    if (header.isEmpty() && seed.isEmpty()) return
+    val udp = finalmask.array("udp").toMutableList()
+    var at = udp.size
+    for ((i, mask) in udp.withIndex()) {
+        val type = xrayMaskType(mask)
+        if (type == "mkcp-legacy") return
+        if (type == "xdns" && at == udp.size) at = i
+    }
+    val cipher = jsonObjectOf("type" to "mkcp-legacy")
+    if (seed.isNotEmpty()) cipher["settings"] = jsonObjectOf("value" to seed)
+    udp.add(at++, cipher)
+    if (header.isNotEmpty()) {
+        val settings = jsonObjectOf("header" to header)
+        if (domain.isNotEmpty()) settings["value"] = domain
+        udp.add(at, jsonObjectOf("type" to "mkcp-legacy", "settings" to settings))
+    }
+    finalmask["udp"] = xrayArrayOf(udp)
+}
+
+private fun xrayKcpImportLegacy(finalmask: JsonObject, field: String, type: String, domain: String, seed: String) {
+    val header = xrayKcpLegacyHeader(type)
+    if (header == null) ParseDiag.warn(field, vtr(R.string.validation_xray_kcp_header_unknown, type.trim()), type)
+    xrayKcpLegacyMasks(finalmask, header.orEmpty(), if (header == "dns") domain else "", seed)
+}
+
+// filter only screens a listener's sources, and a client core older than Xray 26.10.21 refuses the type.
+private fun xrayShareFinalmask(finalmask: JsonObject): JsonObject {
+    val shared = finalmask.copy()
+    for (layer in listOf("tcp", "udp")) {
+        for (key in xrayKeysNamed(shared, layer)) {
+            val masks = shared[key] as? JsonArray ?: continue
+            val kept = masks.filter { xrayMaskType(it) != "filter" }
+            if (kept.isEmpty()) shared.remove(key) else shared[key] = xrayArrayOf(kept)
+        }
+    }
+    return shared
+}
+
+private fun xrayXdnsNames(settings: JsonObject): List<String> {
+    val names = ArrayList<String>()
+    for (domain in xrayValue(settings, "domains", true) as? JsonArray ?: JsonArray()) {
+        for (name in xrayValue(domain as? JsonObject ?: JsonObject(), "names", true) as? JsonArray ?: JsonArray()) {
+            val text = (name as? String ?: "").trim()
+            if (text.isNotEmpty()) names.add(text)
+        }
+    }
+    return names
+}
+
+private fun xrayXdnsIssues(issues: MutableList<Issue>, at: String, mask: JsonObject, resolversReplaced: Boolean) {
+    val (settingsValue, settingsAt) = xrayLast(xrayRoot(mask, at), "settings", true)
+    val settings = settingsValue as? JsonObject ?: JsonObject()
+    val base = (settingsAt ?: (at + "settings")) + "."
+    if (xrayXdnsNames(settings).isEmpty()) issues.addIssue(Severity.Error, base + "domains", vtr(R.string.validation_xray_xdns_domains))
+    var resolved = false
+    val resolvers = xrayValue(settings, "resolvers", true) as? JsonArray ?: JsonArray()
+    for ((i, entry) in resolvers.withIndex()) {
+        val resolver = entry as? JsonObject ?: JsonObject()
+        val resolverAt = "${base}resolvers[$i]."
+        var doh = false
+        for (addr in xrayValue(resolver, "addrs", true) as? JsonArray ?: JsonArray()) {
+            val text = (addr as? String ?: "").trim()
+            if (text.isEmpty()) continue
+            resolved = true
+            val scheme = if (text.contains("://")) text.substring(0, text.indexOf("://")).lowercase() else "udp"
+            doh = doh || scheme == "https"
+            if (scheme != "udp" && scheme != "tcp" && scheme != "https") {
+                issues.addIssue(Severity.Error, resolverAt + "addrs", vtr(R.string.validation_xray_xdns_resolver_scheme), text)
+            }
+        }
+        if (!doh) continue
+        val tls = xrayValue(resolver, "tlsConfig", true) as? JsonObject
+        if (tls == null) {
+            issues.addIssue(Severity.Error, resolverAt + "tlsConfig", vtr(R.string.validation_xray_xdns_doh_tls))
+            continue
+        }
+        val alpn = xrayValue(tls, "alpn", true)
+        val h3 = if (alpn is String) alpn == "h3" else alpn is JsonArray && alpn == JsonArray.of("h3")
+        if (h3) {
+            val quic = xrayValue(resolver, "quicConfig", true) as? JsonObject ?: JsonObject()
+            if (xrayLower(xrayValue(quic, "congestion", false) as? String ?: "") == "brutal") {
+                issues.addIssue(Severity.Error, resolverAt + "quicConfig.congestion", vtr(R.string.validation_xray_xdns_h3_brutal))
+            }
+            continue
+        }
+        fun text(name: String) = (xrayValue(tls, name, false) as? String ?: "").trim()
+        if (text("serverName").isEmpty() && text("pinnedPeerCertSha256").isEmpty() && text("verifyPeerCertByName").isEmpty() &&
+            xrayValue(tls, "allowInsecure", false) != true
+        ) {
+            issues.addIssue(Severity.Warning, resolverAt + "tlsConfig.serverName", vtr(R.string.validation_xray_xdns_server_name))
+        }
+    }
+    if (!resolved && !resolversReplaced) issues.addIssue(Severity.Warning, base + "resolvers", vtr(R.string.validation_xray_xdns_resolvers))
+}
+
+private fun xrayStripResolverKeyLog(resolver: JsonObject, at: String, issues: MutableList<Issue>): Boolean {
+    var removed = false
+    for (tlsKey in xrayKeysNamed(resolver, "tlsConfig")) {
+        val tls = resolver[tlsKey] as? JsonObject ?: continue
+        for (key in xrayKeysNamed(tls, "masterKeyLog")) {
+            val path = (tls[key] as? String ?: "").trim()
+            // Xray reads "none" as no file.
+            if (path.isEmpty() || path == "none") continue
+            issues.add(Issue(Severity.Warning, "$at$tlsKey.$key", vtr(R.string.validation_custom_writes_file), path))
+            tls.remove(key)
+            removed = true
+        }
+    }
+    return removed
+}
+
+// A DoH address keeps the settings of the mask resolver that listed it, else gets the serverName Xray's DoH dialer needs.
+private fun xrayXdnsSourcedResolvers(settings: JsonObject, addresses: JsonArray): JsonArray {
+    val known = HashMap<String, JsonObject>()
+    for (entry in xrayValue(settings, "resolvers", true) as? JsonArray ?: JsonArray()) {
+        val resolver = (entry as? JsonObject)?.copy() ?: JsonObject()
+        val addrs = xrayValue(resolver, "addrs", true) as? JsonArray ?: JsonArray()
+        xrayRemoveNamed(resolver, "addrs")
+        for (addr in addrs) {
+            val key = ResolverSources.xdnsAddress(addr as? String ?: "")
+            if (key.isNotEmpty() && key !in known) known[key] = resolver
+        }
+    }
+    val plain = JsonArray()
+    val resolvers = ArrayList<Any>()
+    for (value in addresses) {
+        val address = value as? String ?: ""
+        if (!address.startsWith("https://")) {
+            plain.add(address)
+            continue
+        }
+        val resolver = known[address]?.copy() ?: jsonObjectOf("tlsConfig" to jsonObjectOf("serverName" to LinkParser.parse(address).host))
+        resolver["addrs"] = JsonArray.of(address)
+        resolvers.add(resolver)
+    }
+    if (plain.isNotEmpty()) resolvers.add(0, jsonObjectOf("addrs" to plain))
+    return xrayArrayOf(resolvers)
+}
+
+private fun xrayXdnsReplaceResolvers(finalmask: JsonObject, addresses: JsonArray) {
+    for (layerKey in xrayKeysNamed(finalmask, "udp")) {
+        val masks = finalmask[layerKey] as? JsonArray ?: continue
+        finalmask[layerKey] = xrayArrayOf(masks.map { entry ->
+            if (xrayMaskType(entry) != "xdns") return@map entry
+            val mask = (entry as JsonObject).copy()
+            val settings = (xrayValue(mask, "settings", true) as? JsonObject)?.copy() ?: JsonObject()
+            val resolvers = xrayXdnsSourcedResolvers(settings, addresses)
+            xrayRemoveNamed(settings, "resolvers")
+            settings["resolvers"] = resolvers
+            xrayRemoveNamed(mask, "settings")
+            mask["settings"] = settings
+            mask
+        })
+    }
+}
+
+// QString::number(double): C's %.6g, which drops the trailing zeros Java's %g keeps.
+private fun xrayQtNumber(value: Double): String {
+    val text = String.format(Locale.ROOT, "%.6g", value)
+    val e = text.indexOfFirst { it == 'e' || it == 'E' }
+    val mantissa = if (e < 0) text else text.substring(0, e)
+    val trimmed = if (mantissa.contains('.')) mantissa.trimEnd('0').trimEnd('.') else mantissa
+    if (e < 0) return trimmed
+    val exponent = text.substring(e + 1).toInt()
+    return trimmed + "e" + (if (exponent < 0) "-" else "+") + Math.abs(exponent).toString().padStart(2, '0')
+}
+
+// Whole JSON numbers as Validation.int reads them; null and other non-numbers keep Xray's default.
+private fun xrayKcpJsonText(value: Any?): String {
+    if (value is String) return value.trim()
+    val number = when (value) {
+        is Long -> value.toDouble()
+        is Double -> value
+        else -> return ""
+    }
+    if (Math.abs(number) < 1e15 && number == Math.floor(number)) return number.toLong().toString()
+    return xrayQtNumber(number)
+}
+
+private fun xrayKcpCheck(key: String, text: String, mtu: Long): String = when (key) {
+    "mtu" -> XrayChecks.xrayKCPMtu(text)
+    "tti" -> XrayChecks.xrayKCPTti(text)
+    "cwndMultiplier" -> XrayChecks.xrayKCPCwndMultiplier(text)
+    "maxSendingWindow" -> XrayChecks.xrayKCPMaxSendingWindow(text, mtu.toString())
+    else -> XrayChecks.xrayKCPCapacity(text)
+}
+
+/** UpgradeXrayFinalmask (xrayStreamSetting.cpp): rewrites the spellings Xray now refuses or ignores (key case, old mask names, old xdns shapes); true when anything changed. */
+fun upgradeXrayFinalmask(finalmask: JsonObject): Boolean {
+    var changed = false
+    for (layer in listOf("tcp", "udp")) {
+        val keys = xrayKeysNamed(finalmask, layer)
+        if (keys.isEmpty()) continue
+        if (keys != listOf(layer)) {
+            val value = xrayValue(finalmask, layer, true)
+            xrayRemoveNamed(finalmask, layer)
+            if (!xrayUnset(value)) finalmask[layer] = value
+            changed = true
+        }
+        val masks = finalmask[layer] as? JsonArray ?: continue
+        var edited = false
+        val upgraded = masks.map { entry ->
+            if (entry !is JsonObject) return@map entry
+            var mask = entry.copy()
+            var maskChanged = xrayCanonicalMask(mask)
+            if (layer == "udp") {
+                xrayUpgradeMkcpMask(mask)?.let {
+                    mask = it
+                    maskChanged = true
+                }
+                val settings = mask["settings"]
+                if (mask["type"] == "xdns" && settings is JsonObject) {
+                    val copy = settings.copy()
+                    if (xrayUpgradeXdnsSettings(copy)) {
+                        mask["settings"] = copy
+                        maskChanged = true
+                    }
+                }
+            }
+            if (!maskChanged) return@map entry
+            edited = true
+            mask
+        }
+        if (!edited) continue
+        finalmask[layer] = xrayArrayOf(upgraded)
+        changed = true
+    }
+    return changed
+}
+
+/** StripXrayFinalmaskKeyLog (xrayStreamSetting.cpp): removes masterKeyLog from the TLS settings of the finalmask's xdns resolvers, in place; true when any went. */
+fun stripXrayFinalmaskKeyLog(finalmask: JsonObject, at: String, issues: MutableList<Issue>): Boolean {
+    var removed = false
+    for (layerKey in xrayKeysNamed(finalmask, "udp")) {
+        val masks = finalmask[layerKey] as? JsonArray ?: continue
+        for ((i, entry) in masks.withIndex()) {
+            if (xrayMaskType(entry) != "xdns") continue
+            val mask = entry as JsonObject
+            for (settingsKey in xrayKeysNamed(mask, "settings")) {
+                val settings = mask[settingsKey] as? JsonObject ?: continue
+                for (resolversKey in xrayKeysNamed(settings, "resolvers")) {
+                    val resolvers = settings[resolversKey] as? JsonArray ?: continue
+                    for ((j, resolver) in resolvers.withIndex()) {
+                        if (resolver !is JsonObject) continue
+                        if (xrayStripResolverKeyLog(resolver, "$at$layerKey[$i].$settingsKey.$resolversKey[$j].", issues)) removed = true
+                    }
+                }
+            }
+        }
+    }
+    return removed
+}
+
+/** XrayFinalmaskHasXdns (xrayStreamSetting.cpp). */
+fun xrayFinalmaskHasXdns(finalmask: JsonObject): Boolean =
+    (xrayValue(finalmask, "udp", true) as? JsonArray)?.any { xrayMaskType(it) == "xdns" } == true
+
 /** The Checks of xrayStreamSetting.h, shared by the Xray stream editor and the import check; each returns "" when acceptable. */
 object XrayChecks {
     @JvmStatic
@@ -547,14 +929,31 @@ object XrayChecks {
     @JvmStatic
     fun xrayXDriveFolder(service: String, folder: String): String {
         val s = service.trim()
+        if (s == "s3") {
+            val prefix = folder.trim()
+            if (prefix.isEmpty()) return vtr(R.string.validation_xray_xdrive_s3_prefix_empty)
+            if (xdriveS3Name(prefix.removeSuffix("/"))) return ""
+            return vtr(R.string.validation_xray_xdrive_s3_prefix)
+        }
         if (folder.trim().isNotEmpty() || (s != "google-drive" && s != "local")) return ""
         if (s == "local") return vtr(R.string.validation_xray_xdrive_folder_local)
         return vtr(R.string.validation_xray_xdrive_folder_drive)
     }
 
-    /** google-drive takes exactly ClientID, ClientSecret and RefreshToken, none empty (Xray drive.go). */
+    /**
+     * google-drive takes exactly ClientID, ClientSecret and RefreshToken, none empty (Xray drive.go);
+     * s3 takes AccessKeyID and SecretAccessKey, then an optional SessionToken.
+     */
     @JvmStatic
     fun xrayXDriveSecrets(service: String, secrets: List<String>): String {
+        if (service.trim() == "s3") {
+            if (secrets.size !in 2..3 || secrets[0].trim().isEmpty() || secrets[1].trim().isEmpty()) {
+                return vtr(R.string.validation_xray_xdrive_s3_secrets)
+            }
+            if (!secrets.all { xdriveHeaderValue(it) }) return vtr(R.string.validation_xray_xdrive_s3_keys_control)
+            if (secrets[0].any { it == '/' || it == ' ' || it == ',' || it == '\t' }) return vtr(R.string.validation_xray_xdrive_s3_access_key)
+            return ""
+        }
         if (service.trim() != "google-drive") return ""
         if (secrets.size == 3 && secrets.none { it.trim().isEmpty() }) return ""
         return vtr(R.string.validation_xray_xdrive_secrets)
@@ -579,9 +978,119 @@ object XrayChecks {
         if (address.trim().isNotEmpty() || (Validation.toInt(port.trim()) ?: 0L) == 0L) return ""
         return vtr(R.string.validation_xray_xdrive_front_port_alone)
     }
+
+    /** The endpoint QUrl's StrictMode parses as http or https, without credentials, query or fragment. */
+    @JvmStatic
+    fun xrayXDriveS3Endpoint(service: String, endpoint: String): String {
+        if (service.trim() != "s3") return ""
+        val text = endpoint.trim()
+        if (text.isEmpty()) return vtr(R.string.validation_xray_xdrive_s3_endpoint_empty)
+        val url = LinkParser.parse(text)
+        val scheme = url.scheme.lowercase()
+        // Brackets belong only to an IPv6 host; StrictMode refuses them in the path.
+        val path = text.substringAfter("://", "").dropWhile { it != '/' }
+        if (xrayStrictUrlText(text) && '[' !in path && ']' !in path && url.isValid && (scheme == "https" || scheme == "http") && url.host.isNotEmpty() &&
+            url.userName.isEmpty() && url.password.isEmpty() && !text.contains('?') && !text.contains('#')
+        ) {
+            return ""
+        }
+        return vtr(R.string.validation_xray_xdrive_s3_endpoint)
+    }
+
+    @JvmStatic
+    fun xrayXDriveS3Region(service: String, region: String): String {
+        if (service.trim() != "s3") return ""
+        if (xdriveHeaderValue(region) && region.none { it == '/' || it == ',' || it == ' ' || it == '\t' }) return ""
+        return vtr(R.string.validation_xray_xdrive_s3_region)
+    }
+
+    /** Virtual-hosted addressing (path style off) puts the bucket in the endpoint's DNS name. */
+    @JvmStatic
+    fun xrayXDriveS3Bucket(service: String, bucket: String, endpoint: String, pathStyle: Boolean): String {
+        if (service.trim() != "s3") return ""
+        if (bucket.isEmpty()) return vtr(R.string.validation_xray_xdrive_s3_bucket_empty)
+        if (bucket.contains('/') || !xdriveS3Name(bucket)) return vtr(R.string.validation_xray_xdrive_s3_bucket)
+        if (pathStyle) return ""
+        if (!XRAY_S3_DNS_BUCKET.matches(bucket) || bucket.contains("..") || bucket.startsWith('.') || bucket.endsWith('.')) {
+            return vtr(R.string.validation_xray_xdrive_s3_bucket_dns)
+        }
+        if (Validation.ip(LinkParser.parse(endpoint.trim()).host).isEmpty()) return vtr(R.string.validation_xray_xdrive_s3_bucket_ip)
+        return ""
+    }
+
+    /**
+     * mKCP values, which Xray reads as uint32; an empty text keeps Xray's default. A full data segment is MTU bytes
+     * in one of Xray's 8192-byte buffers; beyond that the core panics.
+     */
+    @JvmStatic
+    fun xrayKCPMtu(text: String): String = Validation.int(text, 21, 8192)
+
+    @JvmStatic
+    fun xrayKCPTti(text: String): String = Validation.int(text, 10, 1000)
+
+    @JvmStatic
+    fun xrayKCPCapacity(text: String): String = Validation.int(text, 0, XRAY_UINT32_MAX)
+
+    @JvmStatic
+    fun xrayKCPCwndMultiplier(text: String): String = Validation.int(text, 1, XRAY_UINT32_MAX)
+
+    /** Xray sends at most maxSendingWindow / MTU packets ahead and refuses a window that holds none; an empty MTU is Xray's 1350. */
+    @JvmStatic
+    fun xrayKCPMaxSendingWindow(text: String, mtu: String): String {
+        val message = Validation.int(text, 0, XRAY_UINT32_MAX)
+        if (message.isNotEmpty()) return message
+        val window = Validation.toInt(text.trim())
+        val packet = Validation.toInt(mtu.trim()) ?: XrayKcp.DEFAULT_MTU
+        if (window == null || packet <= 0 || window >= packet) return ""
+        return vtr(R.string.validation_xray_kcp_window_mtu, packet.toString())
+    }
+
+    /** XrayFinalmask: an xdns mask must be the last udp mask, and its domains and resolvers have to work; [resolversReplaced] when the profile's resolver lines replace the mask's. */
+    @JvmStatic
+    @JvmOverloads
+    fun xrayFinalmask(issues: MutableList<Issue>, at: String, finalmask: JsonObject, resolversReplaced: Boolean = false) {
+        val (udpValue, udpPath) = xrayLast(xrayRoot(finalmask.copy(), at), "udp", true)
+        val udpAt = udpPath ?: (at + "udp")
+        val udp = udpValue as? JsonArray ?: JsonArray()
+        var xdns = -1
+        var reported = false
+        for ((i, mask) in udp.withIndex()) {
+            val type = xrayMaskType(mask)
+            if (xdns >= 0 && !reported && type != "filter") {
+                // xdns dials its resolvers itself, so the masks Xray stacks under it never see a packet.
+                issues.addIssue(Severity.Error, "$udpAt[$xdns].type", vtr(R.string.validation_xray_xdns_last))
+                reported = true
+            }
+            if (type != "xdns") continue
+            if (xdns < 0) xdns = i
+            xrayXdnsIssues(issues, "$udpAt[$i].", mask as JsonObject, resolversReplaced)
+        }
+    }
 }
 
 private const val XRAY_UINT32_MAX = 4294967295L
+
+private val XRAY_S3_DNS_BUCKET = Regex("^[a-z0-9.-]+$")
+
+// Go httpguts.ValidHeaderFieldValue: no control characters but space and tab.
+private fun xdriveHeaderValue(text: String): Boolean = text.none { (it.code < 0x20 && it != '\t') || it.code == 0x7f }
+
+// Xray validS3Name: no control characters or backslashes, and no empty, "." or ".." component.
+private fun xdriveS3Name(name: String): Boolean {
+    if (name.any { it.code < 0x20 || it.code == 0x7f || it == '\\' }) return false
+    return name.split('/').none { it.isEmpty() || it == "." || it == ".." }
+}
+
+// The characters QUrl's StrictMode refuses anywhere: controls, space, the unsafe delimiters and a '%' not starting an escape.
+private fun xrayStrictUrlText(text: String): Boolean {
+    for ((i, c) in text.withIndex()) {
+        if (c.code < 0x21 || c.code == 0x7f || c in "\"<>\\^`{|}") return false
+        if (c == '%' && (i + 2 >= text.length || !text[i + 1].isHexAscii() || !text[i + 2].isHexAscii())) return false
+    }
+    return true
+}
+
+private fun Char.isHexAscii(): Boolean = this in '0'..'9' || this in 'a'..'f' || this in 'A'..'F'
 
 /** xrayTLS (xrayStreamSetting.h, xrayStreamSetting.cpp). No insecure flag is modelled. */
 class XrayTls {
@@ -1318,6 +1827,85 @@ class XrayGrpc {
     fun build(ctx: BuildContext): JsonObject = exportToJson()
 }
 
+/** xrayKCP (xrayStreamSetting.h, xrayStreamSetting.cpp): mKCP; its old header and seed live in finalmask as mkcp-legacy masks. */
+class XrayKcp {
+    @JvmField var mtu: Long = DEFAULT_MTU
+    @JvmField var tti: Long = DEFAULT_TTI
+    @JvmField var uplinkCapacity: Long = DEFAULT_UPLINK_CAPACITY
+    @JvmField var downlinkCapacity: Long = DEFAULT_DOWNLINK_CAPACITY
+    @JvmField var cwndMultiplier: Long = DEFAULT_CWND_MULTIPLIER
+    @JvmField var maxSendingWindow: Long = DEFAULT_MAX_SENDING_WINDOW
+
+    companion object {
+        const val DEFAULT_MTU = 1350L
+        const val DEFAULT_TTI = 50L
+        const val DEFAULT_UPLINK_CAPACITY = 5L
+        const val DEFAULT_DOWNLINK_CAPACITY = 20L
+        const val DEFAULT_CWND_MULTIPLIER = 1L
+        const val DEFAULT_MAX_SENDING_WINDOW = 2097152L
+
+        /** kXrayKCPValues (xrayStreamSetting.cpp): the Xray key of each field. */
+        @JvmField
+        val VALUES: List<Pair<String, KMutableProperty1<XrayKcp, Long>>> = listOf(
+            "mtu" to XrayKcp::mtu,
+            "tti" to XrayKcp::tti,
+            "uplinkCapacity" to XrayKcp::uplinkCapacity,
+            "downlinkCapacity" to XrayKcp::downlinkCapacity,
+            "cwndMultiplier" to XrayKcp::cwndMultiplier,
+            "maxSendingWindow" to XrayKcp::maxSendingWindow,
+        )
+
+        @JvmField
+        val DEFAULTS: Map<String, Long> = mapOf(
+            "mtu" to DEFAULT_MTU,
+            "tti" to DEFAULT_TTI,
+            "uplinkCapacity" to DEFAULT_UPLINK_CAPACITY,
+            "downlinkCapacity" to DEFAULT_DOWNLINK_CAPACITY,
+            "cwndMultiplier" to DEFAULT_CWND_MULTIPLIER,
+            "maxSendingWindow" to DEFAULT_MAX_SENDING_WINDOW,
+        )
+    }
+
+    fun parseFromLink(link: String): Boolean = parseFromLink(LinkParser.parse(link))
+
+    /** xrayKCP::ParseFromLink: links carry only mtu and tti. */
+    fun parseFromLink(url: ParsedLink): Boolean {
+        val q = url.query
+        for ((key, property) in listOf("mtu" to XrayKcp::mtu, "tti" to XrayKcp::tti)) {
+            if (!q.has(key)) continue
+            val text = q.value(key).trim()
+            if (!acceptOptional(key, xrayKcpCheck(key, text, mtu), text)) continue
+            Validation.toInt(text)?.let { property.set(this, it) }
+        }
+        return true
+    }
+
+    /** xrayKCP::ParseFromJson: an import drops a value Xray would refuse, with a warning. */
+    fun parseFromJson(obj: JsonObject): Boolean {
+        val importing = ParseDiag.active()
+        for ((key, property) in VALUES) {
+            if (!obj.contains(key)) continue
+            val text = xrayKcpJsonText(obj[key])
+            if (importing && !acceptOptional("kcpSettings.$key", xrayKcpCheck(key, text, mtu), text)) continue
+            Validation.toInt(text)?.let { property.set(this, it) }
+        }
+        return true
+    }
+
+    /** xrayKCP::ExportToLink. */
+    fun exportToLink(): List<Pair<String, String>> = listOf("mtu" to mtu.toString(), "tti" to tti.toString())
+
+    /** xrayKCP::ExportToJson. */
+    fun exportToJson(): JsonObject {
+        val obj = JsonObject()
+        for ((key, property) in VALUES) obj[key] = property.get(this)
+        return obj
+    }
+
+    /** xrayKCP::Build. */
+    fun build(ctx: BuildContext): JsonObject = exportToJson()
+}
+
 /**
  * xrayXDrive (xrayStreamSetting.h, xrayStreamSetting.cpp). XDRIVE has no share-link format: a link would carry the
  * storage secrets, so profiles travel as JSON.
@@ -1325,9 +1913,14 @@ class XrayGrpc {
 class XrayXDrive {
     @JvmField var service: String = "google-drive"
     @JvmField var remoteFolder: String = ""
-    /** google-drive: ClientID, ClientSecret, RefreshToken; template: read as {secret0}, {secret1}, ... */
+    /** google-drive: ClientID, ClientSecret, RefreshToken; s3: AccessKeyID, SecretAccessKey[, SessionToken]; template: read as {secret0}, {secret1}, ... */
     @JvmField var secrets: MutableList<String> = ArrayList()
     @JvmField var templateSpec: JsonObject = JsonObject()
+    /** s3 only; Xray addresses the bucket path-style unless s3PathStyle is false. */
+    @JvmField var s3Endpoint: String = ""
+    @JvmField var s3Region: String = ""
+    @JvmField var s3Bucket: String = ""
+    @JvmField var s3PathStyle: Boolean = true
     /** The stream's own address and port: a front the storage API is dialed through. */
     @JvmField var frontAddress: String = ""
     @JvmField var frontPort: Int = 0
@@ -1368,6 +1961,13 @@ class XrayXDrive {
         if (obj.contains("remoteFolder")) remoteFolder = obj.string("remoteFolder")
         if (obj.contains("secrets")) secrets = jsonStringList(obj["secrets"], "xdriveSettings.secrets")
         if (obj.isObject("template")) templateSpec = obj.obj("template").copy()
+        if (obj.isObject("s3")) {
+            val s3 = obj.obj("s3")
+            s3Endpoint = s3.string("endpoint")
+            s3Region = s3.string("region")
+            s3Bucket = s3.string("bucket")
+            s3PathStyle = s3["pathStyle"] as? Boolean ?: true
+        }
         for ((key, property) in TUNING) if (obj.contains(key)) property.set(this, obj.integer(key))
         if (obj.isObject("xmux")) xmux = obj.obj("xmux").copy()
         return true
@@ -1380,6 +1980,15 @@ class XrayXDrive {
         if (remoteFolder.isNotEmpty()) obj["remoteFolder"] = remoteFolder
         if (secrets.isNotEmpty()) obj["secrets"] = JsonValues.stringArray(secrets)
         if (templateSpec.isNotEmpty()) obj["template"] = templateSpec.copy()
+        // Xray reads the s3 object only for the s3 service, so another service drops it.
+        if (service == "s3") {
+            val s3 = JsonObject()
+            s3["endpoint"] = s3Endpoint
+            if (s3Region.isNotEmpty()) s3["region"] = s3Region
+            s3["bucket"] = s3Bucket
+            if (!s3PathStyle) s3["pathStyle"] = false
+            obj["s3"] = s3
+        }
         for ((key, property) in TUNING) {
             val value = property.get(this)
             if (value != 0L) obj[key] = value
@@ -1407,7 +2016,10 @@ class XrayStreamSetting {
     @JvmField var ws: XrayWs = XrayWs()
     @JvmField var httpupgrade: XrayHttpUpgrade = XrayHttpUpgrade()
     @JvmField var grpc: XrayGrpc = XrayGrpc()
+    @JvmField var kcp: XrayKcp = XrayKcp()
     @JvmField var xdrive: XrayXDrive = XrayXDrive()
+    /** XDNS only; stored under Throne-only keys that build() removes. */
+    @JvmField var xdnsResolvers: ResolverSource = ResolverSource()
 
     fun parseFromLink(link: String): Boolean = parseFromLink(LinkParser.parse(link))
 
@@ -1429,6 +2041,7 @@ class XrayStreamSetting {
                 else -> JsonInput.parseObjectOrNull(text)?.let { finalmask = it }
             }
         }
+        upgradeXrayFinalmask(finalmask)
         val type = q.value("type").trim()
         if (type.isNotEmpty()) network = normalizeXrayNetwork(type)
         if (network !in xrayNetworks) {
@@ -1461,6 +2074,10 @@ class XrayStreamSetting {
             "ws" -> ws.parseFromLink(url)
             "httpupgrade" -> httpupgrade.parseFromLink(url)
             "grpc" -> grpc.parseFromLink(url)
+            "kcp" -> {
+                kcp.parseFromLink(url)
+                xrayKcpImportLegacy(finalmask, "headerType", q.valueFully("headerType"), "", q.valueFully("seed"))
+            }
         }
         return true
     }
@@ -1469,6 +2086,7 @@ class XrayStreamSetting {
     fun parseFromJson(obj: JsonObject): Boolean {
         if (obj.isEmpty()) return false
         if (obj.contains("finalmask") && obj.isObject("finalmask")) finalmask = obj.obj("finalmask").copy()
+        if (ParseDiag.active()) upgradeXrayFinalmask(finalmask)
         if (obj.contains("method")) network = obj.string("method")
         else if (obj.contains("network")) network = obj.string("network")
         network = normalizeXrayNetwork(network)
@@ -1488,10 +2106,35 @@ class XrayStreamSetting {
         if (network == "ws" && obj.isObject("wsSettings")) ws.parseFromJson(obj.obj("wsSettings"))
         if (network == "httpupgrade" && obj.isObject("httpupgradeSettings")) httpupgrade.parseFromJson(obj.obj("httpupgradeSettings"))
         if (network == "grpc" && obj.isObject("grpcSettings")) grpc.parseFromJson(obj.obj("grpcSettings"))
+        if (network == "kcp") {
+            val settings = obj.obj("kcpSettings")
+            kcp.parseFromJson(settings)
+            if (ParseDiag.active()) {
+                val header = settings.obj("header")
+                xrayKcpImportLegacy(finalmask, "kcpSettings.header.type", header.string("type"), header.string("domain"), settings.string("seed"))
+            }
+        }
         if (network == "xdrive") {
             if (obj.isObject("xdriveSettings")) xdrive.parseFromJson(obj.obj("xdriveSettings"))
             if (obj.contains("address")) xdrive.frontAddress = obj.string("address")
             if (obj.contains("port")) xdrive.frontPort = obj.int("port")
+        }
+        if (obj.contains("xdnsResolvers")) {
+            val value = obj["xdnsResolvers"]
+            val lines = ArrayList<String>()
+            for (item in value as? JsonArray ?: JsonArray.of(value)) {
+                if (item is String) lines.add(item)
+                else if (item !== JsonNull) ParseDiag.warn("xdnsResolvers", vtr(R.string.validation_json_list_items))
+            }
+            xdnsResolvers = xdnsResolvers.copy(lines = ResolverSources.importLines(lines, ResolverFlavor.Xdns, "xdnsResolvers"))
+        }
+        if (obj.contains("xdnsResolverList")) {
+            if (ParseDiag.active()) {
+                ParseDiag.warn("xdnsResolverList", vtr(R.string.validation_xray_xdns_resolver_list))
+            } else {
+                val id = obj["xdnsResolverList"]
+                xdnsResolvers = xdnsResolvers.copy(ipListId = if (id is Long && id in Int.MIN_VALUE..Int.MAX_VALUE) id.toInt() else -1)
+            }
         }
         return true
     }
@@ -1530,7 +2173,8 @@ class XrayStreamSetting {
     fun exportToLink(): List<Pair<String, String>> {
         val q = ArrayList<Pair<String, String>>()
         if (network.isNotEmpty()) q.add("type" to if (network == "raw") "tcp" else network)
-        if (finalmask.isNotEmpty()) q.add("fm" to finalmask.toCompact())
+        val shared = xrayShareFinalmask(finalmask)
+        if (shared.isNotEmpty()) q.add("fm" to shared.toCompact())
         val header = rawSettings.obj("header")
         if (network == "raw" && header.string("type") == "http") {
             q.add("headerType" to "http")
@@ -1548,6 +2192,7 @@ class XrayStreamSetting {
             "ws" -> q.addAll(ws.exportToLink())
             "httpupgrade" -> q.addAll(httpupgrade.exportToLink())
             "grpc" -> q.addAll(grpc.exportToLink())
+            "kcp" -> q.addAll(kcp.exportToLink())
         }
         return q
     }
@@ -1566,11 +2211,16 @@ class XrayStreamSetting {
             "ws" -> obj["wsSettings"] = ws.exportToJson()
             "httpupgrade" -> obj["httpupgradeSettings"] = httpupgrade.exportToJson()
             "grpc" -> obj["grpcSettings"] = grpc.exportToJson()
+            "kcp" -> obj["kcpSettings"] = kcp.exportToJson()
             "xdrive" -> {
                 obj["xdriveSettings"] = xdrive.exportToJson()
                 if (xdrive.frontAddress.isNotEmpty()) obj["address"] = Hosts.toAceHost(xdrive.frontAddress)
                 if (xdrive.frontPort > 0) obj["port"] = xdrive.frontPort
             }
+        }
+        if (isXdns()) {
+            if (xdnsResolvers.lines.isNotEmpty()) obj["xdnsResolvers"] = JsonValues.stringArray(xdnsResolvers.lines)
+            if (xdnsResolvers.ipListId >= 0) obj["xdnsResolverList"] = xdnsResolvers.ipListId
         }
         return obj
     }
@@ -1592,16 +2242,48 @@ class XrayStreamSetting {
         if (network == "xdrive") {
             obj["service"] = xdrive.service
             if (xdrive.remoteFolder.isNotEmpty()) obj["folder"] = xdrive.remoteFolder
+            if (xdrive.service == "s3") {
+                obj["endpoint"] = xdrive.s3Endpoint
+                obj["bucket"] = xdrive.s3Bucket
+            }
+        }
+        // XDNS reaches the server through resolvers, so its tunnel domain tells two profiles apart.
+        if (isXdns()) {
+            val names = ArrayList<String>()
+            for (mask in xrayValue(finalmask, "udp", true) as? JsonArray ?: JsonArray()) {
+                if (xrayMaskType(mask) != "xdns") continue
+                val settings = xrayValue(mask as JsonObject, "settings", true) as? JsonObject ?: JsonObject()
+                for (name in xrayXdnsNames(settings)) names.add(xrayLower(name))
+            }
+            obj["xdns"] = JsonValues.stringArray(names.sorted().distinct())
         }
         return obj
     }
 
-    /** xrayStreamSetting::Build: binding and DNS are wired by the core, not the config. */
-    fun build(ctx: BuildContext): JsonObject {
+    /** IsXdns: XDNS is network kcp with an xdns mask in finalmask.udp; imports and the editor store exactly these spellings. */
+    fun isXdns(): Boolean = normalizeXrayNetwork(network) == "kcp" && xrayFinalmaskHasXdns(finalmask)
+
+    /**
+     * xrayStreamSetting::Build: binding and DNS are wired by the core, not the config. The XDNS resolver lines replace
+     * the resolvers of the xdns masks; [owner] names the profile in their error. Android has no IP lists, so only the
+     * lines build.
+     */
+    fun build(ctx: BuildContext, owner: String = "XDNS"): BuildResult {
         val obj = exportToJson()
+        obj.remove("xdnsResolvers")
+        obj.remove("xdnsResolverList")
+        if (isXdns() && !xdnsResolvers.isEmpty()) {
+            val built = ResolverSources.build(xdnsResolvers, ResolverFlavor.Xdns, owner, ctx)
+            if (built.error.isNotEmpty()) return BuildResult(JsonObject(), built.error)
+            if (built.resolvers.isNotEmpty()) {
+                val mask = finalmask.copy()
+                xrayXdnsReplaceResolvers(mask, built.resolvers)
+                obj["finalmask"] = mask
+            }
+        }
         if (security == "tls") obj["tlsSettings"] = tls.build(ctx)
         else if (security == "reality") obj["realitySettings"] = reality.build(ctx)
-        return obj
+        return BuildResult(obj)
     }
 
     /** xrayStreamSetting::Validate; [ctx] gives the global uTLS fingerprint an empty TLS fingerprint falls back to. */
@@ -1637,9 +2319,28 @@ class XrayStreamSetting {
             }
         }
 
+        val xdns = isXdns()
+        XrayChecks.xrayFinalmask(issues, root + "finalmask.", finalmask, xdns && !xdnsResolvers.isEmpty())
+        if (xdns) {
+            for (line in xdnsResolvers.lines) {
+                val message = ResolverChecks.xdnsLine(line)
+                if (message.isEmpty()) continue
+                issues.addIssue(Severity.Error, root + "xdnsResolvers", message, line.trim())
+                break
+            }
+            if (xdnsResolvers.hasIpList()) {
+                issues.addIssue(Severity.Warning, root + "xdnsResolverList", vtr(R.string.validation_xray_xdns_resolver_list_android))
+            }
+        }
         val net = normalizeXrayNetwork(network)
         if (net == "httpupgrade") {
             issues.addIssue(Severity.Error, root + "httpupgradeSettings.headers", XrayChecks.xrayHeadersHost(httpupgrade.headers))
+        }
+        if (net == "kcp") {
+            for ((key, property) in XrayKcp.VALUES) {
+                val text = property.get(kcp).toString()
+                issues.addIssue(Severity.Error, root + "kcpSettings." + key, xrayKcpCheck(key, text, kcp.mtu), text)
+            }
         }
         if (net == "xdrive") {
             val d = xdrive
@@ -1649,6 +2350,12 @@ class XrayStreamSetting {
             issues.addIssue(Severity.Error, key + "remoteFolder", XrayChecks.xrayXDriveFolder(d.service, d.remoteFolder))
             issues.addIssue(Severity.Error, key + "secrets", XrayChecks.xrayXDriveSecrets(d.service, d.secrets))
             issues.addIssue(Severity.Error, key + "template", XrayChecks.xrayXDriveTemplate(d.service, d.templateSpec))
+            issues.addIssue(Severity.Error, key + "s3.endpoint", XrayChecks.xrayXDriveS3Endpoint(d.service, d.s3Endpoint), d.s3Endpoint)
+            issues.addIssue(Severity.Error, key + "s3.region", XrayChecks.xrayXDriveS3Region(d.service, d.s3Region), d.s3Region)
+            issues.addIssue(
+                Severity.Error, key + "s3.bucket",
+                XrayChecks.xrayXDriveS3Bucket(d.service, d.s3Bucket, d.s3Endpoint, d.s3PathStyle), d.s3Bucket,
+            )
             for ((name, property) in XrayXDrive.TUNING) {
                 val value = property.get(d).toString()
                 issues.addIssue(Severity.Error, key + name, XrayChecks.xrayXDriveTuning(value), value)

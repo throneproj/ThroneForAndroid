@@ -179,7 +179,7 @@ abstract class Outbound(@JvmField var type: String) {
     open fun security(): SecurityInfo {
         if (isXray()) {
             val stream = getXrayStream()
-            val transport = displayTransportName(stream.network)
+            val transport = if (stream.isXdns()) "XDNS" else displayTransportName(stream.network)
             return when (stream.security) {
                 "reality" -> SecurityInfo("Reality", transport, SecurityLevel.Secure)
                 "tls" -> SecurityInfo("TLS", transport, SecurityLevel.Secure)

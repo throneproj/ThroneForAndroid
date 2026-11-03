@@ -4,6 +4,8 @@ import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.link.Hosts
+import io.nekohasekai.sagernet.outbound.types.Dnstt
+import io.nekohasekai.sagernet.outbound.types.MasterDns
 import java.util.TreeMap
 
 /** The tag vocabulary of generate.cpp:43-74. */
@@ -112,6 +114,9 @@ internal class BuildState(val forTest: Boolean, val ports: PortLease) {
     /** Names whose HTTPS record a hop's ECH needs to fetch; they must not resolve over the proxy they unlock. */
     val echQueryNames = ArrayList<String>()
 
+    /** DNS tunnel domains; a loopback stub resolver forwarding them back through the Tun must not reach dns-remote. */
+    val dnsTunnelDomains = ArrayList<String>()
+
     /** ECH query name -> the hop's own resolver, key-sorted like the desktop's QMap (generate.cpp:209). */
     val echResolvers = TreeMap<String, String>()
 
@@ -141,6 +146,20 @@ internal class BuildState(val forTest: Boolean, val ports: PortLease) {
             if (!echResolvers.containsKey(name)) echResolvers[name] = tls.ech.resolver
         } else if (!echQueryNames.contains(name)) {
             echQueryNames.add(name)
+        }
+    }
+
+    /** collectDnsTunnelDomains (generate.cpp). */
+    fun collectDnsTunnelDomains(hop: Outbound) {
+        val domains = when (hop) {
+            is Dnstt -> listOf(hop.domain)
+            is MasterDns -> hop.domains
+            else -> return
+        }
+        for (domain in domains) {
+            // sing-box lower-cases the query name but matches domain_suffix entries verbatim.
+            val name = Hosts.toAceHost(domain.trim()).lowercase().removeSuffix(".")
+            if (name.isNotEmpty() && !dnsTunnelDomains.contains(name)) dnsTunnelDomains.add(name)
         }
     }
 

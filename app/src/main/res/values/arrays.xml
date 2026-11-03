@@ -302,6 +302,7 @@
         <item>WebSocket</item>
         <item>HTTPUpgrade</item>
         <item>gRPC</item>
+        <item>mKCP</item>
         <item>XDRIVE</item>
     </string-array>
     <string-array name="xray_network_value" translatable="false">
@@ -310,10 +311,12 @@
         <item>ws</item>
         <item>httpupgrade</item>
         <item>grpc</item>
+        <item>kcp</item>
         <item>xdrive</item>
     </string-array>
     <string-array name="xray_xdrive_service" translatable="false">
         <item>google-drive</item>
+        <item>s3</item>
         <item>template</item>
         <item>local</item>
     </string-array>
@@ -350,7 +353,13 @@
         <item>STRING</item>
         <item>BASE64</item>
     </string-array>
+    <string-array name="hysteria_obfs_type_entry">
+        <item>@string/ssh_auth_type_none</item>
+        <item>salamander</item>
+        <item>gecko</item>
+    </string-array>
     <string-array name="hysteria_obfs_type_value" translatable="false">
+        <item></item>
         <item>salamander</item>
         <item>gecko</item>
     </string-array>
@@ -405,6 +414,116 @@
         <item>bbr_standard</item>
         <item>bbr2</item>
         <item>bbr_variant</item>
+    </string-array>
+    <string-array name="dnstt_mode_entry">
+        <item>DNSTT</item>
+        <item>VayDNS</item>
+        <item>@string/dnstt_mode_vaydns_compat</item>
+    </string-array>
+    <string-array name="dnstt_mode_value" translatable="false">
+        <item>dnstt</item>
+        <item>vaydns</item>
+        <item>vaydns_compat</item>
+    </string-array>
+    <string-array name="dnstt_record_type_entry">
+        <item>@string/setting_default</item>
+        <item>TXT</item>
+        <item>NULL</item>
+        <item>CNAME</item>
+        <item>A</item>
+        <item>AAAA</item>
+        <item>MX</item>
+        <item>NS</item>
+        <item>SRV</item>
+        <item>CAA</item>
+    </string-array>
+    <string-array name="dnstt_record_type_value" translatable="false">
+        <item></item>
+        <item>txt</item>
+        <item>null</item>
+        <item>cname</item>
+        <item>a</item>
+        <item>aaaa</item>
+        <item>mx</item>
+        <item>ns</item>
+        <item>srv</item>
+        <item>caa</item>
+    </string-array>
+    <string-array name="dnstt_strategy_entry">
+        <item>@string/setting_default</item>
+        <item>round_robin</item>
+        <item>failover</item>
+        <item>fanout</item>
+    </string-array>
+    <string-array name="dnstt_strategy_value" translatable="false">
+        <item></item>
+        <item>round_robin</item>
+        <item>failover</item>
+        <item>fanout</item>
+    </string-array>
+    <string-array name="dnstt_backend_entry">
+        <item>@string/dnstt_backend_none</item>
+        <item>SOCKS5</item>
+        <item>Shadowsocks</item>
+        <item>SSH</item>
+    </string-array>
+    <string-array name="dnstt_backend_value" translatable="false">
+        <item></item>
+        <item>socks</item>
+        <item>shadowsocks</item>
+        <item>ssh</item>
+    </string-array>
+    <string-array name="masterdns_mode_entry">
+        <item>SOCKS5</item>
+        <item>@string/masterdns_mode_tcp</item>
+    </string-array>
+    <string-array name="masterdns_mode_value" translatable="false">
+        <item>socks5</item>
+        <item>tcp</item>
+    </string-array>
+    <string-array name="masterdns_method_value" translatable="false">
+        <item>none</item>
+        <item>xor</item>
+        <item>chacha20</item>
+        <item>aes-128-gcm</item>
+        <item>aes-192-gcm</item>
+        <item>aes-256-gcm</item>
+    </string-array>
+    <string-array name="masterdns_compression_entry">
+        <item>@string/setting_default</item>
+        <item>@string/tri_state_off</item>
+        <item>zstd</item>
+        <item>lz4</item>
+        <item>zlib</item>
+    </string-array>
+    <string-array name="masterdns_compression_value" translatable="false">
+        <item></item>
+        <item>off</item>
+        <item>zstd</item>
+        <item>lz4</item>
+        <item>zlib</item>
+    </string-array>
+    <string-array name="masterdns_strategy_entry">
+        <item>@string/setting_default</item>
+        <item>round_robin</item>
+        <item>random</item>
+        <item>least_loss</item>
+        <item>lowest_latency</item>
+        <item>hybrid</item>
+        <item>loss_then_latency</item>
+        <item>least_loss_top_random</item>
+        <item>least_loss_top_round_robin</item>
+    </string-array>
+    <string-array name="masterdns_strategy_value" translatable="false">
+        <item></item>
+        <item>round_robin</item>
+        <item>random</item>
+        <item>least_loss</item>
+        <item>lowest_latency</item>
+        <item>hybrid</item>
+        <item>loss_then_latency</item>
+        <item>least_loss_top_random</item>
+        <item>least_loss_top_round_robin</item>
     </string-array>
     <string-array name="shadowtls_versions" translatable="false">
         <item>1</item>

@@ -92,6 +92,12 @@
                             android:id="@+id/action_new_openconnect"
                             android:title="@string/action_openconnect" />
                         <item
+                            android:id="@+id/action_new_dnstt"
+                            android:title="@string/action_dnstt" />
+                        <item
+                            android:id="@+id/action_new_masterdns"
+                            android:title="@string/action_masterdns" />
+                        <item
                             android:id="@+id/action_new_direct"
                             android:title="@string/action_direct" />
                         <item

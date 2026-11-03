@@ -48,6 +48,8 @@ Releases from v2.0.0 on are signed with a new key, so Android refuses to install
 - AmneziaWG
 - MASQUE
 - SSH
+- DNSTT / VayDNS
+- MasterDNS
 - Xray VLESS (XHTTP/XDrive)
 - OpenVPN/OpenConnect
 - Custom Outbound (Both Sing-box and Xray)

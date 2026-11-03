@@ -894,6 +894,16 @@ class ConfigGenerator @JvmOverloads constructor(
             )
         }
 
+        if (!state.forTest && state.dnsTunnelDomains.isNotEmpty()) {
+            headRules.add(
+                jsonObjectOf(
+                    "domain_suffix" to JsonValues.stringArray(state.dnsTunnelDomains),
+                    "action" to "route",
+                    "server" to Tags.DNS_DIRECT,
+                ),
+            )
+        }
+
         if (settings.fakeDns) {
             val fakeServer = jsonObjectOf("tag" to Tags.DNS_FAKE, "type" to "fakeip", "inet4_range" to "198.18.0.0/15")
             // No inet6_range makes the transport answer AAAA empty itself; the rule stays on both types.
@@ -1283,6 +1293,7 @@ private class ChainBuildMark(private val state: BuildState) {
     private val singToXrayBridges = state.singToXrayBridges.size
     private val xrayToSingBridges = state.xrayToSingBridges.size
     private val echQueryNames = state.echQueryNames.size
+    private val dnsTunnelDomains = state.dnsTunnelDomains.size
     private val echResolvers = HashSet(state.echResolvers.keys)
     private val xrayConfig = state.xrayConfig
     private val isXrayNeeded = state.isXrayNeeded
@@ -1300,6 +1311,7 @@ private class ChainBuildMark(private val state: BuildState) {
         truncate(state.singToXrayBridges, singToXrayBridges)
         truncate(state.xrayToSingBridges, xrayToSingBridges)
         truncate(state.echQueryNames, echQueryNames)
+        truncate(state.dnsTunnelDomains, dnsTunnelDomains)
         state.echResolvers.keys.retainAll(echResolvers)
         state.xrayConfig = xrayConfig
         state.isXrayNeeded = isXrayNeeded

@@ -239,6 +239,52 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:key="xrayKcpCategory"
+        app:title="@string/xray_kcp_settings">
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_tune_24"
+            app:key="streamSetting.kcp.mtu"
+            app:title="@string/xray_kcp_mtu"
+            app:dialogMessage="@string/xray_kcp_mtu_hint" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="streamSetting.kcp.tti"
+            app:title="@string/xray_kcp_tti"
+            app:dialogMessage="@string/xray_kcp_tti_hint" />
+        <EditTextPreference
+            app:icon="@drawable/ic_action_dns"
+            app:key="streamSetting.xdnsResolvers"
+            app:title="@string/xray_xdns_resolvers"
+            app:dialogMessage="@string/xray_xdns_resolvers_hint"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="xrayKcpTuningCategory"
+        app:title="@string/xray_kcp_tuning">
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_speed_24"
+            app:key="streamSetting.kcp.uplinkCapacity"
+            app:title="@string/xray_kcp_uplink_capacity"
+            app:dialogMessage="@string/xray_kcp_uplink_capacity_hint" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_speed_24"
+            app:key="streamSetting.kcp.downlinkCapacity"
+            app:title="@string/xray_kcp_downlink_capacity"
+            app:dialogMessage="@string/xray_kcp_downlink_capacity_hint" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_low_priority_24"
+            app:key="streamSetting.kcp.cwndMultiplier"
+            app:title="@string/xray_kcp_cwnd_multiplier"
+            app:dialogMessage="@string/xray_kcp_cwnd_multiplier_hint" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_tune_24"
+            app:key="streamSetting.kcp.maxSendingWindow"
+            app:title="@string/xray_kcp_max_sending_window"
+            app:dialogMessage="@string/xray_kcp_max_sending_window_hint" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:key="xrayXDriveCategory"
         app:title="@string/xdrive_settings">
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
@@ -255,6 +301,44 @@
             app:title="@string/xdrive_folder"
             app:dialogMessage="@string/xdrive_folder_hint"
             app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_file_cloud_queue"
+            app:key="streamSetting.xdrive.s3Endpoint"
+            app:title="@string/xdrive_s3_endpoint"
+            app:dialogMessage="@string/xdrive_s3_endpoint_hint"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/baseline_public_24"
+            app:key="streamSetting.xdrive.s3Region"
+            app:title="@string/xdrive_s3_region"
+            app:dialogMessage="@string/xdrive_s3_region_hint" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_texture_24"
+            app:key="streamSetting.xdrive.s3Bucket"
+            app:title="@string/xdrive_s3_bucket"
+            app:dialogMessage="@string/xdrive_s3_bucket_hint"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="streamSetting.xdrive.s3PathStyle"
+            app:title="@string/xdrive_s3_path_style"
+            app:summary="@string/xdrive_s3_path_style_summary" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_person_24"
+            app:key="streamSetting.xdrive.s3AccessKey"
+            app:title="@string/xdrive_s3_access_key"
+            app:dialogLayout="@layout/layout_password_dialog" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="streamSetting.xdrive.s3SecretKey"
+            app:title="@string/xdrive_s3_secret_key"
+            app:dialogLayout="@layout/layout_password_dialog" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="streamSetting.xdrive.s3SessionToken"
+            app:title="@string/xdrive_s3_session_token"
+            app:dialogMessage="@string/xdrive_s3_session_token_hint"
+            app:dialogLayout="@layout/layout_password_dialog" />
         <EditTextPreference
             app:icon="@drawable/ic_baseline_person_24"
             app:key="streamSetting.xdrive.clientId"

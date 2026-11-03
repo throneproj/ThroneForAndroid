@@ -53,10 +53,7 @@ class HysteriaSettingsActivity : BindingSettingsActivity<Hysteria>() {
     }
 
     private val v1Only = arrayOf("auth_type", "auth", "recv_window_conn", "recv_window", "disable_mtu_discovery")
-    private val v2Only = arrayOf(
-        "password", "obfs_type", "hop_interval_max", "min_packet_size", "max_packet_size", "bbr_profile",
-        "disable_chrome_parrot",
-    )
+    private val v2Only = arrayOf("password", "obfs_type", "hop_interval_max", "bbr_profile", "disable_chrome_parrot")
     private val realmFields = arrayOf(
         "realm_server_url", "realm_token", "realm_id", "realm_stun_servers", "realm_ip_version", "realm_port_mapping",
         "realm_port_mapping_timeout", "realm_port_mapping_lifetime",
@@ -69,13 +66,21 @@ class HysteriaSettingsActivity : BindingSettingsActivity<Hysteria>() {
         multilineInput("server_ports", "realm_stun_servers")
 
         val realm = findPreference<PreferenceCategory>("hysteriaRealmCategory")
+        // edit_hysteria.cpp editHysteriaLayout: v2 hides the password under None and shows the sizes only for gecko
+        fun applyObfs(version: String, type: String) {
+            val v2 = version == "2"
+            setVisible(!v2 || type.isNotEmpty(), "obfs")
+            setVisible(v2 && type == "gecko", "min_packet_size", "max_packet_size")
+        }
         fun applyVersion(version: String) {
             val v2 = version == "2"
             setVisible(!v2, *v1Only)
             setVisible(v2, *v2Only)
             realm?.isVisible = v2
+            applyObfs(version, cached("obfs_type"))
         }
         onMenu("protocol_version") { applyVersion(it) }
+        onMenu("obfs_type") { applyObfs(cached("protocol_version"), it) }
         onMenu("auth_type") { setVisible(it.isNotEmpty(), "auth") }
         onSwitch("realm_enabled") { setVisible(it, *realmFields) }
 
@@ -86,10 +91,13 @@ class HysteriaSettingsActivity : BindingSettingsActivity<Hysteria>() {
     override fun Hysteria.init() {
         pbm.writeToCacheAll(this)
         DataStore.profileCacheStore.putString(KEY_RAW_JSON, ProfileJson.text(this))
-        // edit_hysteria.cpp: the obfuscation type is matched ignoring case, an unknown one shows the first item
+        // edit_hysteria.cpp: without a password no obfs reaches the core, so that opens as None too; otherwise the
+        // type is matched ignoring case and an unknown one shows the first type
         val obfsType = obfs_type.trim()
         DataStore.profileCacheStore.putString(
-            "obfs_type", hysteriaObfsTypes.firstOrNull { it.equals(obfsType, ignoreCase = true) } ?: hysteriaObfsTypes[0],
+            "obfs_type",
+            if (obfs.isEmpty() || obfsType.isEmpty()) ""
+            else hysteriaObfsTypes.firstOrNull { it.equals(obfsType, ignoreCase = true) } ?: hysteriaObfsTypes[0],
         )
     }
 
@@ -121,8 +129,8 @@ class HysteriaSettingsActivity : BindingSettingsActivity<Hysteria>() {
                 else packetSize(text)
             }
         }
-        bind("obfs") { if (it.isEmpty()) vtr(R.string.validation_hysteria_gecko_password) else "" }
-            .raw().warning().onlyIf { gecko() }
+        bind("obfs") { if (it.isEmpty()) vtr(R.string.validation_hysteria_obfs_password) else "" }
+            .raw().warning().onlyIf { isV2() && cached("obfs_type").isNotEmpty() }
         bind("realm_server_url", Validation.Rules.url(listOf("http", "https")))
         bindLines("realm_stun_servers", Validation.Rules.hostPort(false))
         bind("realm_port_mapping_timeout", Validation.Rules.duration())

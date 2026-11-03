@@ -1,0 +1,170 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditTextPreference
+        app:icon="@drawable/ic_social_emoji_symbols"
+        app:key="name"
+        app:title="@string/profile_name"
+        app:useSimpleSummaryProvider="true" />
+
+    <PreferenceCategory
+        app:title="@string/proxy_cat">
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_layers_24"
+            app:key="mode"
+            app:title="@string/dns_tunnel_mode"
+            app:entries="@array/dnstt_mode_entry"
+            app:entryValues="@array/dnstt_mode_value"
+            app:defaultValue="dnstt"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_domain_24"
+            app:key="domain"
+            app:title="@string/dns_tunnel_domain"
+            app:dialogMessage="@string/dns_tunnel_domain_hint"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="public_key"
+            app:title="@string/dnstt_public_key"
+            app:useSimpleSummaryProvider="true" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_texture_24"
+            app:key="record_type"
+            app:title="@string/dnstt_record_type"
+            app:entries="@array/dnstt_record_type_entry"
+            app:entryValues="@array/dnstt_record_type_value"
+            app:defaultValue=""
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_fingerprint_24"
+            app:key="client_id_size"
+            app:title="@string/dnstt_client_id_size" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_format_align_left_24"
+            app:key="max_qname_len"
+            app:title="@string/dnstt_max_qname_len" />
+        <Preference
+            app:icon="@drawable/ic_baseline_info_24"
+            app:key="payload"
+            app:selectable="false"
+            app:title="@string/dnstt_payload" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/dns_tunnel_resolvers">
+        <EditTextPreference
+            app:icon="@drawable/ic_action_dns"
+            app:key="resolvers.lines"
+            app:title="@string/dns_tunnel_resolvers"
+            app:dialogMessage="@string/dns_tunnel_resolvers_hint"
+            app:useSimpleSummaryProvider="true" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_shuffle_24"
+            app:key="resolver_strategy"
+            app:title="@string/dns_tunnel_resolver_strategy"
+            app:entries="@array/dnstt_strategy_entry"
+            app:entryValues="@array/dnstt_strategy_value"
+            app:defaultValue=""
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="tcp_fallback"
+            app:title="@string/dnstt_tcp_fallback" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/dnstt_backend">
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_hardware_router"
+            app:key="backend"
+            app:title="@string/dnstt_backend_type"
+            app:entries="@array/dnstt_backend_entry"
+            app:entryValues="@array/dnstt_backend_value"
+            app:defaultValue=""
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_person_24"
+            app:key="socks_username"
+            app:title="@string/username"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_settings_password"
+            app:key="socks_password"
+            app:title="@string/password"
+            app:dialogLayout="@layout/layout_password_dialog" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="socks_udp_over_tcp"
+            app:title="@string/udp_over_tcp" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_notification_enhanced_encryption"
+            app:key="ss_method"
+            app:title="@string/enc_method"
+            app:entries="@array/ss_enc_method_value"
+            app:entryValues="@array/ss_enc_method_value"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_settings_password"
+            app:key="ss_password"
+            app:title="@string/password"
+            app:dialogLayout="@layout/layout_password_dialog" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="ss_udp_over_tcp"
+            app:title="@string/udp_over_tcp" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_person_24"
+            app:key="ssh_user"
+            app:title="@string/username"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_settings_password"
+            app:key="ssh_password"
+            app:title="@string/password"
+            app:dialogLayout="@layout/layout_password_dialog" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="ssh_private_key"
+            app:title="@string/ssh_private_key"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_settings_password"
+            app:key="ssh_private_key_passphrase"
+            app:title="@string/ssh_private_key_passphrase"
+            app:dialogLayout="@layout/layout_password_dialog" />
+        <EditTextPreference
+            app:icon="@drawable/ic_action_copyright"
+            app:key="ssh_host_key"
+            app:title="@string/ssh_host_key"
+            app:dialogMessage="@string/one_per_line"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_layers_24"
+            app:key="ssh_host_key_algorithms"
+            app:title="@string/ssh_host_key_algorithms"
+            app:dialogMessage="@string/one_per_line"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_update_24"
+            app:key="ssh_client_version"
+            app:title="@string/ssh_client_version"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/cag_advanced">
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_hourglass_empty_24"
+            app:key="idle_timeout"
+            app:title="@string/dnstt_idle_timeout" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="keepalive_interval"
+            app:title="@string/dnstt_keepalive_interval" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_speed_24"
+            app:key="rps"
+            app:title="@string/dnstt_rps" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

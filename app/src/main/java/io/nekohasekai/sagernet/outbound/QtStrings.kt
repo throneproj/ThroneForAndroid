@@ -1,5 +1,7 @@
 package io.nekohasekai.sagernet.outbound
 
+import java.util.Locale
+
 /**
  * QString helpers with the exact semantics the desktop profile code relies on
  * (`include/global/Utils.hpp`, QString::toInt, QString::split, QString::section).
@@ -63,4 +65,15 @@ object QtStrings {
     @JvmStatic
     fun sectionFirstSkipEmpty(s: String, separator: Char): String =
         s.split(separator).firstOrNull { it.isNotEmpty() } ?: ""
+
+    /** QString::number(d, 'g', precision): %g with the trailing zeros dropped; QString::number(double) is precision 6. */
+    @JvmStatic
+    @JvmOverloads
+    fun numberG(d: Double, precision: Int = 6): String {
+        val s = String.format(Locale.ROOT, "%.${precision}g", d)
+        val e = s.indexOfFirst { it == 'e' || it == 'E' }
+        var mantissa = if (e >= 0) s.substring(0, e) else s
+        if (mantissa.contains('.')) mantissa = mantissa.trimEnd('0').trimEnd('.')
+        return if (e >= 0) mantissa + s.substring(e) else mantissa
+    }
 }

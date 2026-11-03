@@ -28,10 +28,12 @@ import io.nekohasekai.sagernet.ui.profile.AutoSelectorSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.ChainSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.CustomSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.DirectSettingsActivity
+import io.nekohasekai.sagernet.ui.profile.DnsttSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.HttpSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.HysteriaSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.JuicitySettingsActivity
 import io.nekohasekai.sagernet.ui.profile.MasqueSettingsActivity
+import io.nekohasekai.sagernet.ui.profile.MasterDnsSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.MieruSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.NaiveSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.OpenConnectSettingsActivity
@@ -155,6 +157,8 @@ class ProfileImports(private val host: ConfigurationFragment) {
         R.id.action_new_shadowtls -> ShadowTLSSettingsActivity::class.java
         R.id.action_new_anytls -> AnyTLSSettingsActivity::class.java
         R.id.action_new_trusttunnel -> TrustTunnelSettingsActivity::class.java
+        R.id.action_new_dnstt -> DnsttSettingsActivity::class.java
+        R.id.action_new_masterdns -> MasterDnsSettingsActivity::class.java
         R.id.action_new_direct -> DirectSettingsActivity::class.java
         R.id.action_new_masque -> MasqueSettingsActivity::class.java
         R.id.action_new_openvpn -> OpenVpnSettingsActivity::class.java

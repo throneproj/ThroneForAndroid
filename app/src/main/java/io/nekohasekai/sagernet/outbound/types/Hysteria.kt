@@ -40,6 +40,12 @@ val hysteriaBBRProfiles = listOf("standard", "conservative", "aggressive")
 /** hysteria.h */
 val hysteriaObfsTypes = listOf("salamander", "gecko")
 
+/** hysteriaObfsType (hysteria.cpp): the official client reads "" and "plain" as no obfuscation; panels also write "none". */
+private fun hysteriaObfsType(type: String): String {
+    val t = type.trim().lowercase()
+    return if (t == "none" || t == "plain") "" else t
+}
+
 /** hysteria.h: the core refuses Hysteria v1 without both rates; [Hysteria.build] falls back to these. */
 const val HYSTERIA_V1_DEFAULT_UP_MBPS = 10
 const val HYSTERIA_V1_DEFAULT_DOWN_MBPS = 50
@@ -202,6 +208,9 @@ class Hysteria : Outbound("hysteria") {
     /** hysteria.h:57-59. */
     fun realmActive(): Boolean = realm_enabled && protocol_version == "2"
 
+    /** hysteria.h: an empty type is the editor's "None"; it keeps the password so switching back restores it. */
+    fun obfsActive(): Boolean = obfs.isNotEmpty() && obfs_type.trim().isNotEmpty()
+
     override fun hasTls(): Boolean = true
     override fun mustTls(): Boolean = true
     override fun hasQuic(): Boolean = true
@@ -243,7 +252,7 @@ class Hysteria : Outbound("hysteria") {
         if (!realm) issues.addIssue(Severity.Error, "hop_interval_max", HysteriaChecks.hysteriaHopInterval(hop_interval_max))
         issues.addIssue(Severity.Error, "hop_interval_max", HysteriaChecks.hysteriaHopMaximum(hopping, hop_interval, hop_interval_max))
         issues.addIssue(Severity.Warning, "hop_interval_max", HysteriaChecks.hysteriaHopMaximumIgnored(hopping, hop_interval, hop_interval_max))
-        if (obfs.isNotEmpty()) {
+        if (obfsActive()) {
             val type = obfs_type.trim().lowercase()
             val message = Validation.oneOf(type, hysteriaObfsTypes)
             if (message.isNotEmpty()) {
@@ -353,7 +362,7 @@ class Hysteria : Outbound("hysteria") {
             password = if (url.password.isEmpty()) url.userName else url.userName + ":" + url.password
             if (q.has("obfs-password")) obfs = q.valueFully("obfs-password")
             obfs_type = when {
-                q.has("obfs") -> q.value("obfs").trim().lowercase()
+                q.has("obfs") -> hysteriaObfsType(q.value("obfs"))
                 q.has("min_packet_size") || q.has("max_packet_size") -> "gecko"
                 else -> "salamander"
             }
@@ -443,8 +452,8 @@ class Hysteria : Outbound("hysteria") {
         } else {
             val clashPassword = proxy.string("password")
             if (clashPassword.isNotEmpty()) password = clashPassword
-            val clashObfs = proxy.string("obfs")
-            if (clashObfs.isNotEmpty()) obfs_type = clashObfs.trim().lowercase()
+            // mihomo turns obfs on only by its type; a lone obfs-password is ignored there.
+            obfs_type = hysteriaObfsType(proxy.string("obfs"))
             val obfsPassword = proxy.string("obfs-password")
             if (obfsPassword.isNotEmpty()) obfs = obfsPassword
         }
@@ -512,7 +521,7 @@ class Hysteria : Outbound("hysteria") {
             if (obj.contains("obfs")) {
                 val obfsObj = obj.obj("obfs")
                 if (obfsObj.contains("password")) obfs = obfsObj.string("password")
-                obfs_type = if (obfsObj.contains("type")) obfsObj.string("type").trim().lowercase() else "salamander"
+                obfs_type = if (obfsObj.contains("type")) hysteriaObfsType(obfsObj.string("type")) else "salamander"
                 if (obfsObj.contains("min_packet_size")) {
                     val value = obfsObj.int("min_packet_size")
                     if (keep("obfs.min_packet_size", value.toString(), Validation.Rules.int(0, 2048))) min_packet_size = value
@@ -591,7 +600,7 @@ class Hysteria : Outbound("hysteria") {
                 linkUser = password
                 url.setUserName(password)
             }
-            if (obfs.isNotEmpty()) {
+            if (obfsActive()) {
                 url.addQueryItemPercentEncoded("obfs", LinkCodec.percentEncodeAll(obfs_type))
                 url.addQueryItemPercentEncoded("obfs-password", LinkCodec.percentEncodeAll(obfs))
                 if (min_packet_size > 0) url.addQueryItem("min_packet_size", min_packet_size.toString())
@@ -675,7 +684,7 @@ class Hysteria : Outbound("hysteria") {
         val obj = super.exportIdentity()
         obj["protocol_version"] = protocol_version
         if (server_ports.isNotEmpty()) obj["server_ports"] = server_ports.joinToString(",")
-        if (obfs.isNotEmpty()) obj["obfs"] = true
+        if (if (protocol_version == "1") obfs.isNotEmpty() else obfsActive()) obj["obfs"] = true
         return obj
     }
 
@@ -700,7 +709,7 @@ class Hysteria : Outbound("hysteria") {
             if (recv_window > 0) obj["recv_window"] = recv_window
             if (disable_mtu_discovery) obj["disable_mtu_discovery"] = disable_mtu_discovery
         } else {
-            if (obfs.isNotEmpty()) {
+            if (obfsActive()) {
                 val obfsType = obfs_type.trim().lowercase()
                 obj["obfs"] = when (obfsType) {
                     "salamander" -> jsonObjectOf("type" to obfsType, "password" to obfs)

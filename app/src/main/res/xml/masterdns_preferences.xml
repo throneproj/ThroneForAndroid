@@ -1,0 +1,130 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditTextPreference
+        app:icon="@drawable/ic_social_emoji_symbols"
+        app:key="name"
+        app:title="@string/profile_name"
+        app:useSimpleSummaryProvider="true" />
+
+    <PreferenceCategory
+        app:title="@string/proxy_cat">
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_domain_24"
+            app:key="domains"
+            app:title="@string/masterdns_domains"
+            app:dialogMessage="@string/one_per_line"
+            app:useSimpleSummaryProvider="true" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_layers_24"
+            app:key="mode"
+            app:title="@string/dns_tunnel_mode"
+            app:entries="@array/masterdns_mode_entry"
+            app:entryValues="@array/masterdns_mode_value"
+            app:defaultValue="socks5"
+            app:useSimpleSummaryProvider="true" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_notification_enhanced_encryption"
+            app:key="encryption_method"
+            app:title="@string/enc_method"
+            app:entries="@array/masterdns_method_value"
+            app:entryValues="@array/masterdns_method_value"
+            app:defaultValue="xor"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_settings_password"
+            app:key="encryption_key"
+            app:title="@string/masterdns_encryption_key"
+            app:dialogLayout="@layout/layout_password_dialog" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/dns_tunnel_resolvers">
+        <EditTextPreference
+            app:icon="@drawable/ic_action_dns"
+            app:key="resolvers.lines"
+            app:title="@string/dns_tunnel_resolvers"
+            app:dialogMessage="@string/dns_tunnel_resolvers_hint"
+            app:useSimpleSummaryProvider="true" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_shuffle_24"
+            app:key="balancing_strategy"
+            app:title="@string/dns_tunnel_resolver_strategy"
+            app:entries="@array/masterdns_strategy_entry"
+            app:entryValues="@array/masterdns_strategy_value"
+            app:defaultValue=""
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/masterdns_transfer">
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_multiple_stop_24"
+            app:key="packet_duplication"
+            app:title="@string/masterdns_duplication" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_multiple_stop_24"
+            app:key="setup_packet_duplication"
+            app:title="@string/masterdns_setup_duplication" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_upload_24"
+            app:key="upload_compression"
+            app:title="@string/masterdns_upload_compression"
+            app:entries="@array/masterdns_compression_entry"
+            app:entryValues="@array/masterdns_compression_value"
+            app:defaultValue=""
+            app:useSimpleSummaryProvider="true" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_download_24"
+            app:key="download_compression"
+            app:title="@string/masterdns_download_compression"
+            app:entries="@array/masterdns_compression_entry"
+            app:entryValues="@array/masterdns_compression_value"
+            app:defaultValue=""
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_texture_24"
+            app:key="base64_response"
+            app:title="@string/masterdns_base64_response" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/mtu">
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_upload_24"
+            app:key="mtu_min_upload"
+            app:title="@string/masterdns_mtu_min_upload" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_upload_24"
+            app:key="mtu_max_upload"
+            app:title="@string/masterdns_mtu_max_upload" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_download_24"
+            app:key="mtu_min_download"
+            app:title="@string/masterdns_mtu_min_download" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_download_24"
+            app:key="mtu_max_download"
+            app:title="@string/masterdns_mtu_max_download" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/cag_advanced">
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_refresh_24"
+            app:key="mtu_test_retries"
+            app:title="@string/masterdns_mtu_test_retries" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_hourglass_empty_24"
+            app:key="mtu_test_timeout"
+            app:title="@string/masterdns_mtu_test_timeout" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_speed_24"
+            app:key="mtu_test_parallelism"
+            app:title="@string/masterdns_mtu_test_parallelism" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_filter_list_24"
+            app:key="mtu_auto_remove_low"
+            app:title="@string/masterdns_mtu_auto_remove_low" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

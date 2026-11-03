@@ -4,6 +4,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.outbound.BuildContext
 import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.OutboundFactory
+import io.nekohasekai.sagernet.outbound.common.DnsTunnels
 import io.nekohasekai.sagernet.outbound.common.TLS_UNSAFE_FINGERPRINT
 import io.nekohasekai.sagernet.outbound.common.stripXrayDialerState
 import io.nekohasekai.sagernet.outbound.common.xrayDownloadLeg
@@ -329,6 +330,8 @@ object ProfileImport {
         val stream = out.obj("streamSettings")
         val s = typed.streamSetting
         if (stream.contains("security") && stream.string("security").lowercase() != s.security) return true
+        // Old mask names and xdns shapes are upgraded, and a legacy mKCP header or seed becomes masks.
+        if (s.finalmask != stream.obj("finalmask")) return true
         // The typed profile keeps neither key in any spelling, while Xray reads every spelling of sockopt.
         for (sk in stream.keys()) {
             if (!sk.equals("sockopt", ignoreCase = true)) continue
@@ -890,6 +893,8 @@ object ProfileImport {
             }
             val outbound = if (line.startsWith("vless://") && OutboundFactory.useXrayVless(line, preference)) {
                 OutboundFactory.newByType("xrayvless")
+            } else if (line.startsWith("dnst://") && DnsTunnels.linkTransport(line) == "masterdns") {
+                OutboundFactory.newByType("masterdns")
             } else {
                 OutboundFactory.newByType(profileType)
             }

@@ -65,9 +65,9 @@
             app:icon="@drawable/ic_baseline_texture_24"
             app:key="obfs_type"
             app:title="@string/hysteria_obfs_type"
-            app:entries="@array/hysteria_obfs_type_value"
+            app:entries="@array/hysteria_obfs_type_entry"
             app:entryValues="@array/hysteria_obfs_type_value"
-            app:defaultValue="salamander"
+            app:defaultValue=""
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:icon="@drawable/ic_baseline_texture_24"

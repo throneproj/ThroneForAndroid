@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.outbound
 
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.outbound.common.DnsTunnels
 import io.nekohasekai.sagernet.outbound.common.XrayChecks
 import io.nekohasekai.sagernet.outbound.common.normalizeXrayNetwork
 import io.nekohasekai.sagernet.outbound.common.xrayNetworks
@@ -38,7 +39,7 @@ object OutboundFactory {
     val ALL_TYPES: List<String> = listOf(
         "socks", "http", "shadowsocks", "chain", "autoselector", "vmess", "trojan", "vless", "xrayvless", "hysteria",
         "tuic", "juicity", "trusttunnel", "anytls", "mieru", "snell", "shadowtls", "wireguard", "masque", "openvpn",
-        "openconnect", "tailscale", "ssh", "custom", "extracore", "naive", "direct",
+        "openconnect", "tailscale", "ssh", "custom", "extracore", "naive", "direct", "dnstt", "masterdns",
     )
 
     /** OutboundFactory.cpp:44 and the JSON alias of openvpn.cpp:157-158. */
@@ -56,7 +57,7 @@ object OutboundFactory {
         "anytls" to "AnyTls", "mieru" to "Mieru", "snell" to "Snell", "shadowtls" to "ShadowTls",
         "wireguard" to "WireGuard", "masque" to "Masque", "openvpn" to "OpenVpn", "openconnect" to "OpenConnect",
         "ssh" to "Ssh", "custom" to "Custom", "naive" to "Naive", "direct" to "Direct", "chain" to "Chain",
-        "autoselector" to "AutoSelector",
+        "autoselector" to "AutoSelector", "dnstt" to "Dnstt", "masterdns" to "MasterDns",
     )
 
     private const val TYPES_PACKAGE = "io.nekohasekai.sagernet.outbound.types."
@@ -132,6 +133,9 @@ object OutboundFactory {
         Protocol("masque", emptyList(), listOf("masque"), listOf("masque")),
         Protocol("ssh", listOf("ssh://"), listOf("ssh"), listOf("ssh")),
         Protocol("naive", listOf("naive+https://", "naive+quic://"), listOf("naive"), emptyList()),
+        // dnst:// links of the masterdns transport go to masterdns, see parseLink.
+        Protocol("dnstt", listOf("dnst://", "slipnet://", "slipnet-enc://", "slipnet-bundle-enc://"), listOf("dnstt"), emptyList()),
+        Protocol("masterdns", listOf("masterdns://", "stormdns://"), listOf("masterdns"), emptyList()),
     )
 
     /** typeForScheme (SubscriptionParser.cpp:69-76): case-sensitive prefix match. */
@@ -189,6 +193,8 @@ object OutboundFactory {
             (security == "reality" && query.value("pqv").isNotBlank())
         // Throne's Xray stream refuses any other network, which sing-box VLESS may still carry (http, quic), but it would drop the Xray-only values.
         if (transport.isNotEmpty() && transport !in xrayNetworks) return xrayOnly
+        // sing-box has no mKCP, so even a link Xray refuses goes there to get Xray's reason.
+        if (transport == "kcp") return true
         // Xray refuses REALITY over ws and httpupgrade, which sing-box carries.
         if (!xrayOnly && XrayChecks.xrayRealityNetwork(security, transport).isNotEmpty()) return false
         // sing-box's http transport speaks the raw HTTP header only in plaintext; TLS (which a bare sni also enables) turns it into h2
@@ -245,6 +251,7 @@ object OutboundFactory {
         if (line.startsWith("vpn://", ignoreCase = true)) return null
         val profileType = typeForScheme(line) ?: return null
         val outbound = if (line.startsWith("vless://") && useXrayVless(line, preference)) newByType("xrayvless")
+        else if (line.startsWith("dnst://") && DnsTunnels.linkTransport(line) == "masterdns") newByType("masterdns")
         else newByType(profileType)
         if (!outbound.parseFromLink(line)) return null
         return outbound

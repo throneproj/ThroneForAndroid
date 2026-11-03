@@ -5,12 +5,18 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.outbound.common.ResolverChecks
 import io.nekohasekai.sagernet.outbound.common.XrayChecks
+import io.nekohasekai.sagernet.outbound.common.XrayKcp
 import io.nekohasekai.sagernet.outbound.common.XrayXDrive
 import io.nekohasekai.sagernet.outbound.common.normalizeXrayNetwork
+import io.nekohasekai.sagernet.outbound.common.upgradeXrayFinalmask
+import io.nekohasekai.sagernet.outbound.common.xrayFinalmaskHasXdns
+import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.types.XrayVless
 import io.nekohasekai.sagernet.outbound.types.XrayVlessChecks
 import io.nekohasekai.sagernet.ui.ValidationForm
+import io.nekohasekai.sagernet.ui.json.ProfileJson
 import io.nekohasekai.sagernet.validation.CommonChecks
 import io.nekohasekai.sagernet.validation.Validation
 
@@ -64,8 +70,15 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         pbm.int("$STREAM.xhttp.hKeepAlivePeriod")
         pbm.text("$STREAM.xhttp.downloadSettings")
 
+        for ((name, _) in XrayKcp.VALUES) pbm.int("$STREAM.kcp.$name")
+        pbm.text("$STREAM.xdnsResolvers.lines", XDNS_RESOLVERS)
+
         pbm.text(XDRIVE_SERVICE)
         pbm.text("$STREAM.xdrive.remoteFolder")
+        pbm.text(S3_ENDPOINT)
+        pbm.text(S3_REGION)
+        pbm.text(S3_BUCKET)
+        pbm.bool(S3_PATH_STYLE)
         pbm.text("$STREAM.xdrive.frontAddress")
         pbm.int(XDRIVE_FRONT_PORT)
         for ((name, _) in XrayXDrive.TUNING) pbm.int("$STREAM.xdrive.$name")
@@ -86,28 +99,42 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
 
         XrayMuxBlock.bind(pbm)
 
-        jsonObjectText("$STREAM.finalmask", { streamSetting.finalmask }, { streamSetting.finalmask = it })
+        // dialog_edit_profile_xray.cpp: the editor keeps the finalmask in the spellings Xray reads now.
+        jsonObjectText(FINALMASK, { streamSetting.finalmask.copy().also { upgradeXrayFinalmask(it) } }, {
+            streamSetting.finalmask = it.also { upgradeXrayFinalmask(it) }
+        })
         jsonObjectText(XDRIVE_TEMPLATE, { streamSetting.xdrive.templateSpec }, { streamSetting.xdrive.templateSpec = it })
     }
 
-    // dialog_edit_profile_xdrive.cpp: one secrets list backs the Google Drive rows and the template's list, and an
-    // unset port or tuning value shows as the Xray default.
+    // dialog_edit_profile_xdrive.cpp: one secrets list backs the Google Drive rows, the S3 rows and the template's
+    // list, and an unset port or tuning value shows as the Xray default; so does an mKCP value at its default.
     override fun XrayVless.writeUnboundToCache() {
         val store = DataStore.profileCacheStore
         val secrets = streamSetting.xdrive.secrets
         GOOGLE_DRIVE_SECRETS.forEachIndexed { i, key -> store.putString(key, secrets.getOrElse(i) { "" }) }
+        S3_SECRETS.forEachIndexed { i, key -> store.putString(key, secrets.getOrElse(i) { "" }) }
         store.putString(XDRIVE_SECRETS, secrets.joinToString("\n"))
         for (key in listOf(XDRIVE_FRONT_PORT) + XrayXDrive.TUNING.map { "$STREAM.xdrive.${it.first}" }) {
             if (store.getString(key)?.trim() == "0") store.putString(key, "")
         }
+        for ((name, property) in XrayKcp.VALUES) {
+            if (property.get(streamSetting.kcp) == XrayKcp.DEFAULTS[name]) store.putString("$STREAM.kcp.$name", "")
+        }
     }
 
     override fun XrayVless.readUnboundFromCache() {
+        // saveXrayKCP: an empty row is Xray's default
+        for ((name, property) in XrayKcp.VALUES) {
+            if (cached("$STREAM.kcp.$name").isEmpty()) property.set(streamSetting.kcp, XrayKcp.DEFAULTS.getValue(name))
+        }
         if (normalizeXrayNetwork(streamSetting.network) != "xdrive") return
         val xdrive = streamSetting.xdrive
         // saveXrayXDrive trims these: a pasted folder ID with a trailing space would find nothing on the Drive
         xdrive.service = xdrive.service.trim()
         xdrive.remoteFolder = xdrive.remoteFolder.trim()
+        xdrive.s3Endpoint = xdrive.s3Endpoint.trim()
+        xdrive.s3Region = xdrive.s3Region.trim()
+        xdrive.s3Bucket = xdrive.s3Bucket.trim()
         xdrive.frontAddress = xdrive.frontAddress.trim()
         xdrive.secrets = secretsFromUi(xdrive.service, xdrive.secrets)
     }
@@ -118,10 +145,24 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         return when (service) {
             "template" -> store.getString(XDRIVE_SECRETS).orEmpty().split('\n').map { it.trim() }
                 .filterTo(ArrayList()) { it.isNotEmpty() }
+            "s3" -> {
+                val keys = S3_SECRETS.take(2).mapTo(ArrayList()) { store.getString(it).orEmpty().trim() }
+                val token = store.getString(S3_SECRETS[2]).orEmpty().trim()
+                if (token.isNotEmpty()) keys.add(token)
+                keys
+            }
             // Xray takes exactly these three, so entries a list carried past them are dropped.
             "google-drive" -> GOOGLE_DRIVE_SECRETS.mapTo(ArrayList()) { store.getString(it).orEmpty().trim() }
             else -> ArrayList(stored)
         }
+    }
+
+    /** Set once the screen exists: re-reads the finalmask the JSON editor may have changed. */
+    private var finalmaskEdited: (() -> Unit)? = null
+
+    override fun onResume() {
+        finalmaskEdited?.invoke()
+        super.onResume()
     }
 
     private fun cached(key: String) = DataStore.profileCacheStore.getString(key)?.trim().orEmpty()
@@ -148,24 +189,53 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         val xhttp = findPreference<PreferenceCategory>("xrayXhttpCategory")
         val xdrive = findPreference<PreferenceCategory>("xrayXDriveCategory")
         val xdriveTuning = findPreference<PreferenceCategory>("xrayXDriveTuningCategory")
-        onMenu("$STREAM.network") { network ->
+        val kcp = findPreference<PreferenceCategory>("xrayKcpCategory")
+        val kcpTuning = findPreference<PreferenceCategory>("xrayKcpTuningCategory")
+        // dialog_edit_profile_xray.cpp updateXrayRows: the resolver lines only while finalmask has an xdns mask
+        var network = ""
+        var xdns = false
+        fun xdnsRow() = setVisible(network == "kcp" && xdns, XDNS_RESOLVERS)
+        fun readFinalmask() {
+            val store = DataStore.profileCacheStore
+            val finalmask = JsonInput.parseObject(store.getString(FINALMASK).orEmpty())
+            if (upgradeXrayFinalmask(finalmask)) store.putString(FINALMASK, ProfileJson.text(finalmask))
+            xdns = xrayFinalmaskHasXdns(finalmask)
+        }
+        readFinalmask()
+        finalmaskEdited = {
+            readFinalmask()
+            xdnsRow()
+            form?.refresh()
+        }
+        onMenu("$STREAM.network") { selected ->
+            network = selected
             ws?.isVisible = network == "ws"
             httpUpgrade?.isVisible = network == "httpupgrade"
             grpc?.isVisible = network == "grpc"
             xhttp?.isVisible = network == "xhttp"
+            kcp?.isVisible = network == "kcp"
+            kcpTuning?.isVisible = network == "kcp"
             xdrive?.isVisible = network == "xdrive"
             xdriveTuning?.isVisible = network == "xdrive"
+            xdnsRow()
         }
+        for ((name, xrayDefault) in XrayKcp.DEFAULTS) {
+            numberInput("$STREAM.kcp.$name")
+            presetTextSummary("$STREAM.kcp.$name", "", xrayDefault.toString())
+        }
+        multilineInput(XDNS_RESOLVERS)
 
         // dialog_edit_profile_xdrive.cpp updateXrayXDriveControls
         findPreference<ListPreference>(XDRIVE_SERVICE)?.keepUnlistedValue()
         onMenu(XDRIVE_SERVICE) { service ->
             setVisible(service == "google-drive", *GOOGLE_DRIVE_SECRETS)
+            setVisible(service == "s3", S3_ENDPOINT, S3_REGION, S3_BUCKET, S3_PATH_STYLE, *S3_SECRETS)
             setVisible(service == "template", XDRIVE_SECRETS, XDRIVE_TEMPLATE)
             setVisible(service != "local", "$STREAM.xdrive.frontAddress", XDRIVE_FRONT_PORT)
         }
-        passwordSummary(*GOOGLE_DRIVE_SECRETS, XDRIVE_SECRETS)
+        passwordSummary(*GOOGLE_DRIVE_SECRETS, *S3_SECRETS, XDRIVE_SECRETS)
         multilineInput(XDRIVE_SECRETS)
+        presetTextSummary(S3_REGION, "", "us-east-1")
         portInput(XDRIVE_FRONT_PORT)
         presetTextSummary(XDRIVE_FRONT_PORT, "", "443")
         for ((name, xrayDefault) in XDRIVE_TUNING_DEFAULTS) {
@@ -206,10 +276,19 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
                 return "multiplex." + field.removePrefix("mux.")
             // only XDRIVE uses the stream's own port: its front port
             "streamSettings.port" -> return XDRIVE_FRONT_PORT
-            "streamSettings.xdriveSettings.secrets" ->
-                return if (cached(XDRIVE_SERVICE) == "template") XDRIVE_SECRETS else GOOGLE_DRIVE_SECRETS[0]
+            "streamSettings.xdriveSettings.secrets" -> return when (cached(XDRIVE_SERVICE)) {
+                "template" -> XDRIVE_SECRETS
+                "s3" -> S3_SECRETS[0]
+                else -> GOOGLE_DRIVE_SECRETS[0]
+            }
             "streamSettings.xdriveSettings.template" -> return XDRIVE_TEMPLATE
+            "streamSettings.xdriveSettings.s3.endpoint" -> return S3_ENDPOINT
+            "streamSettings.xdriveSettings.s3.region" -> return S3_REGION
+            "streamSettings.xdriveSettings.s3.bucket" -> return S3_BUCKET
+            "streamSettings.xdnsResolvers", "streamSettings.xdnsResolverList" -> return XDNS_RESOLVERS
         }
+        // the xdns checks name paths inside the finalmask, which is edited as one JSON row
+        if (field.startsWith("streamSettings.finalmask.")) return FINALMASK
         if (!field.startsWith("streamSettings.")) return null
         var rest = field.removePrefix("streamSettings.")
         val section = XRAY_SECTIONS[rest.substringBefore('.')]
@@ -239,11 +318,28 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         // dialog_edit_profile_xdrive.cpp bindXrayXDrive, edit_xrayvless.cpp; the cross rules mark every row they read
         for ((name, _) in XrayXDrive.TUNING) bind("$STREAM.xdrive.$name", XrayChecks::xrayXDriveTuning)
         bind(XDRIVE_FRONT_PORT, XrayChecks::xrayXDriveFrontPort)
-        addRule(GOOGLE_DRIVE_SECRETS.toList() + XDRIVE_SECRETS + XDRIVE_SERVICE) {
-            // only google-drive checks its secrets, and it never keeps the stored ones
+        addRule(GOOGLE_DRIVE_SECRETS.toList() + S3_SECRETS + XDRIVE_SECRETS + XDRIVE_SERVICE) {
+            // only google-drive and s3 check their secrets, and neither keeps the stored ones
             val service = cached(XDRIVE_SERVICE)
             XrayChecks.xrayXDriveSecrets(service, secretsFromUi(service, emptyList()))
         }
+        addRule(listOf(S3_ENDPOINT, XDRIVE_SERVICE)) { XrayChecks.xrayXDriveS3Endpoint(cached(XDRIVE_SERVICE), cached(S3_ENDPOINT)) }
+        addRule(listOf(S3_REGION, XDRIVE_SERVICE)) { XrayChecks.xrayXDriveS3Region(cached(XDRIVE_SERVICE), cached(S3_REGION)) }
+        addRule(listOf(S3_BUCKET, S3_PATH_STYLE, S3_ENDPOINT, XDRIVE_SERVICE)) {
+            val pathStyle = DataStore.profileCacheStore.getBoolean(S3_PATH_STYLE, true)
+            XrayChecks.xrayXDriveS3Bucket(cached(XDRIVE_SERVICE), cached(S3_BUCKET), cached(S3_ENDPOINT), pathStyle)
+        }
+
+        // dialog_edit_profile_kcp.cpp bindXrayKCP; ResolverSourceWidget::bindValidation
+        bind("$STREAM.kcp.mtu", XrayChecks::xrayKCPMtu)
+        bind("$STREAM.kcp.tti", XrayChecks::xrayKCPTti)
+        bind("$STREAM.kcp.uplinkCapacity", XrayChecks::xrayKCPCapacity)
+        bind("$STREAM.kcp.downlinkCapacity", XrayChecks::xrayKCPCapacity)
+        bind("$STREAM.kcp.cwndMultiplier", XrayChecks::xrayKCPCwndMultiplier)
+        addRule(listOf("$STREAM.kcp.maxSendingWindow", "$STREAM.kcp.mtu")) {
+            XrayChecks.xrayKCPMaxSendingWindow(cached("$STREAM.kcp.maxSendingWindow"), cached("$STREAM.kcp.mtu"))
+        }
+        bindLines(XDNS_RESOLVERS, ResolverChecks::xdnsLine)
         addRule(listOf("encryption", "$STREAM.network")) {
             XrayVlessChecks.xrayXDriveEncryption(cached("encryption"), cached("$STREAM.network"))
         }
@@ -259,10 +355,21 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         private const val XDRIVE_SECRETS = "$STREAM.xdrive.secrets"
         private const val XDRIVE_TEMPLATE = "$STREAM.xdrive.template"
         private const val XDRIVE_FRONT_PORT = "$STREAM.xdrive.frontPort"
+        private const val S3_ENDPOINT = "$STREAM.xdrive.s3Endpoint"
+        private const val S3_REGION = "$STREAM.xdrive.s3Region"
+        private const val S3_BUCKET = "$STREAM.xdrive.s3Bucket"
+        private const val S3_PATH_STYLE = "$STREAM.xdrive.s3PathStyle"
+        private const val FINALMASK = "$STREAM.finalmask"
+        private const val XDNS_RESOLVERS = "$STREAM.xdnsResolvers"
 
         /** No fields of their own: secrets[0..2] while the service is google-drive. */
         private val GOOGLE_DRIVE_SECRETS = arrayOf(
             "$STREAM.xdrive.clientId", "$STREAM.xdrive.clientSecret", "$STREAM.xdrive.refreshToken",
+        )
+
+        /** No fields of their own: secrets[0..2] while the service is s3; the session token is optional. */
+        private val S3_SECRETS = arrayOf(
+            "$STREAM.xdrive.s3AccessKey", "$STREAM.xdrive.s3SecretKey", "$STREAM.xdrive.s3SessionToken",
         )
 
         /** dialog_edit_profile_xdrive.cpp xdriveTuningEdits: what 0 leaves Xray at. */
@@ -285,6 +392,7 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
             "wsSettings" to "ws",
             "httpupgradeSettings" to "httpupgrade",
             "grpcSettings" to "grpc",
+            "kcpSettings" to "kcp",
             "xdriveSettings" to "xdrive",
         )
     }

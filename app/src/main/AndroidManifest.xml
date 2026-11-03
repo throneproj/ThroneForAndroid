@@ -181,6 +181,10 @@
                 <data android:scheme="wg" />
                 <data android:scheme="awg" />
                 <data android:scheme="tt" />
+                <data android:scheme="dnst" />
+                <data android:scheme="slipnet" />
+                <data android:scheme="masterdns" />
+                <data android:scheme="stormdns" />
                 <data android:scheme="throne" />
                 <data android:scheme="json" />
             </intent-filter>
@@ -246,6 +250,12 @@
             android:configChanges="uiMode" />
         <activity
             android:name="io.nekohasekai.sagernet.ui.profile.TrustTunnelSettingsActivity"
+            android:configChanges="uiMode" />
+        <activity
+            android:name="io.nekohasekai.sagernet.ui.profile.DnsttSettingsActivity"
+            android:configChanges="uiMode" />
+        <activity
+            android:name="io.nekohasekai.sagernet.ui.profile.MasterDnsSettingsActivity"
             android:configChanges="uiMode" />
         <activity
             android:name="io.nekohasekai.sagernet.ui.profile.DirectSettingsActivity"

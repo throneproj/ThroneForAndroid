@@ -26,6 +26,8 @@ fun settingsActivityFor(type: String): Class<out ProfileSettingsActivity<*>> =
         "snell" -> SnellSettingsActivity::class.java
         "wireguard" -> WireGuardSettingsActivity::class.java
         "trusttunnel" -> TrustTunnelSettingsActivity::class.java
+        "dnstt" -> DnsttSettingsActivity::class.java
+        "masterdns" -> MasterDnsSettingsActivity::class.java
         "direct" -> DirectSettingsActivity::class.java
         "masque" -> MasqueSettingsActivity::class.java
         "openvpn" -> OpenVpnSettingsActivity::class.java

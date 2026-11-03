@@ -10,8 +10,11 @@ import io.nekohasekai.sagernet.outbound.SecurityLevel
 import io.nekohasekai.sagernet.outbound.displayTransportName
 import io.nekohasekai.sagernet.outbound.withPrivateServer
 import io.nekohasekai.sagernet.outbound.common.XrayChecks
+import io.nekohasekai.sagernet.outbound.common.normalizeXrayNetwork
+import io.nekohasekai.sagernet.outbound.common.stripXrayFinalmaskKeyLog
 import io.nekohasekai.sagernet.outbound.common.withXrayDownloadLeg
 import io.nekohasekai.sagernet.outbound.common.xrayDownloadLeg
+import io.nekohasekai.sagernet.outbound.common.xrayFinalmaskHasXdns
 import io.nekohasekai.sagernet.outbound.common.xrayLower
 import io.nekohasekai.sagernet.outbound.common.xrayNetworks
 import io.nekohasekai.sagernet.outbound.json.JsonArray
@@ -257,7 +260,7 @@ class Custom : Outbound("custom") {
          * SubscriptionParser.cpp:164-179 makeProfileForXrayOutbound: infrastructure protocols are dropped, a VLESS
          * outbound becomes an xrayvless profile when it parses, everything else a custom `xrayoutbound` whose config
          * is the Indented JSON text, named after the tag. Android keeps a VLESS outbound over a network the xrayvless
-         * profile does not model (mKCP, the websocket / splithttp aliases) custom too, so its settings survive.
+         * profile does not model custom too, so its settings survive.
          */
         @JvmStatic
         fun fromXrayOutbound(out: JsonObject): Outbound? {
@@ -431,9 +434,10 @@ class Custom : Outbound("custom") {
                 streamsKnown = streamsKnown && value is JsonObject
                 streams.add(value as? JsonObject ?: JsonObject())
             }
-            val transport = displayTransportName(
-                JsonValues.toStringValue(customValueNamed(streams.firstOrNull() ?: JsonObject(), "network")).lowercase(),
-            )
+            val stream0 = streams.firstOrNull() ?: JsonObject()
+            val network = JsonValues.toStringValue(customValueNamed(stream0, "network")).lowercase()
+            val finalmask = customValueNamed(stream0, "finalmask") as? JsonObject ?: JsonObject()
+            val transport = if (normalizeXrayNetwork(network) == "kcp" && xrayFinalmaskHasXdns(finalmask)) "XDNS" else displayTransportName(network)
             val securities = streams.flatMap { stream -> keysNamed(stream, "security").map { JsonValues.toStringValue(stream[it]).lowercase() } }
             val security = if (streamsKnown) xrayAgreedName(securities) ?: "" else ""
             var info = when (security) {
@@ -535,7 +539,7 @@ object CustomChecks {
 
 /**
  * StripXrayStreamKeyLog (custom.cpp): removes every spelling of masterKeyLog from an Xray stream's TLS and REALITY
- * settings and its XHTTP download legs, editing [stream] in place; true when any went.
+ * settings, its xdns resolvers and its XHTTP download legs, editing [stream] in place; true when any went.
  */
 fun stripXrayStreamKeyLog(stream: JsonObject, at: String, issues: MutableList<Issue>): Boolean = stripXrayKeyLog(stream, at, issues)
 
@@ -763,6 +767,9 @@ private fun stripXrayKeyLog(stream: JsonObject, at: String, issues: MutableList<
             editObjectNamed(xhttp, "extra", xhttpAt, stripDownload) or changed
         } or removed
     }
+    removed = editObjectNamed(stream, "finalmask", at) { finalmask, finalmaskAt ->
+        stripXrayFinalmaskKeyLog(finalmask, finalmaskAt, issues)
+    } or removed
     return removed
 }
 
