@@ -36,7 +36,7 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/setup-go@v7
       with:
-        go-version: '1.27.0'
+        go-version: '1.27.3'
         cache: false
     - name: Go module cache
       if: steps.cache.outputs.cache-hit != 'true'
