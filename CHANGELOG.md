@@ -1,4 +1,16 @@
 #### 2.0.5
+* 配置列表（紧凑模式）信息覆盖显示规则
+* 更改右侧数据展示优先级规则（由高到低）：
+* 测试中（实时进行中显示「测试中...」）
+* 排队中（任务等待队列中半透明显示「排队中」）
+* 连接异常 / 特殊状态（连通显示「连接成功」，超时/失败显示「不可用」）
+* 测速结果（存在下载/上传速率时优先展示，覆盖延迟与 IP）
+* 国旗与延迟（无测速数据时优先展示「国旗 + 延迟 ms」，覆盖出网 IP）
+* 出网外部 IP（无测速且无延迟/国旗时显示「🌐 IP」）
+* 历史流量统计（无任何测试结果时回退显示流量；流量为 0 时空白不占位）
+* 涉及文件：
+* app/src/main/java/io/nekohasekai/sagernet/ui/profiles/ProfileRowHolder.kt
+#### 2.0.5
 
 * Add per-group routing profiles **1**
 * Add routing profile import from subscriptions **2**
