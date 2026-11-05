@@ -10,6 +10,7 @@
 [![Downloads](https://img.shields.io/github/downloads/throneproj/ThroneForAndroid/total?style=flat-square&logo=github&label=downloads)](https://github.com/throneproj/ThroneForAndroid/releases)
 [![Stars](https://img.shields.io/github/stars/throneproj/ThroneForAndroid?style=flat-square&logo=github&label=stars)](https://github.com/throneproj/ThroneForAndroid/stargazers)
 [![License](https://img.shields.io/github/license/throneproj/ThroneForAndroid?style=flat-square&color=6E7781)](LICENSE)
+[![Telegram](https://img.shields.io/badge/Telegram-@ThroneProj-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ThroneProj)
 
 </div>
 
