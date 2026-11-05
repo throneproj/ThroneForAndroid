@@ -1,4 +1,13 @@
-#### 2.0.5
+#### 2.0.5.8
+
+*  底栏左侧区域
+ * 1. 单击：快速跳转至配置列表主页面，并高亮定位当前自动选择器 / 活动配置。
+ * 2. 长按：一键清空所有节点的历史测试数据（重置 Ping 延迟、测速结果与报错状态）。
+*  底栏右侧区域
+ * 1. 单击：测试当前活动出站链路的连通性（保持原有逻辑）。
+ * 2. 长按：批量测试当前主页面订阅/分组中全部节点的 Ping 延迟，并同步刷新出站 IP 与归属地国旗信息。
+
+#### 2.0.5.7
 * 配置列表（紧凑模式）信息覆盖显示规则
 * 更改右侧数据展示优先级规则（由高到低）：
 * 测试中（实时进行中显示「测试中...」）
@@ -10,6 +19,28 @@
 * 历史流量统计（无任何测试结果时回退显示流量；流量为 0 时空白不占位）
 * 涉及文件：
 * app/src/main/java/io/nekohasekai/sagernet/ui/profiles/ProfileRowHolder.kt
+
+
+#### 2.0.5.6
+ * 1. 删除底栏测试是显示的http https。app/src/main/java/io/nekohasekai/sagernet/widget/StatsBar.kt
+ * 2. 更新紧凑模式ip与国家测试，显示国旗和延时。app/src/main/java/io/nekohasekai/sagernet/ui/profiles/ProfileRowHolder.kt
+#### 2.0.5.3
+
+*  更新紧凑模式右侧数据显示规则。app/src/main/java/io/nekohasekai/sagernet/ui/profiles/ProfileRowHolder.kt
+ * 1. 如果没有测试结果，或者测试结果情况，则显示流量统计信息，如果流量统计信息为0，则显示空。
+ * 2. IP与国家、速度、延迟 等测试结果根据时间戳显示最新数据。
+
+#### 2.0.5.2
+
+**底栏修改**
+* 1. 底栏形成“左侧双行网速、右侧国旗加状态”的对称排布。app/src/main/res/layout/layout_stats_bar_content.xml
+* 2. 调低底栏高度。 app/src/main/res/layout/layout_stats_bar_content.xml
+* 3. 一旦底层核心服务状态切换为 `Connected`（已连接），系统会**立即自动调用 `testConnection()` 发起测速**，实现了连接后全自动测速动作。app/src/main/java/io/nekohasekai/sagernet/ui/MainActivity.kt
+
+#### 2.0.5.1
+
+* 第一个编译版本，只生成 v8a 文件
+
 #### 2.0.5
 
 * Add per-group routing profiles **1**
