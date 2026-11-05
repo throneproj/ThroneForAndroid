@@ -12,9 +12,10 @@ class LogRedactor(private val hideDestinations: Boolean) {
         val URL = Regex("""\b([a-zA-Z][a-zA-Z0-9+.\-]*)://([^\s/@"'<>]*@)?([^\s/?#"'<>]+)([^\s"'<>]*)""")
         // A JSON string, and arrays / objects nested up to two levels (XDRIVE "secrets", a template "auth"), matched
         // whole. Runs are consumed possessively: Java's regex recurses per loop iteration, not per character.
+        // Closing brackets are escaped: Android's ICU engine rejects a bare `}` that the JVM accepts.
         const val STRING = """"(?:[^"\\]++|\\.)*+""""
-        const val ARRAY = """\[(?:[^\[\]"]++|$STRING|\[(?:[^\[\]"]++|$STRING)*+])*+]"""
-        const val OBJECT = """\{(?:[^{}"]++|$STRING|\{(?:[^{}"]++|$STRING)*+})*+}"""
+        const val ARRAY = """\[(?:[^\[\]"]++|$STRING|\[(?:[^\[\]"]++|$STRING)*+\])*+\]"""
+        const val OBJECT = """\{(?:[^{}"]++|$STRING|\{(?:[^{}"]++|$STRING)*+\})*+\}"""
         val SECRET = Regex(
             """(?i)("?)([\w\-]*(?:password|passwd|pass|secret|token|key|uuid|auth|psk|short_id)[\w\-]*)\1(\s*[:=]\s*)($STRING|$ARRAY|$OBJECT|[^\s,;&}\]]+)"""
         )
@@ -24,7 +25,7 @@ class LogRedactor(private val hideDestinations: Boolean) {
         )
         // The core logs the connected Wi-Fi ("ssid NAME", "SSID=NAME, BSSID=…"); route rules list them as arrays.
         val WIFI = Regex("""(?i)\b(b?ssid)(\s*[:=]\s*|\s+)("(?:[^"\\]|\\.)*"|[^\s,;]+)""")
-        val WIFI_LIST = Regex("""(?i)("wifi_b?ssid"\s*:\s*)\[[^\]]*]""")
+        val WIFI_LIST = Regex("""(?i)("wifi_b?ssid"\s*:\s*)\[[^\]]*\]""")
         val UUID = Regex("""\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b""")
         val BASE64 = Regex("""(?<![A-Za-z0-9+/_\-])[A-Za-z0-9+/_\-]{32,}={0,2}(?![A-Za-z0-9+/=_\-])""")
         val IPV4 = Regex("""(?<![\d.])(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?![\d.])""")

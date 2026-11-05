@@ -46,7 +46,15 @@ object LogExport {
         val now = System.currentTimeMillis()
         dir.listFiles()?.forEach { if (now - it.lastModified() > MAX_AGE_MS) it.delete() }
         val file = File(dir, fileName())
-        val redactor = if (redact) LogRedactor(hideDestinations) else null
+        // A pattern the platform regex engine rejects fails the class init with an Error, which would bypass every
+        // caller's catch and, through CrashHandler, crash the crash report too.
+        val redactor = if (redact) {
+            try {
+                LogRedactor(hideDestinations)
+            } catch (e: LinkageError) {
+                throw IllegalStateException("log redaction unavailable", e)
+            }
+        } else null
         file.bufferedWriter().use { out ->
             out.write(header(context, redact, hideDestinations))
             section(out, "core.log", String(CoreLog.read(0)), redactor)

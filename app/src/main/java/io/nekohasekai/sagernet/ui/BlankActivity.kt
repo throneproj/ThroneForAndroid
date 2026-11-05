@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.utils.CrashHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,6 +26,7 @@ class BlankActivity : AppCompatActivity() {
             finish()
             return
         }
+        CrashHandler.reporting = true
         lifecycleScope.launch {
             try {
                 val file = withContext(Dispatchers.IO) {
