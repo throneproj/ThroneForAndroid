@@ -1,3 +1,16 @@
+#### 2.0.6
+
+* Add DNS tunnels: DNSTT/VayDNS, MasterDNS/StormDNS and XDNS **1**
+* Add mKCP transport to Xray
+* Add S3 storage to XDRIVE
+* Improve WARP MASQUE over HTTP/3
+* Update sing-box, Xray and Go
+* Fix log export crashing in a loop
+* Fixes and Improvements
+
+**1**:
+Refer to the [documentation](https://throneproj.github.io/advanced/dns_tunnels/) for more details.
+
 #### 2.0.5
 
 * Add per-group routing profiles **1**
