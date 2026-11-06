@@ -1485,7 +1485,9 @@ class OpenVpn : Outbound("openvpn") {
                 else redirect_private = true
                 for (i in 1 until args.size) {
                     val flag = args[i].lowercase()
-                    if (flag == "block-local" || flag == "bypass-dhcp" || flag == "bypass-dns") {
+                    // Host-route exceptions for the DHCP and DNS servers; Throne routes per connection, so they never apply.
+                    if (flag == "bypass-dhcp" || flag == "bypass-dns") continue
+                    if (flag == "block-local") {
                         notes.add(vtr(R.string.validation_ovpn_note_redirect_flag, flag))
                         continue
                     }

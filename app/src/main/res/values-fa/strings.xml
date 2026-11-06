@@ -2136,7 +2136,6 @@
     <string name="validation_tls_pin_hex">هر pin باید یک SHA-256 به‌صورت هگزادسیمال باشد (64 کاراکتر، دونقطه مجاز است).</string>
     <string name="validation_tls_cipher_insecure">sing-box این مجموعه را نمی‌پذیرد چون Go آن را ناامن می‌داند (CBC-SHA256، RC4، 3DES و تبادل کلید RSA)؛ فقط پروفایل‌های VLESS که روی Xray اجرا می‌شوند می‌توانند از آن استفاده کنند.</string>
     <string name="validation_tls_cipher_unknown">cipher suite ناشناخته. از نام‌های Go استفاده کنید، مثلاً TLS_AES_128_GCM_SHA256.</string>
-    <string name="validation_tls_reality_key_padding_removed">padding انتهایی = از کلید عمومی REALITY حذف شد.</string>
     <string name="validation_tls_fingerprint_unknown">اثر انگشت ناشناخته \"%1$s\". از chrome، firefox، safari، ios، android، edge، 360، qq، random، randomized یا unsafe استفاده کنید.</string>
     <string name="validation_tls_version_order">حداقل نسخه TLS بالاتر از حداکثر آن است.</string>
     <string name="validation_tls_reality_key_required">REALITY به کلید عمومی سرور نیاز دارد (43 کاراکتر، همان‌طور که xray x25519 چاپ می‌کند).</string>
@@ -2167,7 +2166,6 @@
     <string name="validation_quic_initial_packet_size">باید 0 (پیش‌فرض) یا از 1200 تا 1452 باشد.</string>
     <string name="validation_dial_unmodelled">این گزینه‌های dial پشتیبانی نمی‌شوند و نادیده گرفته شدند: %1$s.</string>
     <string name="validation_dial_detour">برای رسیدن به این سرور از طریق سرور دیگر، به‌جای detour یک پروفایل زنجیره بسازید.</string>
-    <string name="validation_dial_domain_resolver">Throne حل‌کننده نام سرورها را خودش انتخاب می‌کند.</string>
     <string name="validation_xray_download_network">بخش دانلود هم باید از XHTTP استفاده کند: \"network\": \"xhttp\" را بنویسید.</string>
     <string name="validation_xray_download_address">آدرس سرور دانلود را اضافه کنید، مثلاً \"address\": \"dl.example.com\".</string>
     <string name="validation_xray_download_port">باید یک شماره پورت از 1 تا 65535 باشد که بدون نقل‌قول نوشته می‌شود، مثلاً \"port\": 443.</string>
@@ -2250,7 +2248,6 @@
     <string name="validation_hysteria_clash_bandwidth">پهنای باند به شکل 100 Mbps یا 50 MB/s نیست، بنابراین نادیده گرفته شد.</string>
     <string name="validation_hysteria_transport">فقط پروتکل udp پشتیبانی می‌شود، بنابراین این سرور قابل دسترسی نیست.</string>
     <string name="validation_hysteria_pin_format">pin گواهی باید یک هش SHA-256 به‌صورت hex (64 کاراکتر) یا base64 (44 کاراکتر) باشد.</string>
-    <string name="validation_hysteria_pin_leaf">فقط گواهی خود سرور با این pin مقایسه می‌شود؛ اگر هش یک گواهی میانی یا ریشه باشد، اتصال شکست می‌خورد.</string>
     <string name="validation_hysteria_json_speed">سرعت به شکل 100 Mbps یا 12 MBps نیست، بنابراین نادیده گرفته شد.</string>
     <string name="validation_tuic_v4">UUID وجود ندارد. TUIC v4 (احراز هویت با توکن) پشتیبانی نمی‌شود؛ فقط سرورهای TUIC v5 کار می‌کنند.</string>
     <string name="validation_masque_key">باید کلید base64 حاصل از ثبت WARP باشد (base64 استاندارد با padding از نوع =).</string>
@@ -2269,7 +2266,6 @@
         <item quantity="one">پیوند %1$d آدرس سرور دیگر هم دارد؛ فقط اولین آدرس درون‌ریزی شد.</item>
         <item quantity="other">پیوند %1$d آدرس سرور دیگر هم دارد؛ فقط اولین آدرس درون‌ریزی شد.</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS از TCP Fast Open پشتیبانی نمی‌کند، بنابراین خاموش شد.</string>
     <string name="validation_mieru_port_range_bounds">پورت‌ها باید از 1 تا 65535 باشند.</string>
     <string name="validation_mieru_port_range_order">ابتدای محدوده بعد از انتهای آن است؛ آن را به‌صورت %1$s-%2$s بنویسید.</string>
     <string name="validation_mieru_traffic_pattern_padding">padding انتهایی = وجود ندارد؛ کل الگو را کپی کنید.</string>
@@ -2291,7 +2287,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; به تعداد زوجی رقم hex نیاز دارد، مثلاً &lt;b 0x1a2b&gt;.</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; به تعداد صحیحی بایت نیاز دارد، مثلاً &lt;%1$s 16&gt;.</string>
     <string name="validation_wg_signature_unknown">تگ ناشناخته &lt;%1$s&gt;. از &lt;b 0x...&gt;، &lt;r N&gt;، &lt;rc N&gt;، &lt;rd N&gt;، &lt;dz N&gt;، &lt;t&gt;، &lt;d&gt; یا &lt;ds&gt; استفاده کنید.</string>
-    <string name="validation_wg_dns_ignored">نادیده گرفته شد؛ Throne نام‌ها را با تنظیمات DNS خودش حل می‌کند.</string>
     <string name="validation_wg_unknown_setting">تنظیم ناشناخته، نادیده گرفته شد.</string>
     <string name="validation_wg_peer_sections">فقط آخرین بخش از %1$s بخش [Peer] استفاده می‌شود.</string>
     <string name="validation_wg_allowed_ips_ignored">نادیده گرفته شد؛ Throne تمام ترافیک این پروفایل را از تونل عبور می‌دهد.</string>
@@ -2496,7 +2491,6 @@
     <string name="validation_slipnet_type">این نوع نمایهٔ SlipNet پشتیبانی نمی‌شود.</string>
     <string name="validation_slipnet_encrypted">پیوندهای رمزگذاری‌شدهٔ SlipNet خوانده نمی‌شوند: نمایه را بدون رمزگذاری از SlipNet صادر کنید.</string>
     <string name="validation_masterdns_method_id">روش رمزگذاری ناشناخته است: عددی از 0 تا 5 به کار ببرید.</string>
-    <string name="validation_masterdns_socks_credentials">نام کاربری و کلمه عبور SOCKS فقط از یک شنوندهٔ محلی محافظت می‌کنند که این نمایه آن را باز نمی‌کند؛ نادیده گرفته شدند.</string>
     <string name="validation_masterdns_backend">MasterDNS فقط SOCKS یا یک سرویس سفارشی را حمل می‌کند.</string>
     <string name="validation_masterdns_proxy_link">پیوند، پروکسی‌ای برای اجرا روی تونل هم دارد؛ آن پروکسی را جداگانه وارد کنید و به‌صورت زنجیره‌ای از طریق این نمایه وصلش کنید.</string>
     <string name="validation_masterdns_format">این قالب پیوند MasterDNS پشتیبانی نمی‌شود.</string>

@@ -2182,7 +2182,6 @@
     <string name="validation_tls_pin_hex">Каждый пин должен быть SHA-256 в шестнадцатеричном виде (64 символа, двоеточия допускаются).</string>
     <string name="validation_tls_cipher_insecure">sing-box отклоняет этот набор шифров, так как Go считает его небезопасным (CBC-SHA256, RC4, 3DES и обмен ключами RSA); использовать его могут только профили VLESS на Xray.</string>
     <string name="validation_tls_cipher_unknown">Неизвестный набор шифров. Используйте имена Go, например TLS_AES_128_GCM_SHA256.</string>
-    <string name="validation_tls_reality_key_padding_removed">Завершающее заполнение = удалено из открытого ключа REALITY.</string>
     <string name="validation_tls_fingerprint_unknown">Неизвестный отпечаток «%1$s». Используйте chrome, firefox, safari, ios, android, edge, 360, qq, random, randomized или unsafe.</string>
     <string name="validation_tls_version_order">Минимальная версия TLS выше максимальной.</string>
     <string name="validation_tls_reality_key_required">REALITY требует открытый ключ сервера (43 символа, как выводит xray x25519).</string>
@@ -2213,7 +2212,6 @@
     <string name="validation_quic_initial_packet_size">Должно быть 0 (по умолчанию) или от 1200 до 1452.</string>
     <string name="validation_dial_unmodelled">Эти параметры подключения не поддерживаются и проигнорированы: %1$s.</string>
     <string name="validation_dial_detour">Чтобы подключаться к этому серверу через другой, создайте профиль цепочки вместо detour.</string>
-    <string name="validation_dial_domain_resolver">Throne сам выбирает резолвер для имён серверов.</string>
     <string name="validation_xray_download_network">Ветка загрузки тоже должна использовать XHTTP: запишите \"network\": \"xhttp\".</string>
     <string name="validation_xray_download_address">Добавьте адрес сервера загрузки, например \"address\": \"dl.example.com\".</string>
     <string name="validation_xray_download_port">Должен быть номер порта от 1 до 65535, записанный без кавычек, например \"port\": 443.</string>
@@ -2296,7 +2294,6 @@
     <string name="validation_hysteria_clash_bandwidth">Это не пропускная способность вроде 100 Mbps или 50 MB/s, поэтому значение проигнорировано.</string>
     <string name="validation_hysteria_transport">Поддерживается только протокол udp, поэтому этот сервер недоступен.</string>
     <string name="validation_hysteria_pin_format">Пин сертификата должен быть хэшем SHA-256 в hex (64 символа) или base64 (44 символа).</string>
-    <string name="validation_hysteria_pin_leaf">С этим пином сверяется только собственный сертификат сервера; если это хэш промежуточного или корневого сертификата, подключение не удастся.</string>
     <string name="validation_hysteria_json_speed">Это не скорость вроде 100 Mbps или 12 MBps, поэтому значение проигнорировано.</string>
     <string name="validation_tuic_v4">Отсутствует UUID. TUIC v4 (аутентификация по токену) не поддерживается; работают только серверы TUIC v5.</string>
     <string name="validation_masque_key">Должен быть ключ в base64 из регистрации WARP (стандартный base64 с заполнением =).</string>
@@ -2317,7 +2314,6 @@
         <item quantity="many">В ссылке указано ещё %1$d адресов сервера; импортирован только первый.</item>
         <item quantity="other">В ссылке указано ещё %1$d адреса сервера; импортирован только первый.</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS не поддерживает TCP Fast Open, поэтому он выключен.</string>
     <string name="validation_mieru_port_range_bounds">Порты должны быть от 1 до 65535.</string>
     <string name="validation_mieru_port_range_order">Диапазон начинается после своего конца; запишите его как %1$s-%2$s.</string>
     <string name="validation_mieru_traffic_pattern_padding">В конце отсутствует заполнение =; скопируйте шаблон целиком.</string>
@@ -2339,7 +2335,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; требует чётное число шестнадцатеричных цифр, например &lt;b 0x1a2b&gt;.</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; требует целое число байт, например &lt;%1$s 16&gt;.</string>
     <string name="validation_wg_signature_unknown">Неизвестный тег &lt;%1$s&gt;. Используйте &lt;b 0x...&gt;, &lt;r N&gt;, &lt;rc N&gt;, &lt;rd N&gt;, &lt;dz N&gt;, &lt;t&gt;, &lt;d&gt; или &lt;ds&gt;.</string>
-    <string name="validation_wg_dns_ignored">Игнорируется; Throne разрешает имена по собственным настройкам DNS.</string>
     <string name="validation_wg_unknown_setting">Неизвестная настройка, игнорируется.</string>
     <string name="validation_wg_peer_sections">Используется только последний из %1$s разделов [Peer].</string>
     <string name="validation_wg_allowed_ips_ignored">Игнорируется; Throne направляет весь трафик этого профиля через туннель.</string>
@@ -2544,7 +2539,6 @@
     <string name="validation_slipnet_type">Этот тип профиля SlipNet не поддерживается.</string>
     <string name="validation_slipnet_encrypted">Зашифрованные ссылки SlipNet прочитать нельзя: экспортируйте профиль из SlipNet без шифрования.</string>
     <string name="validation_masterdns_method_id">Неизвестный метод шифрования: используйте число от 0 до 5.</string>
-    <string name="validation_masterdns_socks_credentials">Имя пользователя и пароль SOCKS защищают только локальный слушатель, который этот профиль не открывает; они проигнорированы.</string>
     <string name="validation_masterdns_backend">MasterDNS переносит только SOCKS или пользовательский сервис.</string>
     <string name="validation_masterdns_proxy_link">Ссылка также содержит прокси для работы через туннель; импортируйте этот прокси отдельно и подключите его цепочкой через этот профиль.</string>
     <string name="validation_masterdns_format">Этот формат ссылки MasterDNS не поддерживается.</string>

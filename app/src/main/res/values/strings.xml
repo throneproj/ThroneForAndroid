@@ -2334,7 +2334,6 @@
     <string name="validation_tls_pin_hex">Each pin must be a SHA-256 in hexadecimal (64 characters, colons allowed).</string>
     <string name="validation_tls_cipher_insecure">sing-box refuses this suite because Go lists it as insecure (CBC-SHA256, RC4, 3DES and RSA key exchange); only VLESS profiles running on Xray can use it.</string>
     <string name="validation_tls_cipher_unknown">Unknown cipher suite. Use Go\'s names, for example TLS_AES_128_GCM_SHA256.</string>
-    <string name="validation_tls_reality_key_padding_removed">The trailing = padding was removed from the REALITY public key.</string>
     <string name="validation_tls_fingerprint_unknown">Unknown fingerprint \"%1$s\". Use chrome, firefox, safari, ios, android, edge, 360, qq, random, randomized or unsafe.</string>
     <string name="validation_tls_version_order">The minimum TLS version is above the maximum.</string>
     <string name="validation_tls_reality_key_required">REALITY needs the server\'s public key (43 characters, as printed by xray x25519).</string>
@@ -2365,7 +2364,6 @@
     <string name="validation_quic_initial_packet_size">Must be 0 (the default) or from 1200 to 1452.</string>
     <string name="validation_dial_unmodelled">These dial options are not supported and were ignored: %1$s.</string>
     <string name="validation_dial_detour">To reach this server through another one, build a chain profile instead of a detour.</string>
-    <string name="validation_dial_domain_resolver">Throne picks the resolver for server names itself.</string>
     <string name="validation_xray_download_network">The download leg must use XHTTP too: write \"network\": \"xhttp\".</string>
     <string name="validation_xray_download_address">Add the download server\'s address, for example \"address\": \"dl.example.com\".</string>
     <string name="validation_xray_download_port">Must be a port number from 1 to 65535, written without quotes, for example \"port\": 443.</string>
@@ -2448,7 +2446,6 @@
     <string name="validation_hysteria_clash_bandwidth">Not a bandwidth such as 100 Mbps or 50 MB/s, so it was ignored.</string>
     <string name="validation_hysteria_transport">Only the udp protocol is supported, so this server cannot be reached.</string>
     <string name="validation_hysteria_pin_format">The certificate pin must be a SHA-256 hash in hex (64 characters) or base64 (44 characters).</string>
-    <string name="validation_hysteria_pin_leaf">Only the server\'s own certificate is checked against this pin; if it is the hash of an intermediate or root certificate, the connection will fail.</string>
     <string name="validation_hysteria_json_speed">Not a speed such as 100 Mbps or 12 MBps, so it was ignored.</string>
     <string name="validation_tuic_v4">Missing UUID. TUIC v4 (token authentication) is not supported; only TUIC v5 servers work.</string>
     <string name="validation_masque_key">Must be the base64 key from WARP registration (standard base64 with = padding).</string>
@@ -2467,7 +2464,6 @@
         <item quantity="one">The link lists %1$d more server address; only the first one was imported.</item>
         <item quantity="other">The link lists %1$d more server addresses; only the first one was imported.</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS does not support TCP Fast Open, so it was turned off.</string>
     <string name="validation_mieru_port_range_bounds">Ports must be from 1 to 65535.</string>
     <string name="validation_mieru_port_range_order">The range starts after it ends; write it as %1$s-%2$s.</string>
     <string name="validation_mieru_traffic_pattern_padding">The = padding at the end is missing; copy the whole pattern.</string>
@@ -2489,7 +2485,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; needs an even number of hex digits, for example &lt;b 0x1a2b&gt;.</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; needs a whole number of bytes, for example &lt;%1$s 16&gt;.</string>
     <string name="validation_wg_signature_unknown">Unknown tag &lt;%1$s&gt;. Use &lt;b 0x...&gt;, &lt;r N&gt;, &lt;rc N&gt;, &lt;rd N&gt;, &lt;dz N&gt;, &lt;t&gt;, &lt;d&gt; or &lt;ds&gt;.</string>
-    <string name="validation_wg_dns_ignored">Ignored; Throne resolves names with its own DNS settings.</string>
     <string name="validation_wg_unknown_setting">Unknown setting, ignored.</string>
     <string name="validation_wg_peer_sections">Only the last of the %1$s [Peer] sections is used.</string>
     <string name="validation_wg_allowed_ips_ignored">Ignored; Throne sends all traffic of this profile through the tunnel.</string>
@@ -2694,7 +2689,6 @@
     <string name="validation_slipnet_type">This SlipNet profile type is not supported.</string>
     <string name="validation_slipnet_encrypted">Encrypted SlipNet links cannot be read: export the profile from SlipNet without encryption.</string>
     <string name="validation_masterdns_method_id">Unknown encryption method: use a number from 0 to 5.</string>
-    <string name="validation_masterdns_socks_credentials">The SOCKS user name and password only guard a local listener, which this profile does not open; they were ignored.</string>
     <string name="validation_masterdns_backend">MasterDNS only carries a SOCKS or a custom service.</string>
     <string name="validation_masterdns_proxy_link">The link also carries a proxy to run over the tunnel; import that proxy separately and chain it over this profile.</string>
     <string name="validation_masterdns_format">This MasterDNS link format is not supported.</string>

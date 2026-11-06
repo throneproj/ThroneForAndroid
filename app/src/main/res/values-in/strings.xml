@@ -2108,7 +2108,6 @@
     <string name="validation_tls_pin_hex">Setiap pin harus berupa SHA-256 heksadesimal (64 karakter, titik dua diperbolehkan).</string>
     <string name="validation_tls_cipher_insecure">sing-box menolak suite ini karena Go mencantumkannya sebagai tidak aman (CBC-SHA256, RC4, 3DES, dan pertukaran kunci RSA); hanya profil VLESS yang berjalan di Xray yang dapat menggunakannya.</string>
     <string name="validation_tls_cipher_unknown">Suite cipher tidak dikenal. Gunakan nama Go, mis. TLS_AES_128_GCM_SHA256.</string>
-    <string name="validation_tls_reality_key_padding_removed">Padding = di akhir dihapus dari kunci publik REALITY.</string>
     <string name="validation_tls_fingerprint_unknown">Sidik jari \"%1$s\" tidak dikenal. Gunakan chrome, firefox, safari, ios, android, edge, 360, qq, random, randomized atau unsafe.</string>
     <string name="validation_tls_version_order">Versi TLS minimum lebih tinggi dari maksimum.</string>
     <string name="validation_tls_reality_key_required">REALITY membutuhkan kunci publik server (43 karakter, seperti yang dicetak xray x25519).</string>
@@ -2139,7 +2138,6 @@
     <string name="validation_quic_initial_packet_size">Harus 0 (default) atau dari 1200 hingga 1452.</string>
     <string name="validation_dial_unmodelled">Opsi dial ini tidak didukung dan diabaikan: %1$s.</string>
     <string name="validation_dial_detour">Untuk menjangkau server ini melalui server lain, buat profil rantai, bukan detour.</string>
-    <string name="validation_dial_domain_resolver">Throne memilih resolver untuk nama server sendiri.</string>
     <string name="validation_xray_download_network">Bagian unduhan juga harus menggunakan XHTTP: tulis \"network\": \"xhttp\".</string>
     <string name="validation_xray_download_address">Tambahkan alamat server unduhan, mis. \"address\": \"dl.example.com\".</string>
     <string name="validation_xray_download_port">Harus berupa nomor port dari 1 hingga 65535, ditulis tanpa tanda kutip, mis. \"port\": 443.</string>
@@ -2222,7 +2220,6 @@
     <string name="validation_hysteria_clash_bandwidth">Bukan bandwidth seperti 100 Mbps atau 50 MB/s, jadi diabaikan.</string>
     <string name="validation_hysteria_transport">Hanya protokol udp yang didukung, jadi server ini tidak dapat dijangkau.</string>
     <string name="validation_hysteria_pin_format">Pin sertifikat harus berupa hash SHA-256 dalam heks (64 karakter) atau base64 (44 karakter).</string>
-    <string name="validation_hysteria_pin_leaf">Hanya sertifikat milik server itu sendiri yang diperiksa terhadap pin ini; jika itu hash sertifikat perantara atau root, koneksi akan gagal.</string>
     <string name="validation_hysteria_json_speed">Bukan kecepatan seperti 100 Mbps atau 12 MBps, jadi diabaikan.</string>
     <string name="validation_tuic_v4">UUID tidak ada. TUIC v4 (autentikasi token) tidak didukung; hanya server TUIC v5 yang berfungsi.</string>
     <string name="validation_masque_key">Harus berupa kunci base64 dari pendaftaran WARP (base64 standar dengan padding =).</string>
@@ -2240,7 +2237,6 @@
     <plurals name="validation_trusttunnel_extra_addresses">
         <item quantity="other">Tautan mencantumkan %1$d alamat server lagi; hanya yang pertama yang diimpor.</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS tidak mendukung TCP Fast Open, jadi dimatikan.</string>
     <string name="validation_mieru_port_range_bounds">Port harus dari 1 hingga 65535.</string>
     <string name="validation_mieru_port_range_order">Rentang dimulai setelah berakhir; tulis sebagai %1$s-%2$s.</string>
     <string name="validation_mieru_traffic_pattern_padding">Padding = di akhir hilang; salin seluruh pola.</string>
@@ -2262,7 +2258,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; membutuhkan jumlah digit heks yang genap, mis. &lt;b 0x1a2b&gt;.</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; membutuhkan bilangan bulat byte, mis. &lt;%1$s 16&gt;.</string>
     <string name="validation_wg_signature_unknown">Tag &lt;%1$s&gt; tidak dikenal. Gunakan &lt;b 0x...&gt;, &lt;r N&gt;, &lt;rc N&gt;, &lt;rd N&gt;, &lt;dz N&gt;, &lt;t&gt;, &lt;d&gt; atau &lt;ds&gt;.</string>
-    <string name="validation_wg_dns_ignored">Diabaikan; Throne menyelesaikan nama dengan pengaturan DNS-nya sendiri.</string>
     <string name="validation_wg_unknown_setting">Pengaturan tidak dikenal, diabaikan.</string>
     <string name="validation_wg_peer_sections">Hanya bagian [Peer] terakhir dari %1$s yang digunakan.</string>
     <string name="validation_wg_allowed_ips_ignored">Diabaikan; Throne mengirim semua lalu lintas profil ini melalui tunnel.</string>
@@ -2467,7 +2462,6 @@
     <string name="validation_slipnet_type">Jenis profil SlipNet ini tidak didukung.</string>
     <string name="validation_slipnet_encrypted">Tautan SlipNet terenkripsi tidak dapat dibaca: ekspor profil dari SlipNet tanpa enkripsi.</string>
     <string name="validation_masterdns_method_id">Metode enkripsi tidak dikenal: gunakan angka dari 0 hingga 5.</string>
-    <string name="validation_masterdns_socks_credentials">Nama pengguna dan kata sandi SOCKS hanya menjaga listener lokal, yang tidak dibuka profil ini; keduanya diabaikan.</string>
     <string name="validation_masterdns_backend">MasterDNS hanya membawa SOCKS atau layanan kustom.</string>
     <string name="validation_masterdns_proxy_link">Tautan juga membawa proksi untuk dijalankan melalui tunnel; impor proksi itu secara terpisah dan rantaikan di atas profil ini.</string>
     <string name="validation_masterdns_format">Format tautan MasterDNS ini tidak didukung.</string>

@@ -2098,7 +2098,6 @@
     <string name="validation_tls_pin_hex">每个固定值必须是十六进制的 SHA-256（64 个字符，可带冒号）。</string>
     <string name="validation_tls_cipher_insecure">sing-box 拒绝此套件，因为 Go 将其列为不安全（CBC-SHA256、RC4、3DES 和 RSA 密钥交换）；只有运行在 Xray 上的 VLESS 配置可以使用它。</string>
     <string name="validation_tls_cipher_unknown">未知的密码套件。请使用 Go 的名称，例如 TLS_AES_128_GCM_SHA256。</string>
-    <string name="validation_tls_reality_key_padding_removed">已移除 REALITY 公钥末尾的 = 填充。</string>
     <string name="validation_tls_fingerprint_unknown">未知指纹 \"%1$s\"。请使用 chrome、firefox、safari、ios、android、edge、360、qq、random、randomized 或 unsafe。</string>
     <string name="validation_tls_version_order">最低 TLS 版本高于最高版本。</string>
     <string name="validation_tls_reality_key_required">REALITY 需要服务器的公钥（43 个字符，即 xray x25519 输出的内容）。</string>
@@ -2129,7 +2128,6 @@
     <string name="validation_quic_initial_packet_size">必须为 0（默认值）或在 1200 到 1452 之间。</string>
     <string name="validation_dial_unmodelled">不支持这些拨号选项，已被忽略：%1$s。</string>
     <string name="validation_dial_detour">如需通过另一台服务器连接此服务器，请创建链式代理配置，而不是使用 detour。</string>
-    <string name="validation_dial_domain_resolver">Throne 会自行为服务器名称选择解析器。</string>
     <string name="validation_xray_download_network">下载链路也必须使用 XHTTP：请写成 \"network\": \"xhttp\"。</string>
     <string name="validation_xray_download_address">请添加下载服务器的地址，例如 \"address\": \"dl.example.com\"。</string>
     <string name="validation_xray_download_port">必须是 1 到 65535 的端口号，不加引号，例如 \"port\": 443。</string>
@@ -2212,7 +2210,6 @@
     <string name="validation_hysteria_clash_bandwidth">不是 100 Mbps 或 50 MB/s 这样的带宽，因此已被忽略。</string>
     <string name="validation_hysteria_transport">仅支持 udp 协议，因此无法连接此服务器。</string>
     <string name="validation_hysteria_pin_format">证书固定值必须是十六进制（64 个字符）或 base64（44 个字符）的 SHA-256 哈希。</string>
-    <string name="validation_hysteria_pin_leaf">只会用此固定值校验服务器自身的证书；如果它是中间证书或根证书的哈希，连接将失败。</string>
     <string name="validation_hysteria_json_speed">不是 100 Mbps 或 12 MBps 这样的速度，因此已被忽略。</string>
     <string name="validation_tuic_v4">缺少 UUID。不支持 TUIC v4（令牌认证）；只有 TUIC v5 服务器可用。</string>
     <string name="validation_masque_key">必须是 WARP 注册得到的 base64 密钥（带 = 填充的标准 base64）。</string>
@@ -2230,7 +2227,6 @@
     <plurals name="validation_trusttunnel_extra_addresses">
         <item quantity="other">链接中还列出了 %1$d 个服务器地址；仅导入了第一个。</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS 不支持 TCP Fast Open，因此已将其关闭。</string>
     <string name="validation_mieru_port_range_bounds">端口必须在 1 到 65535 之间。</string>
     <string name="validation_mieru_port_range_order">范围的起点大于终点；请写成 %1$s-%2$s。</string>
     <string name="validation_mieru_traffic_pattern_padding">末尾缺少 = 填充；请复制完整的模式。</string>
@@ -2252,7 +2248,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; 需要偶数个十六进制数字，例如 &lt;b 0x1a2b&gt;。</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; 需要整数字节数，例如 &lt;%1$s 16&gt;。</string>
     <string name="validation_wg_signature_unknown">未知标签 &lt;%1$s&gt;。请使用 &lt;b 0x...&gt;、&lt;r N&gt;、&lt;rc N&gt;、&lt;rd N&gt;、&lt;dz N&gt;、&lt;t&gt;、&lt;d&gt; 或 &lt;ds&gt;。</string>
-    <string name="validation_wg_dns_ignored">已忽略；Throne 使用自己的 DNS 设置解析域名。</string>
     <string name="validation_wg_unknown_setting">未知设置，已忽略。</string>
     <string name="validation_wg_peer_sections">在 %1$s 个 [Peer] 部分中，只使用最后一个。</string>
     <string name="validation_wg_allowed_ips_ignored">已忽略；Throne 会让此配置的所有流量都经过隧道。</string>
@@ -2457,7 +2452,6 @@
     <string name="validation_slipnet_type">不支持这种 SlipNet 配置类型。</string>
     <string name="validation_slipnet_encrypted">无法读取加密的 SlipNet 链接：请在 SlipNet 中导出不加密的配置。</string>
     <string name="validation_masterdns_method_id">未知的加密方式：请使用 0 到 5 之间的数字。</string>
-    <string name="validation_masterdns_socks_credentials">SOCKS 用户名和密码只用于保护本地监听器，而此配置不会开启它；已忽略。</string>
     <string name="validation_masterdns_backend">MasterDNS 只能承载 SOCKS 或自定义服务。</string>
     <string name="validation_masterdns_proxy_link">该链接还包含一个要在隧道上运行的代理；请单独导入该代理，并以链式代理方式将其接在此配置之上。</string>
     <string name="validation_masterdns_format">不支持这种 MasterDNS 链接格式。</string>

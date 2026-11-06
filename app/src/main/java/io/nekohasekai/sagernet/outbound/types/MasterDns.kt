@@ -318,12 +318,8 @@ class MasterDns : Outbound("masterdns") {
         encryption_key = parsed.params["mkey"].orEmpty()
         if (!readMethod(parsed.params["encryption"].orEmpty())) return false
         when (parsed.backend) {
-            "socks" -> {
-                mode = "socks5"
-                if (parsed.params["user"].orEmpty().isNotEmpty() || parsed.params["password"].orEmpty().isNotEmpty()) {
-                    ParseDiag.warn("mode", vtr(R.string.validation_masterdns_socks_credentials))
-                }
-            }
+            // Its user name and password guard only a local listener, which this profile does not open.
+            "socks" -> mode = "socks5"
             "custom" -> mode = "tcp"
             "" -> {
                 ParseDiag.error("mode", vtr(R.string.validation_dns_tunnel_no_backend))

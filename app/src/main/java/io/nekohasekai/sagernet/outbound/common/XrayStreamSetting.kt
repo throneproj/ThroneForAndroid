@@ -1356,6 +1356,93 @@ class XrayXhttp {
             "maxConcurrency", "maxConnections", "cMaxReuseTimes", "hMaxRequestTimes", "hMaxReusableSecs", "hKeepAlivePeriod",
         )
 
+        private val EXTRA_KEY_FOLDS = KNOWN_EXTRA_KEYS.associateBy(::foldKey)
+        private val XMUX_KEY_FOLDS = KNOWN_XMUX_KEYS.associateBy(::foldKey)
+
+        /** foldXHTTPKey (xrayStreamSetting.cpp). */
+        private fun foldKey(key: String): String = buildString {
+            for (c in key) if (c != '_' && c != '-') append(c.lowercaseChar())
+        }
+
+        /**
+         * canonicalXHTTPKeys (xrayStreamSetting.cpp): Go folds case, and sing-box forks write snake_case: every spelling
+         * becomes Xray's name, an exact one outranking a case-folded one, then an underscored one.
+         */
+        private fun canonicalKeys(obj: JsonObject, known: Map<String, String>): JsonObject {
+            val result = JsonObject()
+            val rank = HashMap<String, Int>()
+            for (key in obj.sortedKeys()) {
+                val match = known[foldKey(key)]
+                if (match == null) {
+                    result[key] = obj[key]
+                    continue
+                }
+                val r = if (key == match) 2 else if (key.equals(match, ignoreCase = true)) 1 else 0
+                if ((rank[match] ?: -1) > r) continue
+                rank[match] = r
+                result[match] = obj[key]
+            }
+            return result
+        }
+
+        /** parseRange (xrayStreamSetting.cpp): Xray reads a range as "a-b" or a number; sing-box forks also write {"from": a, "to": b}. */
+        private fun JsonObject.range(key: String): String {
+            if (!isObject(key)) return variantString(key)
+            val value = obj(key)
+            val from = value.variantString("from")
+            val to = value.variantString("to")
+            return if (from.isEmpty() || to.isEmpty() || from == to) from.ifEmpty { to } else "$from-$to"
+        }
+
+        /** parseBool (xrayStreamSetting.cpp): loose generators write 1 or "true", which Xray would refuse. */
+        private fun JsonObject.looseBool(key: String): Boolean = when (val value = this[key]) {
+            is Long -> value != 0L
+            is Double -> value != 0.0
+            is String -> value.trim().let { it.equals("true", ignoreCase = true) || it == "1" }
+            else -> bool(key)
+        }
+
+        /** pythonReprToJson (xrayStreamSetting.cpp): a Python dict repr (str() instead of json.dumps); quotes and True/False/None are rewritten outside strings only. */
+        private fun pythonReprToJson(text: String): String {
+            val out = StringBuilder(text.length)
+            var quote: Char? = null
+            var i = 0
+            while (i < text.length) {
+                val c = text[i]
+                if (quote != null) {
+                    if (c == '\\' && i + 1 < text.length) {
+                        val next = text[++i]
+                        if (next != '\'') out.append(c)
+                        out.append(next)
+                    } else if (c == quote) {
+                        out.append('"')
+                        quote = null
+                    } else {
+                        if (c == '"') out.append('\\')
+                        out.append(c)
+                    }
+                } else if (c == '\'' || c == '"') {
+                    quote = c
+                    out.append('"')
+                } else if (c.isLetter()) {
+                    var end = i
+                    while (end < text.length && (text[end].isLetterOrDigit() || text[end] == '_')) end++
+                    when (val word = text.substring(i, end)) {
+                        "True" -> out.append("true")
+                        "False" -> out.append("false")
+                        "None" -> out.append("null")
+                        else -> out.append(word)
+                    }
+                    i = end
+                    continue
+                } else {
+                    out.append(c)
+                }
+                i++
+            }
+            return out.toString()
+        }
+
         /** The Int32Range fields dropUnusableXHTTPValues (xrayStreamSetting.cpp) checks, by import field name. */
         private val INT32_RANGE_FIELDS: List<Pair<String, KMutableProperty1<XrayXhttp, String>>> = listOf(
             "sessionIDLength" to XrayXhttp::sessionIDLength,
@@ -1388,20 +1475,22 @@ class XrayXhttp {
     }
 
     /** parseXHTTPXmuxObject (xrayStreamSetting.cpp). */
-    private fun parseXmuxObject(obj: JsonObject) {
+    private fun parseXmuxObject(source: JsonObject) {
+        val obj = canonicalKeys(source, XMUX_KEY_FOLDS)
         for (key in obj.keys()) {
             if (key !in KNOWN_XMUX_KEYS) rawXmux[key] = JsonValues.deepCopy(obj[key]!!)
         }
-        if (obj.contains("maxConcurrency")) maxConcurrency = obj.variantString("maxConcurrency")
-        if (obj.contains("maxConnections")) maxConnections = obj.variantString("maxConnections")
-        if (obj.contains("cMaxReuseTimes")) cMaxReuseTimes = obj.variantString("cMaxReuseTimes")
-        if (obj.contains("hMaxRequestTimes")) hMaxRequestTimes = obj.variantString("hMaxRequestTimes")
-        if (obj.contains("hMaxReusableSecs")) hMaxReusableSecs = obj.variantString("hMaxReusableSecs")
+        if (obj.contains("maxConcurrency")) maxConcurrency = obj.range("maxConcurrency")
+        if (obj.contains("maxConnections")) maxConnections = obj.range("maxConnections")
+        if (obj.contains("cMaxReuseTimes")) cMaxReuseTimes = obj.range("cMaxReuseTimes")
+        if (obj.contains("hMaxRequestTimes")) hMaxRequestTimes = obj.range("hMaxRequestTimes")
+        if (obj.contains("hMaxReusableSecs")) hMaxReusableSecs = obj.range("hMaxReusableSecs")
         if (obj.contains("hKeepAlivePeriod")) hKeepAlivePeriod = obj.variantLong("hKeepAlivePeriod")
     }
 
     /** parseXHTTPExtraObject (xrayStreamSetting.cpp). */
-    private fun parseExtraObject(obj: JsonObject) {
+    private fun parseExtraObject(source: JsonObject) {
+        val obj = canonicalKeys(source, EXTRA_KEY_FOLDS)
         for (key in obj.keys()) {
             if (key !in KNOWN_EXTRA_KEYS) rawExtra[key] = JsonValues.deepCopy(obj[key]!!)
         }
@@ -1409,8 +1498,8 @@ class XrayXhttp {
             if (obj.isObject("headers")) headers = JsonValues.objectToPairList(obj.obj("headers"))
             else if (obj.isArray("headers")) headers = obj.array("headers").strings()
         }
-        if (obj.contains("xPaddingBytes")) xPaddingBytes = obj.variantString("xPaddingBytes")
-        if (obj.contains("xPaddingObfsMode")) xPaddingObfsMode = obj.bool("xPaddingObfsMode")
+        if (obj.contains("xPaddingBytes")) xPaddingBytes = obj.range("xPaddingBytes")
+        if (obj.contains("xPaddingObfsMode")) xPaddingObfsMode = obj.looseBool("xPaddingObfsMode")
         if (obj.contains("xPaddingKey")) xPaddingKey = obj.string("xPaddingKey")
         if (obj.contains("xPaddingHeader")) xPaddingHeader = obj.string("xPaddingHeader")
         if (obj.contains("xPaddingPlacement")) xPaddingPlacement = obj.string("xPaddingPlacement")
@@ -1422,18 +1511,18 @@ class XrayXhttp {
         if (obj.contains("sessionKey")) sessionIDKey = obj.string("sessionKey")
         if (obj.contains("sessionIDKey")) sessionIDKey = obj.string("sessionIDKey")
         if (obj.contains("sessionIDTable")) sessionIDTable = obj.string("sessionIDTable")
-        if (obj.contains("sessionIDLength")) sessionIDLength = obj.variantString("sessionIDLength")
+        if (obj.contains("sessionIDLength")) sessionIDLength = obj.range("sessionIDLength")
         if (obj.contains("seqPlacement")) seqPlacement = obj.string("seqPlacement")
         if (obj.contains("seqKey")) seqKey = obj.string("seqKey")
         if (obj.contains("uplinkDataPlacement")) uplinkDataPlacement = obj.string("uplinkDataPlacement")
         if (obj.contains("uplinkDataKey")) uplinkDataKey = obj.string("uplinkDataKey")
-        if (obj.contains("uplinkChunkSize")) uplinkChunkSize = obj.variantString("uplinkChunkSize")
-        if (obj.contains("noGRPCHeader")) noGRPCHeader = obj.bool("noGRPCHeader")
-        if (obj.contains("noSSEHeader")) noSSEHeader = obj.bool("noSSEHeader")
-        if (obj.contains("scMaxEachPostBytes")) scMaxEachPostBytes = obj.variantString("scMaxEachPostBytes")
-        if (obj.contains("scMinPostsIntervalMs")) scMinPostsIntervalMs = obj.variantString("scMinPostsIntervalMs")
+        if (obj.contains("uplinkChunkSize")) uplinkChunkSize = obj.range("uplinkChunkSize")
+        if (obj.contains("noGRPCHeader")) noGRPCHeader = obj.looseBool("noGRPCHeader")
+        if (obj.contains("noSSEHeader")) noSSEHeader = obj.looseBool("noSSEHeader")
+        if (obj.contains("scMaxEachPostBytes")) scMaxEachPostBytes = obj.range("scMaxEachPostBytes")
+        if (obj.contains("scMinPostsIntervalMs")) scMinPostsIntervalMs = obj.range("scMinPostsIntervalMs")
         if (obj.contains("scMaxBufferedPosts")) scMaxBufferedPosts = obj.variantLong("scMaxBufferedPosts")
-        if (obj.contains("scStreamUpServerSecs")) scStreamUpServerSecs = obj.variantString("scStreamUpServerSecs")
+        if (obj.contains("scStreamUpServerSecs")) scStreamUpServerSecs = obj.range("scStreamUpServerSecs")
         if (obj.contains("serverMaxHeaderBytes")) serverMaxHeaderBytes = obj.variantInt("serverMaxHeaderBytes")
         if (obj.contains("downloadSettings")) {
             if (obj.isObject("downloadSettings")) downloadSettings = obj.obj("downloadSettings").toCompact()
@@ -1450,6 +1539,16 @@ class XrayXhttp {
             if (!acceptOptional(field, check(value), value)) property.set(this, "")
         }
         if (!acceptOptional("mode", XrayChecks.xrayXHTTPMode(mode), mode)) mode = "auto"
+        // Xray refuses a Host header, which the host field outranks anyway.
+        var i = 0
+        while (i + 1 < headers.size) {
+            if (!headers[i].trim().equals("host", ignoreCase = true)) {
+                i += 2
+                continue
+            }
+            if (host.isEmpty()) host = Hosts.toAceHost(headers[i + 1].trim())
+            headers.subList(i, i + 2).clear()
+        }
         drop("xPaddingBytes", XrayXhttp::xPaddingBytes, XrayChecks::xrayXPaddingBytes)
         drop("xPaddingMethod", XrayXhttp::xPaddingMethod, XrayChecks::xrayPaddingMethod)
         drop("xPaddingPlacement", XrayXhttp::xPaddingPlacement, XrayChecks::xrayPaddingPlacement)
@@ -1459,10 +1558,10 @@ class XrayXhttp {
         for ((name, property) in INT32_RANGE_FIELDS) drop(name, property, XrayChecks::xrayInt32Range)
     }
 
-    /** xrayXHTTP::ParseExtraJson: Python dict repr ('key': True) is rewritten only when the JSON parse fails. */
+    /** xrayXHTTP::ParseExtraJson: a Python dict repr ('key': True) is rewritten only when the JSON parse fails. */
     fun parseExtraJson(text: String): Boolean {
         var obj = JsonInput.parseObject(text)
-        if (obj.isEmpty()) obj = JsonInput.parseObject(text.replace('\'', '"').replace("True", "true").replace("False", "false"))
+        if (obj.isEmpty()) obj = JsonInput.parseObject(pythonReprToJson(text))
         if (obj.isEmpty()) return false
         parseExtraObject(obj)
         return true
@@ -1478,8 +1577,9 @@ class XrayXhttp {
         if (q.has("path")) path = q.valueFully("path")
         if (q.has("mode")) mode = q.value("mode")
         if (q.has("extra")) {
-            val extra = q.valueFully("extra")
-            if (!parseExtraJson(extra) && !parseExtraJson(q.valueFormDecoded("extra"))) xrayWarnUnparsableExtra(extra)
+            // Header values such as a User-Agent make a space likelier than a literal '+'.
+            val readings = q.valueDecodings("extra", true)
+            if (readings.none { parseExtraJson(it) }) xrayWarnUnparsableExtra(readings.first())
         }
         if (q.has("headers")) headers = xrayLinkHeaders(q)
         if (q.has("x_padding_bytes")) xPaddingBytes = q.value("x_padding_bytes")
@@ -1529,11 +1629,34 @@ class XrayXhttp {
         host = opts.string("host")
         path = opts.string("path")
         mode = opts.string("mode").ifEmpty { "auto" }
+        headers = ArrayList()
+        for ((key, value) in opts.stringMap("headers")) {
+            headers.add(key)
+            headers.add(value)
+        }
+        noGRPCHeader = opts.bool("no-grpc-header")
+        xPaddingBytes = opts.string("x-padding-bytes")
         xPaddingObfsMode = opts.bool("x-padding-obfs-mode")
         xPaddingKey = opts.string("x-padding-key")
         xPaddingHeader = opts.string("x-padding-header")
         xPaddingPlacement = opts.string("x-padding-placement")
         xPaddingMethod = opts.string("x-padding-method")
+        uplinkHTTPMethod = opts.string("uplink-http-method")
+        // 3x-ui writes session-id-*, which mihomo ignores; mihomo's own names win whenever they hold a scalar.
+        fun session(name: String): String {
+            val own = "session-$name"
+            return if (opts.node.isString(own) || opts.string(own).isNotEmpty()) opts.string(own) else opts.string("session-id-$name")
+        }
+        sessionIDPlacement = session("placement")
+        sessionIDKey = session("key")
+        sessionIDTable = session("table")
+        sessionIDLength = session("length")
+        seqPlacement = opts.string("seq-placement")
+        seqKey = opts.string("seq-key")
+        uplinkDataPlacement = opts.string("uplink-data-placement")
+        uplinkDataKey = opts.string("uplink-data-key")
+        uplinkChunkSize = opts.string("uplink-chunk-size")
+        scMaxEachPostBytes = opts.string("sc-max-each-post-bytes")
         scMinPostsIntervalMs = opts.string("sc-min-posts-interval-ms")
         val reuse = opts.obj("reuse-settings")
         maxConcurrency = reuse.string("max-concurrency")
@@ -1543,8 +1666,9 @@ class XrayXhttp {
         hMaxReusableSecs = reuse.string("h-max-reusable-secs")
         val keepAlivePeriod = reuse.string("h-keep-alive-period")
         if (keepAlivePeriod.isNotEmpty()) hKeepAlivePeriod = QtStrings.toLong(keepAlivePeriod)
-        if (opts.present("download-settings")) downloadSettings = clashDownloadSettings(proxy).toCompact()
+        // Dropped first, so the download leg inherits only usable values.
         dropUnusableValues()
+        if (opts.present("download-settings")) downloadSettings = clashDownloadSettings(proxy, exportToJson().obj("extra")).toCompact()
         return true
     }
 
@@ -2029,10 +2153,13 @@ class XrayStreamSetting {
         val q = url.query
         if (q.has("fm") || q.has("finalmask")) {
             val key = if (q.has("fm")) "fm" else "finalmask"
-            var text = q.valueFully(key)
+            // Mask values are mostly base64 and hex, where a bare '+' is more likely literal than a space.
+            val readings = q.valueDecodings(key, false)
+            var text = readings.first()
             var parsed = JsonTree.parse(text)
-            if (!parsed.ok) {
-                text = q.valueFormDecoded(key)
+            for (reading in readings.drop(1)) {
+                if (parsed.ok) break
+                text = reading
                 parsed = JsonTree.parse(text)
             }
             when {
@@ -2445,8 +2572,9 @@ private class ClashWsOptions(proxy: ClashProxy) {
 }
 
 // buildDownloadSettingsObject (xrayStreamSetting.cpp): the Clash `download-settings` block as the Xray downloadSettings
-// object the profile stores as compact JSON. mihomo takes every unset value from the proxy itself.
-private fun clashDownloadSettings(proxy: ClashProxy): JsonObject {
+// object the profile stores as compact JSON. mihomo takes every unset value from the proxy itself, and its download leg
+// copies the whole upload XHTTP config, whose [extra] this starts from.
+private fun clashDownloadSettings(proxy: ClashProxy, extra: JsonObject): JsonObject {
     val opts = proxy.obj("xhttp-opts")
     val settings = opts.obj("download-settings")
     val obj = JsonObject()
@@ -2542,7 +2670,16 @@ private fun clashDownloadSettings(proxy: ClashProxy): JsonObject {
     val path = if (settings.present("path")) settings.string("path") else opts.string("path")
     if (path.isNotEmpty()) xhttp["path"] = path
     xhttp["mode"] = settings.string("mode").ifEmpty { "auto" }
-    val extra = JsonObject()
+    extra.remove("downloadSettings")
+    if (settings.present("headers")) {
+        val headers = JsonObject()
+        for ((key, value) in settings.stringMap("headers")) {
+            // Xray refuses a Host header; it is the host field.
+            if (!key.equals("host", ignoreCase = true)) headers[key] = value
+            else if (!xhttp.contains("host") && value.isNotEmpty()) xhttp["host"] = Hosts.toAceHost(value)
+        }
+        if (headers.isEmpty()) extra.remove("headers") else extra["headers"] = headers
+    }
     if (settings.bool("x-padding-obfs-mode")) extra["xPaddingObfsMode"] = true
     for ((key, jsonKey) in listOf(
         "x-padding-key" to "xPaddingKey", "x-padding-header" to "xPaddingHeader",

@@ -15,12 +15,8 @@ import io.nekohasekai.sagernet.validation.acceptOptional
 import io.nekohasekai.sagernet.validation.addIssue
 import io.nekohasekai.sagernet.validation.vtr
 
-/** sing-box DialerOptions keys (option/outbound.go) that Throne has no field for. */
-private val UNMODELLED_DIAL_KEYS = listOf(
-    "detour", "bind_address_no_port", "protect_path", "routing_mark", "netns", "disable_tcp_keep_alive", "tcp_keep_alive",
-    "tcp_keep_alive_interval", "domain_resolver", "network_strategy", "network_type", "fallback_network_type",
-    "fallback_delay", "tls_fragment", "domain_strategy",
-)
+/** The DialerOptions keys Throne has no field for that change how the server is reached; it sets the local knobs itself. */
+private val UNMODELLED_DIAL_KEYS = listOf("detour", "tls_fragment")
 
 /** dialFieldsRule (DialFields.cpp). */
 private fun dialFieldsRule(key: String, value: String): String = when {
@@ -35,7 +31,6 @@ private fun dialFieldsReportUnmodelled(obj: JsonObject) {
     if (dropped.isEmpty()) return
     var message = vtr(R.string.validation_dial_unmodelled, dropped.joinToString(", "))
     if ("detour" in dropped) message += " " + vtr(R.string.validation_dial_detour)
-    if ("domain_resolver" in dropped) message += " " + vtr(R.string.validation_dial_domain_resolver)
     ParseDiag.warn("", message)
 }
 

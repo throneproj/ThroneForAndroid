@@ -2118,7 +2118,6 @@
     <string name="validation_tls_pin_hex">Her pin, onaltılık biçimde bir SHA-256 olmalıdır (64 karakter, iki nokta üst üste kullanılabilir).</string>
     <string name="validation_tls_cipher_insecure">sing-box bu paketi reddeder çünkü Go onu güvensiz olarak listeler (CBC-SHA256, RC4, 3DES ve RSA anahtar değişimi); yalnızca Xray üzerinde çalışan VLESS profilleri kullanabilir.</string>
     <string name="validation_tls_cipher_unknown">Bilinmeyen şifre paketi. Go\'nun adlarını kullanın, örneğin TLS_AES_128_GCM_SHA256.</string>
-    <string name="validation_tls_reality_key_padding_removed">REALITY açık anahtarının sonundaki = dolgusu kaldırıldı.</string>
     <string name="validation_tls_fingerprint_unknown">Bilinmeyen parmak izi \"%1$s\". chrome, firefox, safari, ios, android, edge, 360, qq, random, randomized veya unsafe kullanın.</string>
     <string name="validation_tls_version_order">En düşük TLS sürümü en yüksek sürümün üzerinde.</string>
     <string name="validation_tls_reality_key_required">REALITY, sunucunun açık anahtarını gerektirir (xray x25519 çıktısındaki gibi 43 karakter).</string>
@@ -2149,7 +2148,6 @@
     <string name="validation_quic_initial_packet_size">0 (varsayılan) veya 1200 ile 1452 arasında olmalıdır.</string>
     <string name="validation_dial_unmodelled">Bu bağlantı seçenekleri desteklenmiyor ve yok sayıldı: %1$s.</string>
     <string name="validation_dial_detour">Bu sunucuya başka bir sunucu üzerinden ulaşmak için detour yerine bir zincir profili oluşturun.</string>
-    <string name="validation_dial_domain_resolver">Sunucu adları için çözümleyiciyi Throne kendisi seçer.</string>
     <string name="validation_xray_download_network">İndirme tarafı da XHTTP kullanmalıdır: \"network\": \"xhttp\" yazın.</string>
     <string name="validation_xray_download_address">İndirme sunucusunun adresini ekleyin, örneğin \"address\": \"dl.example.com\".</string>
     <string name="validation_xray_download_port">1 ile 65535 arasında bir port numarası olmalı ve tırnaksız yazılmalıdır, örneğin \"port\": 443.</string>
@@ -2232,7 +2230,6 @@
     <string name="validation_hysteria_clash_bandwidth">100 Mbps veya 50 MB/s gibi bir bant genişliği değil, bu yüzden yok sayıldı.</string>
     <string name="validation_hysteria_transport">Yalnızca udp protokolü desteklenir, bu yüzden bu sunucuya ulaşılamaz.</string>
     <string name="validation_hysteria_pin_format">Sertifika pini, onaltılık (64 karakter) veya base64 (44 karakter) biçiminde bir SHA-256 özeti olmalıdır.</string>
-    <string name="validation_hysteria_pin_leaf">Bu pine karşı yalnızca sunucunun kendi sertifikası denetlenir; bir ara veya kök sertifikanın özetiyse bağlantı başarısız olur.</string>
     <string name="validation_hysteria_json_speed">100 Mbps veya 12 MBps gibi bir hız değil, bu yüzden yok sayıldı.</string>
     <string name="validation_tuic_v4">UUID eksik. TUIC v4 (token kimlik doğrulaması) desteklenmez; yalnızca TUIC v5 sunucuları çalışır.</string>
     <string name="validation_masque_key">WARP kaydındaki base64 anahtar olmalıdır (= dolgulu standart base64).</string>
@@ -2251,7 +2248,6 @@
         <item quantity="one">Bağlantı %1$d sunucu adresi daha listeliyor; yalnızca ilki içe aktarıldı.</item>
         <item quantity="other">Bağlantı %1$d sunucu adresi daha listeliyor; yalnızca ilki içe aktarıldı.</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS, TCP Fast Open\'ı desteklemez, bu yüzden kapatıldı.</string>
     <string name="validation_mieru_port_range_bounds">Portlar 1 ile 65535 arasında olmalıdır.</string>
     <string name="validation_mieru_port_range_order">Aralık bittiği yerden sonra başlıyor; %1$s-%2$s olarak yazın.</string>
     <string name="validation_mieru_traffic_pattern_padding">Sondaki = dolgusu eksik; kalıbın tamamını kopyalayın.</string>
@@ -2273,7 +2269,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; çift sayıda onaltılık basamak gerektirir, örneğin &lt;b 0x1a2b&gt;.</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; tam sayıda bayt gerektirir, örneğin &lt;%1$s 16&gt;.</string>
     <string name="validation_wg_signature_unknown">Bilinmeyen etiket &lt;%1$s&gt;. &lt;b 0x...&gt;, &lt;r N&gt;, &lt;rc N&gt;, &lt;rd N&gt;, &lt;dz N&gt;, &lt;t&gt;, &lt;d&gt; veya &lt;ds&gt; kullanın.</string>
-    <string name="validation_wg_dns_ignored">Yok sayıldı; Throne adları kendi DNS ayarlarıyla çözümler.</string>
     <string name="validation_wg_unknown_setting">Bilinmeyen ayar, yok sayıldı.</string>
     <string name="validation_wg_peer_sections">%1$s [Peer] bölümünden yalnızca sonuncusu kullanılır.</string>
     <string name="validation_wg_allowed_ips_ignored">Yok sayıldı; Throne bu profilin tüm trafiğini tünelden geçirir.</string>
@@ -2478,7 +2473,6 @@
     <string name="validation_slipnet_type">Bu SlipNet profil türü desteklenmiyor.</string>
     <string name="validation_slipnet_encrypted">Şifreli SlipNet bağlantıları okunamaz: profili SlipNet\'ten şifrelemeden dışa aktarın.</string>
     <string name="validation_masterdns_method_id">Bilinmeyen şifreleme yöntemi: 0 ile 5 arasında bir sayı kullanın.</string>
-    <string name="validation_masterdns_socks_credentials">SOCKS kullanıcı adı ve parolası yalnızca bu profilin açmadığı yerel bir dinleyiciyi korur; yok sayıldı.</string>
     <string name="validation_masterdns_backend">MasterDNS yalnızca bir SOCKS veya özel bir hizmet taşır.</string>
     <string name="validation_masterdns_proxy_link">Bağlantı ayrıca tünel üzerinde çalıştırılacak bir vekil sunucu da taşıyor; o vekil sunucuyu ayrıca içe aktarın ve bu profilin üzerine zincirleyin.</string>
     <string name="validation_masterdns_format">Bu MasterDNS bağlantı biçimi desteklenmiyor.</string>

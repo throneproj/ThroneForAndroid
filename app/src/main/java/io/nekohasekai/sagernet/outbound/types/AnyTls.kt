@@ -1,6 +1,5 @@
 package io.nekohasekai.sagernet.outbound.types
 
-import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.outbound.BuildContext
 import io.nekohasekai.sagernet.outbound.import.ClashProxy
 import io.nekohasekai.sagernet.outbound.BuildResult
@@ -16,7 +15,6 @@ import io.nekohasekai.sagernet.validation.Severity
 import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.validation.acceptOptional
 import io.nekohasekai.sagernet.validation.addIssue
-import io.nekohasekai.sagernet.validation.vtr
 
 /** anyTLS (include/configs/outbounds/anyTLS.h, src/configs/outbounds/anyTLS.cpp). */
 class AnyTls : Outbound("anytls") {
@@ -93,8 +91,6 @@ class AnyTls : Outbound("anytls") {
 
     /** anyTlsDropFastOpen. */
     private fun dropFastOpen() {
-        if (!dial.tcp_fast_open) return
-        ParseDiag.warn("tcp_fast_open", vtr(R.string.validation_anytls_tcp_fast_open))
         dial.tcp_fast_open = false
     }
 

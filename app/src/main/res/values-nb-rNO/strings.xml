@@ -2116,7 +2116,6 @@
     <string name="validation_tls_pin_hex">Hver pin må være en SHA-256 i heksadesimal form (64 tegn, kolon er tillatt).</string>
     <string name="validation_tls_cipher_insecure">sing-box avviser denne suiten fordi Go lister den som usikker (CBC-SHA256, RC4, 3DES og RSA-nøkkelutveksling); bare VLESS-profiler som kjører på Xray kan bruke den.</string>
     <string name="validation_tls_cipher_unknown">Ukjent chiffersuite. Bruk Gos navn, for eksempel TLS_AES_128_GCM_SHA256.</string>
-    <string name="validation_tls_reality_key_padding_removed">Den etterfølgende =-utfyllingen ble fjernet fra den offentlige REALITY-nøkkelen.</string>
     <string name="validation_tls_fingerprint_unknown">Ukjent fingeravtrykk \"%1$s\". Bruk chrome, firefox, safari, ios, android, edge, 360, qq, random, randomized eller unsafe.</string>
     <string name="validation_tls_version_order">Den laveste TLS-versjonen er høyere enn den høyeste.</string>
     <string name="validation_tls_reality_key_required">REALITY trenger tjenerens offentlige nøkkel (43 tegn, slik xray x25519 skriver den ut).</string>
@@ -2147,7 +2146,6 @@
     <string name="validation_quic_initial_packet_size">Må være 0 (standard) eller fra 1200 til 1452.</string>
     <string name="validation_dial_unmodelled">Disse tilkoblingsvalgene (dial) støttes ikke og ble ignorert: %1$s.</string>
     <string name="validation_dial_detour">For å nå denne tjeneren via en annen, bygg en kjedeprofil i stedet for en omvei (detour).</string>
-    <string name="validation_dial_domain_resolver">Throne velger selv resolveren for tjenernavn.</string>
     <string name="validation_xray_download_network">Nedlastingsleddet må også bruke XHTTP: skriv \"network\": \"xhttp\".</string>
     <string name="validation_xray_download_address">Legg til nedlastingstjenerens adresse, for eksempel \"address\": \"dl.example.com\".</string>
     <string name="validation_xray_download_port">Må være et portnummer fra 1 til 65535, skrevet uten anførselstegn, for eksempel \"port\": 443.</string>
@@ -2230,7 +2228,6 @@
     <string name="validation_hysteria_clash_bandwidth">Ikke en båndbredde som 100 Mbps eller 50 MB/s, så den ble ignorert.</string>
     <string name="validation_hysteria_transport">Bare udp-protokollen støttes, så denne tjeneren kan ikke nås.</string>
     <string name="validation_hysteria_pin_format">Sertifikat-pinnen må være en SHA-256-hash i hex (64 tegn) eller base64 (44 tegn).</string>
-    <string name="validation_hysteria_pin_leaf">Bare tjenerens eget sertifikat kontrolleres mot denne pinnen; hvis det er hashen til et mellomliggende sertifikat eller rotsertifikat, vil tilkoblingen mislykkes.</string>
     <string name="validation_hysteria_json_speed">Ikke en hastighet som 100 Mbps eller 12 MBps, så den ble ignorert.</string>
     <string name="validation_tuic_v4">Mangler UUID. TUIC v4 (tokenautentisering) støttes ikke; bare TUIC v5-tjenere fungerer.</string>
     <string name="validation_masque_key">Må være base64-nøkkelen fra WARP-registreringen (standard base64 med =-utfylling).</string>
@@ -2249,7 +2246,6 @@
         <item quantity="one">Lenken lister %1$d tjeneradresse til; bare den første ble importert.</item>
         <item quantity="other">Lenken lister %1$d tjeneradresser til; bare den første ble importert.</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS støtter ikke TCP Fast Open, så det ble slått av.</string>
     <string name="validation_mieru_port_range_bounds">Porter må være fra 1 til 65535.</string>
     <string name="validation_mieru_port_range_order">Området starter etter at det slutter; skriv det som %1$s-%2$s.</string>
     <string name="validation_mieru_traffic_pattern_padding">=-utfyllingen på slutten mangler; kopier hele mønsteret.</string>
@@ -2271,7 +2267,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; trenger et partall antall heksadesimale sifre, for eksempel &lt;b 0x1a2b&gt;.</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; trenger et helt antall byte, for eksempel &lt;%1$s 16&gt;.</string>
     <string name="validation_wg_signature_unknown">Ukjent tagg &lt;%1$s&gt;. Bruk &lt;b 0x...&gt;, &lt;r N&gt;, &lt;rc N&gt;, &lt;rd N&gt;, &lt;dz N&gt;, &lt;t&gt;, &lt;d&gt; eller &lt;ds&gt;.</string>
-    <string name="validation_wg_dns_ignored">Ignorert; Throne løser navn med sine egne DNS-innstillinger.</string>
     <string name="validation_wg_unknown_setting">Ukjent innstilling, ignorert.</string>
     <string name="validation_wg_peer_sections">Bare den siste av de %1$s [Peer]-delene brukes.</string>
     <string name="validation_wg_allowed_ips_ignored">Ignorert; Throne sender all trafikk for denne profilen gjennom tunnelen.</string>
@@ -2476,7 +2471,6 @@
     <string name="validation_slipnet_type">Denne SlipNet-profiltypen støttes ikke.</string>
     <string name="validation_slipnet_encrypted">Krypterte SlipNet-lenker kan ikke leses: eksporter profilen fra SlipNet uten kryptering.</string>
     <string name="validation_masterdns_method_id">Ukjent krypteringsmetode: bruk et tall fra 0 til 5.</string>
-    <string name="validation_masterdns_socks_credentials">SOCKS-brukernavnet og -passordet beskytter bare en lokal lytter, som denne profilen ikke åpner; de ble ignorert.</string>
     <string name="validation_masterdns_backend">MasterDNS bærer bare en SOCKS- eller en egendefinert tjeneste.</string>
     <string name="validation_masterdns_proxy_link">Lenken inneholder også en mellomtjener som skal kjøres over tunnelen; importer den mellomtjeneren separat og kjed den over denne profilen.</string>
     <string name="validation_masterdns_format">Dette MasterDNS-lenkeformatet støttes ikke.</string>

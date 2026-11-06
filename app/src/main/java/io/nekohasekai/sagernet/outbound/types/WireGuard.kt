@@ -47,6 +47,17 @@ private fun wireguardDropBadAddresses(addresses: MutableList<String>): MutableLi
     return addresses.filterTo(ArrayList()) { acceptOptional("address", Validation.cidr(it), it) }
 }
 
+/** wireguardFullTunnel (wireguard.cpp): full tunnels also come as halves (0.0.0.0/1 + 128.0.0.0/1) or as "everything but the LAN" lists. */
+private fun wireguardFullTunnel(allowedIps: List<String>): Boolean {
+    var v4 = 0.0
+    var v6 = 0.0
+    for (cidr in allowedIps) {
+        val (network, prefix) = VpnFileImport.parseSubnet(cidr) ?: continue
+        if (network.contains(':')) v6 += Math.scalb(1.0, -prefix) else v4 += Math.scalb(1.0, -prefix)
+    }
+    return v4 >= 0.5 || v6 >= 0.5
+}
+
 /** The Checks of wireguard.h, shared by the WireGuard editors (field text) and [WireGuard.validate] (profile fields). */
 object WireGuardChecks {
 
@@ -499,14 +510,14 @@ class WireGuard : Outbound("wireguard") {
                 "maxhandshakeattempts", "max_handshake_attempts" -> { max_handshake_attempts = value; enable_amnezia = true }
                 "randomtrailers", "random_trailers" -> { random_trailers = parseAmneziaBool(value); enable_amnezia = true }
                 "disablecookies", "disable_cookies" -> { disable_cookies = parseAmneziaBool(value); enable_amnezia = true }
-                "dns" -> ParseDiag.warn(rawKey, vtr(R.string.validation_wg_dns_ignored), value)
                 "allowedips" -> allowedIps.addAll(QtStrings.splitSkipEmpty(value.replace(" ", ""), ","))
-                "listenport", "table", "fwmark", "saveconfig", "preup", "postup", "predown", "postdown" -> {}
+                // wg-quick's host-side settings: Throne owns DNS and routing.
+                "dns", "listenport", "table", "fwmark", "saveconfig", "preup", "postup", "predown", "postdown" -> {}
                 else -> ParseDiag.warn(rawKey, vtr(R.string.validation_wg_unknown_setting))
             }
         }
         if (peers > 1) ParseDiag.warn("[Peer]", vtr(R.string.validation_wg_peer_sections, peers.toString()))
-        if (allowedIps.isNotEmpty() && "0.0.0.0/0" !in allowedIps) {
+        if (allowedIps.isNotEmpty() && !wireguardFullTunnel(allowedIps)) {
             ParseDiag.warn("AllowedIPs", vtr(R.string.validation_wg_allowed_ips_ignored), allowedIps.joinToString(", "))
         }
         fixAddress()

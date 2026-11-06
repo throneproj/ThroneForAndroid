@@ -175,13 +175,13 @@ fun importTlsFingerprint(raw: String, field: String): String {
 fun importTlsCipherSuites(names: List<String>, field: String): MutableList<String> =
     names.filterTo(ArrayList()) { acceptOptional(field, tlsCipherSuiteRule(it), it) }
 
-/** ImportRealityPublicKey (TLS.cpp): the key without the trailing = padding that sing-box and Xray (RawURLEncoding) refuse, removed with a note. */
+/** ImportRealityPublicKey (TLS.cpp): the key without the trailing = padding that sing-box and Xray (RawURLEncoding) refuse. */
+@Suppress("UNUSED_PARAMETER")
 fun importRealityPublicKey(raw: String, field: String): String {
     val key = raw.trim()
     if (!key.endsWith('=')) return key
     val unpadded = key.trimEnd('=')
     if (unpadded.isEmpty() || TlsChecks.realityPublicKey(unpadded).isNotEmpty()) return key
-    ParseDiag.warn(field, vtr(R.string.validation_tls_reality_key_padding_removed))
     return unpadded
 }
 

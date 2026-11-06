@@ -2112,7 +2112,6 @@
     <string name="validation_tls_pin_hex">Elke pin moet een SHA-256 in hexadecimaal zijn (64 tekens, dubbele punten toegestaan).</string>
     <string name="validation_tls_cipher_insecure">sing-box weigert deze suite omdat Go haar als onveilig aanmerkt (CBC-SHA256, RC4, 3DES en RSA-sleuteluitwisseling); alleen VLESS-profielen die op Xray draaien kunnen haar gebruiken.</string>
     <string name="validation_tls_cipher_unknown">Onbekende cipher suite. Gebruik de namen van Go, bijvoorbeeld TLS_AES_128_GCM_SHA256.</string>
-    <string name="validation_tls_reality_key_padding_removed">De afsluitende =-padding is van de publieke REALITY-sleutel verwijderd.</string>
     <string name="validation_tls_fingerprint_unknown">Onbekende vingerafdruk \"%1$s\". Gebruik chrome, firefox, safari, ios, android, edge, 360, qq, random, randomized of unsafe.</string>
     <string name="validation_tls_version_order">De minimale TLS-versie ligt boven de maximale.</string>
     <string name="validation_tls_reality_key_required">REALITY heeft de publieke sleutel van de server nodig (43 tekens, zoals afgedrukt door xray x25519).</string>
@@ -2143,7 +2142,6 @@
     <string name="validation_quic_initial_packet_size">Moet 0 (de standaard) zijn of van 1200 tot 1452.</string>
     <string name="validation_dial_unmodelled">Deze dial-opties worden niet ondersteund en zijn genegeerd: %1$s.</string>
     <string name="validation_dial_detour">Bouw een ketenprofiel in plaats van een detour om deze server via een andere te bereiken.</string>
-    <string name="validation_dial_domain_resolver">Throne kiest zelf de resolver voor servernamen.</string>
     <string name="validation_xray_download_network">Het downloadgedeelte moet ook XHTTP gebruiken: schrijf \"network\": \"xhttp\".</string>
     <string name="validation_xray_download_address">Voeg het adres van de downloadserver toe, bijvoorbeeld \"address\": \"dl.example.com\".</string>
     <string name="validation_xray_download_port">Moet een poortnummer van 1 tot 65535 zijn, zonder aanhalingstekens geschreven, bijvoorbeeld \"port\": 443.</string>
@@ -2226,7 +2224,6 @@
     <string name="validation_hysteria_clash_bandwidth">Geen bandbreedte zoals 100 Mbps of 50 MB/s, dus genegeerd.</string>
     <string name="validation_hysteria_transport">Alleen het udp-protocol wordt ondersteund, dus deze server kan niet worden bereikt.</string>
     <string name="validation_hysteria_pin_format">De certificaatpin moet een SHA-256-hash zijn in hex (64 tekens) of base64 (44 tekens).</string>
-    <string name="validation_hysteria_pin_leaf">Alleen het eigen certificaat van de server wordt met deze pin vergeleken; is het de hash van een tussen- of rootcertificaat, dan mislukt de verbinding.</string>
     <string name="validation_hysteria_json_speed">Geen snelheid zoals 100 Mbps of 12 MBps, dus genegeerd.</string>
     <string name="validation_tuic_v4">UUID ontbreekt. TUIC v4 (tokenauthenticatie) wordt niet ondersteund; alleen TUIC v5-servers werken.</string>
     <string name="validation_masque_key">Moet de base64-sleutel van de WARP-registratie zijn (standaard base64 met =-padding).</string>
@@ -2245,7 +2242,6 @@
         <item quantity="one">De link vermeldt nog %1$d serveradres; alleen het eerste is geïmporteerd.</item>
         <item quantity="other">De link vermeldt nog %1$d serveradressen; alleen het eerste is geïmporteerd.</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS ondersteunt TCP Fast Open niet, dus het is uitgeschakeld.</string>
     <string name="validation_mieru_port_range_bounds">Poorten moeten van 1 tot 65535 zijn.</string>
     <string name="validation_mieru_port_range_order">Het bereik begint na het einde ervan; schrijf het als %1$s-%2$s.</string>
     <string name="validation_mieru_traffic_pattern_padding">De =-padding aan het einde ontbreekt; kopieer het hele patroon.</string>
@@ -2267,7 +2263,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; vereist een even aantal hexadecimale cijfers, bijvoorbeeld &lt;b 0x1a2b&gt;.</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; vereist een geheel aantal bytes, bijvoorbeeld &lt;%1$s 16&gt;.</string>
     <string name="validation_wg_signature_unknown">Onbekende tag &lt;%1$s&gt;. Gebruik &lt;b 0x...&gt;, &lt;r N&gt;, &lt;rc N&gt;, &lt;rd N&gt;, &lt;dz N&gt;, &lt;t&gt;, &lt;d&gt; of &lt;ds&gt;.</string>
-    <string name="validation_wg_dns_ignored">Genegeerd; Throne lost namen op met zijn eigen DNS-instellingen.</string>
     <string name="validation_wg_unknown_setting">Onbekende instelling, genegeerd.</string>
     <string name="validation_wg_peer_sections">Alleen de laatste van de %1$s [Peer]-secties wordt gebruikt.</string>
     <string name="validation_wg_allowed_ips_ignored">Genegeerd; Throne stuurt al het verkeer van dit profiel door de tunnel.</string>
@@ -2472,7 +2467,6 @@
     <string name="validation_slipnet_type">Dit SlipNet-profieltype wordt niet ondersteund.</string>
     <string name="validation_slipnet_encrypted">Versleutelde SlipNet-links kunnen niet worden gelezen: exporteer het profiel uit SlipNet zonder versleuteling.</string>
     <string name="validation_masterdns_method_id">Onbekende versleutelingsmethode: gebruik een getal van 0 tot 5.</string>
-    <string name="validation_masterdns_socks_credentials">De SOCKS-gebruikersnaam en het wachtwoord beschermen alleen een lokale listener, die dit profiel niet opent; ze zijn genegeerd.</string>
     <string name="validation_masterdns_backend">MasterDNS draagt alleen een SOCKS- of een aangepaste dienst.</string>
     <string name="validation_masterdns_proxy_link">De link bevat ook een proxy die over de tunnel moet lopen; importeer die proxy apart en keten hem over dit profiel.</string>
     <string name="validation_masterdns_format">Dit MasterDNS-linkformaat wordt niet ondersteund.</string>

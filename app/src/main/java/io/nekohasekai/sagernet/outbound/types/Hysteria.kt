@@ -306,10 +306,9 @@ class Hysteria : Outbound("hysteria") {
 
     /**
      * hysteria.cpp: the official hysteria2 URI pins a certificate's SHA-256 in hex (its normalizeCertHash strips ':'
-     * and '-'), sing-box's certificate_sha256 holds it in base64.
+     * and '-'), sing-box's certificate_sha256 holds it in base64 and, unlike the official client, matches only the leaf.
      */
     private fun parsePinSha256(value: String) {
-        var pinned = false
         for (raw in QtStrings.splitSkipEmpty(value, ",")) {
             val pin = raw.trim()
             val hex = pin.replace(":", "").replace("-", "").trim()
@@ -324,10 +323,7 @@ class Hysteria : Outbound("hysteria") {
                 }
             }
             if (!tls.certificate_sha256.contains(hash)) tls.certificate_sha256.add(hash)
-            pinned = true
         }
-        // The official client accepts a pin of any certificate in the chain; sing-box checks only the server's own.
-        if (pinned) ParseDiag.warn("pinSHA256", vtr(R.string.validation_hysteria_pin_leaf))
     }
 
     /** hysteria::ParseFromLink (hysteria.cpp). Android only: a bare-number hop interval is seconds ([hopDuration]). */

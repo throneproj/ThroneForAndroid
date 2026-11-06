@@ -2120,7 +2120,6 @@
     <string name="validation_tls_pin_hex">Chaque empreinte épinglée doit être un SHA-256 en hexadécimal (64 caractères, deux-points autorisés).</string>
     <string name="validation_tls_cipher_insecure">sing-box refuse cette suite car Go la classe comme non sécurisée (CBC-SHA256, RC4, 3DES et échange de clés RSA) ; seuls les profils VLESS exécutés sur Xray peuvent l\'utiliser.</string>
     <string name="validation_tls_cipher_unknown">Suite de chiffrement inconnue. Utilisez les noms de Go, par exemple TLS_AES_128_GCM_SHA256.</string>
-    <string name="validation_tls_reality_key_padding_removed">Le remplissage = final a été retiré de la clé publique REALITY.</string>
     <string name="validation_tls_fingerprint_unknown">Empreinte inconnue \"%1$s\". Utilisez chrome, firefox, safari, ios, android, edge, 360, qq, random, randomized ou unsafe.</string>
     <string name="validation_tls_version_order">La version TLS minimale est supérieure à la version maximale.</string>
     <string name="validation_tls_reality_key_required">REALITY exige la clé publique du serveur (43 caractères, telle qu\'affichée par xray x25519).</string>
@@ -2151,7 +2150,6 @@
     <string name="validation_quic_initial_packet_size">Doit être 0 (valeur par défaut) ou compris entre 1200 et 1452.</string>
     <string name="validation_dial_unmodelled">Ces options de connexion ne sont pas prises en charge et ont été ignorées : %1$s.</string>
     <string name="validation_dial_detour">Pour atteindre ce serveur via un autre, créez un profil de chaîne plutôt qu\'un détour.</string>
-    <string name="validation_dial_domain_resolver">Throne choisit lui-même le résolveur des noms de serveurs.</string>
     <string name="validation_xray_download_network">Le volet de téléchargement doit aussi utiliser XHTTP : écrivez \"network\": \"xhttp\".</string>
     <string name="validation_xray_download_address">Ajoutez l\'adresse du serveur de téléchargement, par exemple \"address\": \"dl.example.com\".</string>
     <string name="validation_xray_download_port">Doit être un numéro de port de 1 à 65535, écrit sans guillemets, par exemple \"port\": 443.</string>
@@ -2234,7 +2232,6 @@
     <string name="validation_hysteria_clash_bandwidth">Bande passante invalide (par exemple 100 Mbps ou 50 MB/s), elle a donc été ignorée.</string>
     <string name="validation_hysteria_transport">Seul le protocole udp est pris en charge, ce serveur est donc injoignable.</string>
     <string name="validation_hysteria_pin_format">L\'empreinte épinglée du certificat doit être un hachage SHA-256 en hexadécimal (64 caractères) ou en base64 (44 caractères).</string>
-    <string name="validation_hysteria_pin_leaf">Seul le certificat propre du serveur est comparé à cette empreinte ; s\'il s\'agit du hachage d\'un certificat intermédiaire ou racine, la connexion échouera.</string>
     <string name="validation_hysteria_json_speed">Vitesse invalide (par exemple 100 Mbps ou 12 MBps), elle a donc été ignorée.</string>
     <string name="validation_tuic_v4">UUID manquant. TUIC v4 (authentification par jeton) n\'est pas pris en charge ; seuls les serveurs TUIC v5 fonctionnent.</string>
     <string name="validation_masque_key">Doit être la clé en base64 issue de l\'enregistrement WARP (base64 standard avec remplissage =).</string>
@@ -2254,7 +2251,6 @@
         <item quantity="many">Le lien liste %1$d adresses de serveur supplémentaires ; seule la première a été importée.</item>
         <item quantity="other">Le lien liste %1$d adresses de serveur supplémentaires ; seule la première a été importée.</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS ne prend pas en charge TCP Fast Open, il a donc été désactivé.</string>
     <string name="validation_mieru_port_range_bounds">Les ports doivent être compris entre 1 et 65535.</string>
     <string name="validation_mieru_port_range_order">La plage commence après sa fin ; écrivez-la %1$s-%2$s.</string>
     <string name="validation_mieru_traffic_pattern_padding">Le remplissage = final est manquant ; copiez le modèle en entier.</string>
@@ -2276,7 +2272,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; nécessite un nombre pair de chiffres hexadécimaux, par exemple &lt;b 0x1a2b&gt;.</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; nécessite un nombre entier d\'octets, par exemple &lt;%1$s 16&gt;.</string>
     <string name="validation_wg_signature_unknown">Balise inconnue &lt;%1$s&gt;. Utilisez &lt;b 0x...&gt;, &lt;r N&gt;, &lt;rc N&gt;, &lt;rd N&gt;, &lt;dz N&gt;, &lt;t&gt;, &lt;d&gt; ou &lt;ds&gt;.</string>
-    <string name="validation_wg_dns_ignored">Ignoré ; Throne résout les noms avec ses propres paramètres DNS.</string>
     <string name="validation_wg_unknown_setting">Paramètre inconnu, ignoré.</string>
     <string name="validation_wg_peer_sections">Seule la dernière des %1$s sections [Peer] est utilisée.</string>
     <string name="validation_wg_allowed_ips_ignored">Ignoré ; Throne envoie tout le trafic de ce profil dans le tunnel.</string>
@@ -2481,7 +2476,6 @@
     <string name="validation_slipnet_type">Ce type de profil SlipNet n\'est pas pris en charge.</string>
     <string name="validation_slipnet_encrypted">Les liens SlipNet chiffrés ne peuvent pas être lus : exportez le profil depuis SlipNet sans chiffrement.</string>
     <string name="validation_masterdns_method_id">Méthode de chiffrement inconnue : utilisez un nombre de 0 à 5.</string>
-    <string name="validation_masterdns_socks_credentials">Le nom d\'utilisateur et le mot de passe SOCKS ne protègent qu\'un point d\'écoute local, que ce profil n\'ouvre pas ; ils ont été ignorés.</string>
     <string name="validation_masterdns_backend">MasterDNS ne transporte qu\'un service SOCKS ou un service personnalisé.</string>
     <string name="validation_masterdns_proxy_link">Le lien contient aussi un proxy à faire passer par le tunnel ; importez ce proxy séparément et chaînez-le par-dessus ce profil.</string>
     <string name="validation_masterdns_format">Ce format de lien MasterDNS n\'est pas pris en charge.</string>

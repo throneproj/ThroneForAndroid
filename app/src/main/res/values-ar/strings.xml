@@ -2251,7 +2251,6 @@
     <string name="validation_tls_pin_hex">يجب أن يكون كل تثبيت (pin) بصيغة SHA-256 بالنظام السداسي عشر (64 حرفًا، ويُسمح بالنقطتين الرأسيتين).</string>
     <string name="validation_tls_cipher_insecure">يرفض sing-box هذه المجموعة لأن Go تدرجها كغير آمنة (CBC-SHA256 وRC4 و3DES وتبادل مفاتيح RSA)؛ لا تستخدمها إلا ملفات VLESS العاملة على Xray.</string>
     <string name="validation_tls_cipher_unknown">مجموعة تشفير غير معروفة. استخدم أسماء Go، مثل TLS_AES_128_GCM_SHA256.</string>
-    <string name="validation_tls_reality_key_padding_removed">أُزيل حشو = الزائد في نهاية المفتاح العام لـ REALITY.</string>
     <string name="validation_tls_fingerprint_unknown">بصمة غير معروفة «%1$s». استخدم chrome أو firefox أو safari أو ios أو android أو edge أو 360 أو qq أو random أو randomized أو unsafe.</string>
     <string name="validation_tls_version_order">الحد الأدنى لإصدار TLS أعلى من الحد الأقصى.</string>
     <string name="validation_tls_reality_key_required">يحتاج REALITY إلى المفتاح العام للخادم (43 حرفًا، كما يطبعه xray x25519).</string>
@@ -2282,7 +2281,6 @@
     <string name="validation_quic_initial_packet_size">يجب أن تكون 0 (الافتراضي) أو من 1200 إلى 1452.</string>
     <string name="validation_dial_unmodelled">خيارات الاتصال هذه غير مدعومة وتم تجاهلها: %1$s.</string>
     <string name="validation_dial_detour">للوصول إلى هذا الخادم عبر خادم آخر، أنشئ ملف سلسلة بدل detour.</string>
-    <string name="validation_dial_domain_resolver">يختار Throne محلّل أسماء الخوادم بنفسه.</string>
     <string name="validation_xray_download_network">يجب أن يستخدم مسار التنزيل XHTTP أيضًا: اكتب \"network\": \"xhttp\".</string>
     <string name="validation_xray_download_address">أضف عنوان خادم التنزيل، مثل \"address\": \"dl.example.com\".</string>
     <string name="validation_xray_download_port">يجب أن يكون رقم منفذ من 1 إلى 65535، يُكتب بدون علامات اقتباس، مثل \"port\": 443.</string>
@@ -2365,7 +2363,6 @@
     <string name="validation_hysteria_clash_bandwidth">ليست عرض نطاق ترددي مثل 100 Mbps أو 50 MB/s، لذا تم تجاهلها.</string>
     <string name="validation_hysteria_transport">يُدعم بروتوكول udp فقط، لذا لا يمكن الوصول إلى هذا الخادم.</string>
     <string name="validation_hysteria_pin_format">يجب أن يكون تثبيت الشهادة تجزئة SHA-256 بالنظام السداسي عشر (64 حرفًا) أو base64 (44 حرفًا).</string>
-    <string name="validation_hysteria_pin_leaf">تُفحص بهذا التثبيت شهادة الخادم نفسها فقط؛ وإن كان تجزئة شهادة وسيطة أو جذر فسيفشل الاتصال.</string>
     <string name="validation_hysteria_json_speed">ليست سرعة مثل 100 Mbps أو 12 MBps، لذا تم تجاهلها.</string>
     <string name="validation_tuic_v4">UUID مفقود. TUIC v4 (مصادقة الرمز) غير مدعوم؛ تعمل خوادم TUIC v5 فقط.</string>
     <string name="validation_masque_key">يجب أن يكون مفتاح base64 الناتج عن تسجيل WARP (base64 قياسي مع حشو =).</string>
@@ -2388,7 +2385,6 @@
         <item quantity="many">يسرد الرابط %1$d عنوان خادم إضافيًا؛ استُورد الأول فقط.</item>
         <item quantity="other">يسرد الرابط %1$d عنوان خادم إضافي؛ استُورد الأول فقط.</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">لا يدعم AnyTLS خاصية TCP Fast Open، لذا تم إيقافها.</string>
     <string name="validation_mieru_port_range_bounds">يجب أن تكون المنافذ من 1 إلى 65535.</string>
     <string name="validation_mieru_port_range_order">يبدأ النطاق بعد نهايته؛ اكتبه هكذا: %1$s-%2$s.</string>
     <string name="validation_mieru_traffic_pattern_padding">حشو = في النهاية مفقود؛ انسخ النمط كاملًا.</string>
@@ -2410,7 +2406,6 @@
     <string name="validation_wg_signature_hex">يحتاج &lt;b&gt; إلى عدد زوجي من الأرقام السداسية عشرية، مثل &lt;b 0x1a2b&gt;.</string>
     <string name="validation_wg_signature_length">يحتاج &lt;%1$s&gt; إلى عدد صحيح من البايتات، مثل &lt;%1$s 16&gt;.</string>
     <string name="validation_wg_signature_unknown">وسم غير معروف &lt;%1$s&gt;. استخدم &lt;b 0x...&gt; أو &lt;r N&gt; أو &lt;rc N&gt; أو &lt;rd N&gt; أو &lt;dz N&gt; أو &lt;t&gt; أو &lt;d&gt; أو &lt;ds&gt;.</string>
-    <string name="validation_wg_dns_ignored">تم التجاهل؛ يحلّل Throne الأسماء بإعدادات DNS الخاصة به.</string>
     <string name="validation_wg_unknown_setting">إعداد غير معروف، تم تجاهله.</string>
     <string name="validation_wg_peer_sections">يُستخدم آخر قسم [Peer] فقط من أصل %1$s أقسام.</string>
     <string name="validation_wg_allowed_ips_ignored">تم التجاهل؛ يمرر Throne كل حركة هذا الملف عبر النفق.</string>
@@ -2615,7 +2610,6 @@
     <string name="validation_slipnet_type">نوع ملف SlipNet هذا غير مدعوم.</string>
     <string name="validation_slipnet_encrypted">لا يمكن قراءة روابط SlipNet المشفرة: صدّر الملف من SlipNet بدون تشفير.</string>
     <string name="validation_masterdns_method_id">طريقة تشفير غير معروفة: استخدم رقمًا من 0 إلى 5.</string>
-    <string name="validation_masterdns_socks_credentials">اسم مستخدم SOCKS وكلمة مروره يحميان مستمعًا محليًا فقط، ولا يفتحه هذا الملف؛ لذا تم تجاهلهما.</string>
     <string name="validation_masterdns_backend">يحمل MasterDNS خدمة SOCKS أو خدمة مخصصة فقط.</string>
     <string name="validation_masterdns_proxy_link">يحمل الرابط أيضًا بروكسي للتشغيل فوق النفق؛ استورد ذلك البروكسي بشكل منفصل واربطه في سلسلة فوق هذا الملف.</string>
     <string name="validation_masterdns_format">صيغة رابط MasterDNS هذه غير مدعومة.</string>

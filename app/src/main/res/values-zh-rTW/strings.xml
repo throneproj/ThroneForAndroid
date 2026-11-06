@@ -2095,7 +2095,6 @@
     <string name="validation_tls_pin_hex">每個釘選必須是十六進位的 SHA-256（64 個字元，可含冒號）。</string>
     <string name="validation_tls_cipher_insecure">sing-box 拒絕此套件，因為 Go 將它列為不安全（CBC-SHA256、RC4、3DES 與 RSA 金鑰交換）；只有在 Xray 上執行的 VLESS 設定檔才能使用。</string>
     <string name="validation_tls_cipher_unknown">未知的加密套件。請使用 Go 的名稱，例如 TLS_AES_128_GCM_SHA256。</string>
-    <string name="validation_tls_reality_key_padding_removed">已移除 REALITY 公開金鑰結尾的 = 填充。</string>
     <string name="validation_tls_fingerprint_unknown">未知的指紋「%1$s」。請使用 chrome、firefox、safari、ios、android、edge、360、qq、random、randomized 或 unsafe。</string>
     <string name="validation_tls_version_order">TLS 最低版本高於最高版本。</string>
     <string name="validation_tls_reality_key_required">REALITY 需要伺服器的公開金鑰（43 個字元，如 xray x25519 所輸出）。</string>
@@ -2126,7 +2125,6 @@
     <string name="validation_quic_initial_packet_size">必須為 0（預設）或介於 1200 到 1452。</string>
     <string name="validation_dial_unmodelled">不支援下列撥號選項，已被忽略：%1$s。</string>
     <string name="validation_dial_detour">若要經由另一個伺服器連線，請建立鏈結設定檔，而非使用 detour。</string>
-    <string name="validation_dial_domain_resolver">Throne 會自行為伺服器名稱選擇解析器。</string>
     <string name="validation_xray_download_network">下載端也必須使用 XHTTP：請寫成 \"network\": \"xhttp\"。</string>
     <string name="validation_xray_download_address">請加上下載伺服器的位址，例如 \"address\": \"dl.example.com\"。</string>
     <string name="validation_xray_download_port">必須是 1 至 65535 的連接埠號碼，且不加引號，例如 \"port\": 443。</string>
@@ -2209,7 +2207,6 @@
     <string name="validation_hysteria_clash_bandwidth">不是如 100 Mbps 或 50 MB/s 的頻寬，因此已被忽略。</string>
     <string name="validation_hysteria_transport">僅支援 udp 協定，因此無法連線到此伺服器。</string>
     <string name="validation_hysteria_pin_format">憑證釘選必須是十六進位（64 個字元）或 base64（44 個字元）的 SHA-256 雜湊。</string>
-    <string name="validation_hysteria_pin_leaf">只會以此釘選檢查伺服器本身的憑證；若它是中繼憑證或根憑證的雜湊，連線將會失敗。</string>
     <string name="validation_hysteria_json_speed">不是如 100 Mbps 或 12 MBps 的速度，因此已被忽略。</string>
     <string name="validation_tuic_v4">缺少 UUID。不支援 TUIC v4（權杖認證）；僅支援 TUIC v5 伺服器。</string>
     <string name="validation_masque_key">必須是 WARP 註冊所得的 base64 金鑰（含 = 填充的標準 base64）。</string>
@@ -2227,7 +2224,6 @@
     <plurals name="validation_trusttunnel_extra_addresses">
         <item quantity="other">連結另外列出 %1$d 個伺服器位址；只匯入了第一個。</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS 不支援 TCP Fast Open，因此已關閉。</string>
     <string name="validation_mieru_port_range_bounds">連接埠必須介於 1 到 65535。</string>
     <string name="validation_mieru_port_range_order">範圍的起點大於終點；請寫成 %1$s-%2$s。</string>
     <string name="validation_mieru_traffic_pattern_padding">結尾缺少 = 填充；請複製完整的流量模式。</string>
@@ -2249,7 +2245,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; 需要偶數個十六進位數字，例如 &lt;b 0x1a2b&gt;。</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; 需要整數位元組，例如 &lt;%1$s 16&gt;。</string>
     <string name="validation_wg_signature_unknown">未知的標籤 &lt;%1$s&gt;。請使用 &lt;b 0x...&gt;、&lt;r N&gt;、&lt;rc N&gt;、&lt;rd N&gt;、&lt;dz N&gt;、&lt;t&gt;、&lt;d&gt; 或 &lt;ds&gt;。</string>
-    <string name="validation_wg_dns_ignored">已忽略；Throne 會以自己的 DNS 設定解析名稱。</string>
     <string name="validation_wg_unknown_setting">未知的設定，已忽略。</string>
     <string name="validation_wg_peer_sections">在 %1$s 個 [Peer] 區段中，只會使用最後一個。</string>
     <string name="validation_wg_allowed_ips_ignored">已忽略；Throne 會將此設定檔的所有流量送入通道。</string>
@@ -2454,7 +2449,6 @@
     <string name="validation_slipnet_type">不支援這種 SlipNet 設定檔類型。</string>
     <string name="validation_slipnet_encrypted">無法讀取加密的 SlipNet 連結：請在 SlipNet 中匯出未加密的設定檔。</string>
     <string name="validation_masterdns_method_id">未知的加密方式：請使用 0 到 5 之間的數字。</string>
-    <string name="validation_masterdns_socks_credentials">SOCKS 使用者名稱和密碼只用於保護本機監聽器，而此設定檔不會開啟它；已忽略。</string>
     <string name="validation_masterdns_backend">MasterDNS 只能承載 SOCKS 或自訂服務。</string>
     <string name="validation_masterdns_proxy_link">該連結還包含一個要在隧道上執行的代理；請另外匯入該代理，並以鏈結方式將其接在此設定檔之上。</string>
     <string name="validation_masterdns_format">不支援這種 MasterDNS 連結格式。</string>

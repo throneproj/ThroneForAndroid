@@ -2083,7 +2083,6 @@
     <string name="validation_tls_pin_hex">各ピンは 16 進数の SHA-256 にしてください（64 文字、コロン可）。</string>
     <string name="validation_tls_cipher_insecure">Go が安全でないスイートに分類している（CBC-SHA256、RC4、3DES、RSA 鍵交換）ため、sing-box はこのスイートを拒否します。使用できるのは Xray で動作する VLESS プロファイルのみです。</string>
     <string name="validation_tls_cipher_unknown">不明な暗号スイートです。Go の名前を使用してください（例：TLS_AES_128_GCM_SHA256）。</string>
-    <string name="validation_tls_reality_key_padding_removed">REALITY 公開鍵の末尾の = パディングを削除しました。</string>
     <string name="validation_tls_fingerprint_unknown">不明なフィンガープリント「%1$s」です。chrome、firefox、safari、ios、android、edge、360、qq、random、randomized、unsafe のいずれかを使用してください。</string>
     <string name="validation_tls_version_order">TLS の最小バージョンが最大バージョンより高く設定されています。</string>
     <string name="validation_tls_reality_key_required">REALITY にはサーバーの公開鍵が必要です（xray x25519 が出力する 43 文字）。</string>
@@ -2114,7 +2113,6 @@
     <string name="validation_quic_initial_packet_size">0（既定）または 1200〜1452 にしてください。</string>
     <string name="validation_dial_unmodelled">これらのダイヤルオプションは未対応のため、無視されました：%1$s。</string>
     <string name="validation_dial_detour">別のサーバーを経由してこのサーバーに接続するには、detour ではなくチェーンのプロファイルを作成してください。</string>
-    <string name="validation_dial_domain_resolver">サーバー名のリゾルバーは Throne が自動で選択します。</string>
     <string name="validation_xray_download_network">ダウンロード側も XHTTP を使う必要があります：\"network\": \"xhttp\" と書いてください。</string>
     <string name="validation_xray_download_address">ダウンロードサーバーのアドレスを追加してください（例：\"address\": \"dl.example.com\"）。</string>
     <string name="validation_xray_download_port">1〜65535 のポート番号を、引用符なしで書いてください（例：\"port\": 443）。</string>
@@ -2197,7 +2195,6 @@
     <string name="validation_hysteria_clash_bandwidth">100 Mbps や 50 MB/s のような帯域幅ではないため、無視されました。</string>
     <string name="validation_hysteria_transport">udp プロトコルのみ対応しているため、このサーバーには接続できません。</string>
     <string name="validation_hysteria_pin_format">証明書ピンは、16 進数（64 文字）または base64（44 文字）の SHA-256 ハッシュにしてください。</string>
-    <string name="validation_hysteria_pin_leaf">このピンと照合されるのは、サーバー自身の証明書のみです。中間証明書やルート証明書のハッシュの場合、接続は失敗します。</string>
     <string name="validation_hysteria_json_speed">100 Mbps や 12 MBps のような速度ではないため、無視されました。</string>
     <string name="validation_tuic_v4">UUID がありません。TUIC v4（トークン認証）には対応しておらず、TUIC v5 サーバーのみ動作します。</string>
     <string name="validation_masque_key">WARP 登録で得た base64 鍵にしてください（= パディング付きの標準 base64）。</string>
@@ -2215,7 +2212,6 @@
     <plurals name="validation_trusttunnel_extra_addresses">
         <item quantity="other">リンクにはほかに %1$d 件のサーバーアドレスが記載されていますが、最初の 1 件のみインポートされました。</item>
     </plurals>
-    <string name="validation_anytls_tcp_fast_open">AnyTLS は TCP Fast Open に対応していないため、オフにしました。</string>
     <string name="validation_mieru_port_range_bounds">ポートは 1〜65535 にしてください。</string>
     <string name="validation_mieru_port_range_order">範囲の開始が終了より後ろにあります。%1$s-%2$s と書いてください。</string>
     <string name="validation_mieru_traffic_pattern_padding">末尾の = パディングがありません。パターン全体をコピーしてください。</string>
@@ -2237,7 +2233,6 @@
     <string name="validation_wg_signature_hex">&lt;b&gt; には偶数桁の 16 進数が必要です（例：&lt;b 0x1a2b&gt;）。</string>
     <string name="validation_wg_signature_length">&lt;%1$s&gt; にはバイト数の整数が必要です（例：&lt;%1$s 16&gt;）。</string>
     <string name="validation_wg_signature_unknown">不明なタグ &lt;%1$s&gt; です。&lt;b 0x...&gt;、&lt;r N&gt;、&lt;rc N&gt;、&lt;rd N&gt;、&lt;dz N&gt;、&lt;t&gt;、&lt;d&gt;、&lt;ds&gt; のいずれかを使用してください。</string>
-    <string name="validation_wg_dns_ignored">無視されます。Throne は独自の DNS 設定で名前解決します。</string>
     <string name="validation_wg_unknown_setting">不明な設定のため、無視されました。</string>
     <string name="validation_wg_peer_sections">%1$s 個ある [Peer] セクションのうち、最後の 1 つのみ使用されます。</string>
     <string name="validation_wg_allowed_ips_ignored">無視されます。Throne はこのプロファイルのすべてのトラフィックをトンネル経由で送ります。</string>
@@ -2442,7 +2437,6 @@
     <string name="validation_slipnet_type">この SlipNet プロファイルタイプには対応していません。</string>
     <string name="validation_slipnet_encrypted">暗号化された SlipNet リンクは読み取れません。SlipNet から暗号化なしでプロファイルをエクスポートしてください。</string>
     <string name="validation_masterdns_method_id">不明な暗号化方式です。0〜5 の数値を使用してください。</string>
-    <string name="validation_masterdns_socks_credentials">SOCKS のユーザー名とパスワードはローカルリスナーを保護するだけで、このプロファイルはリスナーを開かないため、無視されました。</string>
     <string name="validation_masterdns_backend">MasterDNS が運べるのは SOCKS またはカスタムサービスのみです。</string>
     <string name="validation_masterdns_proxy_link">リンクにはトンネル経由で動かすプロキシも含まれています。そのプロキシを別途インポートし、このプロファイルの上にチェーンしてください。</string>
     <string name="validation_masterdns_format">この MasterDNS リンク形式には対応していません。</string>

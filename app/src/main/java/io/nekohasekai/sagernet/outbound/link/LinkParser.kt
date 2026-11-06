@@ -12,11 +12,26 @@ class LinkQuery(@JvmField val items: List<Pair<String, String>>) {
     fun valueFully(key: String): String = LinkCodec.decodeFully(value(key))
 
     /**
-     * formDecodedQueryValue (utils.cpp:20-26): the FullyEncoded value with '+' read as a space, as urlencode()-style
-     * panels send it, then percent-decoded; an encoded %2B stays a '+'.
+     * queryValueDecodings (utils.cpp): readings of a JSON query value, likeliest first; [spaceFirst] breaks the tie for
+     * a bare '+' with neither %20 nor %2B.
      */
-    fun valueFormDecoded(key: String): String =
-        LinkCodec.decodeFully(LinkCodec.recodeQueryFullyEncoded(value(key)).replace("+", "%20"))
+    fun valueDecodings(key: String, spaceFirst: Boolean): List<String> =
+        percentDecodings(LinkCodec.recodeQueryFullyEncoded(value(key)), spaceFirst, 0)
+
+    private fun percentDecodings(raw: String, spaceFirst: Boolean, depth: Int): List<String> {
+        val literal = LinkCodec.decodeFully(raw)
+        val form = LinkCodec.decodeFully(raw.replace("+", "%20"))
+        // Form encoders (Go url.Values, quote_plus, URLEncoder) write a space as '+' and escape a real one; %20 beside a bare '+' means it is literal.
+        val hasEscapedPlus = raw.contains("%2B") || raw.contains("%2b")
+        val formFirst = raw.contains('+') && (hasEscapedPlus || (spaceFirst && !raw.contains("%20")))
+        val result = LinkedHashSet<String>()
+        for (text in if (formFirst) listOf(form, literal) else listOf(literal, form)) {
+            // Some generators encode the value twice; no JSON text starts with '%'.
+            val trimmed = text.trim()
+            if (depth < 2 && trimmed.startsWith('%')) result.addAll(percentDecodings(trimmed, spaceFirst, depth + 1)) else result.add(text)
+        }
+        return result.toList()
+    }
 
     /** GetQueryValue (Utils.cpp:69-75): [default] when the item is absent OR empty. */
     fun valueOr(key: String, default: String): String = value(key).ifEmpty { default }
