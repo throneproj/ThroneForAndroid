@@ -303,6 +303,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         if (!select) {
             testPanel = TestPanelController(this, panelContainer, side = sidePanel).apply {
                 onSelectProfile = { id -> selectProfile(id, toggleOnTv = false) }
+                onSorted = { groupId, id -> revealSorted(groupId, id) }
                 onHeightChanged = { height ->
                     if (height != panelHeight) {
                         panelHeight = height
@@ -410,6 +411,16 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
             if (pager.currentItem != index) pager.setCurrentItem(index, false)
             val list = listFor(groupId)
             if (list != null && list.adapter.loaded) list.revealProfile(id) else pendingReveal = groupId to id
+        }
+    }
+
+    /** After a sort from the test panel: brings the group's fastest profile into view once the new order is shown. */
+    private fun revealSorted(groupId: Long, profileId: Long) {
+        val owner = viewLifecycleOwnerLiveData.value ?: return
+        owner.lifecycleScope.launch {
+            val list = listFor(groupId) ?: return@launch
+            list.adapter.reload()?.join()
+            if (query.isEmpty() && !selection.active) list.revealProfile(profileId)
         }
     }
 
