@@ -82,6 +82,9 @@ class TestPanelController(
     /** Called with the group and its fastest profile once a sort from the panel has been written. */
     var onSorted: ((groupId: Long, profileId: Long) -> Unit)? = null
 
+    /** Called when the panel starts to appear, and when it has gone (after sliding out). */
+    var onVisibilityChanged: ((visible: Boolean) -> Unit)? = null
+
     /**
      * The panel's height in pixels above the navigation bar while shown, 0 when hidden (e.g. to pad the list it
      * overlays). The panel reaches down to the bottom of [container]'s parent. Always 0 beside the list.
@@ -844,6 +847,7 @@ class TestPanelController(
         if (groupId <= 0) return
         val bySpeed = s.kind == TestSpec.KIND_SPEED && !s.countryMode
         val upload = s.speedMode == TestUiState.SPEED_MODE_UPLOAD
+        val fastest = s.ranking.firstOrNull()?.profileId
         runOnDefaultDispatcher {
             val sorted = if (bySpeed) {
                 // Kept like the latency sort, so the next stored result re-sorts instead of undoing the order.
@@ -855,6 +859,7 @@ class TestPanelController(
             onMainDispatcher {
                 if (fragment.isAdded) {
                     fragment.snackbar(if (sorted) R.string.test_panel_sorted else R.string.test_panel_sort_busy).show()
+                    if (sorted && fastest != null) onSorted?.invoke(groupId, fastest)
                 }
             }
         }
