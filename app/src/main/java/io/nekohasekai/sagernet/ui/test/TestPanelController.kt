@@ -79,8 +79,8 @@ class TestPanelController(
     /** Selects a profile like a tap in the list; by default the panel selects it and reloads a running service. */
     var onSelectProfile: ((profileId: Long) -> Unit)? = null
 
-    /** Called when the panel starts to appear, and when it has gone (after sliding out). */
-    var onVisibilityChanged: ((visible: Boolean) -> Unit)? = null
+    /** Called with the group and its fastest profile once a sort from the panel has been written. */
+    var onSorted: ((groupId: Long, profileId: Long) -> Unit)? = null
 
     /**
      * The panel's height in pixels above the navigation bar while shown, 0 when hidden (e.g. to pad the list it
