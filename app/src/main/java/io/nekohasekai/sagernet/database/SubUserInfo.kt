@@ -89,7 +89,8 @@ data class SubUserInfo(
 
         /**
          * ParseSubUserInfo (Group.cpp:44-65): a Subscription-UserInfo value such as
-         * `upload=1; download=2; total=3; expire=1700000000`. An expire in milliseconds is taken as seconds.
+         * `upload=1; download=2; total=3; expire=1700000000`. An expire in milliseconds is taken as seconds; traffic
+         * without a total is an unlimited quota (#139).
          */
         @JvmStatic
         fun parseHeader(info: String): SubUserInfo {
@@ -97,8 +98,16 @@ data class SubUserInfo(
             for (match in USER_INFO.findAll(info)) {
                 val value = match.groupValues[2].toLongOrNull() ?: 0L
                 when (match.groupValues[1].lowercase()) {
-                    "upload" -> result.upload = value
-                    "download" -> result.download = value
+                    "upload" -> {
+                        result.upload = value
+                        result.hasQuota = true
+                    }
+
+                    "download" -> {
+                        result.download = value
+                        result.hasQuota = true
+                    }
+
                     "total" -> {
                         result.total = value
                         result.hasQuota = true
