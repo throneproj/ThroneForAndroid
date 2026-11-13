@@ -443,6 +443,7 @@ class WireGuard : Outbound("wireguard") {
     // so the name and dial fields stay untouched.
     private fun parseIni(text: String): Boolean {
         var peers = 0
+        var mtuSet = false
         val allowedIps = ArrayList<String>()
         for (line in QtStrings.split(text, "\n")) {
             // wg and wg-quick cut every line at '#'; keys and signature tags never contain one.
@@ -463,7 +464,10 @@ class WireGuard : Outbound("wireguard") {
                 "privatekey" -> private_key = value
                 // wg-quick allows the key to repeat, e.g. one line per address family.
                 "address" -> address.addAll(QtStrings.splitSkipEmpty(value.replace(" ", ""), ","))
-                "mtu" -> if (wireguardKeep(rawKey, value, Validation.Rules.int(0, WIREGUARD_INT_MAX))) mtu = QtStrings.toInt(value)
+                "mtu" -> if (wireguardKeep(rawKey, value, Validation.Rules.int(0, WIREGUARD_INT_MAX))) {
+                    mtu = QtStrings.toInt(value)
+                    mtuSet = true
+                }
                 "publickey" -> peer.public_key = value
                 "presharedkey", "preshared_key", "psk" -> peer.pre_shared_key = value
                 "persistentkeepalive", "persistent_keepalive" ->
@@ -516,6 +520,9 @@ class WireGuard : Outbound("wireguard") {
                 else -> ParseDiag.warn(rawKey, vtr(R.string.validation_wg_unknown_setting))
             }
         }
+        // Android-only (#135): wg-quick derives a missing MTU from the route, which Android cannot, so the official
+        // WireGuard / AmneziaWG Android clients' 1280 replaces the desktop's 1420.
+        if (!mtuSet) mtu = 1280
         if (peers > 1) ParseDiag.warn("[Peer]", vtr(R.string.validation_wg_peer_sections, peers.toString()))
         if (allowedIps.isNotEmpty() && !wireguardFullTunnel(allowedIps)) {
             ParseDiag.warn("AllowedIPs", vtr(R.string.validation_wg_allowed_ips_ignored), allowedIps.joinToString(", "))
