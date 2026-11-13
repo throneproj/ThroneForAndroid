@@ -975,6 +975,7 @@
     <string name="profiles_copy_links">复制链接</string>
     <string name="profiles_copy_share_links">分享链接</string>
     <string name="profiles_copy_throne_links">Throne 链接</string>
+    <string name="qr_too_large">链接太多，无法放入一个二维码。</string>
     <string name="profiles_delete_failed">无法删除这些配置。</string>
     <string name="profiles_empty">此分组中没有配置</string>
     <string name="profiles_empty_hint">使用工具栏的「添加配置」按钮从剪贴板、文件或二维码导入，或新建配置。已复制的订阅 URL 也可作为订阅添加。</string>

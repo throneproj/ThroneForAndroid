@@ -952,6 +952,7 @@
     <string name="profiles_copy_links">Копировать ссылки</string>
     <string name="profiles_copy_share_links">Ссылки для обмена</string>
     <string name="profiles_copy_throne_links">Ссылки Throne</string>
+    <string name="qr_too_large">Ссылки не помещаются в один QR-код.</string>
     <string name="profiles_delete_failed">Не удалось удалить профили.</string>
     <string name="profiles_empty">В этой группе нет профилей</string>
     <string name="profiles_empty_hint">Используйте кнопку «Добавить профиль» на панели инструментов, чтобы импортировать из буфера обмена, файла или QR-кода либо создать новый. Скопированный URL подписки тоже можно добавить как подписку.</string>

@@ -915,6 +915,7 @@
     <string name="profiles_copy_links">نسخ الروابط</string>
     <string name="profiles_copy_share_links">روابط المشاركة</string>
     <string name="profiles_copy_throne_links">روابط Throne</string>
+    <string name="qr_too_large">لا تتسع الروابط في رمز QR واحد.</string>
     <string name="profiles_delete_failed">تعذّر حذف الملفات.</string>
     <string name="profiles_empty">لا ملفات في هذه المجموعة</string>
     <string name="profiles_empty_hint">استخدم زر «إضافة ملف تعريف» في شريط الأدوات للاستيراد من الحافظة أو ملف أو رمز QR، أو للإنشاء. يمكن إضافة رابط اشتراك منسوخ كاشتراك أيضًا.</string>

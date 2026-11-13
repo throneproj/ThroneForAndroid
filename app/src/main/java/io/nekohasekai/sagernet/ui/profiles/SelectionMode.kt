@@ -12,8 +12,10 @@ import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.ktx.confirmAction
 import io.nekohasekai.sagernet.ktx.nameList
+import io.nekohasekai.sagernet.ktx.showAllowingStateLoss
 import io.nekohasekai.sagernet.ktx.snackbar
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
+import io.nekohasekai.sagernet.widget.QRCodeDialog
 
 /**
  * Multi-selection in the current tab (the desktop's selected rows): long press starts it, taps toggle, the toolbar
@@ -130,6 +132,8 @@ class SelectionMode(private val host: ConfigurationFragment) {
             R.id.action_selection_move -> moveToGroup(ids)
             R.id.action_selection_copy_links -> copyLinks(ids, throne = false)
             R.id.action_selection_copy_throne -> copyLinks(ids, throne = true)
+            R.id.action_selection_qr_links -> showQr(ids, throne = false)
+            R.id.action_selection_qr_throne -> showQr(ids, throne = true)
             else -> return false
         }
         return true
@@ -209,19 +213,46 @@ class SelectionMode(private val host: ConfigurationFragment) {
     private fun copyLinks(ids: List<Long>, throne: Boolean) {
         finish()
         host.launchIo {
-            val position = ids.withIndex().associate { it.value to it.index }
-            val links = ProfileManager.getProfiles(ids).sortedBy { position[it.id] }.mapNotNull { profile ->
-                val link = if (throne) profile.exportJsonLink() else profile.exportLink().ifEmpty { profile.exportJsonLink() }
-                link.takeIf { it.isNotEmpty() }
-            }
+            val links = links(ids, throne).map { it.first }
             if (links.isEmpty()) return@launchIo
+            host.onUi { copy(links) }
+        }
+    }
+
+    /** Android extra (#140): the links copyLinks would copy, in one code; when they do not fit, the copy is offered. */
+    private fun showQr(ids: List<Long>, throne: Boolean) {
+        finish()
+        host.launchIo {
+            val named = links(ids, throne)
+            if (named.isEmpty()) return@launchIo
+            val links = named.map { it.first }
+            val text = links.joinToString("\n")
+            val fits = QRCodeDialog.fits(text)
             host.onUi {
-                val copied = SagerNet.trySetPrimaryClip(links.joinToString("\n"))
-                snackbar(
-                    if (copied) resources.getQuantityString(R.plurals.profiles_copied, links.size, links.size)
-                    else getString(R.string.action_export_err)
-                ).show()
+                if (fits) {
+                    QRCodeDialog(text, requireContext().nameList(named.map { it.second }, limit = 3))
+                        .showAllowingStateLoss(parentFragmentManager)
+                } else {
+                    snackbar(R.string.qr_too_large).setAction(R.string.profiles_copy_links) { copy(links) }.show()
+                }
             }
         }
+    }
+
+    /** The links of [ids] in list order with their profile names, profiles without one left out. */
+    private fun links(ids: List<Long>, throne: Boolean): List<Pair<String, String>> {
+        val position = ids.withIndex().associate { it.value to it.index }
+        return ProfileManager.getProfiles(ids).sortedBy { position[it.id] }.mapNotNull { profile ->
+            val link = if (throne) profile.exportJsonLink() else profile.exportLink().ifEmpty { profile.exportJsonLink() }
+            if (link.isEmpty()) null else link to profile.displayName()
+        }
+    }
+
+    private fun ConfigurationFragment.copy(links: List<String>) {
+        val copied = SagerNet.trySetPrimaryClip(links.joinToString("\n"))
+        snackbar(
+            if (copied) resources.getQuantityString(R.plurals.profiles_copied, links.size, links.size)
+            else getString(R.string.action_export_err)
+        ).show()
     }
 }

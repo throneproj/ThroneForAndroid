@@ -1153,6 +1153,7 @@
     <string name="profiles_copy_links">Salin tautan</string>
     <string name="profiles_copy_share_links">Tautan berbagi</string>
     <string name="profiles_copy_throne_links">Tautan Throne</string>
+    <string name="qr_too_large">Tautan tidak muat dalam satu kode QR.</string>
     <plurals name="profiles_copied">
         <item quantity="one">Menyalin %d item</item>
         <item quantity="other">Menyalin %d item</item>

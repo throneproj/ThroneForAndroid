@@ -1149,6 +1149,7 @@
     <string name="profiles_copy_links">Copier les liens</string>
     <string name="profiles_copy_share_links">Liens de partage</string>
     <string name="profiles_copy_throne_links">Liens Throne</string>
+    <string name="qr_too_large">Les liens ne tiennent pas dans un seul code QR.</string>
     <plurals name="profiles_copied">
         <item quantity="one">%d élément copié</item>
         <item quantity="other">%d éléments copiés</item>

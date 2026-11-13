@@ -1311,6 +1311,7 @@
     <string name="profiles_copy_links">Copy links</string>
     <string name="profiles_copy_share_links">Share links</string>
     <string name="profiles_copy_throne_links">Throne links</string>
+    <string name="qr_too_large">The links do not fit in one QR code.</string>
     <plurals name="profiles_copied">
         <item quantity="one">Copied %d item</item>
         <item quantity="other">Copied %d items</item>

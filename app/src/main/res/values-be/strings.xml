@@ -856,6 +856,7 @@
     <string name="profiles_copy_links">Скапіяваць спасылкі</string>
     <string name="profiles_copy_share_links">Спасылкі абагульвання</string>
     <string name="profiles_copy_throne_links">Спасылкі Throne</string>
+    <string name="qr_too_large">Спасылкі не змяшчаюцца ў адзін QR-код.</string>
     <string name="profiles_delete_failed">Профілі не атрымалася выдаліць.</string>
     <string name="profiles_empty">Профіляў у гэтай групе няма</string>
     <string name="profiles_empty_hint">Выкарыстоўвайце кнопку «Дадаць профіль» на панэлі інструментаў, каб імпартаваць з буфера абмену, файла або QR-кода, або стварыць яго. Скапіяваны URL падпіскі таксама можа быць дададзены як падпіска.</string>

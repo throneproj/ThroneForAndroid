@@ -1157,6 +1157,7 @@
     <string name="profiles_copy_links">Bağlantıları kopyala</string>
     <string name="profiles_copy_share_links">Paylaşma bağlantıları</string>
     <string name="profiles_copy_throne_links">Throne bağlantıları</string>
+    <string name="qr_too_large">Bağlantılar tek bir QR koduna sığmıyor.</string>
     <plurals name="profiles_copied">
         <item quantity="one">%d öğe kopyalandı</item>
         <item quantity="other">%d öğe kopyalandı</item>

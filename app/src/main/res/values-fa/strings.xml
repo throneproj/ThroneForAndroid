@@ -978,6 +978,7 @@
     <string name="profiles_copy_links">کپی پیوندها</string>
     <string name="profiles_copy_share_links">پیوندهای اشتراک‌گذاری</string>
     <string name="profiles_copy_throne_links">پیوندهای Throne</string>
+    <string name="qr_too_large">پیوندها در یک کد QR جا نمی‌شوند.</string>
     <string name="profiles_delete_failed">حذف پروفایل‌ها ممکن نشد.</string>
     <string name="profiles_empty">پروفایلی در این گروه نیست</string>
     <string name="profiles_empty_hint">از دکمه «افزودن پروفایل» در نوار ابزار برای درون‌ریزی از حافظه، فایل یا کد QR، یا ایجاد استفاده کنید. URL اشتراک کپی‌شده نیز می‌تواند به‌عنوان اشتراک اضافه شود.</string>

@@ -1153,6 +1153,7 @@
     <string name="profiles_copy_links">Kopier lenker</string>
     <string name="profiles_copy_share_links">Delingslenker</string>
     <string name="profiles_copy_throne_links">Throne-lenker</string>
+    <string name="qr_too_large">Lenkene får ikke plass i én QR-kode.</string>
     <plurals name="profiles_copied">
         <item quantity="one">Kopierte %d element</item>
         <item quantity="other">Kopierte %d elementer</item>

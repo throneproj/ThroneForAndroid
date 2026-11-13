@@ -17,6 +17,8 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import com.google.zxing.qrcode.encoder.Encoder
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.dp2px
@@ -30,7 +32,18 @@ class QRCodeDialog() : DialogFragment() {
     companion object {
         private const val KEY_URL = "io.nekohasekai.sagernet.QRCodeDialog.KEY_URL"
         private const val KEY_NAME = "io.nekohasekai.sagernet.QRCodeDialog.KEY_NAME"
-        private val iso88591 = StandardCharsets.ISO_8859_1.newEncoder()
+
+        private fun hints(text: String): Map<EncodeHintType, Any> =
+            if (StandardCharsets.ISO_8859_1.newEncoder().canEncode(text)) emptyMap()
+            else mapOf(EncodeHintType.CHARACTER_SET to StandardCharsets.UTF_8.name())
+
+        /** Whether [text] fits in one code at the error correction the dialog draws with (zxing's default, L). */
+        fun fits(text: String): Boolean = try {
+            Encoder.encode(text, ErrorCorrectionLevel.L, hints(text))
+            true
+        } catch (e: WriterException) {
+            false
+        }
     }
 
     constructor(url: String, displayName: String) : this() {
@@ -71,9 +84,7 @@ class QRCodeDialog() : DialogFragment() {
         val url = arguments?.getString(KEY_URL)!!
         val displayName = arguments?.getString(KEY_NAME)!!
 
-        val hints = mutableMapOf<EncodeHintType, Any>()
-        if (!iso88591.canEncode(url)) hints[EncodeHintType.CHARACTER_SET] = StandardCharsets.UTF_8.name()
-        val qrBits = MultiFormatWriter().encode(url, BarcodeFormat.QR_CODE, size, size, hints)
+        val qrBits = MultiFormatWriter().encode(url, BarcodeFormat.QR_CODE, size, size, hints(url))
         LinearLayout(context).apply {
             // Layout
             orientation = LinearLayout.VERTICAL

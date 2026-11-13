@@ -969,6 +969,7 @@
     <string name="profiles_copy_links">複製連結</string>
     <string name="profiles_copy_share_links">分享連結</string>
     <string name="profiles_copy_throne_links">Throne 連結</string>
+    <string name="qr_too_large">連結太多，無法放進一個 QR Code。</string>
     <string name="profiles_delete_failed">無法刪除這些配置。</string>
     <string name="profiles_empty">此分組中沒有配置</string>
     <string name="profiles_empty_hint">使用工具欄的「新增配置」按鈕從剪貼簿、檔案或二維碼匯入，或新建配置。已複製的訂閱 URL 也可作為訂閱新增。</string>

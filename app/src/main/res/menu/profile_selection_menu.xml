@@ -51,5 +51,18 @@
                     android:title="@string/profiles_copy_throne_links" />
             </menu>
         </item>
+        <item
+            android:id="@+id/action_selection_qr"
+            android:title="@string/share_qr_nfc"
+            app:showAsAction="never">
+            <menu>
+                <item
+                    android:id="@+id/action_selection_qr_links"
+                    android:title="@string/profiles_copy_share_links" />
+                <item
+                    android:id="@+id/action_selection_qr_throne"
+                    android:title="@string/profiles_copy_throne_links" />
+            </menu>
+        </item>
     </group>
 </menu>

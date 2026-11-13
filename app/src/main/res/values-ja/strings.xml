@@ -950,6 +950,7 @@
     <string name="profiles_copy_links">リンクをコピー</string>
     <string name="profiles_copy_share_links">共有リンク</string>
     <string name="profiles_copy_throne_links">Throne リンク</string>
+    <string name="qr_too_large">リンクが 1 つの QR コードに収まりません。</string>
     <string name="profiles_delete_failed">プロファイルを削除できませんでした。</string>
     <string name="profiles_empty">このグループにプロファイルはありません</string>
     <string name="profiles_empty_hint">ツールバーの「プロファイルを追加」ボタンから、クリップボード・ファイル・QR コードをインポートするか、新規作成ができます。コピーした購読 URL は購読として追加もできます。</string>
