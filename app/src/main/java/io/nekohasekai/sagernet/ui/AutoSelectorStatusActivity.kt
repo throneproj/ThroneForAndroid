@@ -351,6 +351,18 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
             val next = (status.nextRoundMs - now) / 1000
             if (status.nextRoundMs > 0 && next > 0) parts.add(getString(R.string.autosel_footer_next_round, next))
         }
+        val tier = status.selectedPriority
+        if (status.prioritized && tier >= 0) {
+            parts.add(getString(R.string.autosel_footer_tier, tier + 1, AutoSelectorTexts.tierLabel(this, status, tier)))
+            if (failback(status).selectedPriority > 0) {
+                parts.add(
+                    getString(R.string.autosel_footer_failback, status.failbackChecks, (status.failbackDelayMs / 1000).toInt())
+                )
+            }
+        }
+        if (status.passive) {
+            parts.add(resources.getQuantityString(R.plurals.autosel_footer_sites, status.sitesRemembered, status.sitesRemembered))
+        }
         status.member(status.pinnedId)?.let { member ->
             val pinned = member.name.ifEmpty { profiles[member.id]?.displayName() ?: member.tag }
             parts.add(
@@ -366,8 +378,19 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
         return parts.joinToString(" ")
     }
 
-    /** noteText (dialog_auto_selector.cpp:85-106); a row of the last build tells the choice and the last test error. */
-    private fun note(row: Row): String {
+    /**
+     * FailbackContext: [selectedPriority] is -1 unless the priority strategy chose the member in use; a pin holds it
+     * whatever the tiers say.
+     */
+    private class Failback(val selectedPriority: Int = -1, val checks: Int = 0, val delayMs: Long = 0)
+
+    private fun failback(status: AutoSelectorStatus): Failback {
+        if (!status.prioritized || (status.pinnedId >= 0 && status.pinnedId == status.selectedId)) return Failback()
+        return Failback(status.selectedPriority, status.failbackChecks, status.failbackDelayMs)
+    }
+
+    /** noteText (dialog_auto_selector.cpp:119-153); a row of the last build tells the choice and the last test error. */
+    private fun note(row: Row, failback: Failback = failback(status)): String {
         val member = row.member
         if (row.pinned) {
             return getString(
@@ -382,6 +405,20 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
         if (member == null) {
             val profile = row.profile ?: return getString(R.string.autosel_note_missing)
             return if (profile.isUnavailable()) profile.testError.orEmpty() else ""
+        }
+        val now = System.currentTimeMillis()
+        if (member.priority < failback.selectedPriority && member.isUsable) {
+            if (member.streak < failback.checks) {
+                return getString(R.string.autosel_note_recovering_checks, member.streak, failback.checks)
+            }
+            val remainingMs = member.lastFailureMs + failback.delayMs - now
+            if (remainingMs > 0) return getString(R.string.autosel_note_recovering_in, (remainingMs + 999) / 1000)
+            return getString(R.string.autosel_note_recovering)
+        }
+        if (member.isSuspect) {
+            val remainingMs = member.suspectUntilMs - now
+            if (remainingMs > 0) return getString(R.string.autosel_note_suspect_in, (remainingMs + 999) / 1000)
+            return getString(R.string.autosel_note_suspect)
         }
         return when {
             member.state == AutoSelectorStatus.STATE_COOLDOWN -> {
@@ -405,6 +442,7 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
         AutoSelectorStatus.STATE_UNTESTED -> getString(R.string.autosel_state_untested)
         AutoSelectorStatus.STATE_DEAD -> getString(R.string.autosel_state_dead)
         AutoSelectorStatus.STATE_COOLDOWN -> getString(R.string.autosel_state_cooldown)
+        AutoSelectorStatus.STATE_SUSPECT -> getString(R.string.autosel_state_suspect)
         else -> member.state
     }
 
@@ -422,6 +460,10 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
         val member = row.member
         if (member != null) {
             lines.add(getString(R.string.autosel_row_state, stateText(member)))
+            if (status.prioritized) {
+                val label = AutoSelectorTexts.tierLabel(this, status, member.priority)
+                lines.add(getString(R.string.autosel_row_tier, member.priority + 1, label))
+            }
             if (member.samples > 0 && member.averageMs > 0) {
                 lines.add(getString(R.string.autosel_row_latency, member.averageMs, member.minMs, member.maxMs))
                 lines.add(getString(R.string.autosel_row_jitter, member.deviationMs))
@@ -431,6 +473,17 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
             }
             if (member.dialTotal > 0) {
                 lines.add(getString(R.string.autosel_row_connects, member.dialTotal - member.dialFail, member.dialTotal))
+            }
+            if (status.passive) {
+                // realTrafficTip (dialog_auto_selector.cpp:67-78) under the Real traffic cell.
+                if (member.passiveAnswered > 0 || member.passiveFailed > 0) {
+                    lines.add(getString(R.string.autosel_row_traffic, member.passiveAnswered, member.passiveFailed))
+                }
+                lines.add(
+                    if (member.firstByteMs > 0) getString(R.string.autosel_traffic_first_reply, member.firstByteMs)
+                    else getString(R.string.autosel_traffic_first_reply_none)
+                )
+                lines.add(getString(R.string.autosel_traffic_recent, member.recentAnswered, member.recentFailed))
             }
             lines.add(getString(R.string.autosel_row_last_ok, AutoSelectorTexts.ago(this, member.lastOkMs)))
             if (member.lastError.isNotEmpty()) lines.add(getString(R.string.autosel_row_error, member.lastError))
@@ -511,6 +564,9 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
 
             val member = item.member
             val profile = item.profile
+            val tier = member?.priority?.takeIf { status.prioritized }
+            row.tier.isVisible = tier != null
+            if (tier != null) row.tier.text = getString(R.string.autosel_tier_short, tier + 1)
             if (member != null) {
                 row.latency.text = if (member.averageMs > 0) getString(R.string.autosel_ms, member.averageMs) else stateText(member)
                 val latency = if (member.averageMs > 0) member.averageMs else if (member.isDead) -1 else 0

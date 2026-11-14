@@ -250,7 +250,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         headerAdapter.holder?.bindErrors()
     }
 
-    private fun dnsServerProblem(text: String): String = DnsServers.parseDnsAddress(text).why
+    private fun dnsServerProblem(text: String): String = DnsServers.dnsAddressListProblem(text)
 
     /** RouteDnsEditor::bindTo: the server fields are checked only while custom DNS is chosen. */
     private fun markDns() {
@@ -349,7 +349,10 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
     private fun applyDns(p: RouteProfile): RouteDns? {
         val draft = model.dnsDraft ?: return null
         p.custom_dns = model.dnsCustom
-        val values = draft.copy(remoteDns = draft.remoteDns.trim(), directDns = draft.directDns.trim())
+        val values = draft.copy(
+            remoteDns = DnsServers.normalizeDnsAddressList(draft.remoteDns),
+            directDns = DnsServers.normalizeDnsAddressList(draft.directDns),
+        )
         if (!p.custom_dns && p.dns == null && values == model.dnsOpened) return null
         p.dns = values
         return values
@@ -360,6 +363,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         if (model.profile?.is_raw == true) {
             menu.removeItem(R.id.action_add_rule)
             menu.removeItem(R.id.action_apply)
+            menu.removeItem(R.id.action_route_tester)
         }
         return true
     }
@@ -368,6 +372,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         when (item.itemId) {
             R.id.action_add_rule -> addRule()
             R.id.action_apply -> save()
+            R.id.action_route_tester -> openTester()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -376,6 +381,20 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
     override fun onSupportNavigateUp(): Boolean {
         close()
         return true
+    }
+
+    /** Unsaved edits travel along as a draft, so the test walks the rules on screen. */
+    private fun openTester() {
+        val p = model.profile ?: return
+        val intent = Intent(this, RouteTesterActivity::class.java)
+        if (model.dirty || p.id <= 0L) {
+            val draft = p.copy().apply { name = name.trim() }
+            applyDns(draft)
+            intent.putExtra(RouteTesterActivity.EXTRA_ROUTE_DRAFT, RouteJson.profileToJson(draft))
+        } else {
+            intent.putExtra(RouteTesterActivity.EXTRA_ROUTE_ID, p.id)
+        }
+        startActivity(intent)
     }
 
     private fun close() {

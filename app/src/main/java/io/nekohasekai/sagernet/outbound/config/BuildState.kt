@@ -29,6 +29,8 @@ internal object Tags {
     const val MAIN_CHAIN_PREFIX = "config"
     const val ROUTE_CHAIN_PREFIX = "route"
     const val POOL_CHAIN_PREFIX = "pool"
+    const val SELECTOR_UPSTREAM_PREFIX = "upstream"
+    const val CHAIN_SELECTOR = "auto-selector"
     const val TEST_CHAIN_PREFIX = "proxy"
     const val TEST_XRAY_FULL_PREFIX = "xrayfull"
     const val BRIDGE_PREFIX = "bridge"
@@ -37,8 +39,25 @@ internal object Tags {
 /** hopTag (generate.cpp:76). */
 internal fun hopTag(prefix: String, index: Int): String = "$prefix-$index"
 
-/** bridgeTagFor (generate.cpp:78-80): the sing-box inbound an Xray -> sing-box bridge lands on. */
-internal fun bridgeTagFor(singIngressTag: String): String = "${Tags.BRIDGE_PREFIX}-$singIngressTag"
+/** dnsRoleTags (generate.cpp): the server tags of a DNS role, the lead keeping the plain tag that resolvers pin. */
+internal fun dnsRoleTags(lead: String, count: Int): List<String> = List(count) { if (it == 0) lead else hopTag(lead, it) }
+
+/** DnsRace (generate.cpp): a role tag (dns-remote, dns-direct) -> its servers, lead first, and the race groups emitted. */
+internal class DnsRace {
+    val members = HashMap<String, List<String>>()
+    var groups = 0
+}
+
+/**
+ * bridgeTagFor (generate.cpp): the sing-box inbound the Xray -> sing-box bridge [idx] lands on. Pool members bridging
+ * into one shared upstream repeat its ingress tag, so a repeat takes the count of the ones before it as a suffix.
+ */
+internal fun bridgeTagFor(singIngressTags: List<String>, idx: Int): String {
+    val ingress = singIngressTags[idx]
+    val repeats = (0 until idx).count { singIngressTags[it] == ingress }
+    val tag = "${Tags.BRIDGE_PREFIX}-$ingress"
+    return if (repeats == 0) tag else "$tag-$repeats"
+}
 
 /** coreBridgeConfig (generate.cpp:173-178). */
 internal class BridgeConfig(
@@ -67,6 +86,12 @@ internal class DomainSelectors {
 }
 
 /**
+ * RouteOutboundGroup (generate.cpp): a route outbound's hops wrapped in the landing / front proxy of [group], the
+ * route outbound's own group, which a deleted hop then names.
+ */
+internal class RouteOutboundGroup(val hopIds: List<Long>, val group: ChainGroup?)
+
+/**
  * BuildPrerequisites (generate.cpp:137-171) as far as Android generates them: no DNS-server hijack selectors, no
  * auxiliary endpoints and no address sets. Test builds leave it empty.
  */
@@ -89,7 +114,7 @@ internal class Prerequisites {
     val outboundMap = HashMap<Long, String>()
 
     /** One hop list per route outbound, exit first. */
-    val routeOutboundGroups = ArrayList<List<Long>>()
+    val routeOutboundGroups = ArrayList<RouteOutboundGroup>()
 
     /** route.rule_set: tag -> download URL, first-seen order. */
     val ruleSets = LinkedHashMap<String, String>()
@@ -127,6 +152,7 @@ internal class BuildState(val forTest: Boolean, val ports: PortLease) {
     var tunIPv4Cidr: String? = null
     val xrayFullConfigs = ArrayList<String>()
     var autoSelector: AutoSelectorBuild? = null
+    val routeRuleOrigins = ArrayList<RouteRuleOrigin>()
 
     val failed: Boolean get() = error.isNotEmpty()
 

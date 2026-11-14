@@ -169,6 +169,11 @@
             app:entryValues="@array/int_array_3"
             app:defaultValue="0"
             app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/baseline_send_24"
+            app:key="dial.quic_opener"
+            app:title="@string/dial_quic_opener"
+            app:summary="@string/dial_quic_opener_sum" />
     </PreferenceCategory>
 
     <moe.matsuri.nb4a.ui.EditConfigPreference

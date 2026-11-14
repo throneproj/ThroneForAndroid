@@ -24,8 +24,15 @@ class TrustTunnelSettingsActivity : BindingSettingsActivity<TrustTunnel>() {
         pbm.text("congestion_control")
         pbm.text("custom_sni")
         pbm.text("client_random")
+        pbm.text("client_random_auth_key")
         pbm.bool("health_check")
+        DialBlock.bindQuicOpener(pbm)
         TlsBlock.bind(pbm)
+    }
+
+    override fun TrustTunnel.serialize() {
+        pbm.fromCacheAll(this)
+        client_random_auth_key = client_random_auth_key.trim()
     }
 
     override fun TrustTunnel.init() {
@@ -50,11 +57,16 @@ class TrustTunnelSettingsActivity : BindingSettingsActivity<TrustTunnel>() {
     private fun tlsConflictKey(): String {
         val outbound = validationOutbound()
         val tls = outbound.tls
-        val clientRandom = outbound.client_random.isNotEmpty() && TrustTunnelChecks.trustTunnelTlsConflict(
+        val keyed = outbound.client_random.isNotEmpty() || outbound.client_random_auth_key.isNotEmpty()
+        val clientRandom = keyed && TrustTunnelChecks.trustTunnelTlsConflict(
             true, false, outbound.quic, tls.ech.enabled, tls.reality.enabled, tls.disable_sni,
             if (tls.utls.enabled) tls.utls.fingerPrint else "",
         ).isNotEmpty()
-        return if (clientRandom) "client_random" else "custom_sni"
+        return when {
+            !clientRandom -> "custom_sni"
+            outbound.client_random.isNotEmpty() -> "client_random"
+            else -> "client_random_auth_key"
+        }
     }
 
     override fun PreferenceFragmentCompat.onPreferencesCreated() {
@@ -65,6 +77,7 @@ class TrustTunnelSettingsActivity : BindingSettingsActivity<TrustTunnel>() {
         // where Go does not let the cipher suites be chosen
         onSwitch("quic") { quic ->
             for (key in arrayOf("tls.utls.fingerPrint", "tls.cipher_suites")) findPreference<Preference>(key)?.isEnabled = !quic
+            setVisible(quic, "dial.quic_opener")
         }
     }
 

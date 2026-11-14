@@ -17,6 +17,22 @@
         app:key="nameFilter"
         app:title="@string/autosel_name_filter" />
 
+    <moe.matsuri.nb4a.ui.SimpleMenuPreference
+        app:entries="@array/autosel_strategies"
+        app:entryValues="@array/autosel_strategy_values"
+        app:icon="@drawable/ic_baseline_low_priority_24"
+        app:key="strategy"
+        app:title="@string/autosel_strategy" />
+
+    <!-- The tier rows ("tiers[<i>]") are added above this one at runtime. -->
+    <Preference
+        app:icon="@drawable/ic_av_playlist_add"
+        app:isPreferenceVisible="false"
+        app:key="tiers"
+        app:persistent="false"
+        app:summary="@string/autosel_tiers_hint"
+        app:title="@string/autosel_tier_add" />
+
     <SwitchPreference
         app:icon="@drawable/ic_baseline_shuffle_24"
         app:key="balance"
@@ -138,6 +154,31 @@
             app:key="interruptOnSwitch"
             app:summary="@string/autosel_interrupt_tip"
             app:title="@string/autosel_interrupt" />
+
+        <EditTextPreference
+            app:dialogMessage="@string/autosel_failback_checks_tip"
+            app:key="failbackChecks"
+            app:title="@string/autosel_failback_checks" />
+
+        <EditTextPreference
+            app:dialogMessage="@string/autosel_failback_delay_tip"
+            app:key="failbackDelaySec"
+            app:title="@string/autosel_failback_delay" />
+
+        <SwitchPreference
+            app:key="failbackInterrupt"
+            app:summary="@string/autosel_failback_interrupt_tip"
+            app:title="@string/autosel_failback_interrupt" />
+
+        <SwitchPreference
+            app:key="passive"
+            app:summary="@string/autosel_passive_tip"
+            app:title="@string/autosel_passive" />
+
+        <EditTextPreference
+            app:dialogMessage="@string/autosel_site_memory_tip"
+            app:key="siteMemoryMins"
+            app:title="@string/autosel_site_memory" />
 
     </PreferenceCategory>
 

@@ -48,6 +48,52 @@ object AutoSelectorProfiles {
     fun existing(ids: Collection<Long>): Set<Long> =
         if (ids.isEmpty()) emptySet() else ProfileManager.getProfiles(ids.distinct()).mapTo(HashSet()) { it.id }
 
+    /** RunningSelectorOf (AutoSelectorPlan.cpp): the auto-selector a started [profile] runs, itself or a chain's selector hop. */
+    fun runningSelectorOf(profile: ProxyEntity?): ProxyEntity? {
+        if (profile == null) return null
+        if (profile.type == TYPE) return profile
+        if (!profile.isChain()) return null
+        val hops = profile.requireChain().list
+        if (hops.isEmpty()) return null
+        val rows = ProfileManager.getProfiles(hops).associateBy { it.id }
+        return hops.firstNotNullOfOrNull { id -> rows[id]?.takeIf { it.type == TYPE } }
+    }
+
+    /**
+     * SelectorBehindHops (AutoSelectorPlan.cpp): a chain whose selector hop [selector] has hops above it, or a group
+     * front proxy, so its members dial through fixed hops and a direct test says nothing about them.
+     */
+    fun selectorBehindHops(profile: ProxyEntity, selector: ProxyEntity): Boolean {
+        if (!profile.isChain()) return false
+        if (profile.requireChain().list.indexOf(selector.id) > 0) return true
+        return (SagerDatabase.groupDao.getById(profile.groupId)?.frontProxyId ?: -1L) > 0
+    }
+
+    /**
+     * The selector a start of [profile] ranks first (AutoSelectorController::rankBeforeStart): its running selector,
+     * unless that sits behind fixed hops and the core ranks the members itself; null when there is none.
+     */
+    fun rankedSelectorOf(profile: ProxyEntity?): Long? {
+        val selector = runningSelectorOf(profile) ?: return null
+        return if (profile != null && selectorBehindHops(profile, selector)) null else selector.id
+    }
+
+    /**
+     * onPoolExhausted behind fixed hops (AutoSelectorController.cpp) with DemoteAutoSelectorMembers: when the pool
+     * holds more than one build, the members of the last build move behind the rest, so the next build tries the
+     * others first. False when there is nothing else to try. Callers hold [writes].
+     */
+    fun demoteLastBuilt(id: Long): Boolean {
+        val selector = load(id) ?: return false
+        val plan = AutoSelectorPlanner(SettingsMapper.selectorStore()).plan(id, selector)
+        if (!plan.ok || plan.pool.size <= plan.build.size) return false
+        val demoted = selector.lastBuilt.toHashSet()
+        val (tail, pool) = plan.pool.partition { it in demoted }
+        selector.pool = (pool + tail).toMutableList()
+        save(id, selector)
+        return true
+    }
+
     /**
      * AutoSelectorMonitor::PersistHealth (AutoSelectorMonitor.cpp:104-135): a probed member's average becomes its
      * profile's latency, a dead one's -1 with the core's last error as the test error; softer states are inconclusive

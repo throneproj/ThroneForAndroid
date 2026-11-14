@@ -207,9 +207,9 @@ object RouteShare {
         for (key in keys) {
             if (key == "name" || key == "type") continue
             val value = obj[key]
-            // QJsonValue::toBool: anything but a JSON true leaves the rule enabled.
+            // QJsonValue::toBool: anything but a JSON true leaves the rule enabled; an endpoint rule cannot be disabled.
             if (key == "disabled") {
-                rule.disabled = value == true
+                rule.disabled = value == true && rule.type != RuleType.ENDPOINT_PREFERRED_BY.id
                 continue
             }
             if (key == "outbound") {

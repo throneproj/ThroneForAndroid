@@ -7,6 +7,7 @@ import io.nekohasekai.sagernet.outbound.common.useXraySystemCA
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
+import io.nekohasekai.sagernet.outbound.types.AutoSelector
 import io.nekohasekai.sagernet.outbound.types.Socks
 
 /** ChainBuildRequest (generate.cpp:1413-1428). */
@@ -26,6 +27,9 @@ internal class ChainRequest(
     /** Hop 0 is the WARP hop: it becomes `proxy` dialing through hop 1, which becomes `warp-bypass`. */
     val warpWrap: Boolean = false,
     val origin: HopOrigin = HopOrigin.NONE,
+    /** The directly dialed hop detours here instead; an Xray one is bridged back into sing-box for it. */
+    val tailDetour: String = "",
+    val tailResolvesViaDns: Boolean = false,
 )
 
 /** A group whose landing / front proxy a chain carries, by name. */
@@ -49,6 +53,9 @@ internal class HopChainOptions(
     val startSuffix: Int = 0,
     val markIngress: Boolean = false,
     val warpWrap: Boolean = false,
+    /** The last hop's detour, an outbound built outside this chain. */
+    val tailDetour: String = "",
+    val tailResolvesViaDns: Boolean = false,
 )
 
 /** memberBridges (generate.cpp:1563-1574): the loopback bridges one auto-selector member chain will create. */
@@ -105,8 +112,9 @@ internal class ChainBuilder(
     fun usesXrayCore(outbound: Outbound): Boolean = outbound.isXray() || outbound.isXrayFullConfig()
 
     /**
-     * proxyPathUsesXray (:434-454): a chain when any hop does, an auto-selector when any member of its build does
-     * ([selectorBuild], the plan's build list), otherwise the profile itself.
+     * proxyPathUsesXray (:434-454): a chain when any hop does (its auto-selector hop as below), an auto-selector when
+     * any member of its build does ([selectorBuild], the plan's build list of the started or the hop selector),
+     * otherwise the profile itself.
      */
     fun proxyPathUsesXray(outbound: Outbound, selectorBuild: List<Long> = emptyList()): Boolean {
         val ids = when (outbound.type) {
@@ -116,13 +124,25 @@ internal class ChainBuilder(
         }
         for (id in ids) {
             val hop = profiles.get(id) ?: continue
-            if (usesXrayCore(hop)) return true
+            if (if (hop.type == "autoselector") proxyPathUsesXray(hop, selectorBuild) else usesXrayCore(hop)) return true
         }
         return false
     }
 
-    /** bridgesFor (:1576-1592), counted like [resolveHops] counts, so the pre-reserved ports line up with the chain. */
-    fun bridgesFor(hopIds: List<Long>): MemberBridges {
+    /** chainSelectorHop (generate.cpp): the id and selector of a chain's first auto-selector hop, null when it has none. */
+    fun selectorHop(outbound: Outbound): Pair<Long, AutoSelector>? {
+        for (id in TypeAccess.chainHops(outbound)) {
+            val hop = profiles.get(id) as? AutoSelector ?: continue
+            return id to hop
+        }
+        return null
+    }
+
+    /**
+     * bridgesFor (:1576-1592), counted like [resolveHops] counts, so the pre-reserved ports line up with the chain;
+     * [tailIntoSing] when the directly dialed hop detours into a sing-box outbound (the selector's upstream).
+     */
+    fun bridgesFor(hopIds: List<Long>, tailIntoSing: Boolean = false): MemberBridges {
         var singToXray = false
         var xrayToSing = false
         var xrayFullConfig = false
@@ -135,7 +155,23 @@ internal class ChainBuilder(
             if (!xray && inXray) xrayToSing = true
             inXray = xray
         }
+        if (tailIntoSing && inXray) xrayToSing = true
         return MemberBridges(singToXray, xrayToSing, xrayFullConfig)
+    }
+
+    /** fitsBeforeUpstream (generate.cpp): [resolveHops]' budget with the shared upstream counted as one more sing-box hop. */
+    fun fitsBeforeUpstream(hopIds: List<Long>): Boolean {
+        var transitions = 0
+        var inXray = false
+        for (id in hopIds) {
+            val hop = profiles.get(id) ?: return false
+            if (hop.isXrayFullConfig() || hop.isExtraCore()) return false
+            val xray = hop.isXray()
+            if (xray != inXray) transitions++
+            inXray = xray
+        }
+        if (inXray) transitions++
+        return transitions <= 2
     }
 
     /** unwrapChain (:1296-1308): the hop ids exit first, i.e. the stored in -> out list reversed. */
@@ -169,7 +205,7 @@ internal class ChainBuilder(
     }
 
     // missingHopError: names the setting that still points at a deleted profile, so the user knows what to amend.
-    private fun missingHopError(id: Long, origin: HopOrigin): String {
+    fun missingHopError(id: Long, origin: HopOrigin): String {
         val profile = origin.profile
         if (profile != null && profile.type == "chain" && id in TypeAccess.chainHops(profile)) {
             return "Chain \"${profile.name}\" has a hop (profile id $id) that no longer exists, edit the chain to remove it"
@@ -321,6 +357,8 @@ internal class ChainBuilder(
             else if (xrayHops.isEmpty()) initialSingHops.add(hop)
             else tailingSingHops.add(hop)
         }
+        val xrayTail = req.tailDetour.isNotEmpty() && xrayHops.isNotEmpty() && tailingSingHops.isEmpty()
+        if (xrayTail) state.xrayToSingTransitioned = true
         val ports = ArrayList<Int>()
         fun bridgePort(given: Int): Int {
             if (given > 0) return given
@@ -353,7 +391,10 @@ internal class ChainBuilder(
             state.xrayToSingBridges.add(xrayToSingBridge)
         }
 
-        val leadingOpts = HopChainOptions(req.prefix, req.includeProxy, req.link, req.startSuffix, markIngress = false, warpWrap = req.warpWrap)
+        val leadingOpts = HopChainOptions(
+            req.prefix, req.includeProxy, req.link, req.startSuffix, markIngress = false, warpWrap = req.warpWrap,
+            tailDetour = if (xrayHops.isEmpty()) req.tailDetour else "", tailResolvesViaDns = req.tailResolvesViaDns,
+        )
         // The synthetic bridge socks hop counts, so the tailing numbering continues after it (D.8: proxy, config-1, config-2).
         val tailingStartSuffix = req.startSuffix + initialSingHops.size
         if (initialSingHops.isNotEmpty()) {
@@ -363,16 +404,23 @@ internal class ChainBuilder(
         if (xrayHops.isNotEmpty()) {
             buildXrayChain(xrayHops, leadingOpts, xrayToSingBridge)
             if (state.failed) return ingressTag
+            if (xrayTail) state.singIngressTags.add(req.tailDetour)
         }
         if (tailingSingHops.isNotEmpty()) {
-            buildSingboxChain(tailingSingHops, HopChainOptions(req.prefix, false, req.link, tailingStartSuffix, markIngress = true))
+            buildSingboxChain(
+                tailingSingHops,
+                HopChainOptions(
+                    req.prefix, false, req.link, tailingStartSuffix, markIngress = true,
+                    tailDetour = req.tailDetour, tailResolvesViaDns = req.tailResolvesViaDns,
+                ),
+            )
         }
         return ingressTag
     }
 
     /** resolvesHostnamesViaDnsRules (generate.cpp): endpoints and plain SOCKS4, whose server cannot resolve names (SOCKS4a can). */
-    private fun resolvesHostnamesViaDnsRules(hop: Hop): Boolean =
-        hop.outbound.isEndpoint() || TypeAccess.asSocks(hop.outbound)?.let { it.version == 4 && !it.socks4a } == true
+    fun resolvesHostnamesViaDnsRules(outbound: Outbound): Boolean =
+        outbound.isEndpoint() || TypeAccess.asSocks(outbound)?.let { it.version == 4 && !it.socks4a } == true
 
     /**
      * buildSingboxChain (:1321-1369). Hop idx gets `<prefix>-<startSuffix+idx>` (idx 0 is `proxy` for the main
@@ -399,12 +447,16 @@ internal class ChainBuilder(
             state.collectDnsTunnelDomains(hop.outbound)
             // Realm reads its STUN resolver off this key only; without it the hosts go through DNS rules (:1356-1358).
             if (TypeAccess.realmActive(hop.outbound)) obj["domain_resolver"] = jsonObjectOf("server" to Tags.DNS_DIRECT)
+            val tail = nextTag.isEmpty() && opts.tailDetour.isNotEmpty()
             if (nextTag.isNotEmpty() && opts.link) obj["detour"] = nextTag
+            if (tail) obj["detour"] = opts.tailDetour
             if (opts.warpWrap && idx == 0) obj["detour"] = Tags.WARP_BYPASS
             // A detour gets the server hostname unresolved; endpoints look it up via DNS rules, which end at dns-remote over the proxy.
-            if (nextTag.isNotEmpty() && opts.link && !hop.outbound.isEndpoint() && !obj.contains("domain_resolver") &&
-                resolvesHostnamesViaDnsRules(hops[idx + 1])
-            ) obj["domain_resolver"] = directDomainResolver(ctx)
+            val detourResolvesViaDns = if (tail) opts.tailResolvesViaDns
+            else nextTag.isNotEmpty() && opts.link && resolvesHostnamesViaDnsRules(hops[idx + 1].outbound)
+            if (detourResolvesViaDns && !hop.outbound.isEndpoint() && !obj.contains("domain_resolver")) {
+                obj["domain_resolver"] = directDomainResolver(ctx)
+            }
             if (hop.outbound.isEndpoint()) state.endpoints.add(obj) else state.outbounds.add(obj)
         }
     }

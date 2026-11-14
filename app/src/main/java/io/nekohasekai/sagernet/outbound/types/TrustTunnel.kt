@@ -43,12 +43,34 @@ object TrustTunnelChecks {
     }
 
     @JvmStatic
+    fun trustTunnelClientRandomAuthKey(text: String): String = Validation.hex(text, 0, 0)
+
+    @JvmStatic
+    fun trustTunnelClientRandomPair(clientRandom: Boolean, authKey: Boolean): String {
+        if (!clientRandom || !authKey) return ""
+        return vtr(R.string.validation_trusttunnel_client_random_pair)
+    }
+
+    /** The auth key is derived from the exact SNI on the wire, so that SNI must be a domain sent as is. */
+    @JvmStatic
+    fun trustTunnelClientRandomAuthKeySni(disableSni: Boolean, mixedCaseSni: Boolean, serverName: String): String {
+        if (disableSni) return vtr(R.string.validation_trusttunnel_auth_key_disable_sni)
+        if (mixedCaseSni) return vtr(R.string.validation_trusttunnel_auth_key_mixed_case_sni)
+        val name = serverName.trim().trimEnd('.')
+        if (name.isEmpty() || Hosts.isIpAddress(name)) return vtr(R.string.validation_trusttunnel_auth_key_sni)
+        return ""
+    }
+
+    @JvmStatic
     fun trustTunnelCredentials(username: String, password: String): String {
         if (username.isNotBlank() && password.isNotEmpty()) return ""
         return vtr(R.string.validation_trusttunnel_credentials)
     }
 
-    /** TrustTunnelTlsConflict: client_random and custom_sni against the TLS settings; a QUIC build drops uTLS and REALITY. */
+    /**
+     * TrustTunnelTlsConflict: client_random (set or derived from the auth key) and custom_sni against the TLS settings;
+     * a QUIC build drops uTLS and REALITY.
+     */
     @JvmStatic
     fun trustTunnelTlsConflict(
         clientRandom: Boolean,
@@ -76,6 +98,7 @@ class TrustTunnel : Outbound("trusttunnel") {
     @JvmField var congestion_control: String = ""
     @JvmField var custom_sni: String = ""
     @JvmField var client_random: String = ""
+    @JvmField var client_random_auth_key: String = ""
     @JvmField var health_check: Boolean = false
     @JvmField var quic: Boolean = false
     @JvmField var tls: Tls = Tls()
@@ -89,8 +112,8 @@ class TrustTunnel : Outbound("trusttunnel") {
      * TrustTunnel/TrustTunnel). Tags: 0x00 version (at most 2), 0x01 SNI, 0x02 first `host[:port]`, 0x03 custom SNI,
      * 0x05/0x06 credentials, 0x07 insecure flag, 0x08 DER certificate chain, 0x09 QUIC when the byte is 2,
      * 0x0A anti-DPI (TLS fragment on), 0x0B client random, 0x0C name, 0x0E subscription URL (must be https; the
-     * static fields stay required, so a subscription-only link fails); has_ipv6, dns_upstreams,
-     * client_random_auth_key and unknown tags are skipped.
+     * static fields stay required, so a subscription-only link fails), 0x0F client random auth key; has_ipv6,
+     * dns_upstreams and unknown tags are skipped.
      */
     fun parseFromDeepLink(payload: String): Boolean {
         val data = Base64Strict.decodeLenient(payload, urlSafe = true)
@@ -138,8 +161,11 @@ class TrustTunnel : Outbound("trusttunnel") {
                 0x0BL -> client_random = text.trim()
                 0x0CL -> name = text
                 0x0EL -> if (!text.startsWith("https://")) return false
+                0x0FL -> client_random_auth_key = text.trim()
             }
         }
+        // The auth key takes priority over client_random_prefix, as in the official client.
+        if (client_random_auth_key.isNotEmpty()) client_random = ""
         if (extraAddresses > 0) {
             ParseDiag.warn("address", vplural(R.plurals.validation_trusttunnel_extra_addresses, extraAddresses))
         }
@@ -167,6 +193,7 @@ class TrustTunnel : Outbound("trusttunnel") {
         }
         if (q.has("custom_sni")) custom_sni = q.value("custom_sni").trim()
         if (q.has("client_random")) client_random = q.value("client_random").trim()
+        if (q.has("client_random_auth_key")) client_random_auth_key = q.value("client_random_auth_key").trim()
 
         tls.parseFromLink(url)
         tls.enabled = true
@@ -186,6 +213,7 @@ class TrustTunnel : Outbound("trusttunnel") {
         if (obj.contains("quic_congestion_control")) congestion_control = importCongestion(obj.string("quic_congestion_control"))
         if (obj.contains("custom_sni")) custom_sni = obj.string("custom_sni")
         if (obj.contains("client_random")) client_random = obj.string("client_random")
+        if (obj.contains("client_random_auth_key")) client_random_auth_key = obj.string("client_random_auth_key")
         if (obj.contains("tls")) tls.parseFromJson(obj.obj("tls"))
         return true
     }
@@ -204,6 +232,7 @@ class TrustTunnel : Outbound("trusttunnel") {
         if (quic) url.addQueryItem("congestion_control", congestion_control.ifEmpty { "bbr" })
         if (custom_sni.isNotEmpty()) url.addQueryItem("custom_sni", custom_sni)
         if (client_random.isNotEmpty()) url.addQueryItem("client_random", client_random)
+        if (client_random_auth_key.isNotEmpty()) url.addQueryItem("client_random_auth_key", client_random_auth_key)
 
         url.addQueryItems(tls.exportToLink())
         url.addQueryItems(baseLinkQuery())
@@ -237,6 +266,8 @@ class TrustTunnel : Outbound("trusttunnel") {
             if (!quic && !tlsObject.contains("utls")) {
                 tlsObject["utls"] = jsonObjectOf("enabled" to true, "fingerprint" to "chrome")
             }
+            // Only the global mixed-case default can reach here with an auth key; the core rejects the pair.
+            if (client_random_auth_key.isNotEmpty()) tlsObject.remove("tls_tricks")
             obj["tls"] = tlsObject
         }
         return BuildResult(obj)
@@ -252,6 +283,7 @@ class TrustTunnel : Outbound("trusttunnel") {
         }
         if (custom_sni.isNotEmpty()) obj["custom_sni"] = Hosts.toAceHost(custom_sni)
         if (client_random.isNotEmpty()) obj["client_random"] = client_random
+        if (client_random_auth_key.isNotEmpty()) obj["client_random_auth_key"] = client_random_auth_key
     }
 
     /** trusttunnel.cpp:221-224. */
@@ -267,10 +299,23 @@ class TrustTunnel : Outbound("trusttunnel") {
         issues.addIssue(Severity.Error, "custom_sni", CommonChecks.serverName(custom_sni), custom_sni)
         // The server grants access by this prefix, so it is not echoed.
         issues.addIssue(Severity.Error, "client_random", TrustTunnelChecks.trustTunnelClientRandom(client_random))
+        issues.addIssue(Severity.Error, "client_random_auth_key", TrustTunnelChecks.trustTunnelClientRandomAuthKey(client_random_auth_key))
+        issues.addIssue(
+            Severity.Error, "client_random_auth_key",
+            TrustTunnelChecks.trustTunnelClientRandomPair(client_random.isNotEmpty(), client_random_auth_key.isNotEmpty()),
+        )
+        if (client_random_auth_key.isNotEmpty()) {
+            val sni = custom_sni.ifEmpty { tls.server_name.ifEmpty { server } }
+            issues.addIssue(
+                Severity.Error, "client_random_auth_key",
+                TrustTunnelChecks.trustTunnelClientRandomAuthKeySni(tls.disable_sni, tls.tls_tricks, sni),
+            )
+        }
         issues.addIssue(
             Severity.Error, "tls",
             TrustTunnelChecks.trustTunnelTlsConflict(
-                client_random.isNotEmpty(), custom_sni.isNotEmpty(), quic, tls.ech.enabled, tls.reality.enabled,
+                client_random.isNotEmpty() || client_random_auth_key.isNotEmpty(), custom_sni.isNotEmpty(), quic,
+                tls.ech.enabled, tls.reality.enabled,
                 tls.disable_sni, if (tls.utls.enabled) tls.utls.fingerPrint else "",
             ),
         )

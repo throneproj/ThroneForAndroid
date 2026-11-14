@@ -10,4 +10,10 @@ import io.nekohasekai.sagernet.outbound.Outbound
  */
 fun interface ProfileProvider {
     fun get(id: Long): Outbound?
+
+    /** The group of profile [id] (GroupsRepo::GetGroup(ent->gid)); null when the profile or its group does not exist. */
+    fun groupOf(id: Long): ProfileGroup? = null
 }
+
+/** A group's landing / front proxy (any id <= 0 is none) and its name, for errors. */
+class ProfileGroup(@JvmField val landingProxyId: Long, @JvmField val frontProxyId: Long, @JvmField val name: String)

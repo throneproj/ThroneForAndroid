@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.bg.proto
 
 import io.nekohasekai.sagernet.bg.AbstractInstance
 import io.nekohasekai.sagernet.bg.CoreRuntime
+import io.nekohasekai.sagernet.bg.RunningRouteRules
 import io.nekohasekai.sagernet.bg.SingBoxDashboard
 import io.nekohasekai.sagernet.bg.XrayGeoAssets
 import io.nekohasekai.sagernet.database.DataStore
@@ -120,7 +121,7 @@ abstract class BoxInstance(
             }
             throw error
         }
-        CoreRuntime.attachRunning(box, profile.id)
+        CoreRuntime.attachRunning(box, profile.id, RunningRouteRules(config.routeRuleOrigins, config.outboundNames, routeId))
         if (deferRuleSets) DeferredRuleSets.afterStart(box, config.coreConfig)
     }
 

@@ -51,9 +51,20 @@
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp">
 
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/pin_icon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="4dp"
+                        android:contentDescription="@string/profiles_pinned"
+                        android:visibility="gone"
+                        app:srcCompat="@drawable/ic_baseline_push_pin_24"
+                        app:tint="?attr/accentOrTextSecondary" />
+
                     <TextView
                         android:id="@+id/profile_name"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:maxLines="2"
                         android:ellipsize="end"

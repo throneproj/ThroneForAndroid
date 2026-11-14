@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.outbound.config
 
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.validation.vtr
 import io.nekohasekai.sagernet.outbound.BuildContext
 import io.nekohasekai.sagernet.outbound.QtStrings
@@ -145,6 +146,31 @@ object DnsServers {
         }
         return DnsAddressParse(DnsAddress(scheme, Hosts.toAceHost(host), port, path), "")
     }
+
+    /**
+     * SplitDnsAddresses (generate.cpp): a DNS setting holds one or more comma-separated addresses, each parsed by
+     * [parseDnsAddress]; several are raced and the first definitive answer wins. Trimmed, without empties or repeats.
+     */
+    @JvmStatic
+    fun splitDnsAddresses(text: String): List<String> = Validation.items(text, Validation.Split.Comma).distinct()
+
+    /** DnsAddressListProblem: "" when every address parses, else why, naming the bad address when there are several. */
+    @JvmStatic
+    fun dnsAddressListProblem(text: String): String {
+        val addresses = splitDnsAddresses(text)
+        if (addresses.isEmpty()) return vtr(R.string.validation_dns_empty)
+        for ((i, address) in addresses.withIndex()) {
+            val parsed = parseDnsAddress(address)
+            if (parsed.address != null) continue
+            if (addresses.size == 1) return parsed.why
+            return vtr(R.string.validation_dns_server_item, (i + 1).toString(), address, parsed.why)
+        }
+        return ""
+    }
+
+    /** NormalizeDnsAddressList: the list as stored, "a, b". */
+    @JvmStatic
+    fun normalizeDnsAddressList(text: String): String = splitDnsAddresses(text).joinToString(", ")
 
     /**
      * buildDnsObj (generate.cpp): the parsed address, or for one [parseDnsAddress] refuses the pre-ParseDnsAddress

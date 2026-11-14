@@ -7,6 +7,7 @@ import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.outbound.Outbound
 import java.io.IOException
 import java.sql.SQLException
+import java.util.Collections
 import java.util.concurrent.Callable
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -219,6 +220,7 @@ object ProfileManager {
             val order = dao.orderInGroup(profileId, groupId)?.takeIf { dao.isDense(groupId) }
             if (dao.deleteById(profileId) == 0) return@Callable false
             if (order != null) dao.closeGap(groupId, order) else compactLocked(groupId)
+            normalizePinsLocked(groupId)
             true
         })
         if (!deleted) return
@@ -260,7 +262,10 @@ object ProfileManager {
                     dao.deleteByIds(chunk)
                     deleted.addAll(existing)
                 }
-                groups.forEach(::compactLocked)
+                for (gid in groups) {
+                    compactLocked(gid)
+                    normalizePinsLocked(gid)
+                }
             }
             true
         } catch (e: Exception) {
@@ -278,7 +283,8 @@ object ProfileManager {
 
     /**
      * The group's list becomes [ids] (Group::profiles = ids): positions 0..n-1 in that order; members missing from
-     * [ids] follow in their current order, ids of other groups are ignored.
+     * [ids] follow in their current order, ids of other groups are ignored. A wholesale rewrite knows nothing of
+     * pins, so the pinned profiles return to the head (NormalizePins).
      */
     suspend fun setOrder(groupId: Long, ids: List<Long>) {
         SagerDatabase.instance.runInTransaction {
@@ -287,28 +293,9 @@ object ProfileManager {
             val wanted = ids.distinct().filter { it in members }
             val wantedSet = wanted.toHashSet()
             writeOrder(current, wanted + current.mapNotNull { row -> row.id.takeIf { it !in wantedSet } })
+            normalizePinsLocked(groupId)
         }
         GroupRepo.postReload(groupId)
-    }
-
-    /**
-     * Group::EmplaceProfile (the desktop's drag and drop): the row at [from] is inserted after the row at [to], so
-     * it lands at [to] when moving down and at [to] + 1 when moving up. False when an index is out of range.
-     * A hand-placed row is a manual order, which a kept sort would undo: the group stops sorting.
-     */
-    suspend fun emplace(groupId: Long, from: Int, to: Int): Boolean {
-        GroupSort.setSort(groupId, GroupSortAction())
-        val moved = SagerDatabase.instance.runInTransaction(Callable {
-            val current = dao.getPositionsByGroup(groupId)
-            val ids = current.mapTo(ArrayList(current.size)) { it.id }
-            if (from !in ids.indices || to !in ids.indices) return@Callable false
-            ids.add(to + 1, ids[from])
-            if (from < to) ids.removeAt(from) else ids.removeAt(from + 1)
-            writeOrder(current, ids)
-            true
-        })
-        if (moved) GroupRepo.postReload(groupId)
-        return moved
     }
 
     /** Android extra: moves [profileIds] to the end of group [groupId] in the given order. */
@@ -328,7 +315,11 @@ object ProfileManager {
                     moved.add(id)
                 }
             }
-            sources.forEach(::compactLocked)
+            // A pin stays with its group: the moved profiles arrive unpinned.
+            for (gid in sources) {
+                compactLocked(gid)
+                normalizePinsLocked(gid)
+            }
         }
         for (gid in sources) GroupRepo.postReload(gid)
         GroupRepo.postReload(groupId)
@@ -352,6 +343,143 @@ object ProfileManager {
         ids.forEachIndexed { index, id ->
             if (stored[id] != index.toLong()) dao.setUserOrder(id, index.toLong())
         }
+    }
+
+    // ------------------------------------------------------------------------------------------------ pins
+
+    /**
+     * Group::NormalizePins inside a transaction: the pins of profiles no longer in the group go and the rest head its
+     * order again, after anything that rewrites the order wholesale or removes members. True when anything changed.
+     */
+    internal fun normalizePinsLocked(groupId: Long): Boolean {
+        val stored = SagerDatabase.groupDao.pinnedJson(groupId) ?: return false
+        if (stored == ProxyGroup.NO_PINS) return false
+        val current = dao.getPositionsByGroup(groupId)
+        val members = current.mapTo(HashSet(current.size * 2)) { it.id }
+        val kept = ProxyGroup.parsePinned(stored).filter { it in members }
+        var changed = writePinsLocked(groupId, kept)
+        if (kept.indices.any { current[it].id != kept[it] }) {
+            val keptSet = kept.toHashSet()
+            writeOrder(current, kept + current.mapNotNull { row -> row.id.takeIf { it !in keptSet } })
+            changed = true
+        }
+        return changed
+    }
+
+    private fun writePinsLocked(groupId: Long, ids: List<Long>): Boolean =
+        SagerDatabase.groupDao.setPinnedJson(groupId, ProxyGroup.pinnedToJson(ids)) > 0
+
+    /** The group's order with its pins normalized: [pins] are the head of [ids]. */
+    private class PinnedOrder(val current: List<ProfilePosition>, val pins: List<Long>) {
+        val ids: MutableList<Long> = current.mapTo(ArrayList(current.size)) { it.id }
+    }
+
+    private fun pinnedOrderLocked(groupId: Long): PinnedOrder {
+        normalizePinsLocked(groupId)
+        return PinnedOrder(dao.getPositionsByGroup(groupId), ProxyGroup.parsePinned(SagerDatabase.groupDao.pinnedJson(groupId)))
+    }
+
+    /** The repair GroupsRepo runs on load: [normalizePinsLocked] in its own transaction. */
+    fun normalizePins(groupId: Long): Boolean =
+        SagerDatabase.instance.runInTransaction(Callable { normalizePinsLocked(groupId) })
+
+    /** Group::PinProfiles: the unpinned ones of [ids] join the end of the pinned block in list order; false when none did. */
+    suspend fun pinProfiles(groupId: Long, ids: Collection<Long>): Boolean {
+        val wanted = ids.toHashSet()
+        val pinned = SagerDatabase.instance.runInTransaction(Callable {
+            val order = pinnedOrderLocked(groupId)
+            val joining = ArrayList<Long>()
+            val rest = ArrayList<Long>()
+            for (id in order.ids.drop(order.pins.size)) (if (id in wanted) joining else rest).add(id)
+            if (joining.isEmpty()) return@Callable false
+            val pins = order.pins + joining
+            writeOrder(order.current, pins + rest)
+            writePinsLocked(groupId, pins)
+            true
+        })
+        if (pinned) GroupRepo.postReload(groupId)
+        return pinned
+    }
+
+    /**
+     * Group::UnpinProfiles: the pinned ones of [ids] lead the unpinned rows until a kept sort places them
+     * (on_menu_pin_triggered); returns them.
+     */
+    suspend fun unpinProfiles(groupId: Long, ids: Collection<Long>): List<Long> {
+        val wanted = ids.toHashSet()
+        val leaving = SagerDatabase.instance.runInTransaction(Callable {
+            val order = pinnedOrderLocked(groupId)
+            val (out, kept) = order.pins.partition { it in wanted }
+            if (out.isNotEmpty()) {
+                writeOrder(order.current, kept + out + order.ids.drop(order.pins.size))
+                writePinsLocked(groupId, kept)
+            }
+            out
+        })
+        if (leaving.isNotEmpty()) {
+            GroupRepo.postReload(groupId)
+            GroupSort.repositionLater(mapOf(groupId to leaving), SortInput.MEMBERSHIP)
+        }
+        return leaving
+    }
+
+    /**
+     * Group::MoveProfile, the drop of a drag: [profileId] lands above or below [targetId] and is pinned exactly when
+     * the target is. A row placed among the unpinned ones is a manual order, which stops a kept sort. False when
+     * nothing moved.
+     */
+    suspend fun moveProfile(groupId: Long, profileId: Long, targetId: Long, below: Boolean): Boolean {
+        var sortStopped = false
+        val moved = SagerDatabase.instance.runInTransaction(Callable {
+            val order = pinnedOrderLocked(groupId)
+            val ids = order.ids
+            val from = ids.indexOf(profileId)
+            val target = ids.indexOf(targetId)
+            if (from < 0 || target < 0) return@Callable false
+            val head = order.pins.size
+            val wasPinned = from < head
+            val toPinned = target < head
+            var to = if (below) target + 1 else target
+            if (from < to) to--
+            if (to == from && wasPinned == toPinned) return@Callable false
+            // Both blocks stay contiguous: `to` falls inside the pinned block exactly when the target was pinned.
+            ids.add(to, ids.removeAt(from))
+            writeOrder(order.current, ids)
+            writePinsLocked(groupId, ids.take(head - (if (wasPinned) 1 else 0) + (if (toPinned) 1 else 0)))
+            if (!toPinned) sortStopped = SagerDatabase.groupDao.setSort(groupId, GroupSortMethod.RAW.ordinal, false) > 0
+            true
+        })
+        if (sortStopped) GroupRepo.postUpdate(groupId)
+        if (moved) GroupRepo.postReload(groupId)
+        return moved
+    }
+
+    /**
+     * One step up ([step] < 0) or down in the stored order, the D-pad alternative to a drag (Group::SwapProfiles):
+     * never across the pinned block's edge. A step among the unpinned rows is a manual order, which stops a kept sort.
+     */
+    suspend fun swapProfile(groupId: Long, profileId: Long, step: Int): Boolean {
+        var sortStopped = false
+        val moved = SagerDatabase.instance.runInTransaction(Callable {
+            val order = pinnedOrderLocked(groupId)
+            val ids = order.ids
+            val from = ids.indexOf(profileId)
+            val to = from + if (step > 0) 1 else -1
+            if (from < 0 || to !in ids.indices) return@Callable false
+            val head = order.pins.size
+            if ((from < head) != (to < head)) return@Callable false
+            Collections.swap(ids, from, to)
+            writeOrder(order.current, ids)
+            if (from < head) {
+                writePinsLocked(groupId, ids.take(head))
+            } else {
+                sortStopped = SagerDatabase.groupDao.setSort(groupId, GroupSortMethod.RAW.ordinal, false) > 0
+            }
+            true
+        })
+        if (sortStopped) GroupRepo.postUpdate(groupId)
+        if (moved) GroupRepo.postReload(groupId)
+        return moved
     }
 
     // ------------------------------------------------------------------------------------------------ test results
@@ -394,6 +522,9 @@ object ProfileManager {
         saveTestResult(profile)
         return profile
     }
+
+    /** TestRunner::applyServiceResult: [document] is the `service_checks` column (ServiceChecks::ResultJson). */
+    fun saveServiceResult(profileId: Long, document: String): Boolean = dao.updateServiceChecks(profileId, document) > 0
 
     fun clearTestResults(profileIds: List<Long>) {
         if (profileIds.isEmpty()) return

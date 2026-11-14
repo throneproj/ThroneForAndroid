@@ -1116,6 +1116,7 @@ class XrayTls {
         if (q.has("peer")) serverName = q.value("peer")
         if (q.has("server_name")) serverName = q.value("server_name")
         if (q.has("pcs")) pinnedPeerCertSha256 = q.valueFully("pcs")
+        else if (q.has("pinSHA256")) pinnedPeerCertSha256 = q.valueFully("pinSHA256")
         if (q.has("vcn")) verifyPeerCertByName = q.valueFully("vcn")
         if (q.has("alpn")) alpn = QtStrings.splitList(q.valueFully("alpn"))
         if (q.has("fp")) fingerprint = xrayKnownFingerprint(q.value("fp"), false, "fp")

@@ -7,10 +7,12 @@ import io.nekohasekai.sagernet.database.RouteManager
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.SettingsMapper
 import io.nekohasekai.sagernet.outbound.Outbound
+import io.nekohasekai.sagernet.outbound.config.ChainStepBuild
 import io.nekohasekai.sagernet.outbound.config.ConfigGenerator
 import io.nekohasekai.sagernet.outbound.config.GeneratedConfig
 import io.nekohasekai.sagernet.outbound.config.GeneratorSettings
 import io.nekohasekai.sagernet.outbound.config.PortLease
+import io.nekohasekai.sagernet.outbound.config.ProfileGroup
 import io.nekohasekai.sagernet.outbound.config.ProfileProvider
 import io.nekohasekai.sagernet.outbound.config.RoutingInput
 import io.nekohasekai.sagernet.outbound.config.TestCandidate
@@ -25,10 +27,19 @@ import io.nekohasekai.sagernet.route.RouteProfile
  */
 object CoreConfigs {
 
-    /** Stored profiles by id, each row parsed once per generation. */
+    /** Stored profiles by id, each row read and parsed once per generation, with their groups. */
     private class DatabaseProfiles : ProfileProvider {
-        private val cache = HashMap<Long, Outbound?>()
-        override fun get(id: Long): Outbound? = cache.getOrPut(id) { SagerDatabase.proxyDao.getById(id)?.outbound }
+        private val rows = HashMap<Long, ProxyEntity?>()
+        private val groups = HashMap<Long, ProfileGroup?>()
+
+        private fun row(id: Long): ProxyEntity? = rows.getOrPut(id) { SagerDatabase.proxyDao.getById(id) }
+
+        override fun get(id: Long): Outbound? = row(id)?.outbound
+
+        override fun groupOf(id: Long): ProfileGroup? {
+            val groupId = row(id)?.groupId ?: return null
+            return groups.getOrPut(groupId) { CoreConfigs.group(groupId) }
+        }
     }
 
     /** [dns]: the routing profile's own DNS, null for the global one; [settings] must be mapped with the same. */
@@ -74,11 +85,30 @@ object CoreConfigs {
         return generator(settings = SettingsMapper.generatorSettings(dns), dns = dns).buildTest(candidates, ports)
     }
 
+    /**
+     * The chain editor's hop test (BuildChainStepTestConfig): the unsaved [hops], top first, behind group [groupId]'s
+     * front / landing proxy, with the DNS of [buildTest]; in :bg the core checks every hop as IsValid does.
+     */
+    fun buildChainStepTest(hops: List<Long>, groupId: Long, ports: PortLease? = null): ChainStepBuild {
+        val (landing, front, _) = groupProxies(groupId)
+        val dns = RouteManager.customDns(DataStore.currentRouteId)
+        val routing = RoutingInput(
+            RoutingInput.DEFAULT.profile, RoutingInput.DEFAULT.catalog, memberCheck = SettingsMapper.memberCheck(),
+        )
+        return generator(routing, SettingsMapper.generatorSettings(dns), dns).buildChainStepTest(hops, landing, front, ports)
+    }
+
     /** (landing_proxy_id, front_proxy_id, name) of a group, -1 when unset (any id <= 0 is "none"). */
     private fun groupProxies(groupId: Long): Triple<Long, Long, String> {
-        val group: ProxyGroup = (if (groupId > 0) SagerDatabase.groupDao.getById(groupId) else null) ?: return Triple(-1L, -1L, "")
+        val group = group(groupId) ?: return Triple(-1L, -1L, "")
+        return Triple(group.landingProxyId, group.frontProxyId, group.name)
+    }
+
+    /** The landing / front proxy (-1 when unset) and name of a group, null when it does not exist. */
+    private fun group(groupId: Long): ProfileGroup? {
+        val group: ProxyGroup = (if (groupId > 0) SagerDatabase.groupDao.getById(groupId) else null) ?: return null
         val landing = group.landingProxyId.takeIf { it > 0 } ?: -1L
         val front = group.frontProxyId.takeIf { it > 0 } ?: -1L
-        return Triple(landing, front, group.displayName())
+        return ProfileGroup(landing, front, group.displayName())
     }
 }

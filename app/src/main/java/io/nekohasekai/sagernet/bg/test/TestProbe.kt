@@ -105,8 +105,9 @@ internal suspend fun TestSession.awaitCore(start: (done: () -> Unit) -> Unit) {
 }
 
 /**
- * One URL or IP result; [measured] is false for what the core never measured (skip, stop, probe failure). A URL
- * failure is reported again with [connectOnly] once the core finds the profile's VPN tunnel up.
+ * One URL, IP or service result; [measured] is false for what the core never measured (skip, stop, probe failure). A
+ * URL failure is reported again with [connectOnly] once the core finds the profile's VPN tunnel up. [service] is the
+ * `profiles.service_checks` document of a service check, "" when there is nothing to store.
  */
 internal class ProbeResult(
     @JvmField val profileId: Long,
@@ -116,6 +117,7 @@ internal class ProbeResult(
     @JvmField val error: String = "",
     @JvmField val measured: Boolean = true,
     @JvmField val connectOnly: Boolean = false,
+    @JvmField val service: String = "",
 )
 
 /** A candidate kept out of a test build: [invalid] when its config fails the core check, else it cannot be measured. */
@@ -180,10 +182,13 @@ internal suspend fun TestSession.ensureSharedXrayAssets(xrayConfig: String?) {
 private const val CHECK_PARALLELISM = 4
 
 /**
- * runLatencyGroup (TestRunner.cpp:307-406) for URL and IP tests: batches of [TEST_BATCH_SIZE] profiles, one test build
- * each, its probes at most [MAX_PARALLEL_PROBES] at a time; results are reported in arrival order, a chunk per wake-up.
+ * runLatencyGroup (TestRunner.cpp:307-406) for URL, IP and service tests: batches of [batchSize] profiles, one test
+ * build each, its probes at most [MAX_PARALLEL_PROBES] at a time; results are reported in arrival order, a chunk per
+ * wake-up.
  */
 internal abstract class LatencySweep(protected val session: TestSession) {
+
+    protected open val batchSize: Int get() = TEST_BATCH_SIZE
 
     /** Starts the core test of [probe], one of [batch]'s; [emit] and [done] are called on Go threads. */
     protected abstract fun start(
@@ -197,7 +202,7 @@ internal abstract class LatencySweep(protected val session: TestSession) {
     protected abstract fun invalid(profileId: Long, reason: String): ProbeResult
 
     suspend fun run(profiles: List<ProxyEntity>) {
-        for (slice in profiles.chunked(TEST_BATCH_SIZE)) {
+        for (slice in profiles.chunked(batchSize)) {
             if (session.cancelled) break
             runBatch(slice)
         }

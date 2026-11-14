@@ -442,6 +442,7 @@ class TestPanelController(
                 when (s.kind) {
                     TestSpec.KIND_IP -> R.drawable.ic_test_ip_24
                     TestSpec.KIND_SPEED -> R.drawable.ic_test_speed_24
+                    TestSpec.KIND_SERVICE -> R.drawable.ic_baseline_check_circle_24
                     else -> R.drawable.ic_test_latency_24
                 }
             )
@@ -525,7 +526,9 @@ class TestPanelController(
                 )
             )
         }
-        sortAction.isVisible = canAct && s.groupId > 0 && s.ok > 0 && s.kind != TestSpec.KIND_IP
+        // IP and service results neither sort the group nor make a profile unavailable
+        val latencyKind = s.kind == TestSpec.KIND_URL || s.kind == TestSpec.KIND_SPEED
+        sortAction.isVisible = canAct && s.groupId > 0 && s.ok > 0 && latencyKind
         if (sortAction.isVisible) {
             sortAction.setTextIfChanged(
                 context.getString(
@@ -534,7 +537,7 @@ class TestPanelController(
                 )
             )
         }
-        val removable = if (canAct && s.kind != TestSpec.KIND_IP) removableIds(s).size else 0
+        val removable = if (canAct && latencyKind) removableIds(s).size else 0
         removeAction.isVisible = removable > 0
         if (removable > 0) removeAction.setTextIfChanged(context.getString(R.string.test_panel_action_remove, removable))
         stopOtherAction.isVisible = s.finished && s.failure == TestFailure.BUSY
@@ -751,6 +754,10 @@ class TestPanelController(
             } else {
                 context.getString(R.string.test_panel_summary_none_resolved)
             }
+
+            s.kind == TestSpec.KIND_SERVICE -> context.getString(
+                if (s.ok > 0) R.string.service_check_summary_results else R.string.service_check_summary_none
+            )
 
             s.ok == 0 -> context.getString(R.string.test_panel_summary_none_working)
             s.countryMode -> context.getString(R.string.test_panel_summary_working_countries, s.ok, s.countries.size)

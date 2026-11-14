@@ -71,11 +71,11 @@ data class GeneratorSettings(
     val httpProxyBypassDomains: List<String> = emptyList(),
 
     // ---- dns (SettingsRepo.h:179-197, :296); the RouteDns members come from RouteDns::Current
-    /** remote_dns (desktop address syntax, see DnsServers.buildDnsObj). */
+    /** remote_dns: comma-separated addresses in the desktop syntax (DnsServers.splitDnsAddresses, buildDnsObj). */
     val remoteDns: String = "https://8.8.8.8/dns-query",
     /** remote_dns_disable_ipv6. */
     val remoteDnsDisableIpv6: Boolean = false,
-    /** direct_dns. */
+    /** direct_dns, the same syntax. */
     val directDns: String = "localhost",
     /** core_box_underlying_dns: the dns-local server, "" means "local". */
     val underlyingDns: String = "",

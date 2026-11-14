@@ -106,7 +106,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
 
         /**
          * The picker: a tap returns the profile to the activity, a [SelectCallback]; [selected] is highlighted.
-         * [hideAutoSelectors] for slots that need a fixed server (front / landing proxy, chain hops).
+         * [hideAutoSelectors] for slots that need a fixed server (front / landing proxy).
          */
         fun forSelection(selected: ProxyEntity?, @StringRes titleRes: Int, hideAutoSelectors: Boolean = false) =
             ConfigurationFragment().apply {

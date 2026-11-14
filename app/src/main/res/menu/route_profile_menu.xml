@@ -11,4 +11,8 @@
         android:icon="@drawable/ic_action_done"
         android:title="@string/apply"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_route_tester"
+        android:title="@string/route_tester"
+        app:showAsAction="never" />
 </menu>

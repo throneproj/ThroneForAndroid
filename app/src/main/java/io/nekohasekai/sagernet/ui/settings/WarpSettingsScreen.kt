@@ -11,6 +11,7 @@ import androidx.preference.SwitchPreference
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.SettingValidators
 import io.nekohasekai.sagernet.database.SettingsRegistry
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.ktx.needReload
@@ -19,6 +20,7 @@ import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import io.nekohasekai.sagernet.ui.warp.WarpClient
 import io.nekohasekai.sagernet.ui.warp.WarpGenerate
+import io.nekohasekai.sagernet.validation.Validation
 import kotlinx.coroutines.launch
 import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
@@ -36,6 +38,8 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         enable.setOnPreferenceChangeListener { _, newValue ->
             val enabled = newValue as Boolean
             DataStore.enableWarp = enabled
+            // WarpService::Apply: Tor outranks WARP on the desktop, so a backup taken here must not bring it back.
+            if (enabled) DataStore.enableTor = false
             if (DataStore.serviceState.started) SagerNet.reloadService()
             if (enabled && !WarpClient.isGenerated()) toast(R.string.warp_not_generated)
             true
@@ -117,6 +121,21 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
             hosts.text = WarpClient.normalizeApiHosts(newValue as String?).joinToString("\n")
             false
         }
+
+        // editWarpAdvanced (dialog_manage_routes.cpp): the fallback delay only matters while the ClientHello is split.
+        val fragment = pref<SwitchPreference>(SettingsRegistry.WARP_API_TLS_FRAGMENT.key)
+        val fallbackDelay = pref<EditTextPreference>(SettingsRegistry.WARP_API_TLS_FRAGMENT_FALLBACK_DELAY.key)
+        fallbackDelay.isEnabled = fragment.isChecked
+        fragment.setOnPreferenceChangeListener { _, newValue ->
+            fallbackDelay.isEnabled = newValue as Boolean
+            validation.refresh()
+            true
+        }
+        gateText(
+            fallbackDelay.key, Validation.Rules.duration(), reload = false,
+            invalid = R.string.invalid_duration, valid = SettingValidators::isDurationOrEmpty,
+        )
+        fallbackDelay.summaryProvider = DefaultSummaryProvider("500ms")
     }
 
     /** The fields of the generated mode (dialog_manage_routes.cpp:480-495), saved at once. */

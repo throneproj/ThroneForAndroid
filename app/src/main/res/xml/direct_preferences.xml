@@ -42,6 +42,11 @@
             app:key="dial.udp_fragment"
             app:title="@string/dial_udp_fragment" />
         <SwitchPreference
+            app:icon="@drawable/baseline_send_24"
+            app:key="dial.quic_opener"
+            app:title="@string/dial_quic_opener"
+            app:summary="@string/dial_quic_opener_sum" />
+        <SwitchPreference
             app:icon="@drawable/ic_baseline_refresh_24"
             app:key="dial.reuse_addr"
             app:title="@string/dial_reuse_addr" />

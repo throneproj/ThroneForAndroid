@@ -44,6 +44,14 @@ class AutoSelectorCore(val box: Instance, private val groupTag: String) {
         val lastRoundMs: Long,
         val nextRoundMs: Long,
         val balance: Boolean,
+        /** latency | priority. */
+        val strategy: String,
+        /** Priority strategy: what a recovered higher-tier member must pass before the group moves back up to it. */
+        val failbackChecks: Int,
+        val failbackDelayMs: Long,
+        /** Passive scoring is on; [sitesRemembered] counts sites holding a member that answered them. */
+        val passive: Boolean,
+        val sitesRemembered: Int,
         /** In rank order, by tag (id and name unset). */
         val members: List<AutoSelectorStatus.Member>,
     )
@@ -76,6 +84,15 @@ class AutoSelectorCore(val box: Instance, private val groupTag: String) {
                     lastProbeMs = member.lastProbeMs,
                     cooldownUntilMs = member.cooldownUntilMs,
                     lastError = member.lastError,
+                    priority = member.priority,
+                    streak = member.streak,
+                    lastFailureMs = member.lastFailureMs,
+                    firstByteMs = member.firstByteMs,
+                    passiveAnswered = member.passiveAnswered,
+                    passiveFailed = member.passiveFailed,
+                    recentAnswered = member.recentAnswered,
+                    recentFailed = member.recentFailed,
+                    suspectUntilMs = member.suspectUntilMs,
                 )
             )
         }
@@ -95,6 +112,11 @@ class AutoSelectorCore(val box: Instance, private val groupTag: String) {
             lastRoundMs = lastRoundMs,
             nextRoundMs = nextRoundMs,
             balance = balance,
+            strategy = strategy,
+            failbackChecks = failbackChecks,
+            failbackDelayMs = failbackDelayMs,
+            passive = passive,
+            sitesRemembered = sitesRemembered,
             members = list,
         )
     }

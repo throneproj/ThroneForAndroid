@@ -28,6 +28,17 @@
             app:key="password"
             app:title="@string/password"
             app:dialogLayout="@layout/layout_password_dialog" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_push_pin_24"
+            app:key="pinned_certchain_sha256"
+            app:title="@string/juicity_pinned_certchain_sha256"
+            app:dialogMessage="@string/juicity_pinned_certchain_sha256_hint"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/baseline_send_24"
+            app:key="dial.quic_opener"
+            app:title="@string/dial_quic_opener"
+            app:summary="@string/dial_quic_opener_sum" />
     </PreferenceCategory>
 
     <PreferenceCategory

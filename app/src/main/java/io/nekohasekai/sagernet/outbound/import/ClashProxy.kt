@@ -4,6 +4,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonNull
 import io.nekohasekai.sagernet.outbound.json.JsonObject
+import io.nekohasekai.sagernet.outbound.link.Base64Strict
 import io.nekohasekai.sagernet.validation.ParseDiag
 import io.nekohasekai.sagernet.validation.vtr
 import java.util.TreeMap
@@ -58,6 +59,23 @@ class ClashProxy(@JvmField val node: JsonObject) {
         node.isString(key) -> listOf(node.string(key))
         node.isArray(key) -> scalarStrings(node.array(key))
         else -> emptyList()
+    }
+
+    /**
+     * WgReserved (clash.cpp) as the text Checks::WireguardReserved reads: a padded standard base64 string is mihomo's
+     * []uint8 and a list of whole numbers the bytes themselves; any other value is kept as written. "" when absent.
+     */
+    fun reserved(key: String): String = when (val value = node[key]) {
+        null, JsonNull -> ""
+        is String -> {
+            val bytes = if (value.toByteArray(Charsets.UTF_8).size % 4 == 0) Base64Strict.decode(value) else null
+            bytes?.joinToString(",") { (it.toInt() and 0xFF).toString() } ?: value
+        }
+        is JsonArray -> {
+            val bytes = value.map { readInt(it) }
+            if (bytes.all { it != null }) bytes.joinToString(",") else value.joinToString(",") { nodeText(it) }
+        }
+        else -> nodeText(value)
     }
 
     /** A nested option block; an empty view when the key is absent or not a mapping. */

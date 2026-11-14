@@ -10,6 +10,9 @@ import androidx.room.Query
 import androidx.room.Update
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.app
+import io.nekohasekai.sagernet.outbound.json.JsonArray
+import io.nekohasekai.sagernet.outbound.json.JsonInput
+import io.nekohasekai.sagernet.outbound.json.JsonValues
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -55,10 +58,19 @@ data class ProxyGroup(
     @ColumnInfo(name = "route_id", defaultValue = "-1") var routeId: Long = -1L,
     /** Subscription refreshes save the routing profile the subscription provides as this group's own (Group.h). */
     @ColumnInfo(name = "import_sub_route", defaultValue = "0") var importSubRoute: Boolean = false,
+    /**
+     * Group::pinned as its compact JSON array; read it through [pinned]. Written only by ProfileManager's pin edits,
+     * so [GroupRepo.save] keeps the stored value.
+     */
+    @ColumnInfo(name = "pinned_json", defaultValue = "[]") var pinnedJson: String = "[]",
 ) : Parcelable {
 
     @get:Ignore
     val isSubscription: Boolean get() = url.isNotEmpty()
+
+    /** Group::pinned: always the head of the group's order, in this order; sorts only order the rows below them. */
+    @get:Ignore
+    val pinned: List<Long> get() = parsePinned(pinnedJson)
 
     /** Group::sort, the order kept as the profiles change; RAW keeps the manual order (GroupsRepo.cpp groupFromJson). */
     @get:Ignore
@@ -83,6 +95,26 @@ data class ProxyGroup(
 
     companion object {
         const val TABLE = "groups"
+
+        const val NO_PINS = "[]"
+
+        /** QJsonArray2QListInt over `pinned_json`: ids in order, duplicates and non-ids dropped. */
+        @JvmStatic
+        fun parsePinned(text: String?): List<Long> {
+            if (text.isNullOrBlank() || text == NO_PINS) return emptyList()
+            val array = JsonInput.parseValue(text) as? JsonArray ?: return emptyList()
+            val ids = LinkedHashSet<Long>()
+            for (item in array) JsonValues.toInteger(item).takeIf { it > 0L }?.let(ids::add)
+            return ids.toList()
+        }
+
+        @JvmStatic
+        fun pinnedToJson(ids: List<Long>): String {
+            if (ids.isEmpty()) return NO_PINS
+            val array = JsonArray()
+            ids.forEach { array.add(it) }
+            return array.toCompact()
+        }
     }
 
     @androidx.room.Dao
@@ -144,6 +176,16 @@ data class ProxyGroup(
 
         @Query("UPDATE `groups` SET `import_sub_route` = 0 WHERE `id` = :groupId")
         fun stopRouteImport(groupId: Long): Int
+
+        @Query("SELECT `pinned_json` FROM `groups` WHERE `id` = :groupId")
+        fun pinnedJson(groupId: Long): String?
+
+        /** 0 when nothing changed. */
+        @Query("UPDATE `groups` SET `pinned_json` = :json WHERE `id` = :groupId AND `pinned_json` != :json")
+        fun setPinnedJson(groupId: Long, json: String): Int
+
+        @Query("SELECT `id` FROM `groups` WHERE `pinned_json` != '[]'")
+        fun idsWithPins(): List<Long>
 
         /** The group's profiles go by the foreign key cascade. */
         @Query("DELETE FROM `groups` WHERE `id` = :groupId")

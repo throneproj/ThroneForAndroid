@@ -19,8 +19,17 @@
             <item
                 android:id="@+id/action_test_speed"
                 android:title="@string/profiles_test_speed" />
+            <item
+                android:id="@+id/action_test_service"
+                android:title="@string/service_check" />
         </menu>
     </item>
+    <item
+        android:id="@+id/action_service_results"
+        android:title="@string/service_check_results" />
+    <item
+        android:id="@+id/action_pin"
+        android:title="@string/profiles_pin" />
     <item
         android:id="@+id/action_resolve_domain"
         android:title="@string/profiles_resolve_domain" />

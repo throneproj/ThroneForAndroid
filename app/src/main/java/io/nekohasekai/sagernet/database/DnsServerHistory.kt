@@ -8,7 +8,10 @@ object DnsServerHistory {
 
     private const val MAX_ENTRIES = 8
 
-    val REMOTE_PRESETS: List<String> = listOf("https://8.8.8.8/dns-query", "tls://8.8.8.8", "tls://1.1.1.1", "8.8.8.8", "1.1.1.1")
+    val REMOTE_PRESETS: List<String> = listOf(
+        "https://8.8.8.8/dns-query", "tls://8.8.8.8", "tls://1.1.1.1", "8.8.8.8", "1.1.1.1",
+        "https://1.1.1.1/dns-query, https://8.8.8.8/dns-query",
+    )
     val DIRECT_PRESETS: List<String> = listOf("localhost", "223.5.5.5", "119.29.29.29", "178.22.122.100", "77.88.8.8")
 
     fun remoteSuggestions(): List<String> = suggestions(DataStore.remoteDnsHistory, REMOTE_PRESETS)

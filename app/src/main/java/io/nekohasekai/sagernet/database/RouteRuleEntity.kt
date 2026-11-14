@@ -7,6 +7,7 @@ import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.json.JsonValues
 import io.nekohasekai.sagernet.route.RouteRule
+import io.nekohasekai.sagernet.route.RuleType
 
 /**
  * The desktop's `route_rules` row (RoutesRepo.cpp:51-94) plus the Android-only `network_type_json`,
@@ -118,7 +119,8 @@ data class RouteRuleEntity(
         it.tls_fragment = tlsFragment
         it.tls_fragment_fallback_delay = tlsFragmentFallbackDelay
         it.tls_record_fragment = tlsRecordFragment
-        it.disabled = disabled
+        // RoutesRepo::routeRuleFromJson: the editor used to switch endpoint rules off by accident; they cannot be disabled.
+        it.disabled = disabled && type != RuleType.ENDPOINT_PREFERRED_BY.id
     }
 
     companion object {

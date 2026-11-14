@@ -50,6 +50,7 @@ class HysteriaSettingsActivity : BindingSettingsActivity<Hysteria>() {
         pbm.text("realm_port_mapping_lifetime")
         TlsBlock.bind(pbm)
         QuicBlock.bind(pbm)
+        DialBlock.bindQuicOpener(pbm)
     }
 
     private val v1Only = arrayOf("auth_type", "auth", "recv_window_conn", "recv_window", "disable_mtu_discovery")

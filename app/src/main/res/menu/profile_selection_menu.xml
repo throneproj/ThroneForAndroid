@@ -19,6 +19,9 @@
                 <item
                     android:id="@+id/action_selection_test_speed"
                     android:title="@string/profiles_test_speed" />
+                <item
+                    android:id="@+id/action_selection_test_service"
+                    android:title="@string/service_check" />
             </menu>
         </item>
         <item
@@ -29,6 +32,10 @@
         <item
             android:id="@+id/action_selection_all"
             android:title="@string/profiles_select_all"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_selection_pin"
+            android:title="@string/profiles_pin"
             app:showAsAction="never" />
         <item
             android:id="@+id/action_selection_clear_results"

@@ -27,6 +27,7 @@ class MasqueSettingsActivity : BindingSettingsActivity<Masque>() {
         pbm.bool("disable_version_fallback")
         TlsBlock.bind(pbm)
         QuicBlock.bind(pbm)
+        DialBlock.bindQuicOpener(pbm)
     }
 
     // edit_masque.cpp: comma-separated addresses are accepted too, and bare ones are saved with /32 or /128

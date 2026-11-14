@@ -47,6 +47,7 @@ class SelectionMode(private val host: ConfigurationFragment) {
         checked.add(profile.id)
         dragStartedId = 0L
         host.onSelectionModeChanged(true)
+        refreshPinTitle()
     }
 
     /** A long press that turned into a drag: selecting unless the row really moves. */
@@ -70,6 +71,7 @@ class SelectionMode(private val host: ConfigurationFragment) {
             finish()
         } else {
             host.onSelectionChanged(listOf(id))
+            refreshPinTitle()
         }
     }
 
@@ -103,6 +105,7 @@ class SelectionMode(private val host: ConfigurationFragment) {
         checked.addAll(restored)
         dragStartedId = 0L
         host.onSelectionModeChanged(true)
+        refreshPinTitle()
     }
 
     val count: Int get() = checked.size
@@ -117,6 +120,26 @@ class SelectionMode(private val host: ConfigurationFragment) {
         val shown = host.listFor(groupId)?.adapter?.displayedIds ?: return
         checked.addAll(shown)
         host.onSelectionChanged(null)
+        refreshPinTitle()
+    }
+
+    /** Every checked profile is pinned, so the action unpins (refresh_pin_action). */
+    private fun allPinned(): Boolean {
+        val adapter = host.listFor(groupId)?.adapter ?: return false
+        return checked.isNotEmpty() && checked.all(adapter::isPinned)
+    }
+
+    private fun refreshPinTitle() {
+        host.toolbar?.menu?.findItem(R.id.action_selection_pin)
+            ?.setTitle(if (allPinned()) R.string.profiles_unpin else R.string.profiles_pin)
+    }
+
+    /** on_menu_pin_triggered. */
+    private fun pin(ids: List<Long>) {
+        val gid = groupId
+        val unpin = allPinned()
+        finish()
+        ProfileItemMenu.setPinned(host, gid, ids, pin = !unpin)
     }
 
     fun onMenuItemClick(item: MenuItem): Boolean {
@@ -126,8 +149,14 @@ class SelectionMode(private val host: ConfigurationFragment) {
             R.id.action_selection_test_url -> test(TestSpec.KIND_URL, ids)
             R.id.action_selection_test_ip -> test(TestSpec.KIND_IP, ids)
             R.id.action_selection_test_speed -> test(TestSpec.KIND_SPEED, ids)
+            R.id.action_selection_test_service -> {
+                ProfileTests.startServiceProfiles(host, ids, groupId)
+                finish()
+            }
+
             R.id.action_selection_all -> selectAll()
             R.id.action_selection_delete -> delete(ids)
+            R.id.action_selection_pin -> pin(ids)
             R.id.action_selection_clear_results -> clearResults(ids)
             R.id.action_selection_move -> moveToGroup(ids)
             R.id.action_selection_copy_links -> copyLinks(ids, throne = false)

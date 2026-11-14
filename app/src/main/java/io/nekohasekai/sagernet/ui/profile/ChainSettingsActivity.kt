@@ -4,7 +4,11 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.format.Formatter
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -12,6 +16,7 @@ import android.widget.TextView
 import androidx.activity.result.component1
 import androidx.activity.result.component2
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.ColorInt
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -19,6 +24,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.aidl.IChainStepCallback
+import io.nekohasekai.sagernet.aidl.ICoreService
+import io.nekohasekai.sagernet.bg.CoreServiceClient
+import io.nekohasekai.sagernet.bg.test.ChainStepReport
+import io.nekohasekai.sagernet.bg.test.ChainStepResult
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -31,6 +41,7 @@ import io.nekohasekai.sagernet.outbound.types.Custom
 import io.nekohasekai.sagernet.ui.FormIssue
 import io.nekohasekai.sagernet.ui.ProfileSelectActivity
 import io.nekohasekai.sagernet.ui.ValidationForm
+import io.nekohasekai.sagernet.ui.test.TestFormat
 import io.nekohasekai.sagernet.validation.Severity
 import io.nekohasekai.sagernet.validation.vplural
 import io.nekohasekai.sagernet.widget.applyInsetPadding
@@ -50,6 +61,11 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
 
         /** The row above the hop list that carries the list's problems (name_preferences.xml). */
         const val KEY_HOPS = "chainHops"
+
+        /** Rebinds a row in place for its hop test result. */
+        val STEP_PAYLOAD = Any()
+
+        const val DANGER_FALLBACK = 0xFFE53935.toInt()
     }
 
     val proxyList = ArrayList<ProxyEntity>()
@@ -57,6 +73,11 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
     /** Stored hops left out on load because their profile no longer exists. */
     private var droppedHops = 0
     private var hopsLoaded = false
+
+    /** The last hop test's verdict per row (edit_chain.cpp showStepResult); null when there is none. */
+    private var stepRows: List<StepRow>? = null
+    private var stepTest: ChainStepClient? = null
+    private lateinit var stepStatus: TextView
 
     override fun issueKey(field: String): String? = if (field == "list") KEY_HOPS else null
 
@@ -74,8 +95,10 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
         }
     }
 
+    /** Adding, removing, replacing and dragging hops; a test result no longer describes the list. */
     private fun hopsChanged() {
         form?.revalidate(KEY_HOPS)
+        if (stepTest == null && stepStatus.isVisible) clearStepResults()
     }
 
     private fun refreshForm() {
@@ -97,21 +120,34 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
 
     private fun hopsError(): String {
         if (proxyList.isEmpty()) return getString(R.string.validation_chain_empty)
-        // The picker only refuses circular references; the chain builder refuses these too.
+        // The picker only refuses circular references; the chain builder refuses this too.
         for ((i, hop) in proxyList.withIndex()) {
-            when (hop.type) {
-                "chain" -> return getString(R.string.validation_chain_hop_chain, i + 1)
-                "autoselector" -> return getString(R.string.validation_chain_hop_autoselector, i + 1)
-            }
+            if (hop.type == "chain") return getString(R.string.validation_chain_hop_chain, i + 1)
         }
         return scanError(proxyList.map { it.outbound })
     }
 
+    /** edit_chain.cpp editChainScanError: the hops above an auto selector and the ones below it are built as two separate chains. */
+    private fun scanError(topFirst: List<Outbound>): String {
+        var selectorAt = -1
+        for ((i, hop) in topFirst.withIndex()) {
+            if (hop.type != "autoselector") continue
+            if (selectorAt >= 0) return getString(R.string.validation_chain_selector_twice)
+            selectorAt = i
+        }
+        if (selectorAt < 0) return segmentError(topFirst)
+        if (topFirst.any { it.isXrayFullConfig() || (it as? Custom)?.isFullConfig() == true }) {
+            return getString(R.string.validation_chain_selector_custom)
+        }
+        // The selector stays in the lower part: an Xray hop below it switches back to sing-box to reach it.
+        return segmentError(topFirst.subList(selectorAt, topFirst.size)).ifEmpty { segmentError(topFirst.subList(0, selectorAt)) }
+    }
+
     /**
-     * edit_chain.cpp editChainScanError: generate.cpp's chain scan over the build order, which reads the list
+     * edit_chain.cpp editChainSegmentError: generate.cpp's chain scan over the build order, which reads the list
      * bottom-up. The extra-core rules are left out, Android has no extra cores.
      */
-    private fun scanError(topFirst: List<Outbound>): String {
+    private fun segmentError(topFirst: List<Outbound>): String {
         val count = topFirst.size
         var xrayFullConfigs = 0
         var xrayFullConfigIndex = -1
@@ -142,6 +178,178 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
         return ""
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.chain_settings_menu, menu)
+        menu.findItem(R.id.action_test_hops)?.isEnabled = stepTest == null
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_test_hops) {
+            testHops()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onDestroy() {
+        stepTest?.cancel()
+        stepTest = null
+        super.onDestroy()
+    }
+
+    /** edit_chain.cpp on_test_hops_clicked: tests the hops as listed, without saving anything. */
+    private fun testHops() {
+        if (stepTest != null || !hopsLoaded) return
+        val error = hopsError()
+        if (error.isNotEmpty()) {
+            clearStepResults()
+            setStepStatus(error, StepRole.DANGER)
+            return
+        }
+        val hops = proxyList.map { it.id }
+        val names = proxyList.map { it.displayName() }
+        val testing = StepRow(getString(R.string.connection_test_testing), "", StepRole.MUTED)
+        showStepRows(List(hops.size) { testing })
+        setStepStatus(getString(R.string.chain_step_testing), StepRole.MUTED)
+        val client = ChainStepClient(hops.toLongArray(), DataStore.editingGroup) { onStepOutcome(hops, names, it) }
+        stepTest = client
+        invalidateOptionsMenu()
+        client.start()
+    }
+
+    private fun onStepOutcome(hops: List<Long>, names: List<String>, outcome: StepOutcome) {
+        stepTest = null
+        invalidateOptionsMenu()
+        if (outcome !is StepOutcome.Done) {
+            clearStepResults()
+            val message = if (outcome is StepOutcome.Busy) R.string.chain_step_busy else R.string.test_panel_failure_unreachable
+            setStepStatus(getString(message), StepRole.DANGER)
+            return
+        }
+        if (proxyList.map { it.id } != hops) {
+            clearStepResults()
+            setStepStatus(getString(R.string.chain_step_hops_changed), StepRole.MUTED)
+            return
+        }
+        val verdict = judgeSteps(outcome.report, names)
+        showStepRows(verdict.rows)
+        setStepStatus(verdict.status, verdict.statusRole)
+    }
+
+    private fun showStepRows(rows: List<StepRow>?) {
+        stepRows = rows
+        configurationAdapter.notifyItemRangeChanged(1, proxyList.size, STEP_PAYLOAD)
+    }
+
+    private fun clearStepResults() {
+        showStepRows(null)
+        stepStatus.isVisible = false
+    }
+
+    private fun setStepStatus(text: String, role: StepRole) {
+        stepStatus.text = text
+        stepStatus.setTextColor(roleColor(role))
+        stepStatus.isVisible = true
+    }
+
+    @ColorInt
+    private fun roleColor(role: StepRole): Int = when (role) {
+        StepRole.SUCCESS -> TestFormat.latencyColor(1)
+        StepRole.DANGER -> TestFormat.themeColor(this, R.attr.colorError, DANGER_FALLBACK)
+        StepRole.MUTED -> getColorAttr(android.R.attr.textColorSecondary)
+    }
+
+    private fun stepLatencyText(result: ChainStepResult): String =
+        if (result.latency == ProxyEntity.LATENCY_CONNECT_ONLY) getString(R.string.test_connect_ok)
+        else getString(R.string.test_panel_ms, result.latency)
+
+    private fun aloneNote(result: ChainStepResult?): String = when {
+        result == null -> ""
+        ProxyEntity.isWorking(result.latency) -> getString(R.string.chain_step_alone, stepLatencyText(result))
+        else -> getString(R.string.chain_step_alone_unavailable)
+    }
+
+    private fun joinLines(vararg lines: String): String = lines.filter { it.isNotEmpty() }.joinToString("\n")
+
+    /** edit_chain.cpp judgeSteps: a row per hop and the status line; [names] is the hop list the test ran on. */
+    private fun judgeSteps(report: ChainStepReport, names: List<String>): StepVerdict {
+        val through = HashMap<Int, ChainStepResult>()
+        val alone = HashMap<Int, ChainStepResult>()
+        for (result in report.results) (if (result.alone) alone else through)[result.hop] = result
+        val invalid = report.invalidHops.toSet()
+
+        val rows = ArrayList<StepRow>()
+        var breakAt = -1
+        for (i in names.indices) {
+            val throughResult = through[i]
+            val aloneResult = alone[i]
+            rows += when {
+                i in invalid -> {
+                    if (breakAt < 0) breakAt = i
+                    StepRow(getString(R.string.chain_step_invalid), getString(R.string.chain_step_invalid_sum), StepRole.DANGER)
+                }
+
+                throughResult != null -> when {
+                    ProxyEntity.isWorking(throughResult.latency) -> StepRow(
+                        stepLatencyText(throughResult),
+                        getString(if (i == 0) R.string.chain_step_works else R.string.chain_step_works_through),
+                        StepRole.SUCCESS,
+                    )
+
+                    breakAt >= 0 -> StepRow(
+                        getString(R.string.chain_step_not_reached),
+                        joinLines(getString(R.string.chain_step_not_reached_sum), aloneNote(aloneResult)),
+                        StepRole.MUTED,
+                    )
+
+                    else -> {
+                        breakAt = i
+                        if (aloneResult != null && ProxyEntity.isWorking(aloneResult.latency)) {
+                            StepRow(
+                                getString(R.string.chain_step_fails_through),
+                                joinLines(
+                                    getString(R.string.chain_step_fails_through_sum, stepLatencyText(aloneResult)),
+                                    throughResult.error,
+                                ),
+                                StepRole.DANGER,
+                            )
+                        } else {
+                            StepRow(getString(R.string.unavailable), joinLines(aloneNote(aloneResult), throughResult.error), StepRole.DANGER)
+                        }
+                    }
+                }
+
+                aloneResult != null -> StepRow(
+                    if (ProxyEntity.isWorking(aloneResult.latency)) stepLatencyText(aloneResult) else getString(R.string.unavailable),
+                    joinLines(getString(R.string.chain_step_alone_only_sum), aloneResult.error),
+                    StepRole.MUTED,
+                )
+
+                else -> StepRow(getString(R.string.chain_step_not_tested), "", StepRole.MUTED)
+            }
+        }
+
+        val landing = names.size
+        val throughLanding = through[landing]
+        val aloneLanding = alone[landing]
+        val (status, role) = when {
+            report.error.isNotEmpty() -> report.error to StepRole.DANGER
+            report.aborted -> getString(R.string.chain_step_stopped) to StepRole.MUTED
+            breakAt >= 0 -> getString(R.string.chain_step_breaks_at, breakAt + 1, names[breakAt]) to StepRole.DANGER
+            !report.hasLanding -> getString(R.string.chain_step_all_work) to StepRole.SUCCESS
+            throughLanding != null && ProxyEntity.isWorking(throughLanding.latency) ->
+                getString(R.string.chain_step_landing_works, stepLatencyText(throughLanding)) to StepRole.SUCCESS
+
+            aloneLanding != null && ProxyEntity.isWorking(aloneLanding.latency) ->
+                getString(R.string.chain_step_landing_fails_through) to StepRole.DANGER
+
+            else -> getString(R.string.chain_step_landing_unavailable) to StepRole.DANGER
+        }
+        return StepVerdict(rows, status, role)
+    }
+
     override fun Chain.init() {
         pbm.writeToCacheAll(this)
         DataStore.profileCacheStore.putString(KEY_CHAIN_IDS, list.joinToString(","))
@@ -169,6 +377,8 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
         super.onCreate(savedInstanceState)
 
         supportActionBar!!.setTitle(R.string.chain_settings)
+        stepStatus = findViewById(R.id.step_status)
+        stepStatus.applyInsetPadding(horizontal = true)
         configurationList = findViewById(R.id.configuration_list)
         configurationList.applyListInsets()
         layoutManager = FixedLinearLayoutManager(configurationList)
@@ -284,7 +494,7 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
             if (holder is AddHolder) {
                 holder.bind()
             } else if (holder is ProfileHolder) {
-                holder.bind(proxyList[position - 1])
+                holder.bind(proxyList[position - 1], position - 1)
             }
         }
 
@@ -359,9 +569,8 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
             binding.root.setOnClickListener {
                 replacing = 0
                 selectProfileForAdd.launch(
-                    Intent(
-                        this@ChainSettingsActivity, ProfileSelectActivity::class.java
-                    )
+                    Intent(this@ChainSettingsActivity, ProfileSelectActivity::class.java)
+                        .putExtra(ProfileSelectActivity.EXTRA_ALLOW_AUTO_SELECTORS, true)
                 )
             }
         }
@@ -375,8 +584,10 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
         val trafficText: TextView = binding.trafficText
         val editButton = binding.edit
         val shareLayout = binding.share
+        val stepResult: TextView = binding.profileResult
+        val stepExplanation: TextView = binding.profileError
 
-        fun bind(proxyEntity: ProxyEntity) {
+        fun bind(proxyEntity: ProxyEntity, index: Int) {
 
             profileName.text = proxyEntity.displayName()
             profileType.text = proxyEntity.displayType()
@@ -401,12 +612,145 @@ class ChainSettingsActivity : ProfileSettingsActivity<Chain>(R.layout.layout_cha
                     this@ChainSettingsActivity, ProfileSelectActivity::class.java
                 ).apply {
                     putExtra(ProfileSelectActivity.EXTRA_SELECTED, proxyEntity)
+                    putExtra(ProfileSelectActivity.EXTRA_ALLOW_AUTO_SELECTORS, true)
                 })
             }
 
             shareLayout.isVisible = false
+
+            val step = stepRows?.getOrNull(index)
+            stepResult.isVisible = step != null
+            stepExplanation.isVisible = !step?.explanation.isNullOrEmpty()
+            if (step != null) {
+                stepResult.text = step.text
+                stepResult.setTextColor(roleColor(step.role))
+                stepExplanation.text = step.explanation
+            }
+            // The explanation line is cut at two lines; a tap shows all of it (the desktop's tooltip).
+            val explanation = step?.explanation?.takeIf { it.isNotEmpty() }
+            itemView.setOnClickListener(explanation?.let { text ->
+                View.OnClickListener {
+                    MaterialAlertDialogBuilder(this@ChainSettingsActivity).setTitle(proxyEntity.displayName())
+                        .setMessage(text)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                }
+            })
         }
 
     }
 
+}
+
+/** edit_chain.cpp's colour roles of a hop test result. */
+private enum class StepRole { SUCCESS, DANGER, MUTED }
+
+/** A hop's result text and its explanation (the desktop's tooltip). */
+private class StepRow(val text: String, val explanation: String, val role: StepRole)
+
+private class StepVerdict(val rows: List<StepRow>, val status: String, val statusRole: StepRole)
+
+private sealed class StepOutcome {
+    class Done(val report: ChainStepReport) : StepOutcome()
+    object Busy : StepOutcome()
+    object Unreachable : StepOutcome()
+}
+
+/**
+ * Binds :bg for one hop test (ICoreService.startChainStepTest) and hands its outcome to [onOutcome] on the main
+ * thread, at most once; [cancel] stops the test in :bg and drops the outcome. Main thread only.
+ */
+private class ChainStepClient(
+    private val hops: LongArray,
+    private val groupId: Long,
+    private val onOutcome: (StepOutcome) -> Unit,
+) {
+    private val main = Handler(Looper.getMainLooper())
+    private var unbind: (() -> Unit)? = null
+    private var service: ICoreService? = null
+    private var started = false
+    private var cancelled = false
+    private var finished = false
+
+    private val timeout = Runnable { if (service == null) finish(StepOutcome.Unreachable) }
+
+    private val callback = object : IChainStepCallback.Stub() {
+        override fun onDone(report: ChainStepReport?) {
+            main.post { finish(if (report != null) StepOutcome.Done(report) else StepOutcome.Unreachable) }
+        }
+    }
+
+    fun start() {
+        unbind = try {
+            CoreServiceClient.bindPersistent(
+                onConnected = { service -> main.post { onConnected(service) } },
+                onDisconnected = { main.post { finish(StepOutcome.Unreachable) } },
+            )
+        } catch (e: Exception) {
+            Logs.w(e)
+            main.post { finish(StepOutcome.Unreachable) }
+            return
+        }
+        main.postDelayed(timeout, CONNECT_TIMEOUT_MS)
+    }
+
+    fun cancel() {
+        if (finished) return
+        finished = true
+        cancelled = true
+        main.removeCallbacks(timeout)
+        val service = service
+        // With the start still in flight, its answer stops the test and releases the binding.
+        if (service == null) release() else if (started) stopAndRelease(service)
+    }
+
+    private fun onConnected(service: ICoreService) {
+        if (finished || this.service != null) return
+        this.service = service
+        main.removeCallbacks(timeout)
+        runOnDefaultDispatcher {
+            val accepted = try {
+                service.startChainStepTest(hops, groupId, callback)
+            } catch (e: Exception) {
+                Logs.w(e)
+                null
+            }
+            onMainDispatcher {
+                when {
+                    cancelled -> if (accepted == true) stopAndRelease(service) else release()
+                    accepted == null -> finish(StepOutcome.Unreachable)
+                    !accepted -> finish(StepOutcome.Busy)
+                    else -> started = true
+                }
+            }
+        }
+    }
+
+    private fun finish(outcome: StepOutcome) {
+        if (finished) return
+        finished = true
+        main.removeCallbacks(timeout)
+        release()
+        onOutcome(outcome)
+    }
+
+    private fun stopAndRelease(service: ICoreService) {
+        runOnDefaultDispatcher {
+            try {
+                service.stopChainStepTest()
+            } catch (e: Exception) {
+                Logs.w(e)
+            }
+            onMainDispatcher { release() }
+        }
+    }
+
+    private fun release() {
+        unbind?.invoke()
+        unbind = null
+    }
+
+    companion object {
+        const val CONNECT_TIMEOUT_MS = 15_000L
+    }
 }

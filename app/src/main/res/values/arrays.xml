@@ -811,6 +811,14 @@
         <item>rotate</item>
         <item>connection</item>
     </string-array>
+    <string-array name="autosel_strategies" translatable="false">
+        <item>@string/autosel_strategy_latency</item>
+        <item>@string/autosel_strategy_priority</item>
+    </string-array>
+    <string-array name="autosel_strategy_values" translatable="false">
+        <item>latency</item>
+        <item>priority</item>
+    </string-array>
 
     <!-- WARP -->
     <string-array name="warp_mode_entries" translatable="false">

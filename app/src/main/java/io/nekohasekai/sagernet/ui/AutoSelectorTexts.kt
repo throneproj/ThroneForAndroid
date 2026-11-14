@@ -15,6 +15,7 @@ internal object AutoSelectorTexts {
         }
         val total = status.membersTotal
         return when {
+            status.suspended && status.upstream -> context.getString(R.string.autosel_status_paused_upstream, total)
             status.suspended -> context.getString(R.string.autosel_status_paused, total)
             status.corePhase == "starting" || status.corePhase == "probing" && status.membersProbed == 0 ->
                 context.getString(R.string.autosel_status_starting, total)
@@ -22,7 +23,12 @@ internal object AutoSelectorTexts {
             status.corePhase == "probing" -> context.getString(R.string.autosel_status_probing, status.membersProbed, total)
             status.membersAlive == 0 -> context.getString(R.string.autosel_status_no_working, total)
             else -> {
-                val base = context.getString(R.string.autosel_status_on_working, status.selectedName, status.membersAlive, total)
+                val tier = status.selectedPriority
+                val base = if (status.prioritized && tier >= 0) {
+                    context.getString(R.string.autosel_status_on_tier, status.selectedName, tier + 1, status.membersAlive, total)
+                } else {
+                    context.getString(R.string.autosel_status_on_working, status.selectedName, status.membersAlive, total)
+                }
                 if (status.lastSwitchMs <= 0) base
                 else base + context.getString(R.string.autosel_status_switched, ago(context, status.lastSwitchMs, now))
             }
@@ -37,6 +43,7 @@ internal object AutoSelectorTexts {
         if (status.membersProbed > 0) {
             parts.add(context.getString(R.string.autosel_detail_working, status.membersAlive))
             if (status.membersCooldown > 0) parts.add(context.getString(R.string.autosel_detail_cooling, status.membersCooldown))
+            if (status.membersSuspect > 0) parts.add(context.getString(R.string.autosel_detail_suspect, status.membersSuspect))
             val untested = total - status.membersProbed
             if (untested > 0) parts.add(context.getString(R.string.autosel_detail_untested, untested))
         }
@@ -47,6 +54,10 @@ internal object AutoSelectorTexts {
             R.string.autosel_detail_health, total, parts.joinToString(context.getString(R.string.autosel_list_separator))
         )
     }
+
+    /** AutoSelectorView::tierLabel. */
+    fun tierLabel(context: Context, status: AutoSelectorStatus, priority: Int): String =
+        status.tierLabels.getOrNull(priority) ?: context.getString(R.string.autosel_tier_fallback, priority + 1)
 
     /** elapsedText / agoText. */
     fun ago(context: Context, ms: Long, now: Long = System.currentTimeMillis()): String {

@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
+import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceDataStore
@@ -36,6 +37,7 @@ import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.group.DeviceDetails
 import io.nekohasekai.sagernet.group.RequestIdentity
+import io.nekohasekai.sagernet.group.SubscriptionClient
 import io.nekohasekai.sagernet.group.SubscriptionNameFilter
 import io.nekohasekai.sagernet.group.SubscriptionScheduler
 import io.nekohasekai.sagernet.ktx.FixedLinearLayoutManager
@@ -106,9 +108,10 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         private const val KEY_REMOVE_UNAVAILABLE = "groupSubRemoveUnavailable"
         private const val KEY_SORT_BY_LATENCY = "groupSubSortByLatency"
         private const val KEY_FILTER = "groupFilter"
-        private const val KEY_NAME_INCLUDE = "groupSubNameInclude"
+        private const val KEY_NAME_FILTER = "groupSubNameInclude"
         private const val KEY_NAME_EXCLUDE = "groupSubNameExclude"
-        private val NAME_FILTERS = listOf(KEY_NAME_INCLUDE, KEY_NAME_EXCLUDE)
+        private const val KEY_TYPE_EXCLUDE = "groupSubTypeExclude"
+        private val NAME_FILTERS = listOf(KEY_NAME_FILTER, KEY_NAME_EXCLUDE)
 
         private val HWID_KEYS = listOf(KEY_HWID, KEY_HWID_OS, KEY_HWID_OS_VERSION, KEY_HWID_MODEL)
         private val OPTION_TEXT_KEYS = listOf(KEY_USER_AGENT) + HWID_KEYS
@@ -162,6 +165,9 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
     /** The menu's value on open; while it stays, the stored route_id is kept, a raw one the menu does not offer included. */
     private var initialRoute = "-1"
 
+    /** Stored type_exclude ids this build does not know: offered under their id, so they are kept until unticked. */
+    private var unknownTypes: List<String> = emptyList()
+
     private val fragment get() = supportFragmentManager.findFragmentById(R.id.settings) as? GroupPreferenceFragment
 
     private val selectFront = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -191,6 +197,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
                 val group = if (editingId > 0) GroupRepo.get(editingId) ?: return@withContext false else ProxyGroup()
                 if (editingId > 0) resetDanglingProxies(group)
                 loadRouteChoices(group)
+                unknownTypes = group.subOptions.typeExclude.filter { id -> SubscriptionNameFilter.PROTOCOLS.none { it.id == id } }
                 if (fresh) {
                     writeToCache(group)
                     val prefilled = editingId == 0L && !link.isNullOrBlank()
@@ -353,18 +360,23 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         store.putBoolean(KEY_URL_TEST, options.urlTest)
         store.putBoolean(KEY_REMOVE_UNAVAILABLE, options.removeUnavailable)
         store.putBoolean(KEY_SORT_BY_LATENCY, options.sortByLatency)
-        store.putString(KEY_NAME_INCLUDE, options.nameInclude)
+        store.putString(KEY_NAME_FILTER, options.nameFilter)
         store.putString(KEY_NAME_EXCLUDE, options.nameExclude)
+        store.putStringSet(KEY_TYPE_EXCLUDE, options.typeExclude.toMutableSet())
     }
 
-    /** DialogEditGroupAdvanced::accept: the strings trimmed, disabled fields kept, the interval as entered (the form refuses 1-29). */
-    private fun optionsFromCache(): SubscriptionOptions {
+    /**
+     * DialogEditGroupAdvanced::accept: the strings trimmed, disabled fields kept, the interval as entered (the form
+     * refuses 1-29); the ticked types in the desktop's order, then the unknown ones. [countryFilter] has no field here.
+     */
+    private fun optionsFromCache(countryFilter: String): SubscriptionOptions {
         val store = DataStore.profileCacheStore
         fun text(key: String) = store.getString(key).orEmpty().trim()
         fun flag(key: String) = store.getBoolean(key, false)
         // overrideAt: index 0 is "Keep default".
         fun overrideAt(key: String): Int? = store.getString(key)?.toIntOrNull()?.takeIf { it > 0 }?.minus(1)
         val minutes = text(KEY_UPDATE_INTERVAL).toIntOrNull() ?: 0
+        val ticked = store.getStringSet(KEY_TYPE_EXCLUDE).orEmpty()
         return SubscriptionOptions(
             userAgent = text(KEY_USER_AGENT),
             tlsVersion = overrideAt(KEY_TLS_VERSION)?.let(SubTlsVersion::of),
@@ -383,8 +395,10 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             urlTest = flag(KEY_URL_TEST),
             removeUnavailable = flag(KEY_REMOVE_UNAVAILABLE),
             sortByLatency = flag(KEY_SORT_BY_LATENCY),
-            nameInclude = text(KEY_NAME_INCLUDE),
+            nameFilter = text(KEY_NAME_FILTER),
             nameExclude = text(KEY_NAME_EXCLUDE),
+            typeExclude = (SubscriptionNameFilter.PROTOCOLS.map { it.id } + unknownTypes).filter { it in ticked },
+            countryFilter = countryFilter,
             showInfoCard = store.getBoolean(KEY_SHOW_INFO_CARD, true),
         )
     }
@@ -413,6 +427,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
     /** DialogEditGroup::accept and DialogEditGroupAdvanced::accept behind one save gate. */
     private suspend fun save() {
         if (fragment?.form?.validateAll() == false) return
+        var refreshNeeded = false
         val restartNeeded = withContext(Dispatchers.IO) {
             val group = if (editingId > 0) GroupRepo.get(editingId) ?: return@withContext false else ProxyGroup()
             val url = DataStore.subscriptionLink.trim()
@@ -429,7 +444,10 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             group.autoClearUnavailable = store.getBoolean(KEY_AUTO_CLEAR, false)
             group.url = newUrl
             group.skipAutoUpdate = store.getBoolean(KEY_SKIP_AUTO_UPDATE, false)
-            group.subOptions = optionsFromCache()
+            val options = optionsFromCache(group.subOptions.countryFilter)
+            // DialogEditGroup::accept: new filters apply to an existing subscription right away.
+            refreshNeeded = editingId > 0 && newUrl.isNotEmpty() && !group.archive && !group.subOptions.sameFilters(options)
+            group.subOptions = options
             group.frontProxyId = proxyId(KEY_FRONT)
             group.landingProxyId = proxyId(KEY_LANDING)
             val pickedRoute = store.getString(KEY_ROUTE) ?: initialRoute
@@ -444,6 +462,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             SubscriptionScheduler.schedule()
             restart
         }
+        if (refreshNeeded) SubscriptionClient.refreshGroup(editingId, showDiff = true)
         if (restartNeeded) setResult(RESULT_OK, Intent().putExtra(EXTRA_RESTART_NEEDED, true))
         finish()
     }
@@ -551,8 +570,9 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             )
             updateInterval()
 
-            nameFilter(KEY_NAME_INCLUDE, R.string.grp_filter_include_empty)
+            nameFilter(KEY_NAME_FILTER, R.string.grp_filter_include_empty)
             nameFilter(KEY_NAME_EXCLUDE, R.string.grp_filter_exclude_empty)
+            typeFilter()
 
             findPreference<Preference>(KEY_ADVANCED_TOGGLE)!!.setOnPreferenceClickListener {
                 host.advancedExpanded = !host.advancedExpanded
@@ -670,6 +690,21 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             preference.setOnBindEditTextListener {
                 it.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                 it.setSingleLine()
+            }
+        }
+
+        /** "Remove types": the protocols of FilterProtocols(), then the unknown stored ids; the summary lists the ticked ones. */
+        private fun typeFilter() {
+            val preference = findPreference<MultiSelectListPreference>(KEY_TYPE_EXCLUDE) ?: return
+            val protocols = SubscriptionNameFilter.PROTOCOLS
+            val ids = protocols.map { it.id } + host.unknownTypes
+            val labels = protocols.map { getString(it.label) } + host.unknownTypes
+            preference.entries = labels.toTypedArray()
+            preference.entryValues = ids.toTypedArray()
+            preference.summaryProvider = Preference.SummaryProvider<MultiSelectListPreference> {
+                val ticked = it.values
+                val shown = ids.indices.filter { i -> ids[i] in ticked }.joinToString(", ") { i -> labels[i] }
+                shown.ifEmpty { getString(R.string.grp_filter_exclude_empty) } + "\n" + getString(R.string.grp_filter_type_exclude_tip)
             }
         }
 

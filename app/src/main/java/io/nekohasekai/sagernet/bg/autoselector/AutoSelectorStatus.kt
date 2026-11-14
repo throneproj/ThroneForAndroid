@@ -28,6 +28,8 @@ data class AutoSelectorStatus(
     /** Members in the running build. */
     val membersTotal: Int = 0,
     val suspended: Boolean = false,
+    /** Members dial through the chain hops in front of the selector. */
+    val upstream: Boolean = false,
     val membersProbed: Int = 0,
     val membersAlive: Int = 0,
     val membersQualified: Int = 0,
@@ -38,6 +40,19 @@ data class AutoSelectorStatus(
     val nextRoundMs: Long = 0,
     val balance: Boolean = false,
     val exhaustedSinceMs: Long = 0,
+    /** latency | priority ("" until the core first reports). */
+    val strategy: String = "",
+    /** What a recovered higher-tier member must pass before the selector moves back up to it. */
+    val failbackChecks: Int = 0,
+    val failbackDelayMs: Long = 0,
+    /** Indexed by priority; the last entry names the members that match no tier. */
+    val tierLabels: List<String> = emptyList(),
+    /** The selected member's tier, -1 while none is selected; the callbacks carry no member table to read it from. */
+    val selectedPriority: Int = -1,
+    val membersSuspect: Int = 0,
+    val passive: Boolean = false,
+    /** Sites holding the member that last answered them. */
+    val sitesRemembered: Int = 0,
     val members: List<Member> = emptyList(),
     /** The runtime's last notice (a refused pin, a rebuild), "" = none. */
     val notice: String = "",
@@ -51,7 +66,7 @@ data class AutoSelectorStatus(
         val name: String = "",
         val selected: Boolean = false,
         val selectedUdp: Boolean = false,
-        /** ok | degraded | untested | dead | cooldown. */
+        /** ok | degraded | suspect | untested | dead | cooldown. */
         val state: String = "",
         val rank: Int = 0,
         val qualified: Boolean = false,
@@ -69,10 +84,27 @@ data class AutoSelectorStatus(
         val lastProbeMs: Long = 0,
         val cooldownUntilMs: Long = 0,
         val lastError: String = "",
+        /** Tier index, 0 = most preferred. */
+        val priority: Int = 0,
+        /** Successful checks in a row since the last failure. */
+        val streak: Int = 0,
+        val lastFailureMs: Long = 0,
+        /** Passive scoring, from the real connections the member carried; time-weighted average, 0 = none yet. */
+        val firstByteMs: Int = 0,
+        val passiveAnswered: Int = 0,
+        val passiveFailed: Int = 0,
+        /** Decayed and rounded: what the suspect rule weighs. */
+        val recentAnswered: Int = 0,
+        val recentFailed: Int = 0,
+        val suspectUntilMs: Long = 0,
     ) {
         val isDead: Boolean get() = state == STATE_DEAD
         val isUsable: Boolean get() = state == STATE_OK || state == STATE_DEGRADED
-        val hasProblem: Boolean get() = state == STATE_DEAD || state == STATE_COOLDOWN || state == STATE_DEGRADED
+
+        /** Passes its probes, but recent real connections mostly fail. */
+        val isSuspect: Boolean get() = state == STATE_SUSPECT
+        val hasProblem: Boolean
+            get() = state == STATE_DEAD || state == STATE_COOLDOWN || state == STATE_DEGRADED || state == STATE_SUSPECT
 
         internal fun toJson(): JsonObject = jsonObjectOf(
             "id" to id,
@@ -97,6 +129,15 @@ data class AutoSelectorStatus(
             "last_probe_ms" to lastProbeMs,
             "cooldown_until_ms" to cooldownUntilMs,
             "last_error" to lastError,
+            "priority" to priority,
+            "streak" to streak,
+            "last_failure_ms" to lastFailureMs,
+            "first_byte_ms" to firstByteMs,
+            "passive_answered" to passiveAnswered,
+            "passive_failed" to passiveFailed,
+            "recent_answered" to recentAnswered,
+            "recent_failed" to recentFailed,
+            "suspect_until_ms" to suspectUntilMs,
         )
 
         internal companion object {
@@ -123,12 +164,23 @@ data class AutoSelectorStatus(
                 lastProbeMs = obj.integer("last_probe_ms"),
                 cooldownUntilMs = obj.integer("cooldown_until_ms"),
                 lastError = obj.string("last_error"),
+                priority = obj.int("priority"),
+                streak = obj.int("streak"),
+                lastFailureMs = obj.integer("last_failure_ms"),
+                firstByteMs = obj.int("first_byte_ms"),
+                passiveAnswered = obj.int("passive_answered"),
+                passiveFailed = obj.int("passive_failed"),
+                recentAnswered = obj.int("recent_answered"),
+                recentFailed = obj.int("recent_failed"),
+                suspectUntilMs = obj.integer("suspect_until_ms"),
             )
         }
     }
 
     /** A selector is being measured or run. */
     val active: Boolean get() = phase != PHASE_IDLE
+
+    val prioritized: Boolean get() = strategy == STRATEGY_PRIORITY
 
     fun member(id: Long): Member? = members.firstOrNull { it.id == id }
 
@@ -146,6 +198,7 @@ data class AutoSelectorStatus(
             "last_switch_reason" to lastSwitchReason,
             "members_total" to membersTotal,
             "suspended" to suspended,
+            "upstream" to upstream,
             "members_probed" to membersProbed,
             "members_alive" to membersAlive,
             "members_qualified" to membersQualified,
@@ -156,9 +209,17 @@ data class AutoSelectorStatus(
             "next_round_ms" to nextRoundMs,
             "balance" to balance,
             "exhausted_since_ms" to exhaustedSinceMs,
+            "strategy" to strategy,
+            "failback_checks" to failbackChecks,
+            "failback_delay_ms" to failbackDelayMs,
+            "selected_priority" to selectedPriority,
+            "members_suspect" to membersSuspect,
+            "passive" to passive,
+            "sites_remembered" to sitesRemembered,
             "notice" to notice,
             "notice_at_ms" to noticeAtMs,
         )
+        obj["tier_labels"] = JsonArray().also { array -> tierLabels.forEach { array.add(it) } }
         obj["members"] = JsonArray().also { array -> members.forEach { array.add(it.toJson()) } }
         return obj.toCompact()
     }
@@ -177,6 +238,9 @@ data class AutoSelectorStatus(
         const val STATE_UNTESTED = "untested"
         const val STATE_DEAD = "dead"
         const val STATE_COOLDOWN = "cooldown"
+        const val STATE_SUSPECT = "suspect"
+
+        const val STRATEGY_PRIORITY = "priority"
 
         @JvmField
         val IDLE = AutoSelectorStatus()
@@ -199,6 +263,7 @@ data class AutoSelectorStatus(
                 lastSwitchReason = obj.string("last_switch_reason"),
                 membersTotal = obj.int("members_total"),
                 suspended = obj.bool("suspended"),
+                upstream = obj.bool("upstream"),
                 membersProbed = obj.int("members_probed"),
                 membersAlive = obj.int("members_alive"),
                 membersQualified = obj.int("members_qualified"),
@@ -209,6 +274,14 @@ data class AutoSelectorStatus(
                 nextRoundMs = obj.integer("next_round_ms"),
                 balance = obj.bool("balance"),
                 exhaustedSinceMs = obj.integer("exhausted_since_ms"),
+                strategy = obj.string("strategy"),
+                failbackChecks = obj.int("failback_checks"),
+                failbackDelayMs = obj.integer("failback_delay_ms"),
+                tierLabels = obj.array("tier_labels").map { it as? String ?: "" },
+                selectedPriority = if (obj.contains("selected_priority")) obj.int("selected_priority") else -1,
+                membersSuspect = obj.int("members_suspect"),
+                passive = obj.bool("passive"),
+                sitesRemembered = obj.int("sites_remembered"),
                 members = obj.array("members").mapNotNull { (it as? JsonObject)?.let(Member::fromJson) },
                 notice = obj.string("notice"),
                 noticeAtMs = obj.integer("notice_at_ms"),

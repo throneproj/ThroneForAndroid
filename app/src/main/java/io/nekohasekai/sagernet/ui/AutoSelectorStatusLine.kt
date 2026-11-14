@@ -19,7 +19,8 @@ import kotlinx.coroutines.withContext
 
 /**
  * The profiles screen's status line (the Data view summary, mainwindow_view.cpp:89-97): what the running auto-selector
- * does, or "stopped" while the selected profile is a selector and nothing runs. A tap opens [AutoSelectorStatusActivity].
+ * does, or "stopped" while the selected profile runs a selector (itself or a chain's selector hop) and nothing runs.
+ * A tap opens [AutoSelectorStatusActivity].
  */
 object AutoSelectorStatusLine {
 
@@ -39,8 +40,7 @@ object AutoSelectorStatusLine {
         try {
             val selectedSelector = selection.mapLatest { id ->
                 withContext(Dispatchers.IO) {
-                    runCatching { ProfileManager.getProfile(id)?.takeIf { it.type == AutoSelectorProfiles.TYPE }?.id }
-                        .getOrNull()
+                    runCatching { AutoSelectorProfiles.runningSelectorOf(ProfileManager.getProfile(id))?.id }.getOrNull()
                 }
             }
             val ticks = flow {

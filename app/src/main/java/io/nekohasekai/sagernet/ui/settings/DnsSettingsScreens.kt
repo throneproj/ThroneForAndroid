@@ -27,13 +27,13 @@ class DnsSettingsFragment : SettingsScreenFragment(R.xml.settings_dns) {
 
     override fun bind() {
         // dialog_manage_routes.cpp's server rules.
-        val server: Rule = { DnsServers.parseDnsAddress(it).why }
+        val server: Rule = { DnsServers.dnsAddressListProblem(it) }
         gateText(SettingsRegistry.REMOTE_DNS.key, server, invalid = R.string.invalid_dns_address) { it.isNotEmpty() }
         gateText(SettingsRegistry.DIRECT_DNS.key, server, invalid = R.string.invalid_dns_address) { it.isNotEmpty() }
         pref<DnsServerPreference>(SettingsRegistry.REMOTE_DNS.key).suggestions = DnsServerHistory::remoteSuggestions
         pref<DnsServerPreference>(SettingsRegistry.DIRECT_DNS.key).suggestions = DnsServerHistory::directSuggestions
-        rememberAccepted(SettingsRegistry.REMOTE_DNS.key, DnsServerHistory::rememberRemote)
-        rememberAccepted(SettingsRegistry.DIRECT_DNS.key, DnsServerHistory::rememberDirect)
+        acceptServers(SettingsRegistry.REMOTE_DNS.key, DnsServerHistory::rememberRemote)
+        acceptServers(SettingsRegistry.DIRECT_DNS.key, DnsServerHistory::rememberDirect)
         gateText(SettingsRegistry.CORE_BOX_UNDERLYING_DNS.key, ::localDnsProblem, invalid = R.string.invalid_dns_address)
         reloadOn(
             SettingsRegistry.REMOTE_DNS_DISABLE_IPV6.key, SettingsRegistry.DIRECT_DNS_DISABLE_IPV6.key,
@@ -93,17 +93,24 @@ class DnsSettingsFragment : SettingsScreenFragment(R.xml.settings_dns) {
         }
     }
 
-    /** DnsServerHistory::Remember for a server the screen took in place of another (dialog_manage_routes.cpp:635-640). */
-    private fun rememberAccepted(key: String, remember: (String) -> Unit) {
+    /**
+     * dialog_manage_routes.cpp:accept: the server list is stored as NormalizeDnsAddressList gives it, and
+     * DnsServerHistory::Remember takes a list the screen took in place of another.
+     */
+    private fun acceptServers(key: String, remember: (String) -> Unit) {
         val preference = pref<EditTextPreference>(key)
         val check = preference.onPreferenceChangeListener
         preference.setOnPreferenceChangeListener { p, newValue ->
             val before = preference.text.orEmpty()
-            val accepted = check?.onPreferenceChange(p, newValue) ?: true
-            // A refused value leaves the text as it was; a trimmed one is stored by the check itself.
-            val now = if (accepted) newValue?.toString().orEmpty() else preference.text.orEmpty()
-            if (now != before) remember(now)
-            accepted
+            val raw = newValue?.toString().orEmpty()
+            val value = DnsServers.normalizeDnsAddressList(raw)
+            // A refused value leaves the text as it was.
+            if (check?.onPreferenceChange(p, value) == false) return@setOnPreferenceChangeListener false
+            if (value != before) remember(value)
+            if (value == raw) return@setOnPreferenceChangeListener true
+            // setText persists without calling the listener again.
+            preference.text = value
+            false
         }
     }
 

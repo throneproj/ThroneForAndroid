@@ -124,6 +124,7 @@ class GroupMenu(private val host: ConfigurationFragment) {
             R.id.action_test_url -> ProfileTests.startGroup(host, TestSpec.KIND_URL, id)
             R.id.action_test_ip -> ProfileTests.startGroup(host, TestSpec.KIND_IP, id)
             R.id.action_test_speed -> ProfileTests.startGroup(host, TestSpec.KIND_SPEED, id)
+            R.id.action_test_service -> ProfileTests.startServiceGroup(host, id)
             R.id.action_clear_test_results -> GroupActions.clearTestResults(host, group)
             R.id.action_remove_duplicates -> GroupActions.removeDuplicates(host, id)
             R.id.action_remove_unavailable -> GroupActions.removeUnavailable(host, id)

@@ -36,6 +36,10 @@ class GeneratedConfig(
     @JvmField val error: String?,
     @JvmField val involvedProfileIds: Set<Long> = emptySet(),
     @JvmField val autoSelector: AutoSelectorBuild? = null,
+    /** One per route.rules entry of a started config (`routeRuleOrigins`, generate.h); empty for a custom full config and test builds. */
+    @JvmField val routeRuleOrigins: List<RouteRuleOrigin> = emptyList(),
+    /** Outbound tag -> the display name of the profile it stands for (`outboundNames`, generate.h); started configs only. */
+    @JvmField val outboundNames: Map<String, String> = emptyMap(),
 ) {
     val ok: Boolean get() = error == null
 
@@ -62,8 +66,12 @@ class GeneratedConfig(
  * core status names members by [members] tags, and pinning maps a profile id back to its tag.
  */
 class AutoSelectorBuild(
-    /** The core `auto-selector` outbound: `proxy`, or `warp-bypass` under WARP. */
+    /**
+     * The core `auto-selector` outbound: `proxy`, or `warp-bypass` under WARP; as the hop of a chain with hops below
+     * it, `auto-selector`.
+     */
     @JvmField val groupTag: String,
+    /** The auto-selector profile: the started one, or the selector hop of the started chain. */
     @JvmField val selectorId: Long,
     /** Member ingress tag (`pool-<i>-0`) -> member profile id, in pool order: the plan's build minus [rejected]. */
     @JvmField val members: Map<String, Long>,
@@ -71,8 +79,15 @@ class AutoSelectorBuild(
     @JvmField val rejected: Map<Long, String>,
     /** interval_sec after Normalize(), for the lazy Xray idle window. */
     @JvmField val intervalSec: Int,
-    /** Built behind the WARP hop: every member's bytes then land on `proxy`. */
-    @JvmField val warp: Boolean,
+    /** Built behind the WARP hop or the chain hops below the selector: every member's bytes then land on `proxy`. */
+    @JvmField val landsOnProxy: Boolean,
+    /**
+     * Priority strategy only: the label of each tier as the core numbers them (a member's `priority`), the last one
+     * naming the members that match no tier; taken from the selector at build time.
+     */
+    @JvmField val tierLabels: List<String> = emptyList(),
+    /** Members dial through the chain hops in front of the selector (the group's `upstream`). */
+    @JvmField val upstream: Boolean = false,
 ) {
     val memberIds: List<Long> get() = members.values.toList()
 
@@ -89,4 +104,24 @@ class TestCandidate @JvmOverloads constructor(
     @JvmField val frontProxyId: Long = -1,
     /** The group's name, for the error when its landing / front proxy is gone. */
     @JvmField val groupName: String = "",
+)
+
+/**
+ * ChainStepProbe (generate.h): [hop] indexes the chain editor's top-first hop list, the list's size standing for the
+ * group's landing proxy; [alone] dials it by itself rather than through every hop above it.
+ */
+class ChainStepProbe(@JvmField val hop: Int, @JvmField val alone: Boolean)
+
+/**
+ * ChainStepTestBuild (generate.h) of [ConfigGenerator.buildChainStepTest]: [build] is the test box of the probes,
+ * [tagToProbe] its ingress tags, [vpnEndpointTags] the probes exiting through an OpenVPN / OpenConnect hop (their
+ * tunnel coming up is a Connect OK). [invalidHops] failed IsValid and were not probed; [error] is empty on success.
+ */
+class ChainStepBuild(
+    @JvmField val error: String = "",
+    @JvmField val build: GeneratedConfig? = null,
+    @JvmField val tagToProbe: Map<String, ChainStepProbe> = emptyMap(),
+    @JvmField val invalidHops: Set<Int> = emptySet(),
+    @JvmField val vpnEndpointTags: List<String> = emptyList(),
+    @JvmField val hasLanding: Boolean = false,
 )

@@ -6,6 +6,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.RouteManager
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.SettingsRegistry
@@ -372,9 +373,11 @@ object BackupRestore {
                 // Database.cpp:364-377 raises all three counters whichever of the two parts was restored.
                 for ((table, value) in staged.counters) raiseSequence(db, table, value)
             }
-            if (choice.settings) applySettings(db, staged, fromAndroid)
+            if (choice.settings) applySettings(db, staged, fromAndroid, warnings)
             // Configs.cpp:32-44 initDB: an empty table gets its Default row, with a fresh id.
             if (choice.profiles) SagerDatabase.groupDao.insertDefaultIfEmpty(SagerDatabase.defaultGroupName())
+            // GroupsRepo's NormalizePins on load, once for the restored groups: the pins head their order.
+            if (choice.profiles) for (gid in SagerDatabase.groupDao.idsWithPins()) ProfileManager.normalizePinsLocked(gid)
             if (choice.routes && (db.longQuery("SELECT COUNT(*) FROM `$ROUTE_PROFILES` WHERE `is_raw` = 0") ?: 0L) == 0L) {
                 RouteManager.save(RouteProfile.defaultProfile())
             }
@@ -410,9 +413,10 @@ object BackupRestore {
     /**
      * R10 §8.3: an Android backup replaces every row but the device-local keys; a desktop backup replaces the desktop
      * rows and keeps this phone's Android-only rows (adopting only those the phone lacks). Unknown and desktop-only
-     * keys are stored as they are so they go back to the desktop.
+     * keys are stored as they are so they go back to the desktop; enable_tor is one, with a warning since Android has
+     * no Tor exit.
      */
-    private fun applySettings(db: SupportSQLiteDatabase, staged: Staged, fromAndroid: Boolean) {
+    private fun applySettings(db: SupportSQLiteDatabase, staged: Staged, fromAndroid: Boolean, warnings: MutableList<String>) {
         val kept = if (fromAndroid) SettingsRegistry.DEVICE_LOCAL_KEYS else SettingsRegistry.DEVICE_LOCAL_KEYS + SettingsRegistry.ANDROID_KEYS
         db.execSQL(
             "DELETE FROM `$SETTINGS` WHERE `key` NOT IN (${kept.joinToString(",") { "?" }})",
@@ -430,6 +434,8 @@ object BackupRestore {
                 }
             }
         }
+        val tor = staged.settings?.get(SettingsRegistry.ENABLE_TOR.key)
+        if (tor != null && SettingsRegistry.ENABLE_TOR.decode(tor) == true) warnings.add(app.getString(R.string.backup_warn_tor_egress))
         // Database.cpp:357-359: without a markers table the backup predates the migrations, which then run again.
         db.execSQL("DELETE FROM `$MARKERS`")
         staged.markers?.let { insertRows(db, MARKERS, it) }

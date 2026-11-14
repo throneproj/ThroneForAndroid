@@ -34,5 +34,14 @@ data class TestSpec(
         const val KIND_URL = 0
         const val KIND_IP = 1
         const val KIND_SPEED = 2
+
+        /** The service availability checks (runServiceChecks): never automatic, the menus ask first. */
+        const val KIND_SERVICE = 3
+
+        /** kMaxServiceCheckProfiles: every profile sends about 20 requests to third-party services. */
+        const val SERVICE_MAX_PROFILES = 100
+
+        /** Service checks of more profiles than this are confirmed first (mainwindow_setup.cpp startServiceChecks). */
+        const val SERVICE_CONFIRM_ABOVE = 20
     }
 }

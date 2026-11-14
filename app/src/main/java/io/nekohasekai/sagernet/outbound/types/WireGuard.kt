@@ -7,6 +7,7 @@ import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.QtStrings
 import io.nekohasekai.sagernet.outbound.SecurityInfo
 import io.nekohasekai.sagernet.outbound.SecurityLevel
+import io.nekohasekai.sagernet.outbound.import.ClashProxy
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.json.JsonValues
@@ -56,6 +57,50 @@ private fun wireguardFullTunnel(allowedIps: List<String>): Boolean {
         if (network.contains(':')) v6 += Math.scalb(1.0, -prefix) else v4 += Math.scalb(1.0, -prefix)
     }
     return v4 >= 0.5 || v6 >= 0.5
+}
+
+/** As in Peer::ParseFromJson, a value that is not exactly three bytes is dropped; [text] is [ClashProxy.reserved]. */
+private fun wireguardClashReserved(text: String, bytes: MutableList<Int>) {
+    if (text.isEmpty()) return
+    val message = WireGuardChecks.wireguardReserved(text, bytes)
+    if (message.isNotEmpty()) acceptOptional("reserved", message, text)
+}
+
+/** A peer's allowed IPs, a string or a list of them; mihomo folds '_' into '-' when matching keys. */
+private fun wireguardClashAllowedIps(peer: ClashProxy): List<String> {
+    for (key in listOf("allowed-ips", "allowed_ips")) {
+        if (!peer.has(key)) continue
+        val node = peer.node
+        return when {
+            node.isString(key) -> listOf(node.string(key))
+            node.isArray(key) -> node.array(key).filterIsInstance<String>()
+            else -> emptyList()
+        }
+    }
+    return emptyList()
+}
+
+/** GFW-knocker Xray sends no noise for "none" or for a custom header that is not hex. */
+private fun wireguardNoiseOn(wnoise: String): Boolean {
+    if (wnoise.isEmpty() || wnoise == "none") return false
+    if (wnoise in listOf("quic", "quicv1", "quicinit", "random")) return true
+    return Validation.hex(wnoise.take(100), 0, 0, evenLength = false, empty = Empty.Required).isEmpty()
+}
+
+/** GFW-knocker Xray's "n" or "lo-hi" in either order, capped as it caps them; anything else is its default. */
+private fun wireguardNoiseRange(text: String, defaultLow: Long, defaultHigh: Long, cap: Long): Pair<Int, Int> {
+    var low = defaultLow
+    var high = defaultHigh
+    val parts = text.split('-')
+    if (parts.size <= 2) {
+        val from = Validation.toInt(parts.first())
+        val to = Validation.toInt(parts.last())
+        if (from != null && to != null && from >= 0 && to >= 0) {
+            low = from
+            high = to
+        }
+    }
+    return minOf(low, high, cap).toInt() to minOf(maxOf(low, high), cap).toInt()
 }
 
 /** The Checks of wireguard.h, shared by the WireGuard editors (field text) and [WireGuard.validate] (profile fields). */
@@ -535,6 +580,112 @@ class WireGuard : Outbound("wireguard") {
             return false
         }
         return true
+    }
+
+    /** wireguard::ParseFromClash (wireguard.cpp). */
+    override fun parseFromClash(node: JsonObject): Boolean {
+        val proxy = ClashProxy(node)
+        if (proxy.type != "wireguard") return false
+        baseParseFromClash(proxy)
+        private_key = proxy.string("private-key").trim()
+
+        // mihomo dials only the peers when there are any, and ignores the proxy-wide endpoint and keys.
+        val peers = if (node.isArray("peers")) node.array("peers").map { ClashProxy(it as? JsonObject ?: JsonObject()) } else emptyList()
+        val peerField = if (peers.isEmpty()) "" else "peers[0]."
+        if (peers.isEmpty()) {
+            peer.address = server
+            peer.port = serverPort
+            peer.public_key = proxy.string("public-key").trim()
+            peer.pre_shared_key = proxy.string("pre-shared-key").trim()
+            wireguardClashReserved(proxy.reserved("reserved"), peer.reserved)
+        } else {
+            val first = peers[0]
+            peer.address = Hosts.toAceHost(first.string("server"))
+            peer.port = first.int("port")
+            peer.public_key = first.string("public-key").trim()
+            peer.pre_shared_key = first.string("pre-shared-key").trim()
+            // mihomo's bind falls back to the proxy-wide reserved for a peer without its own.
+            wireguardClashReserved(first.reserved("reserved").ifEmpty { proxy.reserved("reserved") }, peer.reserved)
+            val allowedIps = wireguardClashAllowedIps(first).flatMap { QtStrings.splitSkipEmpty(it.replace(" ", ""), ",") }
+            if (allowedIps.isNotEmpty() && !wireguardFullTunnel(allowedIps)) {
+                ParseDiag.warn("peers[0].allowed-ips", vtr(R.string.validation_wg_allowed_ips_ignored), allowedIps.joinToString(", "))
+            }
+            if (peers.size > 1) ParseDiag.warn("peers", vtr(R.string.validation_wg_peers, peers.size.toString()))
+            server = peer.address
+            serverPort = peer.port
+        }
+
+        val mihomoKeepalive = proxy.string("persistent-keepalive").isNotEmpty()
+        val keepaliveKey = if (mihomoKeepalive) "persistent-keepalive" else "keepalive"
+        val keepalive = proxy.string(keepaliveKey).trim()
+        if (keepalive.isNotEmpty() && wireguardKeep(keepaliveKey, keepalive) { WireGuardChecks.wireguardKeepalive(it) }) {
+            peer.persistent_keepalive = keepalive
+        }
+
+        for (key in listOf("ip", "ipv6")) address.addAll(QtStrings.splitSkipEmpty(proxy.string(key).replace(" ", ""), ","))
+        proxy.int("mtu").let { if (it > 0) mtu = it }
+        proxy.int("workers").let { if (it > 0) worker_count = it }
+
+        // A null option leaves mihomo's pointer nil, so it is not AmneziaWG.
+        val awg = if (node.isObject("amnezia-wg-option")) proxy.obj("amnezia-wg-option") else null
+        if (awg != null) {
+            enable_amnezia = true
+            fun int(key: String, max: Long, mustMatchServer: Boolean, set: (Int) -> Unit) {
+                val text = awg.string(key)
+                if (text.isNotEmpty()) set(wireguardAmneziaInt("amnezia-wg-option.$key", text, max, mustMatchServer))
+            }
+            fun text(key: String, set: (String) -> Unit) {
+                val value = awg.string(key)
+                if (value.isNotEmpty()) set(value.trim())
+            }
+            int("jc", WIREGUARD_INT_MAX, false) { jc = it }
+            int("jmin", WIREGUARD_INT_MAX, false) { jmin = it }
+            int("jmax", WIREGUARD_INT_MAX, false) { jmax = it }
+            int("s1", 65535, true) { s1 = it }
+            int("s2", 65535, true) { s2 = it }
+            int("s3", 65535, true) { s3 = it }
+            int("s4", 65535, true) { s4 = it }
+            text("h1") { h1 = it }
+            text("h2") { h2 = it }
+            text("h3") { h3 = it }
+            text("h4") { h4 = it }
+            text("i1") { i1 = it }
+            text("i2") { i2 = it }
+            text("i3") { i3 = it }
+            text("i4") { i4 = it }
+            text("i5") { i5 = it }
+            text("header-protection-key") { header_protection_key = it }
+            text("content-padding-addition") { content_padding_addition = it }
+            text("rekey-after-time") { rekey_after_time = it }
+            text("rekey-timeout") { rekey_timeout = it }
+            text("reject-after-time") { reject_after_time = it }
+            text("keepalive-timeout") { keepalive_timeout = it }
+            text("max-handshake-attempts") { max_handshake_attempts = it }
+            random_trailers = awg.bool("random-trailers")
+            disable_cookies = awg.bool("disable-cookies")
+        }
+        // GFW-knocker noise datagrams precede each handshake, as AmneziaWG junk packets do; explicit junk settings win.
+        val wnoise = proxy.string("wnoise").trim()
+        if (wireguardNoiseOn(wnoise)) {
+            val count = wireguardNoiseRange(proxy.string("wnoisecount"), 1, 2, 50).second
+            if (count > 0) {
+                if (wnoise == "quicinit") dial.quic_opener = true
+                if (awg == null || (awg.string("jc").isEmpty() && awg.string("jmin").isEmpty() && awg.string("jmax").isEmpty())) {
+                    val (low, high) = wireguardNoiseRange(proxy.string("wpayloadsize"), 5, 10, 100)
+                    jmin = low
+                    jmax = high
+                    jc = count
+                    enable_amnezia = true
+                }
+            }
+        }
+
+        fixAddress()
+        address = wireguardDropBadAddresses(address)
+        if (private_key.isEmpty()) ParseDiag.error("private-key", Validation.required(private_key))
+        if (peer.public_key.isEmpty()) ParseDiag.error(peerField + "public-key", Validation.required(peer.public_key))
+        if (server.isEmpty()) ParseDiag.error(peerField + "server", vtr(R.string.validation_server_missing))
+        return !(private_key.isEmpty() || peer.public_key.isEmpty() || server.isEmpty())
     }
 
     /** wireguard::ParseFromJson: the DB loader too, so only an import drops values. */

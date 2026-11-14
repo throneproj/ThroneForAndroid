@@ -49,6 +49,7 @@ import io.nekohasekai.sagernet.ui.route.RouteImports
 import io.nekohasekai.sagernet.ui.route.RouteJson
 import io.nekohasekai.sagernet.ui.route.RouteProfileActivity
 import io.nekohasekai.sagernet.ui.route.RouteQuickSwitch
+import io.nekohasekai.sagernet.ui.route.RouteTesterActivity
 import io.nekohasekai.sagernet.ui.route.RouteTexts
 import io.nekohasekai.sagernet.ui.settings.RoutingSettingsFragment
 import io.nekohasekai.sagernet.widget.QRCodeDialog
@@ -134,6 +135,7 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
             R.id.action_route_download -> downloadProfiles()
             R.id.action_route_update_all -> updateAll()
             R.id.action_route_update_rule_sets -> updateRuleSets()
+            R.id.action_route_tester -> startActivity(Intent(requireContext(), RouteTesterActivity::class.java))
             R.id.action_route_refresh_repo -> refreshRepository()
             R.id.action_routing_settings -> (activity as? MainActivity)?.openSettingsScreen(
                 RoutingSettingsFragment::class.java.name, getString(R.string.settings_routing)
@@ -609,6 +611,8 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
                 popup.menu.findItem(R.id.action_route_edit)?.setTitle(R.string.route_raw_view)
                 popup.menu.removeItem(R.id.action_route_clone)
                 popup.menu.removeItem(R.id.action_route_share)
+                // Android never builds a config from a raw profile.
+                popup.menu.removeItem(R.id.action_route_tester)
             }
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
@@ -617,6 +621,10 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
                     R.id.action_route_share_clipboard -> share(profile.id, qr = false)
                     R.id.action_route_share_qr -> share(profile.id, qr = true)
                     R.id.action_route_update -> runRemoteUpdates(listOf(profile.id))
+                    R.id.action_route_tester -> startActivity(
+                        Intent(requireContext(), RouteTesterActivity::class.java).putExtra(RouteTesterActivity.EXTRA_ROUTE_ID, profile.id)
+                    )
+
                     R.id.action_route_delete -> delete(profile)
                     else -> return@setOnMenuItemClickListener false
                 }

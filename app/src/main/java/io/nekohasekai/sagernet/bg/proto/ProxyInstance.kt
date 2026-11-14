@@ -21,8 +21,9 @@ class ProxyInstance(profile: ProxyEntity, var service: BaseService.Interface? = 
 
     /**
      * Outbound tag -> the profiles whose traffic it carries: the `proxy` exit accounts for the started profile. An
-     * auto-selector credits each member's `pool-<i>-0` to itself and the member (generate.cpp:1723-1724); under WARP
-     * every byte lands on the WARP `proxy`, which then accounts for the selector alone.
+     * auto-selector credits each member's `pool-<i>-0` to itself and the member (generate.cpp:1723-1724), a chain
+     * around one to the chain, the selector and the member; under WARP or behind the chain's hops below the selector
+     * every byte lands on `proxy`, which then accounts for the started profile and the selector.
      */
     val trafficMap: Map<String, List<ProxyEntity>>
         get() = selectorTraffic ?: mapOf(CoreConfig.TAG_PROXY to listOf(profile))
@@ -39,11 +40,12 @@ class ProxyInstance(profile: ProxyEntity, var service: BaseService.Interface? = 
     }
 
     private fun selectorTrafficMap(selector: AutoSelectorBuild): Map<String, List<ProxyEntity>>? {
-        if (selector.warp) return null
+        val hop = if (selector.selectorId == profile.id) null else SagerDatabase.proxyDao.getById(selector.selectorId)
+        if (selector.landsOnProxy) return hop?.let { mapOf(CoreConfig.TAG_PROXY to listOf(profile, it)) }
         val members = SagerDatabase.proxyDao.getEntities(selector.memberIds).associateBy { it.id }
         val map = LinkedHashMap<String, List<ProxyEntity>>()
         // TrafficLooper keeps one item per profile id and reads a tag's speed off its last profile: the member goes last.
-        for ((tag, id) in selector.members) map[tag] = listOfNotNull(profile, members[id])
+        for ((tag, id) in selector.members) map[tag] = listOfNotNull(profile, hop, members[id])
         return map
     }
 

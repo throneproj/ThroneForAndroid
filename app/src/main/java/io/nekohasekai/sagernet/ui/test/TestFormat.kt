@@ -77,6 +77,7 @@ internal object TestFormat {
         when (kind) {
             TestSpec.KIND_IP -> R.string.test_panel_kind_ip
             TestSpec.KIND_SPEED -> R.string.test_panel_kind_speed
+            TestSpec.KIND_SERVICE -> R.string.service_check
             else -> R.string.test_panel_kind_url
         }
     )

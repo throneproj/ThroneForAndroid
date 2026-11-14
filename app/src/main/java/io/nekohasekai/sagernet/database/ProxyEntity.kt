@@ -64,6 +64,8 @@ data class ProxyEntity(
     @ColumnInfo(name = "traffic_up", defaultValue = "0") var tx: Long = 0L,
     /** The last test's error text; Android-only, never exported. */
     @ColumnInfo(name = "test_error") var testError: String? = null,
+    /** The desktop's `service_checks`: the results of the per-service reachability checks. */
+    @ColumnInfo(name = "service_checks", defaultValue = "") var serviceChecks: String = "",
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -150,12 +152,13 @@ data class ProxyEntity(
     }
 
     fun hasTestResults(): Boolean = latency != 0 || testCountry != null || ipOut != null || dlSpeed != null ||
-        ulSpeed != null || testError != null
+        ulSpeed != null || testError != null || serviceChecks.isNotEmpty()
 
     /** Profile::ClearTestResults, plus the Android-only error text. */
     fun clearTestResults() {
         testCountry = null
         ipOut = null
+        serviceChecks = ""
         latency = 0
         latencyAt = 0L
         dlSpeed = null
@@ -339,13 +342,14 @@ data class ProxyEntity(
         fun closeGap(groupId: Long, order: Long)
 
         /**
-         * The group's members without their data: `type` and `outbound_json` are empty, `name`, `test_country` and
-         * `test_error` null, so only the keys that read plain columns (test results, traffic) can be taken from them.
+         * The group's members without their data: `type`, `outbound_json` and `service_checks` are empty, `name`,
+         * `test_country` and `test_error` null, so only the keys that read plain columns (test results, traffic) can be
+         * taken from them.
          */
         @Query(
             "SELECT `id`, '' AS `type`, NULL AS `name`, `gid`, `user_order`, `latency`, `latency_at`, `dl_speed`, " +
                 "`ul_speed`, NULL AS `test_country`, `ip_out`, '' AS `outbound_json`, `traffic_dl`, `traffic_up`, " +
-                "NULL AS `test_error` FROM `profiles` WHERE `gid` = :groupId"
+                "NULL AS `test_error`, '' AS `service_checks` FROM `profiles` WHERE `gid` = :groupId"
         )
         fun getWithoutDataByGroup(groupId: Long): List<ProxyEntity>
 
@@ -353,7 +357,7 @@ data class ProxyEntity(
         @Query(
             "SELECT `id`, '' AS `type`, NULL AS `name`, `gid`, `user_order`, `latency`, `latency_at`, `dl_speed`, " +
                 "`ul_speed`, NULL AS `test_country`, `ip_out`, '' AS `outbound_json`, `traffic_dl`, `traffic_up`, " +
-                "NULL AS `test_error` FROM `profiles` WHERE `id` IN (:proxyIds)"
+                "NULL AS `test_error`, '' AS `service_checks` FROM `profiles` WHERE `id` IN (:proxyIds)"
         )
         fun getWithoutData(proxyIds: List<Long>): List<ProxyEntity>
 
@@ -428,15 +432,21 @@ data class ProxyEntity(
         )
         fun updateLatency(proxyId: Long, latency: Int, latencyAt: Long, testError: String?): Int
 
+        /** TestRunner::applyServiceResult: the `service_checks` document alone. */
+        @Query("UPDATE `profiles` SET `service_checks` = :document WHERE `id` = :proxyId")
+        fun updateServiceChecks(proxyId: Long, document: String): Int
+
         @Query(
             "UPDATE `profiles` SET `latency` = 0, `latency_at` = 0, `dl_speed` = NULL, `ul_speed` = NULL, " +
-                "`test_country` = NULL, `ip_out` = NULL, `test_error` = NULL WHERE `id` IN (:profileIds)"
+                "`test_country` = NULL, `ip_out` = NULL, `test_error` = NULL, `service_checks` = '' " +
+                "WHERE `id` IN (:profileIds)"
         )
         fun clearTestResults(profileIds: List<Long>): Int
 
         @Query(
             "UPDATE `profiles` SET `latency` = 0, `latency_at` = 0, `dl_speed` = NULL, `ul_speed` = NULL, " +
-                "`test_country` = NULL, `ip_out` = NULL, `test_error` = NULL WHERE `gid` = :groupId"
+                "`test_country` = NULL, `ip_out` = NULL, `test_error` = NULL, `service_checks` = '' " +
+                "WHERE `gid` = :groupId"
         )
         fun clearGroupTestResults(groupId: Long): Int
 

@@ -3,9 +3,11 @@ package io.nekohasekai.sagernet.bg
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import io.nekohasekai.sagernet.aidl.IChainStepCallback
 import io.nekohasekai.sagernet.aidl.ICoreService
 import io.nekohasekai.sagernet.aidl.ISubscriptionCallback
 import io.nekohasekai.sagernet.aidl.ITestSessionCallback
+import io.nekohasekai.sagernet.bg.test.ChainStepRunner
 import io.nekohasekai.sagernet.bg.test.TestEngine
 import io.nekohasekai.sagernet.bg.test.TestSpec
 import io.nekohasekai.sagernet.group.SubscriptionQueue
@@ -20,6 +22,11 @@ class CoreService : Service() {
         override fun stopTests() = TestEngine.stop()
 
         override fun runningTestSession(): Int = TestEngine.runningSession()
+
+        override fun startChainStepTest(hops: LongArray?, gid: Long, cb: IChainStepCallback): Boolean =
+            ChainStepRunner.start(hops?.toList().orEmpty(), gid, cb)
+
+        override fun stopChainStepTest() = TestEngine.stopExclusive()
 
         override fun refreshGroup(gid: Long, showDiff: Boolean) = SubscriptionQueue.refreshGroup(gid, showDiff)
 
@@ -40,8 +47,17 @@ class CoreService : Service() {
 
         override fun unregisterSubscriptionCallback(cb: ISubscriptionCallback) = SubscriptionQueue.unregister(cb)
 
-        override fun warpRegister(tunnelType: String, proxy: String?, apiHosts: Array<String>?): String =
-            WarpRegistration.register(tunnelType, proxy.orEmpty(), apiHosts ?: emptyArray())
+        override fun warpRegister(
+            tunnelType: String,
+            proxy: String?,
+            apiHosts: Array<String>?,
+            tlsFragment: Boolean,
+            tlsRecordFragment: Boolean,
+            tlsFragmentFallbackDelay: String?,
+        ): String = WarpRegistration.register(
+            tunnelType, proxy.orEmpty(), apiHosts ?: emptyArray(),
+            tlsFragment, tlsRecordFragment, tlsFragmentFallbackDelay.orEmpty(),
+        )
 
         override fun genQuicSignature(domain: String?): String = QuicSignature.generate(domain.orEmpty())
 
@@ -56,6 +72,8 @@ class CoreService : Service() {
         )
 
         override fun stopDiagnostics() = CoreDiagnostics.stop()
+
+        override fun testRoute(requestJson: String?): String = RouteTester.test(requestJson.orEmpty())
     }
 
     override fun onCreate() {

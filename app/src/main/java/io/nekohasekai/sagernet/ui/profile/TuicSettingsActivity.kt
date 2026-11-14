@@ -25,6 +25,7 @@ class TuicSettingsActivity : BindingSettingsActivity<Tuic>() {
         pbm.text("heartbeat")
         TlsBlock.bind(pbm)
         QuicBlock.bind(pbm)
+        DialBlock.bindQuicOpener(pbm)
     }
 
     override fun Tuic.init() {

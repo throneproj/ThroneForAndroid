@@ -22,6 +22,9 @@
         android:id="@+id/action_route_update"
         android:title="@string/group_update" />
     <item
+        android:id="@+id/action_route_tester"
+        android:title="@string/route_tester" />
+    <item
         android:id="@+id/action_route_delete"
         android:title="@string/delete" />
 </menu>

@@ -115,8 +115,12 @@ object WarpClient {
     suspend fun register(tunnelType: String): Identity = withContext(Dispatchers.IO) {
         val proxy = proxy()
         val hosts = DataStore.warpApiHosts.toTypedArray()
+        val fragment = DataStore.warpApiTlsFragment
+        val recordFragment = DataStore.warpApiTlsRecordFragment
+        // The screen validates the delay only while fragmenting is on.
+        val fallbackDelay = if (fragment) DataStore.warpApiTlsFragmentFallbackDelay.trim() else ""
         val raw = try {
-            CoreServiceClient.call { it.warpRegister(tunnelType, proxy, hosts) }
+            CoreServiceClient.call { it.warpRegister(tunnelType, proxy, hosts, fragment, recordFragment, fallbackDelay) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

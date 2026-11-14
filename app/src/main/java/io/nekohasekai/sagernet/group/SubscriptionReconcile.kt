@@ -26,27 +26,43 @@ object SubscriptionReconcile {
     private const val HEX = "0123456789abcdef"
 
     /**
-     * The identity pass of Reconcile (SubscriptionReconcile.cpp:19-63), once every arrival went through [index] and
-     * before any is stored: an arrival that pairs with a leftover old row gets it as [NewEntry.supersedes], so it
+     * The identity and name passes of Reconcile (SubscriptionReconcile.cpp), once every arrival went through [index]
+     * and before any is stored: an arrival that pairs with a leftover old row gets it as [NewEntry.supersedes], so it
      * updates that row in place instead of being inserted and deleted again.
      */
     @JvmStatic
-    fun pairByIdentity(old: List<OldEntry>, incoming: List<NewEntry>, index: ContentIndex) {
+    fun pair(old: List<OldEntry>, incoming: List<NewEntry>, index: ContentIndex) {
         // Identity pairing only sees what the content pass never saw: leftovers whose key never arrived, arrivals whose key was never known.
         val leftoverByIdentity = HashMap<String, ArrayDeque<Long>>()
         for (entry in old) {
             if (index.isClaimed(entry.id) || index.arrived(entry.content)) continue
             leftoverByIdentity.getOrPut(entry.identity) { ArrayDeque() }.addLast(entry.id)
         }
+        val matchedOld = HashSet<Long>()
         for (entry in incoming) {
             if (entry.reused || entry.contentKnown) continue
             val leftovers = leftoverByIdentity[entry.identity]
             if (leftovers.isNullOrEmpty()) continue
             entry.supersedes = leftovers.removeFirst()
+            matchedOld.add(entry.supersedes)
+        }
+
+        // Best effort on what both passes left, excess duplicates and known content included.
+        val leftoverByName = HashMap<String, ArrayDeque<Long>>()
+        for (entry in old) {
+            if (entry.name.isEmpty() || index.isClaimed(entry.id) || entry.id in matchedOld) continue
+            leftoverByName.getOrPut(entry.name) { ArrayDeque() }.addLast(entry.id)
+        }
+        for (entry in incoming) {
+            if (entry.reused || entry.name.isEmpty() || entry.supersedes > 0L) continue
+            val leftovers = leftoverByName[entry.name]
+            if (leftovers.isNullOrEmpty()) continue
+            entry.supersedes = leftovers.removeFirst()
+            entry.byName = true
         }
     }
 
-    /** Reconcile (SubscriptionReconcile.cpp:19-63) over the stored arrivals, paired by [pairByIdentity]. */
+    /** Reconcile (SubscriptionReconcile.cpp) over the stored arrivals, paired by [pair]. */
     @JvmStatic
     fun reconcile(old: List<OldEntry>, incoming: List<NewEntry>, index: ContentIndex): ReconcilePlan {
         val plan = ReconcilePlan()
@@ -78,12 +94,13 @@ object SubscriptionReconcile {
     }
 }
 
-/** An old member of the group, in group order. */
+/** An old member of the group, in group order; [name] is the outbound's own name. */
 class OldEntry(
     @JvmField val id: Long,
     @JvmField val content: String,
     @JvmField val identity: String,
     @JvmField val display: String,
+    @JvmField val name: String,
 )
 
 /**
@@ -99,8 +116,14 @@ class NewEntry(@JvmField val display: String) {
     /** Only computed when the content was never known. */
     @JvmField var identity: String = ""
 
-    /** The old row of the same identity that takes this profile's data in place, 0 = none. */
+    /** The outbound's own name; left empty where no name match is possible (reused arrivals, imports without an index). */
+    @JvmField var name: String = ""
+
+    /** The old row of the same identity (or, failing that, the same name) that takes this profile's data in place, 0 = none. */
     @JvmField var supersedes: Long = 0L
+
+    /** [supersedes] was paired by name alone, so possibly another server or protocol. */
+    @JvmField var byName: Boolean = false
 }
 
 /** ContentIndex: each old profile is claimed at most once, in group order, by identical arrivals in arrival order (#1775). */

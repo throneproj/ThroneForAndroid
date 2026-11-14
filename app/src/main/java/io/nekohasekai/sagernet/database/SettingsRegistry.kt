@@ -303,6 +303,8 @@ object SettingsRegistry {
     // ------------------------------------------------------------------------------------------------ warp
 
     @JvmField val ENABLE_WARP = bool("enable_warp", false)
+    /** The desktop's Tor exit, which outranks WARP there; Android has no Tor and keeps it only for the round trip. */
+    @JvmField val ENABLE_TOR = bool("enable_tor", false)
     @JvmField val WARP_MODE = oneOf("warp_mode", "wireguard", WARP_MODES)
     @JvmField val WARP_EP = string("warp_ep", "")
     @JvmField val WARP_PRIVATE_KEY = string("warp_private_key", "")
@@ -321,6 +323,12 @@ object SettingsRegistry {
     @JvmField val WARP_MASQUE_HTTP_MODE = int("warp_masque_http_mode", 0) { it in 0..2 }
     /** Registration API hosts tried in order; empty = api.cloudflareclient.com. */
     @JvmField val WARP_API_HOSTS = stringList("warp_api_hosts", emptyList())
+    /** Registration ClientHello shaping; the core skips it when registration goes through the mixed inbound. */
+    @JvmField val WARP_API_TLS_FRAGMENT = bool("warp_api_tls_fragment", false)
+    @JvmField val WARP_API_TLS_RECORD_FRAGMENT = bool("warp_api_tls_record_fragment", false)
+    /** Empty = 500ms. */
+    @JvmField val WARP_API_TLS_FRAGMENT_FALLBACK_DELAY =
+        string("warp_api_tls_fragment_fallback_delay", "", SettingValidators::isDurationOrEmpty)
 
     // ------------------------------------------------------------------------------------------------ core
 

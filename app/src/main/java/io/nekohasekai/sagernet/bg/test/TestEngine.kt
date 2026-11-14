@@ -43,10 +43,42 @@ object TestEngine {
         return test.id
     }
 
+    /** How [stop] reaches the run of [startExclusive] in progress. */
+    @Volatile
+    private var exclusiveStop: (() -> Unit)? = null
+
+    /**
+     * Runs [block] on the engine's scope under the session lock, so no session overlaps it; false while one runs
+     * (TestRunner::runChainStepTest's tryLock). [stop] and [stopExclusive] call [onStop] and stop the core's tests.
+     */
+    fun startExclusive(onStop: () -> Unit, block: suspend () -> Unit): Boolean {
+        if (!session.tryLock()) return false
+        exclusiveStop = onStop
+        scope.launch {
+            try {
+                block()
+            } finally {
+                exclusiveStop = null
+                session.unlock()
+            }
+        }
+        return true
+    }
+
+    /** Stops the run of [startExclusive] in progress, if any; a session is left alone. */
+    fun stopExclusive() {
+        val onStop = exclusiveStop ?: return
+        onStop()
+        Mobile.stopTests()
+    }
+
     /** TestRunner::stop: the core aborts what runs, the session starts nothing new and ends with onDone(cancelled). */
     fun stop() {
         val test = current
-        if (test == null) Mobile.stopTests() else stop(test)
+        if (test == null) {
+            exclusiveStop?.invoke()
+            Mobile.stopTests()
+        } else stop(test)
     }
 
     /** profile_stop (mainwindow_profile_lifecycle.cpp:419-423): a test of the running box ends with the box. */

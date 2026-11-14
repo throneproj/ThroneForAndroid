@@ -65,13 +65,26 @@ fun interface SelectorStore {
 
 /** AutoSelectorPlan (AutoSelectorPlan.h:31-58) over every tracked group. */
 class AutoSelectorPlan internal constructor() {
-    /** Eligible members, best first, capped at pool_cap. */
+    /** Eligible members, best first, capped at pool_cap; in priority mode tier by tier, each tier keeping a share. */
     var pool: List<Long> = emptyList()
         internal set
 
-    /** The prefix of [pool] that enters the config. */
+    /** The members of [pool] that enter the config, capped at build_limit the same way. */
     var build: List<Long> = emptyList()
         internal set
+
+    /** Priority strategy only. Member id -> index of the first tier it matches, tiers.size when none. */
+    val tierOf: Map<Long, Int> get() = tiers
+
+    /** Members of [build] per tier; the extra last slot counts those matching no tier. */
+    var tierBuilt: List<Int> = emptyList()
+        internal set
+
+    /** Eligible members per tier before the caps, laid out like [tierBuilt]. */
+    var tierEligible: List<Int> = emptyList()
+        internal set
+
+    internal val tiers = HashMap<Long, Int>()
 
     /** Members of all tracked groups, each counted once; the selector itself is not one. */
     var membersInGroup = 0
@@ -129,6 +142,22 @@ class AutoSelectorPlan internal constructor() {
         val lines = ArrayList<String>()
         val scope = if (groups.size > 1) "in the ${groups.size} groups" else "in the group"
         lines.add("$eligible of $membersInGroup profiles $scope can be used; ${build.size} would run.")
+        if (tierBuilt.isNotEmpty()) {
+            val rest = tierBuilt.size - 1
+            val empty = ArrayList<String>()
+            val crowded = ArrayList<String>()
+            val counts = tierBuilt.mapIndexed { i, count ->
+                if (i < rest && count == 0) (if (tierEligible.getOrElse(i) { 0 } > 0) crowded else empty).add("${i + 1}")
+                "${if (i < rest) "${i + 1}" else "everything else"} → $count"
+            }
+            lines.add("By tier: ${counts.joinToString(", ")}.")
+            if (empty.size == 1) lines.add("No usable profile belongs to tier ${empty[0]}.")
+            if (empty.size > 1) lines.add("No usable profile belongs to tiers ${empty.joinToString(", ")}.")
+            if (crowded.size == 1) lines.add("Too few profiles may run to cover every tier, so tier ${crowded[0]} runs none.")
+            if (crowded.size > 1) {
+                lines.add("Too few profiles may run to cover every tier, so tiers ${crowded.joinToString(", ")} run none.")
+            }
+        }
         if (missingGroups == 1) lines.add("1 tracked group no longer exists and is skipped.")
         if (missingGroups > 1) lines.add("$missingGroups tracked groups no longer exist and are skipped.")
         if (skipped.isNotEmpty()) {
@@ -140,7 +169,10 @@ class AutoSelectorPlan internal constructor() {
                     "so all $keptUnavailable are kept and will be re-checked.",
             )
         }
-        if (truncated) lines.add("More than $poolCapUsed profiles match, so only the best-ranked ones are kept.")
+        if (truncated) {
+            val kept = if (tierBuilt.isNotEmpty()) "the best-ranked ones of each tier" else "the best-ranked ones"
+            lines.add("More than $poolCapUsed profiles match, so only $kept are kept.")
+        }
         if (rankedByTest > 0) lines.add("$rankedByTest have a recent test result that will be reused.")
         if (needsRanking) {
             lines.add(
@@ -195,7 +227,10 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         return Tracked(groups, missing)
     }
 
-    /** PlanAutoSelector (cpp:245-284); [selectorId] is excluded from the members, missing groups are skipped. */
+    /**
+     * PlanAutoSelector (cpp:353-407); [selectorId] is excluded from the members, missing groups are skipped. In priority
+     * mode the members are stable-sorted by tier and both caps keep each tier a share ([AutoSelectorPlan.tierOf]).
+     */
     fun plan(selectorId: Long, selector: AutoSelector): AutoSelectorPlan {
         val plan = AutoSelectorPlan()
         selector.normalize()
@@ -220,10 +255,21 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         }
 
         var ordered = orderMembers(members, selector.pool, selector, tracked, now)
+        val noTier = selector.tiers.size
         plan.truncated = ordered.size > selector.poolCap
-        if (plan.truncated) ordered = ordered.take(selector.poolCap)
-        plan.pool = ordered
-        plan.build = ordered.take(selector.buildLimit)
+        if (selector.prioritized) {
+            // The core reads this order as its ranking prior, and capByTier keeps it.
+            ordered = ordered.sortedBy { plan.tiers[it] ?: noTier }
+            plan.tierEligible = tierCounts(ordered, plan.tiers, noTier)
+            ordered = capByTier(ordered, selector.poolCap, plan.tiers, noTier)
+            plan.pool = ordered
+            plan.build = capByTier(ordered, selector.buildLimit, plan.tiers, noTier)
+            plan.tierBuilt = tierCounts(plan.build, plan.tiers, noTier)
+        } else {
+            if (plan.truncated) ordered = ordered.take(selector.poolCap)
+            plan.pool = ordered
+            plan.build = ordered.take(selector.buildLimit)
+        }
         if (ordered.size > selector.buildLimit) {
             plan.needsRanking = plan.build.any { effectiveLatency(tracked.byId[it], selector, now) == 0 }
         }
@@ -291,10 +337,15 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         return members
     }
 
-    // excludedCountries: "!RU" items, removed whether or not includes are given.
-    private class Filters(val name: Pattern?, val countries: Set<String>, val excludedCountries: Set<String>)
+    // MemberTierFilter: [name] null with [hasName] is an invalid pattern.
+    private class TierFilter(val gid: Long, val name: Pattern?, val hasName: Boolean)
 
-    // buildFilters (cpp:27-39): an invalid regex filters nothing (the editor refuses to save one).
+    // excludedCountries: "!RU" items, removed whether or not includes are given; [tiers] in tier order, priority strategy only.
+    private class Filters(
+        val name: Pattern?, val countries: Set<String>, val excludedCountries: Set<String>, val tiers: List<TierFilter>,
+    )
+
+    // buildFilters (cpp:40-67): an invalid regex filters nothing (the editor refuses to save one).
     private fun buildFilters(selector: AutoSelector): Filters {
         var name: Pattern? = null
         if (selector.nameFilter.trim().isNotEmpty()) {
@@ -313,7 +364,28 @@ class AutoSelectorPlanner @JvmOverloads constructor(
             if (code.isEmpty()) continue
             (if (exclude) excludedCountries else countries).add(code.uppercase())
         }
-        return Filters(name, countries, excludedCountries)
+        val tiers = if (!selector.prioritized) emptyList() else selector.tiers.map { tier ->
+            val pattern = tier.nameFilter.trim()
+            if (pattern.isEmpty()) return@map TierFilter(tier.gid, null, false)
+            val compiled = try {
+                Pattern.compile(pattern, Pattern.CASE_INSENSITIVE or Pattern.UNICODE_CASE)
+            } catch (e: PatternSyntaxException) {
+                null
+            }
+            TierFilter(tier.gid, compiled, true)
+        }
+        return Filters(name, countries, excludedCountries, tiers)
+    }
+
+    // memberTierOf (cpp:69-80): first match wins, tiers.size when none does; an invalid pattern matches nothing.
+    private fun memberTierOf(member: Outbound, group: SelectorGroup, filters: Filters): Int {
+        val name = member.displayName()
+        for ((i, tier) in filters.tiers.withIndex()) {
+            if (tier.gid >= 0 && group.id != tier.gid) continue
+            if (tier.hasName && (tier.name == null || !tier.name.matcher(name).find())) continue
+            return i
+        }
+        return filters.tiers.size
     }
 
     // eligibilityOf (cpp:50-82); null = eligible.
@@ -379,6 +451,7 @@ class AutoSelectorPlanner @JvmOverloads constructor(
                 skips.merge(AutoSelectorSkip.CoreTransitions, 1, Int::plus)
                 continue
             }
+            if (plan != null && selector.prioritized) plan.tiers[member.id] = memberTierOf(outbound, group, filters)
             if (skip == AutoSelectorSkip.Unavailable) {
                 unavailable.add(member.id)
                 continue
@@ -411,6 +484,45 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         }
         ordered.addAll(sortByLatency(members.filter { it !in placed }, selector, tracked.byId, now))
         return ordered
+    }
+
+    // capByTier (cpp:296-330): cuts a tier-sorted list to [limit] without crowding out a tier: each one first gets a
+    // fair share, the rest goes in tier order.
+    private fun capByTier(ordered: List<Long>, limit: Int, tierOf: Map<Long, Int>, noTier: Int): List<Long> {
+        if (ordered.size <= limit) return ordered
+        val byTier = List(noTier + 1) { ArrayList<Long>() }
+        for (id in ordered) byTier[tierOf[id] ?: noTier].add(id)
+        val nonEmpty = byTier.count { it.isNotEmpty() }
+        val reserve = maxOf(1, limit / (2 * nonEmpty))
+        val quota = IntArray(byTier.size)
+        var given = 0
+        for (i in byTier.indices) {
+            quota[i] = minOf(byTier[i].size, reserve)
+            given += quota[i]
+        }
+        if (given > limit) {
+            // More tiers than slots: one each, in tier order.
+            given = 0
+            for (i in byTier.indices) {
+                quota[i] = if (byTier[i].isNotEmpty() && given < limit) 1 else 0
+                given += quota[i]
+            }
+        }
+        for (i in byTier.indices) {
+            if (given >= limit) break
+            val extra = minOf(byTier[i].size - quota[i], limit - given)
+            quota[i] += extra
+            given += extra
+        }
+        val capped = ArrayList<Long>(given)
+        for (i in byTier.indices) capped.addAll(byTier[i].subList(0, quota[i]))
+        return capped
+    }
+
+    private fun tierCounts(ids: List<Long>, tierOf: Map<Long, Int>, noTier: Int): List<Int> {
+        val counts = IntArray(noTier + 1)
+        for (id in ids) counts[tierOf[id] ?: noTier]++
+        return counts.toList()
     }
 
     // sortByLatency (cpp:149-159): each effective latency read once up front, [untrusted] members as untested, then

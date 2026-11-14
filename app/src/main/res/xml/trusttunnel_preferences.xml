@@ -40,6 +40,11 @@
             app:entryValues="@array/trusttunnel_congestion_control"
             app:defaultValue="bbr"
             app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/baseline_send_24"
+            app:key="dial.quic_opener"
+            app:title="@string/dial_quic_opener"
+            app:summary="@string/dial_quic_opener_sum" />
         <EditTextPreference
             app:icon="@drawable/ic_action_copyright"
             app:key="custom_sni"
@@ -49,6 +54,12 @@
             app:icon="@drawable/ic_baseline_shuffle_24"
             app:key="client_random"
             app:title="@string/trusttunnel_client_random"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="client_random_auth_key"
+            app:title="@string/trusttunnel_client_random_auth_key"
+            app:dialogMessage="@string/trusttunnel_client_random_auth_key_hint"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
             app:icon="@drawable/ic_baseline_refresh_24"

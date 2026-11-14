@@ -93,4 +93,21 @@
             app:key="warp_api_hosts"
             app:title="@string/warp_api_hosts" />
     </PreferenceCategory>
+
+    <PreferenceCategory
+        app:summary="@string/warp_api_tls_fragment_note"
+        app:title="@string/warp_api_tls_fragment_title">
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_shuffle_24"
+            app:key="warp_api_tls_fragment"
+            app:title="@string/tls_fragment" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_shuffle_24"
+            app:key="warp_api_tls_record_fragment"
+            app:title="@string/tls_record_fragment" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="warp_api_tls_fragment_fallback_delay"
+            app:title="@string/tls_fragment_fallback_delay" />
+    </PreferenceCategory>
 </PreferenceScreen>

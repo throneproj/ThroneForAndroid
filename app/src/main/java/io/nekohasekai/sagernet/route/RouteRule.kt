@@ -685,6 +685,7 @@ class RouteRule {
             for (hopId in hops) {
                 val hop = profiles.get(hopId)
                 if (hop == null || hop.type == "chain" || unroutable(hop)) return vtr(R.string.validation_route_outbound_chain_hop, name)
+                if (hop.type == "autoselector") return vtr(R.string.validation_route_outbound_chain_selector, name)
             }
             return ""
         }

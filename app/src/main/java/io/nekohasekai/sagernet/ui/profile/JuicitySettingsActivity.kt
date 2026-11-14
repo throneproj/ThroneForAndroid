@@ -15,7 +15,14 @@ class JuicitySettingsActivity : BindingSettingsActivity<Juicity>() {
         pbm.int("serverPort")
         pbm.text("uuid")
         pbm.text("password")
+        pbm.text("pinned_certchain_sha256")
+        DialBlock.bindQuicOpener(pbm)
         TlsBlock.bind(pbm)
+    }
+
+    override fun Juicity.serialize() {
+        pbm.fromCacheAll(this)
+        pinned_certchain_sha256 = pinned_certchain_sha256.trim()
     }
 
     override fun PreferenceFragmentCompat.onPreferencesCreated() {

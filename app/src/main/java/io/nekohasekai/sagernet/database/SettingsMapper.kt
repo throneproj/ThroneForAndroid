@@ -45,6 +45,9 @@ object SettingsMapper {
     /** GroupsRepo / ProfilesRepo for the auto-selector plan; each group is read once per store. */
     fun selectorStore(): SelectorStore = DatabaseSelectorStore()
 
+    /** The core half of IsValid where the core is loaded (:bg), else null. */
+    fun memberCheck(): MemberCheck? = if (SagerNet.application.isBgProcess) CoreMemberCheck else null
+
     /** The outbound layer's lookups into the database (autoselector.cpp:9-15 DisplayAddress); once per process. */
     fun installOutboundHooks() {
         AutoSelector.groupNames = AutoSelector.GroupNames { gid -> SagerDatabase.groupDao.getById(gid)?.displayName() }

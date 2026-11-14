@@ -34,10 +34,10 @@ data class RouteDns(
 
     /** RouteDns::Problem: why the core could not use it; "" when it can. */
     fun problem(): String {
-        val remote = DnsServers.parseDnsAddress(remoteDns)
-        if (remote.address == null) return vtr(R.string.validation_route_dns_remote, remoteDns, remote.why)
-        val direct = DnsServers.parseDnsAddress(directDns)
-        if (direct.address == null) return vtr(R.string.validation_route_dns_direct, directDns, direct.why)
+        val remote = DnsServers.dnsAddressListProblem(remoteDns)
+        if (remote.isNotEmpty()) return vtr(R.string.validation_route_dns_remote, remoteDns, remote)
+        val direct = DnsServers.dnsAddressListProblem(directDns)
+        if (direct.isNotEmpty()) return vtr(R.string.validation_route_dns_direct, directDns, direct)
         if (dnsFinalOut != "remote" && dnsFinalOut != "direct") return vtr(R.string.validation_route_dns_final, dnsFinalOut)
         return ""
     }

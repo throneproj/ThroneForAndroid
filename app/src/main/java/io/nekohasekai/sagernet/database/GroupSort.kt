@@ -175,13 +175,15 @@ object GroupSort {
             val group = GroupRepo.get(groupId) ?: return false
             if (!group.keepsSorted()) return false
             val action = group.sort
+            val pins = group.pinnedJson
             val snapshot = ProfileManager.memberIds(groupId)
+            val head = pinnedHead(snapshot, pins)
             val keys = SortKeys(SortRule(group, action))
             keys.loadGroup(groupId)
-            keys.load(snapshot)
+            keys.load(snapshot.subList(head, snapshot.size))
             // Stable, so a re-sort leaves rows with equal keys where they were.
-            val order = snapshot.sortedWith(keys)
-            when (commit(groupId, snapshot, action, order)) {
+            val order = snapshot.subList(0, head) + snapshot.subList(head, snapshot.size).sortedWith(keys)
+            when (commit(groupId, snapshot, pins, action, order)) {
                 Commit.MOVED -> return true
                 Commit.UNCHANGED -> return false
                 Commit.STALE -> Unit
@@ -201,39 +203,44 @@ object GroupSort {
             val group = GroupRepo.get(groupId) ?: return false
             if (!group.keepsSorted()) return false
             val action = group.sort
+            val pins = group.pinnedJson
             val snapshot = ProfileManager.memberIds(groupId)
             val count = snapshot.size
-            val positions = snapshot.indices.filter { snapshot[it] in changedSet }
+            // Pinned rows head the list and stay out of the sort, changed or not.
+            val head = pinnedHead(snapshot, pins)
+            val positions = (head until count).filter { snapshot[it] in changedSet }
             if (positions.isEmpty()) return false
             // A full sort loads each row once, a reinsertion about log2(n) rows one by one.
-            val probes = Int.SIZE_BITS - count.countLeadingZeroBits() + 4
-            if (positions.size * probes >= count) return resort(groupId)
+            val sorted = count - head
+            val probes = Int.SIZE_BITS - sorted.countLeadingZeroBits() + 4
+            if (positions.size * probes >= sorted) return resort(groupId)
 
             val rule = SortRule(group, action)
             val keys = SortKeys(rule)
             val around = ArrayList<Long>()
             for (i in positions) {
                 around.add(snapshot[i])
-                if (i > 0) around.add(snapshot[i - 1])
+                if (i > head) around.add(snapshot[i - 1])
                 if (i + 1 < count) around.add(snapshot[i + 1])
             }
             keys.load(around)
             // The rest was sorted before, so the whole list still is when every changed row fits its neighbours.
             val inPlace = positions.all { i ->
-                (i == 0 || !keys.less(snapshot[i], snapshot[i - 1])) &&
+                (i == head || !keys.less(snapshot[i], snapshot[i - 1])) &&
                     (i + 1 == count || !keys.less(snapshot[i + 1], snapshot[i]))
             }
             if (inPlace) return false
-            if (positions.size * probes * ROWS_PER_QUERY >= count) keys.loadGroup(groupId)
+            if (positions.size * probes * ROWS_PER_QUERY >= sorted) keys.loadGroup(groupId)
 
             // Lift every changed row, not just the misplaced ones: a fitting row's neighbour may be leaving too.
             val order = ArrayList<Long>(count)
-            snapshot.filterTo(order) { it !in changedSet }
+            order.addAll(snapshot.subList(0, head))
+            for (i in head until count) if (snapshot[i] !in changedSet) order.add(snapshot[i])
             for (i in positions) {
                 val id = snapshot[i]
                 val key = keys.get(id)
                 // upper_bound: after equal keys, where a stable sort leaves a row that came last.
-                var low = 0
+                var low = head
                 var high = order.size
                 while (low < high) {
                     val mid = (low + high) ushr 1
@@ -241,7 +248,7 @@ object GroupSort {
                 }
                 order.add(low, id)
             }
-            when (commit(groupId, snapshot, action, order)) {
+            when (commit(groupId, snapshot, pins, action, order)) {
                 Commit.MOVED -> return true
                 Commit.UNCHANGED -> return false
                 Commit.STALE -> Unit
@@ -250,11 +257,22 @@ object GroupSort {
         return false
     }
 
+    /** How many rows head [snapshot] as pins: the leading run of pinned ids, which is every pin once normalized. */
+    private fun pinnedHead(snapshot: List<Long>, pinnedJson: String): Int {
+        val pins = ProxyGroup.parsePinned(pinnedJson).toHashSet()
+        if (pins.isEmpty()) return 0
+        var head = 0
+        while (head < snapshot.size && snapshot[head] in pins) head++
+        return head
+    }
+
     /** The keys were read outside the transaction, so a change that landed meanwhile means sorting again. */
-    private fun commit(groupId: Long, snapshot: List<Long>, action: GroupSortAction, order: List<Long>): Commit =
+    private fun commit(
+        groupId: Long, snapshot: List<Long>, pins: String, action: GroupSortAction, order: List<Long>,
+    ): Commit =
         SagerDatabase.instance.runInTransaction(Callable {
             val group = SagerDatabase.groupDao.getById(groupId) ?: return@Callable Commit.UNCHANGED
-            if (group.sort != action) return@Callable Commit.STALE
+            if (group.sort != action || group.pinnedJson != pins) return@Callable Commit.STALE
             val current = SagerDatabase.proxyDao.getPositionsByGroup(groupId)
             if (current.size != snapshot.size || current.indices.any { current[it].id != snapshot[it] }) {
                 return@Callable Commit.STALE

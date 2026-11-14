@@ -36,6 +36,10 @@
         android:title="@string/route_update_rule_sets"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_route_tester"
+        android:title="@string/route_tester"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_route_refresh_repo"
         android:title="@string/route_refresh_repo"
         app:showAsAction="never" />

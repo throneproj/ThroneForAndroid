@@ -5,16 +5,18 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Filter
 import com.google.android.material.textfield.TextInputLayout
+import io.nekohasekai.sagernet.R
 
 /**
  * The editable server combo boxes of DnsServerHistory::Fill: typed servers first, then the presets. Typing narrows the
- * list; the field's end icon opens all of it.
+ * list; the field's end icon opens all of it. The helper text is the desktop's tooltip on server lists.
  */
 object DnsServerSuggestions {
 
     fun attach(layout: TextInputLayout, field: AutoCompleteTextView, suggestions: List<String>) {
         val adapter = SuggestionAdapter(field.context, suggestions)
         field.setAdapter(adapter)
+        layout.helperText = field.context.getString(R.string.dns_server_list_hint)
         // The error icon would take the end icon's place.
         layout.setErrorIconDrawable(null)
         layout.setEndIconOnClickListener {

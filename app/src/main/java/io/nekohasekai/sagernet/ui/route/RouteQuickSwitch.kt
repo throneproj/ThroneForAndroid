@@ -66,9 +66,13 @@ object RouteQuickSwitch {
         return if (kept == null) switched else switched + "\n" + fragment.getString(R.string.route_group_keeps_own, kept)
     }
 
-    /** "Enable Warp" (mainwindow_setup.cpp:893-903): saves enable_warp and reloads a running service. */
+    /**
+     * "Enable Warp" (mainwindow_setup.cpp:893-903): saves enable_warp (turning on also turns the desktop's enable_tor
+     * off, as WarpService::Apply does) and reloads a running service.
+     */
     fun setWarpEnabled(fragment: Fragment, enabled: Boolean) {
         DataStore.enableWarp = enabled
+        if (enabled) DataStore.enableTor = false
         if (DataStore.serviceState.started) SagerNet.reloadService()
         val activity = fragment.activity as? MainActivity
         if (enabled && !WarpClient.isGenerated()) {

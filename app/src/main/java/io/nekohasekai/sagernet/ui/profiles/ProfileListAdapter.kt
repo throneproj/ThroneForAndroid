@@ -12,8 +12,6 @@ import io.nekohasekai.sagernet.aidl.TrafficData
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupRepo
-import io.nekohasekai.sagernet.database.GroupSort
-import io.nekohasekai.sagernet.database.GroupSortAction
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProfileName
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -99,6 +97,18 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
 
     /** The auto selectors among [memberIds], for the pickers that hide them. */
     private var autoSelectors: Set<Long> = emptySet()
+
+    /** The group's pins (Group::pinned), which head [memberIds]. */
+    private var pinned: Set<Long> = emptySet()
+
+    /** The shown row the pinned block ends with, when an unpinned one follows it: [PinnedDivider] goes under it. */
+    var pinEdge = 0L
+        private set
+
+    /** The row being dragged, its position when picked up and how many of the other shown rows are pinned. */
+    private var draggedId = 0L
+    private var draggedFrom = -1
+    private var pinnedOthers = 0
 
     /** The loaded rows, least recently bound first ([touch]); a reload keeps only the ones around the screen. */
     private val cache = object : LinkedHashMap<Long, ProxyEntity>(CACHE_SIZE * 2) {
@@ -236,8 +246,14 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
                 val known = if (loaded) window ?: ArrayList(cache.keys) else null
                 val selected = host?.pickedOrSelectedId() ?: 0L
                 val (loadedGroup, names, rows) = withContext(Dispatchers.IO) {
-                    val loadedGroup = GroupRepo.get(groupId)
-                    val names = SagerDatabase.proxyDao.getNamesByGroup(groupId)
+                    var loadedGroup = GroupRepo.get(groupId)
+                    var names = SagerDatabase.proxyDao.getNamesByGroup(groupId)
+                    // GroupsRepo's repair on load: pins apart from the head of the order go back to it.
+                    val pins = loadedGroup?.pinned.orEmpty()
+                    if (pins.indices.any { it >= names.size || names[it].id != pins[it] } && ProfileManager.normalizePins(groupId)) {
+                        loadedGroup = GroupRepo.get(groupId)
+                        names = SagerDatabase.proxyDao.getNamesByGroup(groupId)
+                    }
                     Triple(loadedGroup, names, ProfileManager.getProfiles(known ?: firstRows(loadedGroup, names, selected)))
                 }
                 // a removed group's page goes away with the tabs
@@ -303,6 +319,8 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
     private fun apply(newGroup: ProxyGroup, names: List<ProfileName>, rows: List<ProxyEntity>, onlyRead: Boolean) {
         val displayChanged = group?.let { it.testItemsToShow != newGroup.testItemsToShow } == true
         group = newGroup
+        val oldPinned = pinned
+        pinned = newGroup.pinned.toHashSet()
         memberIds = names.map { it.id }
         autoSelectors = names.filter { it.type == AUTO_SELECTOR }.mapTo(HashSet()) { it.id }
         val members = memberIds.toHashSet()
@@ -327,6 +345,11 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         val oldPhases = phases
         phases = computePhases()
         if (phases != oldPhases) memberIds.filterTo(changed) { oldPhases[it] != phases[it] }
+        // the pin icon
+        if (pinned != oldPinned) {
+            oldPinned.filterTo(changed) { it !in pinned && it in members }
+            pinned.filterTo(changed) { it !in oldPinned }
+        }
         val first = !loaded
         loaded = true
         if (first && isFiltered) {
@@ -463,8 +486,13 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun publish(changed: Set<Long>, all: Boolean) {
+        publishRows(changed, all)
+        updatePinEdge()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun publishRows(changed: Set<Long>, all: Boolean) {
         val next = visibleIds()
         if (next == ids) {
             if (all) {
@@ -647,6 +675,35 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         notifyId(id, PAYLOAD_CONTENT)
     }
 
+    // ------------------------------------------------------------------------------------------------ pins
+
+    fun isPinned(id: Long) = id in pinned
+
+    /** How many rows head the stored order as pins. */
+    fun pinnedHead(): Int {
+        var head = 0
+        while (head < memberIds.size && memberIds[head] in pinned) head++
+        return head
+    }
+
+    /** Where a drop at [at] leaves the dragged row: pinned inside the block; on its edge it keeps its state. */
+    private fun dropPinned(at: Int) = at < pinnedOthers || (at == pinnedOthers && draggedId in pinned)
+
+    /** The block during a drag is the one the drop would make, so the divider shows where the row lands. */
+    fun updatePinEdge() {
+        val block = if (dragging && draggedId != 0L) {
+            val at = positionOf(draggedId)
+            pinnedOthers + if (at >= 0 && dropPinned(at)) 1 else 0
+        } else {
+            ids.count { it in pinned }
+        }
+        val edge = if (multiColumn || block <= 0 || block >= ids.size) 0L else ids[block - 1]
+        if (edge == pinEdge) return
+        pinEdge = edge
+        val list = fragment.list
+        if (list.isComputingLayout) list.post { list.invalidateItemDecorations() } else list.invalidateItemDecorations()
+    }
+
     // ------------------------------------------------------------------------------------------------ order
 
     /** Drag and drop follows the desktop: refused while the list is filtered (and while selecting or picking). */
@@ -661,6 +718,9 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         dragging = true
         orderChanged = false
         fragment.undoManager?.flush()
+        draggedId = profile.id
+        draggedFrom = positionOf(profile.id)
+        pinnedOthers = ids.count { it in pinned && it != profile.id }
         host?.selection?.startFromDrag(profile)
     }
 
@@ -670,6 +730,21 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         positions = null
         notifyItemMoved(from, to)
         orderChanged = true
+        updatePinEdge()
+    }
+
+    /**
+     * The drop as Group::MoveProfile sees it: next to a row of the block it lands in, so it is pinned exactly when
+     * [dropPinned] says. Null when the row is back where it started.
+     */
+    private fun dropTarget(): Pair<Long, Boolean>? {
+        val at = ids.indexOf(draggedId)
+        if (at < 0 || at == draggedFrom || ids.size < 2) return null
+        return if (dropPinned(at)) {
+            if (at > 0) ids[at - 1] to true else ids[1] to false
+        } else {
+            if (at + 1 < ids.size) ids[at + 1] to false else ids[at - 1] to true
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -678,16 +753,25 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         dragging = false
         val moved = orderChanged
         orderChanged = false
-        if (moved) {
-            val order = ids.toList()
-            memberIds = order + memberIds.filter { it in hidden }
-            runOnDefaultDispatcher {
-                // A hand-placed row is a manual order, which a kept sort would undo (mainwindow_setup.cpp).
-                GroupSort.setSort(groupId, GroupSortAction())
-                ProfileManager.setOrder(groupId, order)
+        val target = if (moved) dropTarget() else null
+        if (target != null) {
+            val id = draggedId
+            memberIds = ids.toList() + memberIds.filter { it in hidden }
+            // The pins as the drop leaves them, until the reload brings the stored ones.
+            val pin = dropPinned(ids.indexOf(id))
+            if (pin != (id in pinned)) {
+                pinned = if (pin) pinned + id else pinned - id
+                notifyId(id, PAYLOAD_CONTENT)
             }
+            runOnDefaultDispatcher { ProfileManager.moveProfile(groupId, id, target.first, target.second) }
             if (multiColumn) notifyDataSetChanged()
+        } else if (moved) {
+            // back where it started: the stored order still holds
+            publish(emptySet(), false)
         }
+        draggedId = 0L
+        draggedFrom = -1
+        updatePinEdge()
         host?.selection?.onDragFinished(moved)
         host?.onDragEnded()
         if (reloadAgain) reload()
@@ -744,8 +828,11 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         if (group.id != groupId) return
         fragment.onMain {
             val displayChanged = this.group?.testItemsToShow != group.testItemsToShow
+            val pinsChanged = this.group?.pinnedJson != group.pinnedJson
             this.group = group
             if (displayChanged) notifyAllContent()
+            // the pins come with the order they head
+            if (pinsChanged && loaded) reload()
         }
     }
 

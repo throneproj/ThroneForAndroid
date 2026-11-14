@@ -101,6 +101,7 @@ class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
         adapter = ProfileListAdapter(this)
         list.layoutManager = FixedGridLayoutManager(list, if (isCompact) 2 else 1)
         list.adapter = adapter
+        list.addItemDecoration(PinnedDivider(adapter))
         list.setItemViewCacheSize(20)
         list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -153,6 +154,7 @@ class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
     fun switchLayout() {
         (list.layoutManager as? GridLayoutManager)?.spanCount = columns()
         adapter.notifyDataSetChanged()
+        adapter.updatePinEdge()
     }
 
     /** Single keeps cards 320 dp wide or more, Double 180 dp and two columns at least, over the list's width. */
@@ -180,6 +182,7 @@ class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
                 layoutManager.spanCount = columns
                 // grid rows pair their cards' heights when they bind
                 adapter.notifyAllContent()
+                adapter.updatePinEdge()
                 return false
             }
         })
@@ -279,7 +282,7 @@ class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
     }
 
     /**
-     * Drags reorder (the desktop's EmplaceProfile). They start from the row's long press, which also starts the
+     * Drags reorder (the desktop's MoveProfile, pinning or unpinning across the pinned edge). They start from the row's long press, which also starts the
      * multi-selection; that ends again when the row really moved: a long press selects, a long press and drag reorders.
      */
     private fun attachDragHelper() {

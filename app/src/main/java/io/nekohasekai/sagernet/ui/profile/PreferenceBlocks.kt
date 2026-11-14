@@ -599,7 +599,13 @@ object DialBlock {
         pbm.bool("$prefix.tcp_fast_open")
         pbm.bool("$prefix.tcp_multi_path")
         pbm.bool("$prefix.udp_fragment")
+        bindQuicOpener(pbm, prefix)
         pbm.bool("$prefix.reuse_addr")
+    }
+
+    /** The one dial field the QUIC protocols' editors show; Xray builds its own dialer, so its editors leave it out. */
+    fun bindQuicOpener(pbm: PreferenceBindingManager, prefix: String = "dial") {
+        pbm.bool("$prefix.quic_opener")
     }
 }
 

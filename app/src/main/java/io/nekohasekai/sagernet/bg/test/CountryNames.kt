@@ -1,11 +1,50 @@
 package io.nekohasekai.sagernet.bg.test
 
+import java.util.Locale
+
 /** CountryNameToCode (src/global/CountryHelper.cpp, table include/global/CountryHelper.hpp): speedtest.net server countries. */
 object CountryNames {
 
     /** The ISO code of a country name, "" when the desktop table has no entry for it. */
     @JvmStatic
     fun toCode(name: String?): String = CODES[name.orEmpty()] ?: ""
+
+    /**
+     * servicecheck.NormalizeRegion (core region.go): an alpha-2 or alpha-3 code as alpha-2, "" when it names no country
+     * (XX, ZZ, EU, Cloudflare's T1 for Tor...).
+     */
+    @JvmStatic
+    fun normalizeRegion(code: String?): String {
+        val upper = code.orEmpty().trim().uppercase(Locale.ROOT)
+        return when (upper.length) {
+            2 -> upper.takeIf { it in ALPHA2 }.orEmpty()
+            3 -> ALPHA3_TO_2[upper].orEmpty()
+            else -> ""
+        }
+    }
+
+    /** ISO 3166-1 alpha-3 followed by alpha-2, plus Kosovo's widely used XKX/XK. */
+    private const val ISO_COUNTRIES =
+        "AFGAF ALAAX ALBAL DZADZ ASMAS ANDAD AGOAO AIAAI ATAAQ ATGAG ARGAR ARMAM ABWAW AUSAU AUTAT AZEAZ " +
+        "BHSBS BHRBH BGDBD BRBBB BLRBY BELBE BLZBZ BENBJ BMUBM BTNBT BOLBO BESBQ BIHBA BWABW BVTBV BRABR IOTIO BRNBN " +
+        "BGRBG BFABF BDIBI CPVCV KHMKH CMRCM CANCA CYMKY CAFCF TCDTD CHLCL CHNCN CXRCX CCKCC COLCO COMKM COGCG CODCD " +
+        "COKCK CRICR CIVCI HRVHR CUBCU CUWCW CYPCY CZECZ DNKDK DJIDJ DMADM DOMDO ECUEC EGYEG SLVSV GNQGQ ERIER ESTEE " +
+        "SWZSZ ETHET FLKFK FROFO FJIFJ FINFI FRAFR GUFGF PYFPF ATFTF GABGA GMBGM GEOGE DEUDE GHAGH GIBGI GRCGR GRLGL " +
+        "GRDGD GLPGP GUMGU GTMGT GGYGG GINGN GNBGW GUYGY HTIHT HMDHM VATVA HNDHN HKGHK HUNHU ISLIS INDIN IDNID IRNIR " +
+        "IRQIQ IRLIE IMNIM ISRIL ITAIT JAMJM JPNJP JEYJE JORJO KAZKZ KENKE KIRKI PRKKP KORKR KWTKW KGZKG LAOLA LVALV " +
+        "LBNLB LSOLS LBRLR LBYLY LIELI LTULT LUXLU MACMO MDGMG MWIMW MYSMY MDVMV MLIML MLTMT MHLMH MTQMQ MRTMR MUSMU " +
+        "MYTYT MEXMX FSMFM MDAMD MCOMC MNGMN MNEME MSRMS MARMA MOZMZ MMRMM NAMNA NRUNR NPLNP NLDNL NCLNC NZLNZ NICNI " +
+        "NERNE NGANG NIUNU NFKNF MKDMK MNPMP NORNO OMNOM PAKPK PLWPW PSEPS PANPA PNGPG PRYPY PERPE PHLPH PCNPN POLPL " +
+        "PRTPT PRIPR QATQA REURE ROURO RUSRU RWARW BLMBL SHNSH KNAKN LCALC MAFMF SPMPM VCTVC WSMWS SMRSM STPST SAUSA " +
+        "SENSN SRBRS SYCSC SLESL SGPSG SXMSX SVKSK SVNSI SLBSB SOMSO ZAFZA SGSGS SSDSS ESPES LKALK SDNSD SURSR SJMSJ " +
+        "SWESE CHECH SYRSY TWNTW TJKTJ TZATZ THATH TLSTL TGOTG TKLTK TONTO TTOTT TUNTN TURTR TKMTM TCATC TUVTV UGAUG " +
+        "UKRUA AREAE GBRGB USAUS UMIUM URYUY UZBUZ VUTVU VENVE VNMVN VGBVG VIRVI WLFWF ESHEH YEMYE ZMBZM ZWEZW XKXXK"
+
+    private val ALPHA3_TO_2: Map<String, String> by lazy {
+        ISO_COUNTRIES.split(' ').associate { it.substring(0, 3) to it.substring(3) }
+    }
+
+    private val ALPHA2: Set<String> by lazy { ALPHA3_TO_2.values.toHashSet() }
 
     private val CODES: Map<String, String> = hashMapOf(
         "Afghanistan" to "AF",

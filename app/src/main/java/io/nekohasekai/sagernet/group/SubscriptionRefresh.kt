@@ -75,13 +75,16 @@ internal object SubscriptionRefresh {
 
         val (info, result, routing) = fetchAndParse(group, url, surface, notifyErrors) ?: return
         val parsed = result.outbounds
-        // Android-only (#53): filtered servers never enter the sink, so the diff deletes the ones already stored.
-        val servers = SubscriptionNameFilter.apply(parsed, options, group.name)
+        // A filtered-out profile never reaches the database; an old one that no longer passes goes stale below.
+        val filter = SubscriptionNameFilter.Filter(options, group.name)
+        val servers = if (filter.active) parsed.filter(filter::admits) else parsed
+        // Likewise when the filters leave nothing: a provider renaming its servers must not empty the group.
         if (servers.isEmpty()) {
             if (info.valid) saveMetadata(group, info)
-            val message = str(R.string.subs_filtered_all_aborted, parsed.size)
-            Logs.w("${group.name}: $message")
-            if (notifyErrors) SubscriptionQueue.error(gid, message)
+            val message = str(R.string.subs_filtered_all_aborted, group.name, parsed.size)
+            Logs.w(message)
+            if (surface != Surface.Log) SubscriptionQueue.report(gid, reportTitle(surface, group.name), message, true)
+            else if (notifyErrors) SubscriptionQueue.error(gid, message)
             return
         }
 
@@ -91,7 +94,7 @@ internal object SubscriptionRefresh {
         val removed = ArrayList<Long>()
         // Ids a running auto selector can no longer trust: deleted, or same id with new settings.
         val disturbed = ArrayList<Long>()
-        val snapshot = loadSnapshot(gid, options, disturbed, removed) ?: return
+        val snapshot = loadSnapshot(gid, options, filter, disturbed, removed) ?: return
         val sticky = snapshot.sticky
         val stickyIds = snapshot.stickyIds
         val old = snapshot.old
@@ -105,6 +108,8 @@ internal object SubscriptionRefresh {
         Logs.i(">>>>>>>> " + str(R.string.subs_processing))
         for (outbound in servers) sink.add(outbound)
         sink.finish(old)
+        val running = ProfileManager.runningProfileId()
+        val updatedRunning = running.takeIf { it > 0L && it in sink.updatedByName }
         Logs.i(">>>>>>>> " + str(R.string.subs_process_complete))
         val report = result.report()
         report.setImported(sink.stored())
@@ -206,7 +211,8 @@ internal object SubscriptionRefresh {
         if (!diffPopup && surface != Surface.Log && report.hasProblems()) {
             SubscriptionQueue.report(gid, reportTitle(surface, group.name), report.text(), true)
         }
-        stoppedRunning?.let { reconnectSuccessor(gid, it) }
+        val stopped = stoppedRunning
+        if (stopped != null) reconnectSuccessor(gid, stopped) else updatedRunning?.let(::reconnectUpdated)
         SubscriptionQueue.groupChanged(gid, disturbed)
         // GroupUpdater.cpp:996: only after an update that went through.
         if (routing.isNotEmpty() && !dbFailed) SubscriptionRoute.importRoute(gid, routing)
@@ -287,6 +293,23 @@ internal object SubscriptionRefresh {
     }
 
     /**
+     * reconnectUpdated (GroupUpdater.cpp, 35abd923): the running profile took a new server by name, so it restarts
+     * with it when stopping the active profile is allowed; otherwise the change waits for its next start.
+     */
+    private fun reconnectUpdated(id: Long) {
+        val profile = ProfileManager.getProfile(id) ?: return
+        if (ProfileManager.runningProfileId() != id || !ProfileManager.runningUses(id)) return
+        val display = profile.outbound.displayTypeAndName()
+        if (!DataStore.allowStoppingActiveProfile) {
+            Logs.i(str(R.string.subs_running_updated_later, display))
+            return
+        }
+        Logs.i(str(R.string.subs_running_updated_reconnect, display))
+        if (DataStore.selectedProxy != id) DataStore.selectedProxy = id
+        SagerNet.reloadService()
+    }
+
+    /**
      * EngineHost's subscriptionReplacedRunning: the delete only asked the service to stop, and a start while it is
      * stopping is ignored, so this waits for Stopped. Whatever the user started meanwhile wins.
      */
@@ -327,9 +350,13 @@ internal object SubscriptionRefresh {
     private suspend fun loadSnapshot(
         gid: Long,
         options: SubscriptionOptions,
+        filter: SubscriptionNameFilter.Filter,
         disturbed: MutableList<Long>,
         removed: MutableList<Long>,
     ): Snapshot? {
+        // The filters win over keep_working.
+        fun keptWorking(profile: ProxyEntity): Boolean =
+            options.keepWorking && profile.isWorking() && filter.admits(profile.type) { profile.outbound.displayName() }
         // Auto selectors are local state, not servers the remote sent: keep them out of the diff.
         var members = ProfileManager.members(gid)
         val sticky = members.withIndex()
@@ -344,7 +371,7 @@ internal object SubscriptionRefresh {
         var stopped: ProxyEntity? = null
         if (DataStore.subClear) {
             Logs.i(str(R.string.subs_clearing))
-            val doomed = if (options.keepWorking) members.filter { !it.isWorking() } else members
+            val doomed = members.filter { !keptWorking(it) }
             val outcome = ProfileManager.batchDeleteProfiles(doomed.map { it.id })
             if (!outcome.ok) {
                 val message = str(R.string.subs_db_error_retry)
@@ -365,8 +392,13 @@ internal object SubscriptionRefresh {
         val working = HashSet<Long>()
         if (!cleared) {
             for (profile in members) {
-                old.add(OldEntry(profile.id, contentKey(profile), identityKey(profile), profile.outbound.displayTypeAndName()))
-                if (options.keepWorking && profile.isWorking()) working.add(profile.id)
+                old.add(
+                    OldEntry(
+                        profile.id, contentKey(profile), identityKey(profile), profile.outbound.displayTypeAndName(),
+                        profile.outbound.name,
+                    )
+                )
+                if (keptWorking(profile)) working.add(profile.id)
             }
         }
         return Snapshot(sticky, stickyIds, membersBefore, routeNames, old, working, cleared, stopped)
@@ -495,6 +527,7 @@ internal object SubscriptionRefresh {
                 if (!entry.contentKnown) {
                     entry.identity = SubscriptionReconcile.identityKey(outbound.type, outbound.exportIdentity().toCompact())
                 }
+                entry.name = outbound.name
                 pendingIndex.add(entries.size)
                 entries.add(entry)
                 pending.add(outbound)
@@ -506,10 +539,13 @@ internal object SubscriptionRefresh {
             if (chunk.size >= INSERT_CHUNK) flush()
         }
 
-        /** After the last [add]: the identity pairs of [old] take their arrival's data, the other arrivals are inserted. */
+        /** The old ids that took an arrival's data by name alone: tested again like a new profile. */
+        val updatedByName = HashSet<Long>()
+
+        /** After the last [add]: the paired rows of [old] take their arrival's data, the other arrivals are inserted. */
         suspend fun finish(old: List<OldEntry>) {
             if (index != null) {
-                SubscriptionReconcile.pairByIdentity(old, entries, index)
+                SubscriptionReconcile.pair(old, entries, index)
                 val updates = ArrayList<Int>()
                 for (k in pending.indices) {
                     val position = pendingIndex[k]
@@ -524,14 +560,18 @@ internal object SubscriptionRefresh {
                 flush()
                 for (part in updates.chunked(INSERT_CHUNK)) {
                     val json = part.map { pending[it].exportToJson().toCompact() }
-                    // The old row keeps its id, test results and traffic.
+                    // The old row keeps its id, position, pin and traffic; its test results only when paired by identity.
                     SagerDatabase.instance.runInTransaction {
+                        val byName = ArrayList<Long>()
                         part.forEachIndexed { i, k ->
                             val entry = entries[pendingIndex[k]]
                             val outbound = pending[k]
                             SagerDatabase.proxyDao.updateOutbound(entry.supersedes, outbound.type, outbound.name, json[i])
                             entry.id = entry.supersedes
+                            if (entry.byName) byName.add(entry.supersedes)
                         }
+                        if (byName.isNotEmpty()) SagerDatabase.proxyDao.clearTestResults(byName)
+                        updatedByName.addAll(byName)
                     }
                 }
                 pendingIndex.clear()

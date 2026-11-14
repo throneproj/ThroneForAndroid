@@ -49,6 +49,9 @@ internal class TestSession(
         val speedTimeoutMs: Int = spec.speedTimeoutMs.takeIf { it > 0 } ?: DataStore.speedTestTimeoutMs
         val simpleDlUrl: String = spec.simpleDlUrl.ifBlank { DataStore.simpleDlUrl }
         val creditTraffic: Boolean = !DataStore.disableTrafficStats
+
+        /** The IP test's `exit_lookup_provider` id; "" or "auto" lets the core try several. */
+        val ipProvider: String = DataStore.exitLookupProvider
     }
 
     val kind: Int get() = spec.kind
@@ -121,8 +124,8 @@ internal class TestSession(
 
     /** TestRunner.cpp: kept sorts move once the run is over, so rows do not jump while results stream in. */
     private fun repositionTested() {
-        // the running connection's URL and IP results are shown, never stored
-        if (spec.testCurrent && kind != TestSpec.KIND_SPEED) return
+        // the running connection's URL and IP results are shown, never stored; no sort reads a service check
+        if (spec.testCurrent && kind != TestSpec.KIND_SPEED || kind == TestSpec.KIND_SERVICE) return
         val changed = tested.values.groupBy({ it.groupId }, { it.id })
         GroupSort.repositionLater(changed, SortInput.TEST_RESULT)
         // A speed test also credits the traffic it moved.
@@ -182,6 +185,7 @@ internal class TestSession(
 
             TestSpec.KIND_IP -> IpTestRunner(this).run(profiles)
             TestSpec.KIND_SPEED -> SpeedTestRunner(this).run(profiles)
+            TestSpec.KIND_SERVICE -> ServiceTestRunner(this).runChecks(profiles)
         }
     }
 
@@ -192,6 +196,11 @@ internal class TestSession(
         when (kind) {
             TestSpec.KIND_URL -> UrlTestRunner(this).runCurrent(running)
             TestSpec.KIND_SPEED -> SpeedTestRunner(this).runCurrent(running)
+            // runCurrentServiceCheck is not ported: the menus check stored profiles only
+            TestSpec.KIND_SERVICE -> reportService(
+                listOf(ProbeResult(running?.profileId ?: 0L, error = ERROR_ABORTED, measured = false))
+            )
+
             else -> reportIp(
                 listOf(
                     ProbeResult(
@@ -284,6 +293,19 @@ internal class TestSession(
                     result.profileId, if (success) result.ip else "", if (success) result.country else "", error,
                 )
             }
+        }
+    }
+
+    /** applyServiceResult (TestRunner.cpp:232-242): an aborted check stores nothing and keeps the previous one. */
+    fun reportService(results: List<ProbeResult>) {
+        persist(results) { if (it.service.isNotEmpty()) ProfileManager.saveServiceResult(it.profileId, it.service) }
+        for (result in results) {
+            val success = result.measured && result.error.isEmpty()
+            val failure = result.measured && !success && !ProxyEntity.isTestAborted(result.error)
+            counted(success, failure)
+            if (failure) Logs.w("[${nameOf(result.profileId)}] service check error: ${result.error}")
+            val error = if (result.measured) result.error else notMeasured(result.error)
+            notifyClient { it.onServiceResult(result.profileId, error) }
         }
     }
 

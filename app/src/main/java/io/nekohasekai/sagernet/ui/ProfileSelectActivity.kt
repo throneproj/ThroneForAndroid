@@ -11,6 +11,9 @@ class ProfileSelectActivity : ThemedActivity(R.layout.layout_empty),
     companion object {
         const val EXTRA_SELECTED = "selected"
         const val EXTRA_PROFILE_ID = "id"
+
+        /** Lists auto selectors too; without it the picker fills a fixed-server slot (front / landing proxy). */
+        const val EXTRA_ALLOW_AUTO_SELECTORS = "allowAutoSelectors"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,12 +21,12 @@ class ProfileSelectActivity : ThemedActivity(R.layout.layout_empty),
 
         if (savedInstanceState != null) return
         val selected = intent.getParcelableExtra<ProxyEntity>(EXTRA_SELECTED)
+        val hideAutoSelectors = !intent.getBooleanExtra(EXTRA_ALLOW_AUTO_SELECTORS, false)
 
         supportFragmentManager.beginTransaction()
             .replace(
                 R.id.fragment_holder,
-                // both callers fill fixed-server slots (front / landing proxy, chain hops)
-                ConfigurationFragment.forSelection(selected, R.string.select_profile, hideAutoSelectors = true)
+                ConfigurationFragment.forSelection(selected, R.string.select_profile, hideAutoSelectors = hideAutoSelectors)
             )
             .commitAllowingStateLoss()
     }

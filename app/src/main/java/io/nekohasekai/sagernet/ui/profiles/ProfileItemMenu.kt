@@ -26,6 +26,7 @@ import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.ui.profile.ProfileConfigExport
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.profileSettingsIntent
+import io.nekohasekai.sagernet.ui.test.ServiceCheckDialog
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 
 /** The actions of one profile row: edit, share, the ⋮ menu (tests, resolve, clearing results / traffic, move up/down on TV, delete). */
@@ -64,22 +65,26 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         val noButtons = adapter.isCompact || adapter.isCompactRow
         menu.findItem(R.id.action_edit).isVisible = noButtons
         menu.findItem(R.id.action_share).isVisible = noButtons
-        // TV only, where a D-pad cannot drag; a filtered list says nothing about the stored order
+        val pinned = adapter.isPinned(profile.id)
+        menu.findItem(R.id.action_pin).setTitle(if (pinned) R.string.profiles_unpin else R.string.profiles_pin)
+        // TV only, where a D-pad cannot drag; a filtered list says nothing about the stored order. Never across the pinned edge.
         val index = adapter.memberIds.indexOf(profile.id)
+        val head = adapter.pinnedHead()
         val movable = SagerNet.isTv && !adapter.isFiltered && index >= 0
         menu.findItem(R.id.action_move_up).apply {
             isVisible = movable
-            isEnabled = index > 0
+            isEnabled = index > 0 && index != head
         }
         menu.findItem(R.id.action_move_down).apply {
             isVisible = movable
-            isEnabled = index in 0 until adapter.memberIds.size - 1
+            isEnabled = index in 0 until adapter.memberIds.size - 1 && index != head - 1
         }
         menu.findItem(R.id.action_delete).isEnabled = !host.isStartedProfile(profile.id)
         val address = profile.outbound.getAddress()
         menu.findItem(R.id.action_resolve_domain).isVisible =
             !profile.outbound.invalid && address.isNotEmpty() && !address.isIpAddress()
         menu.findItem(R.id.action_clear_test_results).isVisible = profile.hasTestResults()
+        menu.findItem(R.id.action_service_results).isVisible = profile.serviceChecks.isNotEmpty()
         menu.findItem(R.id.action_clear_traffic_statistics).isVisible = profile.tx != 0L || profile.rx != 0L
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -88,6 +93,9 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
                 R.id.action_test_url -> test(profile, TestSpec.KIND_URL)
                 R.id.action_test_ip -> test(profile, TestSpec.KIND_IP)
                 R.id.action_test_speed -> test(profile, TestSpec.KIND_SPEED)
+                R.id.action_test_service -> ProfileTests.startServiceProfiles(host, listOf(profile.id), profile.groupId)
+                R.id.action_service_results -> showServiceResults(profile)
+                R.id.action_pin ->setPinned(host, profile.groupId, listOf(profile.id), !pinned)
                 R.id.action_resolve_domain -> resolve(profile)
                 R.id.action_clear_test_results -> clearTestResults(profile)
                 R.id.action_clear_traffic_statistics -> clearTraffic(profile, adapter)
@@ -103,6 +111,16 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
 
     private fun test(profile: ProxyEntity, kind: Int) {
         ProfileTests.startProfiles(host, kind, listOf(profile.id), profile.groupId)
+    }
+
+    /** The stored service check (the desktop's test result tooltip), read fresh: the row may predate it. */
+    private fun showServiceResults(profile: ProxyEntity) {
+        host.launchIo {
+            val stored = ProfileManager.getProfile(profile.id) ?: return@launchIo
+            if (stored.serviceChecks.isEmpty()) return@launchIo
+            val name = stored.displayName()
+            host.onUi { ServiceCheckDialog.show(requireContext(), name, stored.serviceChecks) }
+        }
     }
 
     /** on_menu_resolve_selected_triggered for one profile: no confirmation, like the desktop. */
@@ -135,17 +153,9 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         }
     }
 
-    /** One step in the stored order through Group::EmplaceProfile (the D-pad alternative to dragging). */
+    /** One step in the stored order (the D-pad alternative to dragging), never across the pinned edge. */
     private fun move(profile: ProxyEntity, step: Int) {
-        val groupId = profile.groupId
-        host.launchIo {
-            val ids = ProfileManager.memberIds(groupId)
-            val from = ids.indexOf(profile.id)
-            val to = from + step
-            if (from < 0 || to !in ids.indices) return@launchIo
-            // EmplaceProfile lands a downward move on its target; moving up is the upper neighbour moving down
-            if (step > 0) ProfileManager.emplace(groupId, from, to) else ProfileManager.emplace(groupId, to, from)
-        }
+        host.launchIo { ProfileManager.swapProfile(profile.groupId, profile.id, step) }
     }
 
     private fun delete(profile: ProxyEntity, adapter: ProfileListAdapter) {
@@ -159,6 +169,15 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
             profile.displayName(),
             R.string.delete,
         ) { adapter.removeWithUndo(profile) }
+    }
+
+    companion object {
+        /** on_menu_pin_triggered: pins [ids] at the end of the pinned block, or unpins them under the kept sort. */
+        fun setPinned(host: ConfigurationFragment, groupId: Long, ids: List<Long>, pin: Boolean) {
+            host.launchIo {
+                if (pin) ProfileManager.pinProfiles(groupId, ids) else ProfileManager.unpinProfiles(groupId, ids)
+            }
+        }
     }
 
     fun showShare(anchor: View, profile: ProxyEntity) {

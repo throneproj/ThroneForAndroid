@@ -299,6 +299,10 @@
             android:name="io.nekohasekai.sagernet.ui.route.RuleSetPickerActivity"
             android:configChanges="uiMode" />
         <activity
+            android:name="io.nekohasekai.sagernet.ui.route.RouteTesterActivity"
+            android:configChanges="uiMode"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".QuickToggleShortcut"
             android:excludeFromRecents="true"
             android:exported="true"

@@ -100,8 +100,12 @@ object GroupRepo {
         return group
     }
 
+    /** The stored pins stay: only ProfileManager's pin edits write them, and [group] may be an older copy. */
     suspend fun save(group: ProxyGroup) {
-        dao.update(group)
+        SagerDatabase.instance.runInTransaction {
+            dao.pinnedJson(group.id)?.let { group.pinnedJson = it }
+            dao.update(group)
+        }
         notify { groupUpdated(group) }
     }
 
