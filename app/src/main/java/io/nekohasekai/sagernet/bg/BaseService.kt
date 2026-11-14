@@ -87,6 +87,7 @@ class BaseService {
                 Action.SWITCH_PREVIOUS -> service.switchRelative(-1)
                 Action.SWITCH_PROFILE -> service.switchProfile(intent.getLongExtra(Action.EXTRA_PROFILE_ID, 0L))
                 Action.REFRESH_WIFI_STATE -> afterStart { refreshWifiState(ctx) }
+                Action.REFRESH_NOTIFICATION -> refreshNotification()
                 Action.AUTO_SELECTOR_AUTOMATIC -> AutoSelectorRuntime.releasePin(intent.getLongExtra(Action.EXTRA_PROFILE_ID, 0L))
                 PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED -> afterStart { applyIdleMode() }
 
@@ -100,6 +101,20 @@ class BaseService {
                         }
                     }
                 }
+            }
+        }
+
+        private fun refreshNotification() {
+            val shown = notification ?: return
+            val running = proxy
+            runOnMainDispatcher {
+                var oldTitle: String? = null
+                val newTitle = running?.let { p ->
+                    oldTitle = p.displayProfileName
+                    withContext(Dispatchers.IO) { ServiceNotification.genTitle(p.profile) }
+                        .also { p.displayProfileName = it }
+                }
+                if (notification === shown) shown.reloadSettings(oldTitle, newTitle)
             }
         }
 
@@ -620,6 +635,7 @@ class BaseService {
                     addAction(Action.SWITCH_PREVIOUS)
                     addAction(Action.SWITCH_PROFILE)
                     addAction(Action.REFRESH_WIFI_STATE)
+                    addAction(Action.REFRESH_NOTIFICATION)
                     addAction(Action.AUTO_SELECTOR_AUTOMATIC)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

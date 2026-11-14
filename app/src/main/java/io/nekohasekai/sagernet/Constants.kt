@@ -93,6 +93,9 @@ object Action {
     const val SWITCH_PROFILE = "io.nekohasekai.sagernet.SWITCH_PROFILE"
     const val REFRESH_WIFI_STATE = "io.nekohasekai.sagernet.REFRESH_WIFI_STATE"
 
+    /** The notification settings changed: the running notification is redrawn without a restart. */
+    const val REFRESH_NOTIFICATION = "io.nekohasekai.sagernet.REFRESH_NOTIFICATION"
+
     /** The auto-selector [EXTRA_PROFILE_ID] goes back to automatic in the running core. */
     const val AUTO_SELECTOR_AUTOMATIC = "io.nekohasekai.sagernet.AUTO_SELECTOR_AUTOMATIC"
     const val EXTRA_PROFILE_ID = "profileId"

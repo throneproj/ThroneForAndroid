@@ -50,6 +50,7 @@ class ServiceNotification(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
 
         // notificationActions entries; the template shows at most three buttons, in this order.
+        const val MAX_ACTIONS = 3
         const val ACTION_STOP = "stop"
         const val ACTION_PREVIOUS = "previous"
         const val ACTION_NEXT = "next"
@@ -60,7 +61,7 @@ class ServiceNotification(
 
         fun notificationActions(): List<String> {
             val stored = DataStore.configurationStore.getStringList(Key.NOTIFICATION_ACTIONS) ?: return DEFAULT_ACTIONS
-            return ACTION_ORDER.filter { it in stored }.take(3)
+            return ACTION_ORDER.filter { it in stored }.take(MAX_ACTIONS)
         }
 
         fun genTitle(ent: ProxyEntity): String {
@@ -101,6 +102,7 @@ class ServiceNotification(
                         R.string.speed, Formatter.formatFileSize(service, stats.rxRateProxy)
                     )
                 )
+                it.setStyle(null)
                 it.setContentText(speedSimple)
             }
             it.setSubText(
@@ -116,6 +118,7 @@ class ServiceNotification(
 
     suspend fun postNotificationTitle(newTitle: String) {
         useBuilder {
+            title = newTitle
             it.setContentTitle(newTitle)
         }
         update()
@@ -125,6 +128,7 @@ class ServiceNotification(
     suspend fun refresh(newTitle: String) {
         updateActions()
         useBuilder {
+            title = newTitle
             it.setContentTitle(newTitle)
             it.setContentText(null)
             it.setSubText(null)
@@ -148,7 +152,29 @@ class ServiceNotification(
         update()
     }
 
-    private val showDirectSpeed = DataStore.showDirectSpeed
+    /**
+     * The notification settings changed: buttons and speed style are read again, and [newTitle] (the profile title
+     * under the new group setting) replaces [oldTitle] only while that one is shown, not a switching or measuring one.
+     */
+    suspend fun reloadSettings(oldTitle: String?, newTitle: String?) {
+        showDirectSpeed = DataStore.showDirectSpeed
+        updateActions()
+        useBuilder {
+            if (newTitle != null && title == oldTitle) {
+                title = newTitle
+                it.setContentTitle(newTitle)
+            }
+        }
+        update()
+    }
+
+    @Volatile
+    private var showDirectSpeed = DataStore.showDirectSpeed
+
+    private var title: String = title
+
+    @Volatile
+    private var closed = false
 
     private val builder = NotificationCompat.Builder(service as Context, channel)
         .setWhen(0)
@@ -268,11 +294,13 @@ class ServiceNotification(
             }
         }
 
+    // A late update after destroy() would post the notification again with no service behind it.
     private suspend fun update() = useBuilder {
-        NotificationManagerCompat.from(service as Service).notify(notificationId, it.build())
+        if (!closed) NotificationManagerCompat.from(service as Service).notify(notificationId, it.build())
     }
 
     fun destroy() {
+        closed = true
         listenPostSpeed = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             (service as Service).stopForeground(Service.STOP_FOREGROUND_REMOVE)

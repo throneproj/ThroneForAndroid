@@ -194,7 +194,6 @@ class TrafficLooper(val data: BaseService.Data, private val sc: CoroutineScope) 
 
     private suspend fun loop() {
         val delayMs = 1000L
-        val showDirectSpeed = DataStore.showDirectSpeed
         val profileTrafficStatistics = !DataStore.disableTrafficStats
 
         while (currentCoroutineContext().isActive) {
@@ -235,8 +234,8 @@ class TrafficLooper(val data: BaseService.Data, private val sc: CoroutineScope) 
                     speed = SpeedDisplayData(
                         mainTxRate,
                         mainRxRate,
-                        if (showDirectSpeed) direct?.txRate ?: 0L else 0L,
-                        if (showDirectSpeed) direct?.rxRate ?: 0L else 0L,
+                        direct?.txRate ?: 0L,
+                        direct?.rxRate ?: 0L,
                         sessionTx,
                         sessionRx,
                     ),

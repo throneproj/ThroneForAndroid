@@ -217,6 +217,9 @@ class SagerNet : Application(),
         fun reloadService() =
             application.sendBroadcast(Intent(Action.RELOAD).setPackage(application.packageName))
 
+        fun refreshNotification() =
+            application.sendBroadcast(Intent(Action.REFRESH_NOTIFICATION).setPackage(application.packageName))
+
         fun stopService() =
             application.sendBroadcast(Intent(Action.CLOSE).setPackage(application.packageName))
 
