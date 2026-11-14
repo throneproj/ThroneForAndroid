@@ -1,3 +1,33 @@
+#### 2.0.7
+
+* Add Service check **1**
+* Add Route path lookup to routing profiles **2**
+* Add priority tiers and learning from real connections to the Auto Selector **3**
+* Add hop-by-hop chain testing and allow an Auto Selector as a chain hop
+* Add profile pinning
+* Add QR code sharing for multiple profiles
+* Add QUIC Opener **4**
+* Add TLS fragmentation for WARP registration
+* Add basic subscription filters
+* Allow multiple DNS servers, queried together
+* Use MTU 1280 for WireGuard files without an MTU
+* Improve XHTTP and Clash import compatibility
+* Update sing-box and Xray
+* Fix subscription traffic not showing without a total
+* Fixes and Improvements
+
+**1**:
+Checks which AI, streaming and social services work through a profile and what kind of IP it exits from.
+
+**2**:
+Shows which rule and outbound an app, domain or IP would take.
+
+**3**:
+With Choose set to In priority order, the selector stays on the highest tier that has a working profile, e.g. a preferred group first and another as fallback.
+
+**4**:
+Helps HTTP/3 profiles (MASQUE, Hysteria2, TUIC) on networks that block QUIC by its first packet.
+
 #### 2.0.6
 
 * Add DNS tunnels: DNSTT/VayDNS, MasterDNS/StormDNS and XDNS **1**
