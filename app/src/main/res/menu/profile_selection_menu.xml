@@ -46,6 +46,14 @@
             android:title="@string/connection_test_clear_results"
             app:showAsAction="never" />
         <item
+            android:id="@+id/action_selection_resolve_domain"
+            android:title="@string/profiles_resolve_domains"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_selection_clear_traffic"
+            android:title="@string/clear_traffic_statistics"
+            app:showAsAction="never" />
+        <item
             android:id="@+id/action_selection_move"
             android:title="@string/profiles_move_to_group"
             app:showAsAction="never" />
