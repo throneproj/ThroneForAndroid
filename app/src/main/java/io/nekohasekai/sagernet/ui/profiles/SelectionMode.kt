@@ -10,11 +10,14 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
+import io.nekohasekai.sagernet.group.SubscriptionClient
+import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.confirmAction
 import io.nekohasekai.sagernet.ktx.nameList
 import io.nekohasekai.sagernet.ktx.showAllowingStateLoss
 import io.nekohasekai.sagernet.ktx.snackbar
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
+import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 
 /**
@@ -169,6 +172,8 @@ class SelectionMode(private val host: ConfigurationFragment) {
             R.id.action_selection_delete -> delete(ids)
             R.id.action_selection_pin -> pin(ids)
             R.id.action_selection_clear_results -> clearResults(ids)
+            R.id.action_selection_resolve_domain -> resolve(ids)
+            R.id.action_selection_clear_traffic -> clearTraffic(ids)
             R.id.action_selection_move -> moveToGroup(ids)
             R.id.action_selection_copy_links -> copyLinks(ids, throne = false)
             R.id.action_selection_copy_throne -> copyLinks(ids, throne = true)
@@ -206,6 +211,35 @@ class SelectionMode(private val host: ConfigurationFragment) {
             host.launchIo {
                 ProfileManager.clearTestResults(ids)
                 GroupRepo.postReload(gid)
+            }
+        }
+    }
+
+    private fun resolve(ids: List<Long>) {
+        if (ids.isEmpty()) return
+        val gid = groupId
+        finish()
+        host.launchIo {
+            val report = SubscriptionClient.resolveProfiles(gid, ids)
+            if (report.isNotBlank()) host.onUi { snackbar(report).show() }
+        }
+    }
+
+    private fun clearTraffic(ids: List<Long>) {
+        val gid = groupId
+        confirm(ids, host.getString(R.string.confirm_clear_traffic), R.string.confirm_clear) {
+            val service = (host.activity as? MainActivity)?.connection?.service
+            val adapter = host.listFor(gid)?.adapter
+            finish()
+            ids.forEach { adapter?.clearTraffic(it) }
+            host.launchIo {
+                val array = ids.toLongArray()
+                try {
+                    service?.resetTraffic(array)
+                } catch (e: Exception) {
+                    Logs.w(e)
+                }
+                ProfileManager.resetTraffic(array)
             }
         }
     }
