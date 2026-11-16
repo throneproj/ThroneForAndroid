@@ -179,6 +179,8 @@ class SelectionMode(private val host: ConfigurationFragment) {
             R.id.action_selection_copy_throne -> copyLinks(ids, throne = true)
             R.id.action_selection_qr_links -> showQr(ids, throne = false)
             R.id.action_selection_qr_throne -> showQr(ids, throne = true)
+            R.id.action_selection_config_clipboard -> exportConfigs(ids, toFile = false)
+            R.id.action_selection_config_file -> exportConfigs(ids, toFile = true)
             else -> return false
         }
         return true
@@ -310,6 +312,15 @@ class SelectionMode(private val host: ConfigurationFragment) {
                     snackbar(R.string.qr_too_large).setAction(R.string.profiles_copy_links) { copy(links) }.show()
                 }
             }
+        }
+    }
+
+    private fun exportConfigs(ids: List<Long>, toFile: Boolean) {
+        finish()
+        host.launchIo {
+            val position = ids.withIndex().associate { it.value to it.index }
+            val profiles = ProfileManager.getProfiles(ids).sortedBy { position[it.id] }
+            host.itemMenu.exportConfigurations(profiles, toFile)
         }
     }
 
