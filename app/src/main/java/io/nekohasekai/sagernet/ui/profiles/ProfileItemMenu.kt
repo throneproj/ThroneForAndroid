@@ -218,10 +218,14 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
      */
     private fun exportConfiguration(profile: ProxyEntity, toFile: Boolean) {
         // A copy parses its own outbound, so the row's cached one is only ever touched on the main thread.
-        val entity = profile.copy()
+        exportConfigurations(listOf(profile.copy()), toFile)
+    }
+
+    internal fun exportConfigurations(entities: List<ProxyEntity>, toFile: Boolean) {
+        if (entities.isEmpty()) return
         host.launchIo {
             val (config, fileName) = try {
-                ProfileConfigExport.export(entity)
+                ProfileConfigExport.exportAll(entities)
             } catch (e: Exception) {
                 Logs.w(e)
                 host.onUi { snackbar(e.readableMessage).show() }
