@@ -59,7 +59,7 @@
             app:showAsAction="never" />
         <item
             android:id="@+id/action_selection_qr"
-            android:title="@string/share_qr_nfc"
+            android:title="@string/share_qr_link"
             app:showAsAction="never">
             <menu>
                 <item
@@ -67,25 +67,20 @@
                     android:title="@string/standard" />
                 <item
                     android:id="@+id/action_selection_qr_throne"
-                    android:title="@string/throne_link" />
+                    android:title="@string/deep_link" />
             </menu>
         </item>
         <item
-            android:id="@+id/action_selection_copy"
-            android:title="@string/action_export_clipboard"
-            app:showAsAction="never">
-            <menu>
-                <item
-                    android:id="@+id/action_selection_copy_links"
-                    android:title="@string/standard" />
-                <item
-                    android:id="@+id/action_selection_copy_throne"
-                    android:title="@string/throne_link" />
-            </menu>
-        </item>
+            android:id="@+id/action_selection_copy_links"
+            android:title="@string/copy_link"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_selection_copy_throne"
+            android:title="@string/copy_deep_link"
+            app:showAsAction="never" />
         <item
             android:id="@+id/action_selection_config"
-            android:title="@string/profile_share_config"
+            android:title="@string/export_config"
             app:showAsAction="never">
             <menu>
                 <item
