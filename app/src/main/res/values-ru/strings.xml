@@ -976,6 +976,11 @@
     <string name="profiles_running_kept">Работающий профиль сохранён.</string>
     <string name="profiles_select_all">Выбрать все</string>
     <string name="profiles_invert_selection">Инвертировать выбор</string>
+    <string name="share_qr_link">QR-код и ссылка</string>
+    <string name="copy_link">Копировать ссылку</string>
+    <string name="copy_deep_link">Копировать deep link</string>
+    <string name="deep_link">Deep link</string>
+    <string name="export_config">Экспортировать конфиг</string>
     <string name="profiles_show">Показать</string>
     <string name="profiles_show_out_ip">Внешний IP</string>
     <string name="profiles_show_speed">Скорость</string>
