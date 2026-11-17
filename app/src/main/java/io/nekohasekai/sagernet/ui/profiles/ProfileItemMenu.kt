@@ -187,10 +187,11 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         // a chain has no link of its own, only the config it starts (bf89f273)
         if (profile.isChain()) {
             popup.menu.removeItem(R.id.action_group_qr)
-            popup.menu.removeItem(R.id.action_group_clipboard)
+            popup.menu.removeItem(R.id.action_standard_clipboard)
+            popup.menu.removeItem(R.id.action_universal_clipboard)
         } else if (profile.exportLink().isEmpty()) {
             popup.menu.findItem(R.id.action_group_qr).subMenu?.removeItem(R.id.action_standard_qr)
-            popup.menu.findItem(R.id.action_group_clipboard).subMenu?.removeItem(R.id.action_standard_clipboard)
+            popup.menu.removeItem(R.id.action_standard_clipboard)
         }
         popup.setOnMenuItemClickListener { item ->
             try {
