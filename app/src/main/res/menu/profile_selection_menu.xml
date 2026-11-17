@@ -34,6 +34,10 @@
             android:title="@string/profiles_select_all"
             app:showAsAction="never" />
         <item
+            android:id="@+id/action_selection_invert"
+            android:title="@string/profiles_invert_selection"
+            app:showAsAction="never" />
+        <item
             android:id="@+id/action_selection_pin"
             android:title="@string/profiles_pin"
             app:showAsAction="never" />
@@ -42,33 +46,49 @@
             android:title="@string/connection_test_clear_results"
             app:showAsAction="never" />
         <item
+            android:id="@+id/action_selection_resolve_domain"
+            android:title="@string/profiles_resolve_domains"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_selection_clear_traffic"
+            android:title="@string/clear_traffic_statistics"
+            app:showAsAction="never" />
+        <item
             android:id="@+id/action_selection_move"
             android:title="@string/profiles_move_to_group"
             app:showAsAction="never" />
         <item
-            android:id="@+id/action_selection_copy"
-            android:title="@string/profiles_copy_links"
-            app:showAsAction="never">
-            <menu>
-                <item
-                    android:id="@+id/action_selection_copy_links"
-                    android:title="@string/profiles_copy_share_links" />
-                <item
-                    android:id="@+id/action_selection_copy_throne"
-                    android:title="@string/profiles_copy_throne_links" />
-            </menu>
-        </item>
-        <item
             android:id="@+id/action_selection_qr"
-            android:title="@string/share_qr_nfc"
+            android:title="@string/share_qr_link"
             app:showAsAction="never">
             <menu>
                 <item
                     android:id="@+id/action_selection_qr_links"
-                    android:title="@string/profiles_copy_share_links" />
+                    android:title="@string/standard" />
                 <item
                     android:id="@+id/action_selection_qr_throne"
-                    android:title="@string/profiles_copy_throne_links" />
+                    android:title="@string/deep_link" />
+            </menu>
+        </item>
+        <item
+            android:id="@+id/action_selection_copy_links"
+            android:title="@string/copy_link"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_selection_copy_throne"
+            android:title="@string/copy_deep_link"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_selection_config"
+            android:title="@string/export_config"
+            app:showAsAction="never">
+            <menu>
+                <item
+                    android:id="@+id/action_selection_config_clipboard"
+                    android:title="@string/action_export_clipboard" />
+                <item
+                    android:id="@+id/action_selection_config_file"
+                    android:title="@string/action_export_file" />
             </menu>
         </item>
     </group>

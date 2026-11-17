@@ -10,11 +10,14 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
+import io.nekohasekai.sagernet.group.SubscriptionClient
+import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.confirmAction
 import io.nekohasekai.sagernet.ktx.nameList
 import io.nekohasekai.sagernet.ktx.showAllowingStateLoss
 import io.nekohasekai.sagernet.ktx.snackbar
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
+import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 
 /**
@@ -123,6 +126,16 @@ class SelectionMode(private val host: ConfigurationFragment) {
         refreshPinTitle()
     }
 
+    private fun invertSelection() {
+        val shown = host.listFor(groupId)?.adapter?.displayedIds ?: return
+        for (id in shown) {
+            if (!checked.remove(id)) checked.add(id)
+        }
+        if (checked.isEmpty()) return finish()
+        host.onSelectionChanged(null)
+        refreshPinTitle()
+    }
+
     /** Every checked profile is pinned, so the action unpins (refresh_pin_action). */
     private fun allPinned(): Boolean {
         val adapter = host.listFor(groupId)?.adapter ?: return false
@@ -155,14 +168,19 @@ class SelectionMode(private val host: ConfigurationFragment) {
             }
 
             R.id.action_selection_all -> selectAll()
+            R.id.action_selection_invert -> invertSelection()
             R.id.action_selection_delete -> delete(ids)
             R.id.action_selection_pin -> pin(ids)
             R.id.action_selection_clear_results -> clearResults(ids)
+            R.id.action_selection_resolve_domain -> resolve(ids)
+            R.id.action_selection_clear_traffic -> clearTraffic(ids)
             R.id.action_selection_move -> moveToGroup(ids)
             R.id.action_selection_copy_links -> copyLinks(ids, throne = false)
             R.id.action_selection_copy_throne -> copyLinks(ids, throne = true)
             R.id.action_selection_qr_links -> showQr(ids, throne = false)
             R.id.action_selection_qr_throne -> showQr(ids, throne = true)
+            R.id.action_selection_config_clipboard -> exportConfigs(ids, toFile = false)
+            R.id.action_selection_config_file -> exportConfigs(ids, toFile = true)
             else -> return false
         }
         return true
@@ -195,6 +213,35 @@ class SelectionMode(private val host: ConfigurationFragment) {
             host.launchIo {
                 ProfileManager.clearTestResults(ids)
                 GroupRepo.postReload(gid)
+            }
+        }
+    }
+
+    private fun resolve(ids: List<Long>) {
+        if (ids.isEmpty()) return
+        val gid = groupId
+        finish()
+        host.launchIo {
+            val report = SubscriptionClient.resolveProfiles(gid, ids)
+            if (report.isNotBlank()) host.onUi { snackbar(report).show() }
+        }
+    }
+
+    private fun clearTraffic(ids: List<Long>) {
+        val gid = groupId
+        confirm(ids, host.getString(R.string.confirm_clear_traffic), R.string.confirm_clear) {
+            val service = (host.activity as? MainActivity)?.connection?.service
+            val adapter = host.listFor(gid)?.adapter
+            finish()
+            ids.forEach { adapter?.clearTraffic(it) }
+            host.launchIo {
+                val array = ids.toLongArray()
+                try {
+                    service?.resetTraffic(array)
+                } catch (e: Exception) {
+                    Logs.w(e)
+                }
+                ProfileManager.resetTraffic(array)
             }
         }
     }
@@ -265,6 +312,15 @@ class SelectionMode(private val host: ConfigurationFragment) {
                     snackbar(R.string.qr_too_large).setAction(R.string.profiles_copy_links) { copy(links) }.show()
                 }
             }
+        }
+    }
+
+    private fun exportConfigs(ids: List<Long>, toFile: Boolean) {
+        finish()
+        host.launchIo {
+            val position = ids.withIndex().associate { it.value to it.index }
+            val profiles = ProfileManager.getProfiles(ids).sortedBy { position[it.id] }
+            host.itemMenu.exportConfigurations(profiles, toFile)
         }
     }
 

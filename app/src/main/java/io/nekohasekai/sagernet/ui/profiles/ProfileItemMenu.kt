@@ -187,10 +187,11 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         // a chain has no link of its own, only the config it starts (bf89f273)
         if (profile.isChain()) {
             popup.menu.removeItem(R.id.action_group_qr)
-            popup.menu.removeItem(R.id.action_group_clipboard)
+            popup.menu.removeItem(R.id.action_standard_clipboard)
+            popup.menu.removeItem(R.id.action_universal_clipboard)
         } else if (profile.exportLink().isEmpty()) {
             popup.menu.findItem(R.id.action_group_qr).subMenu?.removeItem(R.id.action_standard_qr)
-            popup.menu.findItem(R.id.action_group_clipboard).subMenu?.removeItem(R.id.action_standard_clipboard)
+            popup.menu.removeItem(R.id.action_standard_clipboard)
         }
         popup.setOnMenuItemClickListener { item ->
             try {
@@ -218,10 +219,14 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
      */
     private fun exportConfiguration(profile: ProxyEntity, toFile: Boolean) {
         // A copy parses its own outbound, so the row's cached one is only ever touched on the main thread.
-        val entity = profile.copy()
+        exportConfigurations(listOf(profile.copy()), toFile)
+    }
+
+    internal fun exportConfigurations(entities: List<ProxyEntity>, toFile: Boolean) {
+        if (entities.isEmpty()) return
         host.launchIo {
             val (config, fileName) = try {
-                ProfileConfigExport.export(entity)
+                ProfileConfigExport.exportAll(entities)
             } catch (e: Exception) {
                 Logs.w(e)
                 host.onUi { snackbar(e.readableMessage).show() }

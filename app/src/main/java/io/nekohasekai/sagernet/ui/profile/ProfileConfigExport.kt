@@ -29,4 +29,10 @@ object ProfileConfigExport {
         val name = if (xrayConfigs.isEmpty()) "${entity.displayName()}.json" else "${entity.displayName()}.txt"
         return text.toString() to name
     }
+
+    fun exportAll(entities: List<ProxyEntity>): Pair<String, String> {
+        if (entities.size == 1) return export(entities.single())
+        val text = entities.joinToString("\n\n") { entity -> "// ${entity.displayName()}\n" + export(entity).first }
+        return text to "profiles.txt"
+    }
 }

@@ -1302,6 +1302,12 @@
         <item quantity="other">%d selected</item>
     </plurals>
     <string name="profiles_select_all">Select all</string>
+    <string name="profiles_invert_selection">Invert selection</string>
+    <string name="share_qr_link">QR code and link</string>
+    <string name="copy_link">Copy link</string>
+    <string name="copy_deep_link">Copy deep link</string>
+    <string name="deep_link">Deep link</string>
+    <string name="export_config">Export config</string>
     <string name="profiles_move_to_group">Move to group</string>
     <string name="profiles_move_no_target">There is no other basic group to move to.</string>
     <plurals name="profiles_moved">
