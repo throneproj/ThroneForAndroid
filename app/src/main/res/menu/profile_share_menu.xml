@@ -2,32 +2,25 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_group_qr"
-        android:title="@string/share_qr_nfc">
+        android:title="@string/share_qr_link">
         <menu>
             <item
                 android:id="@+id/action_standard_qr"
                 android:title="@string/standard" />
             <item
                 android:id="@+id/action_universal_qr"
-                android:title="@string/throne_link" />
+                android:title="@string/deep_link" />
         </menu>
     </item>
     <item
-        android:id="@+id/action_group_clipboard"
-        android:title="@string/action_export_clipboard">
-        <menu>
-            <item
-                android:id="@+id/action_standard_clipboard"
-                android:title="@string/standard" />
-            <item
-                android:id="@+id/action_universal_clipboard"
-                android:title="@string/throne_link" />
-        </menu>
-    </item>
+        android:id="@+id/action_standard_clipboard"
+        android:title="@string/copy_link" />
+    <item
+        android:id="@+id/action_universal_clipboard"
+        android:title="@string/copy_deep_link" />
     <item
         android:id="@+id/action_group_configuration"
-
-        android:title="@string/profile_share_config">
+        android:title="@string/export_config">
         <menu>
             <item
                 android:id="@+id/action_config_export_clipboard"
