@@ -30,7 +30,7 @@
     <PreferenceCategory app:title="@string/speed_test_settings">
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:entries="@array/speed_test_modes"
-            app:entryValues="@array/int_array_5"
+            app:entryValues="@array/int_array_4"
             app:icon="@drawable/ic_baseline_speed_24"
             app:key="speed_test_mode"
             app:title="@string/speed_test_mode"
@@ -43,5 +43,13 @@
             app:key="simple_dl_url"
             app:title="@string/simple_download_url"
             app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/service_check">
+        <Preference
+            app:icon="@drawable/ic_baseline_check_circle_24"
+            app:key="service_check_services"
+            app:persistent="false"
+            app:title="@string/service_check_services" />
     </PreferenceCategory>
 </PreferenceScreen>

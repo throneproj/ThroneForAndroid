@@ -12,20 +12,20 @@ object SpeedTestSettings {
     const val DOWNLOAD_ONLY = 1
     const val UPLOAD_ONLY = 2
     const val SIMPLE_DOWNLOAD = 3
-    const val COUNTRY = 4
 
     const val MODE_DOWNLOAD_UPLOAD = "download_upload"
     const val MODE_DOWNLOAD = "download"
     const val MODE_UPLOAD = "upload"
     const val MODE_SIMPLE_DOWNLOAD = "simple_download"
-    const val MODE_COUNTRY = "country"
 
-    /** The name of a `speed_test_mode` value; an unknown value is the desktop default (download + upload). */
+    /**
+     * The name of a `speed_test_mode` value; an unknown value, like the removed "Only country" (4), is the desktop
+     * default (download + upload).
+     */
     fun modeName(mode: Int): String = when (mode) {
         DOWNLOAD_ONLY -> MODE_DOWNLOAD
         UPLOAD_ONLY -> MODE_UPLOAD
         SIMPLE_DOWNLOAD -> MODE_SIMPLE_DOWNLOAD
-        COUNTRY -> MODE_COUNTRY
         else -> MODE_DOWNLOAD_UPLOAD
     }
 

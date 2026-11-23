@@ -89,19 +89,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:hint="@string/remote_dns"
-                app:endIconContentDescription="@string/dns_server_suggestions"
-                app:endIconDrawable="@drawable/ic_baseline_expand_more_24"
+                app:endIconContentDescription="@string/edit"
+                app:endIconDrawable="@drawable/ic_image_edit"
                 app:endIconMode="custom">
 
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/remote_dns"
-                    style="@style/Widget.MaterialComponents.AutoCompleteTextView.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:completionThreshold="1"
-                    android:imeOptions="actionNext"
-                    android:inputType="textUri"
-                    android:maxLines="1" />
+                    android:focusable="false"
+                    android:textDirection="ltr" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -117,19 +114,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:hint="@string/direct_dns"
-                app:endIconContentDescription="@string/dns_server_suggestions"
-                app:endIconDrawable="@drawable/ic_baseline_expand_more_24"
+                app:endIconContentDescription="@string/edit"
+                app:endIconDrawable="@drawable/ic_image_edit"
                 app:endIconMode="custom">
 
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/direct_dns"
-                    style="@style/Widget.MaterialComponents.AutoCompleteTextView.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:completionThreshold="1"
-                    android:imeOptions="actionDone"
-                    android:inputType="textUri"
-                    android:maxLines="1" />
+                    android:focusable="false"
+                    android:textDirection="ltr" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

@@ -36,7 +36,7 @@
     <string name="security_settings">تنظیمات امنیت TLS</string>
     <string name="allow_insecure">اتصال محافظت نشده</string>
     <string name="allow_insecure_sum">اگر بررسی گواهی‌ها غیرفعال باشد، اتصال بدون رمزنگاری خواهد بود.</string>
-    <string name="speed_detail">سرعت: %1$s↑ %2$s↓\nمستقیم: %3$s↑ %4$s↓</string>
+    <string name="speed_detail">سرعت: ↓%2$s ↑%1$s\nمستقیم: ↓%4$s ↑%3$s</string>
     <string name="speed">%s/s</string>
     <string name="connection_test_testing">در حال آزمایش</string>
     <string name="connection_test_available">HTTPS: %d ms</string>
@@ -423,8 +423,6 @@
     <string name="auto_connect_superseded">جایگزین‌شده توسط VPN همیشه‌روشن</string>
     <string name="auto_update_interval">بازه به‌روزرسانی</string>
     <string name="auto_update_interval_sum">%d دقیقه</string>
-    <string name="autosel_active_size">بررسی نزدیک</string>
-    <string name="autosel_active_size_tip">پروفایل‌های دارای بالاترین رتبه در هر بازه دوباره بررسی می‌شوند. بقیه نیز بررسی می‌شوند، اما در پیمایش کامل کندتر پخش می‌شوند.</string>
     <string name="autosel_advanced">پیشرفته</string>
     <string name="autosel_advanced_hide">پنهان‌کردن گزینه‌های پیشرفته</string>
     <string name="autosel_advanced_show">همه موارد اینجا مقدار پیش‌فرض کارآمدی دارند. فقط در صورتی باز کنید که بخواهید شیوه اندازه‌گیری و جابه‌جایی انتخابگر را تنظیم کنید.</string>
@@ -432,18 +430,13 @@
     <string name="autosel_ago_hours">%d ساعت پیش</string>
     <string name="autosel_ago_minutes">%d دقیقه پیش</string>
     <string name="autosel_ago_seconds">%d ثانیه پیش</string>
-    <string name="autosel_always_retest">همیشه دوباره آزمایش شود</string>
     <string name="autosel_back_to_automatic">بازگشت به حالت خودکار</string>
     <string name="autosel_balance">توزیع ترافیک بین بهترین پروفایل‌ها</string>
     <string name="autosel_balance_hint_connection">هر اتصال جدید ممکن است پروفایل متفاوتی بگیرد. بیشترین پراکندگی، اما IP خروجی شما در میانه نشست تغییر می‌کند و ترافیک هر پروفایل تقریبی می‌شود.</string>
     <string name="autosel_balance_hint_off">بهترین پروفایل تمام ترافیک را حمل می‌کند؛ پروفایل‌های آماده دیگر تأییدشده نگه داشته می‌شوند تا فوراً جایگزین شوند.</string>
     <string name="autosel_balance_hint_rotate">اتصالات جدید در هر چرخش به پروفایل خوب دیگری منتقل می‌شوند؛ اتصالات باز رها شده و در مقصد اولیه تمام می‌شوند. ترافیک دقیق شمرده می‌شود.</string>
-    <string name="autosel_balance_interval">چرخش هر</string>
-    <string name="autosel_balance_interval_tip">مدتی که انتخابگر روی یک پروفایل می‌ماند پیش از رفتن به پروفایل آماده بعدی.</string>
     <string name="autosel_balance_mode">حالت</string>
     <string name="autosel_balance_tip">به‌طور پیش‌فرض خاموش: یک پروفایل همه‌چیز را حمل می‌کند و بقیه آماده می‌مانند. برای پخش ترافیک روی پروفایل‌های تأییدشده روشن کنید.</string>
-    <string name="autosel_bench_interval">پیمایش کامل هر</string>
-    <string name="autosel_bench_interval_tip">مدتی که یک دور روی همه پروفایل‌های در حال اجرا طول می‌کشد. بررسی‌ها به‌طور یکنواخت در آن پخش می‌شوند، بنابراین مجموعه بزرگ هرگز باعث جهش ترافیک نمی‌شود.</string>
     <string name="autosel_build_limit">اجرای بهترین‌ها</string>
     <string name="autosel_build_limit_tip">تعداد پروفایل‌های بارگذاری‌شده در پیکربندی در حال اجرا. انتخابگر بین آن‌ها فوراً و بدون اتصال مجدد جابه‌جا می‌شود. مقدار بیشتر حافظه و زمان راه‌اندازی بیشتری می‌خواهد.</string>
     <string name="autosel_cat_balance">توزیع بار</string>
@@ -465,13 +458,9 @@
     <string name="autosel_detail_health">%1$d پروفایل: %2$s</string>
     <string name="autosel_detail_untested">%d هنوز بررسی نشده</string>
     <string name="autosel_detail_working">%d کار می‌کند</string>
-    <string name="autosel_dial_retries">تلاش‌های جایگزینی</string>
-    <string name="autosel_dial_retries_tip">وقتی پروفایل انتخاب‌شده در اتصال شکست خورد، چند پروفایل دیگر بلافاصله امتحان شوند پیش از آنکه برنامه خطا ببیند.</string>
     <string name="autosel_edit">ویرایش انتخابگر خودکار</string>
     <string name="autosel_error_no_group">انتخابگر خودکار به گروهی اشاره دارد که دیگر وجود ندارد</string>
     <string name="autosel_error_no_members">انتخابگر خودکار عضو قابل استفاده‌ای ندارد</string>
-    <string name="autosel_exclude_unavailable">رد کردن پروفایل‌های ناموفق</string>
-    <string name="autosel_exclude_unavailable_tip">سرورهایی که آخرین آزمایش‌شان شکست خورده را تا وقتی نتیجه در بازه اعتماد است از مجموعه دور نگه می‌دارد. اگر آزمایش‌های شما قابل اعتماد نیست و ترجیح می‌دهید خود انتخابگر تصمیم بگیرد، خاموش کنید.</string>
     <string name="autosel_expected">آماده نگه دار</string>
     <string name="autosel_expected_tip">تعداد پروفایل‌هایی که همیشه تأییدشده کار می‌کنند تا خرابی فوراً پوشش داده شود. این‌ها همان‌هایی هستند که هنگام توزیع، ترافیک بینشان تقسیم می‌شود.</string>
     <string name="autosel_footer_exhausted">الان هیچ‌چیز کار نمی‌کند — اگر ادامه یابد، انتخابگر از بهترین پروفایل‌های بعدی بازسازی می‌کند.</string>
@@ -481,18 +470,18 @@
     <string name="autosel_footer_pinned_other">شما %s را انتخاب کردید، اما الان کار نمی‌کند، بنابراین انتخابگر دیگری را برگزید. پس از بازیابی به انتخاب شما بازمی‌گردد.</string>
     <string name="autosel_footer_pinned_using">از %s استفاده می‌شود چون شما آن را انتخاب کردید.</string>
     <string name="autosel_footer_suspended">بررسی‌ها متوقف شده‌اند چون این دستگاه اتصال شبکه ندارد. هیچ پروفایلی مقصر نیست و رتبه‌بندی تا بازگشت اتصال منجمد می‌ماند.</string>
-    <string name="autosel_group">سرورها از</string>
+    <string name="autosel_group">پروفایل‌ها از</string>
     <string name="autosel_group_archived">%s (بایگانی‌شده)</string>
     <string name="autosel_group_missing">گروه مفقود (#%d)</string>
-    <string name="autosel_interrupt">قطع اتصالات هنگام جابه‌جایی</string>
-    <string name="autosel_interrupt_tip">زمانی اعمال می‌شود که انتخابگر به دلیل بدتر شدن یا شکست پروفایل جابه‌جا شود. روشن: همه‌چیز یکباره به پروفایل جدید منتقل می‌شود. خاموش: دانلودهای فعلی روی پروفایل قدیمی تمام می‌شوند. چرخش‌های توزیع نیز هرگز اتصال قطع نمی‌کنند.</string>
+    <string name="autosel_interrupt">قطع اتصالات هنگام از کار افتادن پروفایل</string>
+    <string name="autosel_interrupt_tip">اتصالات باز به‌جای تمام شدن روی پروفایل از کار افتاده، فوراً منتقل می‌شوند. جابه‌جایی به پروفایل سریع‌تر و چرخش‌های توزیع هرگز اتصال قطع نمی‌کنند.</string>
     <string name="autosel_interval">بازه بررسی</string>
-    <string name="autosel_interval_tip">هر چند وقت پروفایل‌های نزدیک‌بررسی دوباره اندازه‌گیری شوند.</string>
+    <string name="autosel_interval_tip">هر چند وقت پروفایل‌های بالای رتبه‌بندی دوباره اندازه‌گیری شوند.</string>
     <string name="autosel_just_now">همین حالا</string>
     <string name="autosel_last_ok_short">موفق %s</string>
     <string name="autosel_list_separator">"، "</string>
     <string name="autosel_max_rtt">حداکثر تأخیر</string>
-    <string name="autosel_max_rtt_tip">پروفایل‌های کندتر از این هرگز انتخاب نمی‌شوند، حتی اگر گزینه بهتری موجود نباشد.</string>
+    <string name="autosel_max_rtt_tip">پروفایل‌های کندتر از این فقط زمانی استفاده می‌شوند که هیچ پروفایل سریع‌تری کار نکند.</string>
     <string name="autosel_ms">%d ms</string>
     <string name="autosel_name_empty">نام نمی‌تواند خالی باشد.</string>
     <string name="autosel_name_filter">فقط نام‌های منطبق</string>
@@ -529,27 +518,19 @@
     <string name="autosel_plan">پروفایل‌ها</string>
     <string name="autosel_plan_calculating">در حال بررسی گروه…</string>
     <string name="autosel_plan_counts">%1$d از %2$d پروفایل در گروه قابل استفاده‌اند؛ %3$d اجرا خواهند شد.</string>
-    <string name="autosel_plan_kept_unavailable">آخرین آزمایش همه پروفایل‌ها شکست خورد، که معمولاً یعنی شبکه قطع بوده نه سرورها، بنابراین هر %d تا نگه داشته می‌شوند و دوباره بررسی خواهند شد.</string>
     <string name="autosel_plan_needs_ranking">بقیه هنگام شروع انتخابگر اندازه‌گیری می‌شوند: انتخابگر به محض اینکه به اندازه کافی پروفایل کار کند اجرا می‌شود و پس از اندازه‌گیری همه، به رتبه‌بندی کامل تغییر می‌کند.</string>
     <string name="autosel_plan_reused">%d نتیجه آزمایش اخیر دارند که دوباره استفاده می‌شود.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">رد شد: %s.</string>
     <string name="autosel_plan_truncated">بیش از %d پروفایل منطبق است، بنابراین فقط بهترین‌های رتبه‌بندی‌شده نگه داشته می‌شوند.</string>
-    <string name="autosel_pool_cap">حداکثر رتبه‌بندی</string>
-    <string name="autosel_pool_cap_tip">سقف سختی برای تعداد پروفایل‌های اندازه‌گیری‌شده و نگه‌داشته‌شده در فهرست رتبه‌بندی. وقتی همه پروفایل‌های در حال اجرا از کار بیفتند، جایگزین‌ها از این فهرست گرفته می‌شوند.</string>
-    <string name="autosel_result_validity">اعتبار نتایج برای</string>
-    <string name="autosel_result_validity_tip">نتایج آزمایش URL به‌این تازگی دوباره استفاده می‌شوند به‌جای اندازه‌گیری مجدد — از جمله آزمایش‌هایی که خودتان روی گروه اجرا کرده‌اید، بنابراین شروع انتخابگر بلافاصله پس از آن کار را تکرار نمی‌کند. نتایج قدیمی‌تر مانند پروفایلی که هرگز آزمایش نشده در نظر گرفته می‌شوند. برای همیشه آزمایش تازه، صفر تنظیم کنید.</string>
     <string name="autosel_row_checks">بررسی‌ها: %1$d / %2$d موفق</string>
     <string name="autosel_row_connects">اتصال‌ها: %1$d / %2$d موفق</string>
     <string name="autosel_row_error">آخرین خطا: %s</string>
-    <string name="autosel_row_jitter">نوسان: %d ms</string>
     <string name="autosel_row_last_ok">آخرین موفق: %s</string>
     <string name="autosel_row_latency">تأخیر: %1$d ms (بهترین %2$d ms، بدترین %3$d ms)</string>
     <string name="autosel_row_state">وضعیت: %s</string>
     <string name="autosel_row_tested">آخرین آزمایش URL: %1$s، %2$s</string>
     <string name="autosel_row_untested">هنوز نتیجه آزمایش URL موجود نیست.</string>
-    <string name="autosel_sampling">نمونه‌های نگه‌داشته‌شده</string>
-    <string name="autosel_sampling_tip">رتبه‌بندی از میانگین و نوسان روی این تعداد از بررسی‌های اخیر استفاده می‌کند، بنابراین یک نتیجه بد نمی‌تواند سرور خوب را پایین بیاورد.</string>
     <string name="autosel_select_group">گروهی را که این انتخابگر خودکار باید دنبال کند انتخاب کنید.</string>
     <string name="autosel_skip_core_transitions">به تعویض‌های زیاد هسته نیاز دارد</string>
     <string name="autosel_skip_country">بر اساس کشور رد شده</string>
@@ -561,7 +542,6 @@
     <string name="autosel_skip_missing">پروفایل مفقود</string>
     <string name="autosel_skip_name">بر اساس نام رد شده</string>
     <string name="autosel_skip_tailscale">پروفایل Tailscale</string>
-    <string name="autosel_skip_unavailable">آخرین آزمایش شکست خورد</string>
     <string name="autosel_skip_unsupported">نوعی که این بیلد نمی‌تواند استفاده کند</string>
     <string name="autosel_skip_xray_chained">پیکربندی کامل Xray را نمی‌توان با پراکسی‌های گروه ترکیب کرد</string>
     <string name="autosel_state_cooldown">متوقف</string>
@@ -593,8 +573,6 @@
     <string name="autosel_use_automatic_tip">ترجیح این پروفایل را متوقف کنید و بگذارید انتخابگر دوباره بر اساس اندازه‌گیری انتخاب کند.</string>
     <string name="autosel_use_this">استفاده از این پروفایل</string>
     <string name="autosel_use_this_tip">این پروفایل را به‌جای آنکه رتبه‌بندی انتخاب کند در استفاده نگه می‌دارد. یک ترجیح می‌ماند نه قفل: اگر پروفایل از کار بیفتد انتخابگر باز هم جابه‌جا می‌شود و پس از بازیابی به انتخاب شما بازمی‌گردد.</string>
-    <string name="autosel_watch_interval">پایش پروفایل در حال استفاده</string>
-    <string name="autosel_watch_interval_tip">هر چند وقت پروفایلی که هم‌اکنون ترافیک شما را حمل می‌کند به‌تنهایی بررسی شود. کوتاه نگه دارید: سروری ممکن است در حالی که هنوز اتصال می‌پذیرد از کار بیفتد و تا بررسی کامل بعدی کسی متوجه نشود.</string>
     <string name="backup_create">ایجاد پشتیبان</string>
     <string name="backup_created">پشتیبان ایجاد شد. شامل: %s</string>
     <string name="backup_creating">در حال ایجاد پشتیبان…</string>
@@ -609,7 +587,7 @@
     <string name="backup_failed">ایجاد پشتیبان شکست خورد: %s</string>
     <string name="backup_local_summary">پشتیبان‌ها از قالب دسکتاپ Throne استفاده می‌کنند (.thrbackup): هر دو برنامه می‌توانند آن‌ها را بازیابی کنند. اعتبارنامه‌های WebDAV روی همین دستگاه می‌مانند.</string>
     <string name="backup_open_label">بازیابی پشتیبان Throne</string>
-    <string name="backup_part_otp">پروفایل‌های OTP (در اندروید بازیابی نمی‌شوند)</string>
+    <string name="backup_part_otp">ورودی‌های OTP (در اندروید بازیابی نمی‌شوند)</string>
     <string name="backup_part_profiles">پروفایل‌ها (گروه‌ها و پراکسی‌ها)</string>
     <string name="backup_part_routes">پروفایل‌های مسیریابی</string>
     <string name="backup_part_settings">تنظیمات</string>
@@ -716,7 +694,7 @@
     <string name="direct_test_url">URL آزمایش مستقیم</string>
     <string name="direct_test_url_empty">وضعیت شبکه سیستم</string>
     <string name="direct_test_url_sum">بدون هیچ پراکسی واکشی می‌شود تا اتصال مرده از سرور مرده تمیز داده شود. خالی بگذارید تا از وضعیت شبکه سیستم استفاده شود.</string>
-    <string name="disable_traffic_stats">غیرفعال‌سازی آمار ترافیک</string>
+    <string name="disable_traffic_stats">غیرفعال‌سازی شمارنده‌های ترافیک</string>
     <string name="disable_traffic_stats_sum">ترافیک پروفایل شمرده نمی‌شود</string>
     <string name="dns_address_dialog_message">نمونه‌ها: https://8.8.8.8/dns-query، tls://1.1.1.1، 8.8.8.8، localhost</string>
     <string name="dns_advanced">تنظیمات پیشرفته</string>
@@ -745,7 +723,7 @@
     <string name="enable_clash_api_summary">ارائه Clash API برای کنترل‌کننده‌های خارجی و داشبورد</string>
     <string name="enable_ntp">کلاینت NTP</string>
     <string name="enable_ntp_sum">همگام‌سازی ساعت هسته با یک سرور NTP</string>
-    <string name="enable_reality">فعال‌سازی Reality</string>
+    <string name="enable_reality">فعال‌سازی REALITY</string>
     <string name="enable_stats">آمار اتصال</string>
     <string name="enable_stats_sum">رهگیری اتصال‌ها و فرآیندهای آن‌ها</string>
     <string name="enable_tls">فعال‌سازی TLS</string>
@@ -792,7 +770,11 @@
     <string name="grp_keep_working_tip">پروفایل‌هایی که آخرین آزمایش‌شان موفق بوده هنگامی که اشتراک دیگر آن‌ها را فهرست نمی‌کند نگه داشته می‌شوند.</string>
     <string name="grp_landing_proxy">پراکسی فرود</string>
     <string name="grp_last_update">آخرین به‌روزرسانی: %1$s</string>
-    <string name="grp_missing_profile">پروفایل #%1$d (مفقود)</string>
+    <string name="grp_missing_profile">پروفایل ناموجود (#%1$d)</string>
+    <string name="hop_refs_warning">این گروه‌ها از پروفایلی که حذف می‌شود به‌عنوان پراکسی جلویی یا پراکسی فرود استفاده می‌کنند. این پروفایل از آن‌ها برداشته می‌شود و بدون آن وصل خواهند شد:</string>
+    <string name="hop_refs_cleared">این گروه‌ها از یک پروفایل حذف‌شده به‌عنوان پراکسی جلویی یا پراکسی فرود استفاده می‌کردند. این پروفایل از آن‌ها برداشته شد و اکنون بدون آن وصل می‌شوند:</string>
+    <string name="hop_ref_front">%1$s (پراکسی جلویی)</string>
+    <string name="hop_ref_landing">%1$s (پراکسی فرود)</string>
     <string name="grp_route_profile">پروفایل مسیریابی</string>
     <string name="grp_route_profile_default">پیش‌فرض (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (از این اشتراک)</string>
@@ -829,7 +811,7 @@
     <string name="grp_state_running">در حال به‌روزرسانی…</string>
     <string name="grp_sub_auto_update">به‌روزرسانی خودکار اشتراک</string>
     <string name="grp_sub_auto_update_interval">بازه (دقیقه، در صورت کمتر از ۳۰ نامعتبر)</string>
-    <string name="grp_sub_clear">پاک‌کردن سرورها پیش از به‌روزرسانی اشتراک</string>
+    <string name="grp_sub_clear">پاک‌کردن پروفایل‌ها پیش از به‌روزرسانی اشتراک</string>
     <string name="grp_sub_custom_hwid_params">پارامترهای سفارشی شناسه سخت‌افزار (اختیاری)</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
     <string name="grp_sub_custom_hwid_params_tip">قالب: hwid=value,os=value,osVersion=value,model=value\nبرای استفاده از مقادیر پیش‌فرض خالی بگذارید. فقط پارامترهایی را که می‌خواهید بازنویسی کنید مشخص کنید.</string>
@@ -986,11 +968,15 @@
     <string name="profiles_empty_subscription_hint">برای دانلود پروفایل‌های اشتراک، آن را به‌روزرسانی کنید.</string>
     <string name="profiles_more_options">گزینه‌های بیشتر</string>
     <string name="profiles_move_down">انتقال به پایین</string>
-    <string name="profiles_move_no_target">گروه پایه دیگری برای انتقال وجود ندارد.</string>
     <string name="profiles_move_to_group">انتقال به گروه</string>
+    <string name="import_target_subscription">این گروه یک اشتراک است: به‌روزرسانی بعدی، پروفایل‌هایی را که در آن وارد شده‌اند حذف می‌کند. گروه دیگری را انتخاب کنید و سپس دوباره وارد کنید.</string>
+    <string name="import_target_archived">این گروه بایگانی شده است. گروه دیگری را انتخاب کنید و سپس دوباره وارد کنید.</string>
+    <string name="import_target_gone">این گروه دیگر وجود ندارد.</string>
+    <string name="profiles_move_target_subscription">به‌روزرسانی بعدی یک گروه اشتراک، پروفایل‌هایی را که به آن منتقل شده‌اند حذف می‌کند. گروه دیگری را انتخاب کنید.</string>
+    <string name="profiles_move_source_updating">اشتراک این گروه در حال به‌روزرسانی است. پس از پایان آن دوباره تلاش کنید.</string>
     <string name="profiles_move_up">انتقال به بالا</string>
     <string name="profiles_no_duplicates">پروفایل تکراری یافت نشد.</string>
-    <string name="profiles_no_insecure">پیکربندی ناامنی یافت نشد.</string>
+    <string name="profiles_no_insecure">پروفایل ناامنی یافت نشد.</string>
     <string name="profiles_no_unavailable">پروفایل در دسترس نبوده‌ای یافت نشد.</string>
     <string name="profiles_remove">حذف</string>
     <string name="profiles_remove_duplicates">تکراری‌ها</string>
@@ -1043,9 +1029,9 @@
     <string name="raw_json">JSON خام</string>
     <string name="raw_json_invalid">JSON یک پروفایل معتبر از این نوع نیست</string>
     <string name="raw_json_summary">ویرایش هر فیلد این پروفایل به‌صورت JSON</string>
-    <string name="reality_public_key">کلید عمومی Reality</string>
-    <string name="reality_settings">تنظیمات Reality</string>
-    <string name="reality_short_id">شناسه کوتاه Reality</string>
+    <string name="reality_public_key">کلید عمومی REALITY</string>
+    <string name="reality_settings">تنظیمات REALITY</string>
+    <string name="reality_short_id">شناسه کوتاه REALITY</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="remote_dns_disable_ipv6">DNS راه دور: غیرفعال‌سازی IPv6</string>
     <string name="reserved_hint">سه عدد، یکی در هر خط</string>
@@ -1097,7 +1083,7 @@
     <string name="route_profile_empty">قانون معتبری در پروفایل نیست</string>
     <string name="route_profile_empty_title">پروفایل مسیریابی خالی</string>
     <string name="route_profile_fetch">اکنون واکشی کن</string>
-    <string name="route_profile_fetch_confirm">قوانین فعلی با قوانین واکشی‌شده از URL جایگزین می‌شوند.</string>
+    <string name="route_profile_fetch_confirm">قوانینی که از URL آمده‌اند، همراه با تغییراتی که در آن‌ها داده‌اید، با قوانین تازه واکشی‌شده جایگزین می‌شوند. قوانینی که اینجا اضافه کرده‌اید حفظ می‌شوند.</string>
     <string name="route_profile_fetch_failed">واکشی پروفایل مسیریابی ممکن نشد</string>
     <string name="route_profile_fetched">%d قانون از URL راه دور بارگذاری شد.</string>
     <string name="route_profile_fetched_title">واکشی شد</string>
@@ -1111,7 +1097,7 @@
     <string name="route_profile_never_updated">هنوز به‌روزرسانی نشده</string>
     <string name="route_profile_quick_switch">پروفایل مسیریابی</string>
     <string name="route_profile_remote_source">منبع راه دور</string>
-    <string name="route_profile_remote_rules_note">هر به‌روزرسانی قوانین این پروفایل را با قوانین URL جایگزین می‌کند، بنابراین قوانینی که اینجا اضافه یا تغییر می‌دهید از دست می‌روند. برای نگه داشتن قوانین خودتان، از «شبیه‌سازی» در فهرست پروفایل‌های مسیریابی استفاده کنید: نسخه شبیه‌سازی‌شده یک کپی محلی است که هرگز به‌روزرسانی نمی‌شود.</string>
+    <string name="route_profile_remote_rules_note">هر به‌روزرسانی قوانینی را که از URL آمده‌اند جایگزین می‌کند، پس تغییرات شما در آن‌ها تا به‌روزرسانی بعدی می‌مانند. قوانینی که اینجا اضافه می‌کنید حفظ می‌شوند.</string>
     <string name="route_profile_rules">قوانین (%d)</string>
     <string name="route_profile_title">پروفایل مسیریابی</string>
     <string name="route_profile_url">URL</string>
@@ -1137,8 +1123,8 @@
     <string name="route_rule_advanced_show">نمایش شرایط و گزینه‌های دیگر</string>
     <string name="route_rule_any">هر</string>
     <string name="route_rule_apps">برنامه‌ها</string>
-    <string name="route_rule_catch_all">این قانون شرطی ندارد، بنابراین با هر اتصالی مطابقت می‌یابد. به‌هرحال ذخیره شود؟</string>
-    <string name="route_rule_catch_all_title">بدون شرط</string>
+    <string name="route_rule_default_name">قانون %d</string>
+    <string name="route_rule_dns_queries">پرس‌وجوهای DNS</string>
     <string name="route_rule_category_match">تطبیق</string>
     <string name="route_rule_category_rule">قانون</string>
     <string name="route_rule_domain">دامنه</string>
@@ -1159,6 +1145,8 @@
     <string name="route_rule_ip_version">نسخه IP</string>
     <string name="route_rule_lines_hint">یک ورودی در هر خط</string>
     <string name="route_rule_missing_server">سرور مفقود (#%d)</string>
+    <string name="route_outbound_no_exit">پراکسی بدون خروجی</string>
+    <string name="route_outbound_no_exit_hint">فقط وقتی یک خروجی روشن است با «پراکسی» فرق دارد (تنظیمات › مسیریابی › خروجی): این سایت‌ها آن را دور می‌زنند و از پروفایل انتخاب‌شده خارج می‌شوند.</string>
     <string name="route_rule_name">نام</string>
     <string name="route_rule_network">شبکه</string>
     <string name="route_rule_no_drop">بدون رهاکردن</string>
@@ -1252,7 +1240,6 @@
     <string name="skip_cert_sum">به‌طور پیش‌فرض رد کردن تأیید گواهی TLS (allowInsecure)</string>
     <string name="skip_delete_confirmation">رد کردن تأیید حذف</string>
     <string name="skip_delete_confirmation_sum">حذف پروفایل‌ها بدون پرسیدن</string>
-    <string name="speed_test_mode_country">فقط کشور</string>
     <string name="ss_plugin">افزونه SIP003</string>
     <string name="ss_plugin_opts">گزینه‌های افزونه</string>
     <string name="ssh_client_version">نسخه کلاینت</string>
@@ -1303,7 +1290,7 @@
     <string name="test_engine_fg_busy">در حال کار در پس‌زمینه…</string>
     <string name="test_engine_fg_subscriptions">در حال به‌روزرسانی اشتراک‌ها…</string>
     <string name="test_engine_ip_current_unsupported">آزمایش IP اتصال در حال اجرا پشتیبانی نمی‌شود</string>
-    <string name="test_engine_kind_ip">آزمایش IP</string>
+    <string name="test_engine_kind_ip">آزمایش IP خروجی</string>
     <string name="test_engine_kind_speed">آزمایش سرعت</string>
     <string name="test_engine_kind_url">آزمایش URL</string>
     <string name="test_engine_progress">%1$d / %2$d</string>
@@ -1328,7 +1315,6 @@
     <string name="test_panel_completed">تکمیل شد</string>
     <string name="test_panel_countries">کشورها</string>
     <string name="test_panel_country_description">%1$s: %2$d</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_current_unavailable">در دسترس نیست: %s</string>
     <string name="test_panel_dismiss">رد کردن نتایج آزمایش</string>
     <string name="test_panel_distinct_ips">%d IP خروجی متمایز</string>
@@ -1381,7 +1367,6 @@
     <string name="test_panel_summary_stopped">متوقف · %1$d از %2$d در %3$s آزمایش شد</string>
     <string name="test_panel_summary_tested">%1$d در %2$s آزمایش شد</string>
     <string name="test_panel_summary_working">%d کار می‌کند</string>
-    <string name="test_panel_summary_working_countries">%1$d در %2$d کشور کار می‌کند</string>
     <string name="test_panel_summary_working_fastest">%1$d کار می‌کند، سریع‌ترین %2$s</string>
     <string name="test_panel_title">%1$s · %2$s</string>
     <string name="test_panel_unnamed">پروفایل %d</string>
@@ -1512,8 +1497,6 @@
     <string name="warp_proxy_not_started">درخواست با پراکسی اما بدون پروفایل شروع شد.</string>
     <string name="warp_registration">ثبت</string>
     <string name="warp_reserved">رزروشده</string>
-    <string name="warp_state_off">خاموش</string>
-    <string name="warp_state_on">روشن · %s</string>
     <string name="warp_tos_message"><![CDATA[ایجاد هویت WARP یک دستگاه جدید در Cloudflare ثبت می‌کند.<br><br>آیا <a href="%1$s">شرایط خدمات Cloudflare WARP</a> را می‌پذیرید؟]]></string>
     <string name="warp_wireguard_note">WARP روی پراکسی شما سوار می‌شود: WireGuard به پراکسی‌ای نیاز دارد که UDP را منتقل کند.</string>
     <string name="webdav_choose_backup">انتخاب پشتیبان</string>
@@ -1638,16 +1621,12 @@
     <string name="xray_verify_peer_cert_by_name">تأیید گواهی همتا بر اساس نام</string>
     <string name="xray_vless_all">همه VLESS</string>
     <string name="xray_vless_preference">ترجیح VLESS در Xray</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP و Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP و REALITY</string>
     <string name="xray_vless_xhttp_only">فقط XHTTP</string>
 
     <plurals name="autosel_milliseconds">
         <item quantity="one">%d ms</item>
         <item quantity="other">%d ms</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="one">%d دقیقه</item>
-        <item quantity="other">%d دقیقه</item>
     </plurals>
     <plurals name="autosel_profiles">
         <item quantity="one">%d پروفایل</item>
@@ -1736,7 +1715,16 @@
     <string name="backup_restore">بازیابی</string>
     <string name="warp_private_key">کلید خصوصی</string>
     <string name="warp_public_key">کلید عمومی</string>
-    <string name="warp_settings">WARP</string>
+    <string name="warp_settings">خروجی</string>
+    <string name="exit_through">خروج از طریق</string>
+    <string name="exit_server">پروفایل انتخاب‌شده</string>
+    <string name="exit_server_hint">ترافیک از پروفایلی که اجرا کرده‌اید خارج می‌شود.</string>
+    <string name="exit_psiphon_hint">Psiphon شبکه‌ای رایگان است که Psiphon Inc. آن را اداره می‌کند و مانند هر ارائه‌دهندهٔ VPN می‌تواند سایت‌هایی را که بازدید می‌کنید ببیند.</string>
+    <string name="exit_tor_hint">Tor در اندروید در دسترس نیست، پس ترافیک از پروفایل انتخاب‌شده خارج می‌شود.</string>
+    <string name="exit_unavailable">%s (در اندروید در دسترس نیست)</string>
+    <string name="psiphon_egress_region">منطقه</string>
+    <string name="psiphon_region_best">بهترین عملکرد</string>
+    <string name="psiphon_egress_region_sum">کشور سرور Psiphon؛ «بهترین عملکرد» انتخاب را به Psiphon می‌سپارد.</string>
 
     <string name="ech_query_target_hint">دامنه، یا دامنه+حل‌کننده (مثلاً cloudflare-ech.com+https://1.1.1.1/dns-query)</string>
     <string name="certificate_sha256">SHA256 گواهی</string>
@@ -1877,9 +1865,9 @@
     <string name="grp_http_version">نسخه HTTP</string>
     <string name="grp_http_version_tip">حالت خودکار در صورت پشتیبانی سرور از HTTP/2 از آن استفاده می‌کند. «حفظ پیش‌فرض» از تنظیمات › اشتراک‌ها پیروی می‌کند.</string>
     <string name="grp_update_interval">بازه به‌روزرسانی (دقیقه)</string>
-    <string name="grp_update_interval_tip">تعداد دقیقه‌های بین به‌روزرسانی‌های خودکار این اشتراک، حداقل 30. خالی از تنظیمات › اشتراک‌ها پیروی می‌کند که در آنجا باید به‌روزرسانی خودکار فعال باشد.</string>
+    <string name="grp_update_interval_tip">تعداد دقیقه‌های بین به‌روزرسانی‌های خودکار این اشتراک، حداقل 30، حتی وقتی به‌روزرسانی خودکار در تنظیمات › اشتراک‌ها خاموش است. خالی از همان تنظیم پیروی می‌کند.</string>
     <string name="grp_server_interval">بازه سرور</string>
-    <string name="grp_server_interval_tip">از بازه به‌روزرسانی‌ای که سرور اشتراک می‌فرستد استفاده کن؛ اگر سرور چیزی نفرستد بازه بالا اعمال می‌شود. «حفظ پیش‌فرض» از تنظیمات › اشتراک‌ها پیروی می‌کند.</string>
+    <string name="grp_server_interval_tip">از بازه به‌روزرسانی‌ای که سرور اشتراک می‌فرستد استفاده کن، حتی وقتی به‌روزرسانی خودکار در تنظیمات › اشتراک‌ها خاموش است؛ اگر سرور چیزی نفرستد بازه بالا اعمال می‌شود. «حفظ پیش‌فرض» از همان تنظیم پیروی می‌کند.</string>
     <string name="grp_server_interval_use">استفاده</string>
     <string name="grp_server_interval_ignore">نادیده گرفتن</string>
     <string name="grp_server_interval_last">این سرور آخرین بار %1$d ساعت فرستاد.</string>
@@ -2146,9 +2134,9 @@
     <string name="validation_tls_pem_private_key">کلید خصوصی را به‌صورت متن PEM بچسبانید، که با -----BEGIN PRIVATE KEY----- شروع می‌شود.</string>
     <string name="validation_tls_pin_base64">این یک SHA-256 هگزادسیمال است؛ آن را به‌صورت base64 بنویسید (44 کاراکتر که به = ختم می‌شود).</string>
     <string name="validation_tls_ech_config">فهرست پیکربندی ECH را به‌صورت base64 یا به‌صورت یک بلوک -----BEGIN ECH CONFIGS----- بچسبانید.</string>
-    <string name="validation_tls_reality_ech">Reality را نمی‌توان با ECH ترکیب کرد. ECH را خاموش کنید، یا کلید عمومی Reality را پاک کنید.</string>
-    <string name="validation_tls_reality_disable_sni">Reality را نمی‌توان با «غیرفعال کردن SNI» استفاده کرد. «غیرفعال کردن SNI» را خاموش کنید.</string>
-    <string name="validation_tls_reality_spoof">Reality را نمی‌توان با TLS spoof ترکیب کرد. TLS Spoof را روی خاموش بگذارید.</string>
+    <string name="validation_tls_reality_ech">REALITY را نمی‌توان با ECH ترکیب کرد. ECH را خاموش کنید، یا کلید عمومی REALITY را پاک کنید.</string>
+    <string name="validation_tls_reality_disable_sni">REALITY را نمی‌توان با «غیرفعال کردن SNI» استفاده کرد. «غیرفعال کردن SNI» را خاموش کنید.</string>
+    <string name="validation_tls_reality_spoof">REALITY را نمی‌توان با TLS spoof ترکیب کرد. TLS Spoof را روی خاموش بگذارید.</string>
     <string name="validation_tls_pins_with_certificate">گواهی سفارشی را نمی‌توان با pinهای گواهی ترکیب کرد؛ فقط یکی از آن‌ها را نگه دارید.</string>
     <string name="validation_tls_client_pair">گواهی کلاینت و کلید کلاینت را با هم تنظیم کنید.</string>
     <string name="validation_tls_spoof_needs_sni">TLS spoof به SNI نیاز دارد. «غیرفعال کردن SNI» را خاموش کنید، یا TLS Spoof را روی خاموش بگذارید.</string>
@@ -2160,7 +2148,7 @@
     <string name="validation_transport_headers_pairs">سرآیندها باید به‌صورت متناوب نام و مقدار باشند که با | از هم جدا می‌شوند، مثلاً User-Agent|curl، بنابراین نادیده گرفته شدند.</string>
     <string name="validation_transport_type">sing-box از انتقال \"%1$s\" پشتیبانی نمی‌کند. از ws، httpupgrade، http، grpc یا quic استفاده کنید.</string>
     <string name="validation_transport_quic_tls">انتقال QUIC به TLS نیاز دارد. «فعال‌سازی TLS» را روشن کنید.</string>
-    <string name="validation_transport_quic_reality">Reality با انتقال QUIC کار نمی‌کند. کلید Reality را پاک کنید، یا انتقال دیگری انتخاب کنید.</string>
+    <string name="validation_transport_quic_reality">REALITY با انتقال QUIC کار نمی‌کند. کلید REALITY را پاک کنید، یا انتقال دیگری انتخاب کنید.</string>
     <string name="validation_transport_quic_utls">uTLS با انتقال QUIC استفاده نمی‌شود.</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal فقط با مالتی‌پلکس سفارشی کار می‌کند. Multiplex را روی سفارشی بگذارید.</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal به هر دو سرعت نیاز دارد؛ سرعت خالی به‌صورت 1 Mbps ارسال می‌شود.</string>
@@ -2199,6 +2187,12 @@
     <string name="validation_xray_vless_encryption_mode">بخش بعد از mlkem768x25519plus باید native، xorpub یا random باشد.</string>
     <string name="validation_xray_vless_encryption_rtt">بخش بعد از حالت باید 1rtt یا 0rtt باشد.</string>
     <string name="validation_xray_vless_encryption_key">هر کلید در این رشته باید base64 امن برای URL با 32 یا 1184 بایت و بدون padding باشد.</string>
+    <string name="validation_xray_vless_encryption_padding_order">بخش‌های padding را پیش از کلیدها بگذارید.</string>
+    <string name="validation_xray_vless_encryption_mlkem">کلید 1184 بایتی در رشته یک کلید معتبر ML-KEM-768 نیست: رشته را دوباره از سرور کپی کنید.</string>
+    <string name="validation_xray_vless_encryption_no_key">رشته هیچ کلیدی ندارد: کل رشته‌ای را که سرور می‌دهد کپی کنید.</string>
+    <string name="validation_xray_vless_padding_format">هر بخش padding باید سه عدد باشد که با خط تیره به هم وصل شده‌اند، مانند 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_first">بخش نخست padding باید احتمالی دست‌کم 100 و طول‌هایی دست‌کم 35 داشته باشد، مانند 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_total">مجموع طول‌های padding می‌تواند از 65553 بایت بیشتر شود.</string>
     <string name="validation_xray_vless_vision">XTLS Vision به شبکه raw همراه با TLS یا REALITY، یا رمزنگاری VLESS نیاز دارد: شبکه یا امنیت را تغییر دهید، یا flow را پاک کنید.</string>
     <string name="validation_xray_xdrive_no_link">XDRIVE قالب پیوند اشتراک‌گذاری ندارد. به‌جای آن پیکربندی JSON سرور را وارد کنید.</string>
     <string name="validation_xray_xdrive_service">باید google-drive، s3، template یا local باشد.</string>
@@ -2420,11 +2414,6 @@
     <string name="validation_custom_xray_geodata">به‌روزرسان geodata از پیکربندی درون‌ریزی‌شده حذف شد: فایل‌هایی را از آدرس‌هایی که فرستنده انتخاب کرده بود دانلود می‌کرد و فایل‌های پوشه Throne را جایگزین می‌کرد.</string>
     <string name="validation_custom_xray_webhook">webhook از این قانون مسیریابی حذف شد: جزئیات هر اتصال منطبق را به آدرسی که فرستنده انتخاب کرده بود می‌فرستاد.</string>
     <string name="validation_autoselector_countries">از کدهای دو حرفی کشور استفاده کنید که با ویرگول جدا شده‌اند، مثلاً DE,NL,FR.</string>
-    <string name="validation_autoselector_build_limit">نمی‌توان بیش از تعداد پروفایل‌های رتبه‌بندی‌شده اجرا کرد (%1$s).</string>
-    <string name="validation_autoselector_bench_interval">پیمایش کامل نمی‌تواند بیشتر از بازه بررسی اجرا شود (%1$s ثانیه).</string>
-    <string name="validation_autoselector_watch_interval">پایش پروفایل در حال استفاده نمی‌تواند کندتر از بازه بررسی باشد (%1$s ثانیه).</string>
-    <string name="validation_autoselector_ready_count">حداقل به تعداد پروفایل‌های آماده‌نگه‌داشته‌شده (%1$s) را نزدیک بررسی کنید.</string>
-    <string name="validation_autoselector_close_count">نمی‌توان بیش از تعداد پروفایل‌های در حال اجرا (%1$s) را نزدیک بررسی کرد.</string>
     <string name="validation_chain_empty">حداقل یک پروفایل به زنجیره اضافه کنید.</string>
     <string name="validation_ss_plugin_opts_dangling">بک‌اسلش انتهایی چیزی برای escape کردن ندارد.</string>
     <string name="validation_ss_plugin_opts_name">هر گزینه به یک نام نیاز دارد، مانند obfs=http;obfs-host=example.com.</string>
@@ -2528,6 +2517,7 @@
     <string name="validation_route_no_drop_unused">با روش drop اثری ندارد.</string>
     <string name="validation_route_ignored_by_action">قانون %1$s آن را نادیده می‌گیرد؛ فقط برای این کنش‌ها اعمال می‌شود: %2$s.</string>
     <string name="validation_route_matches_all">این قانون شرط تطبیق ندارد، بنابراین با همه ترافیک مطابقت می‌یابد.</string>
+    <string name="validation_route_catch_all">این قانون هیچ شرطی ندارد، پس همهٔ ترافیک را می‌گیرد. یک شرط اضافه کنید یا قانون را خاموش کنید.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s (\"%2$s\"): %3$s</string>
     <string name="validation_route_rule_warning">قانون \"%1$s\": %2$s</string>
@@ -2575,6 +2565,7 @@
     <string name="validation_millis_or_default">تعداد صحیحی میلی‌ثانیه وارد کنید، مثلاً %1$s (بدون واحد)، یا 0 برای مقدار پیش‌فرض.</string>
     <string name="validation_group_update_interval">باید حداقل 30 دقیقه باشد، یا برای حفظ مقدار پیش‌فرض خالی بماند.</string>
     <string name="validation_port_used">پورت %1$s از قبل توسط این مورد استفاده می‌شود: %2$s. پورت دیگری انتخاب کنید.</string>
+    <string name="validation_port_reenabled">روشن‌کردن %1$s روی پورت %2$s با %3$s تداخل دارد. پورت دیگری انتخاب کنید.</string>
     <string name="validation_mtu_ipv6">IPv6 به MTU حداقل %1$s نیاز دارد؛ کمتر از آن سیستم ممکن است IPv6 را از Tun حذف کند.</string>
     <string name="validation_private_range_all">این محدوده همه آدرس‌ها را پوشش می‌دهد، که باعث می‌شود Tun چیزی را مسیریابی نکند.</string>
     <string name="validation_dns_local_ip">از یک آدرس IP استفاده کنید، مثلاً 223.5.5.5 یا tls://1.1.1.1: این سرور نام سرورهای دیگر را حل می‌کند.</string>
@@ -2597,12 +2588,18 @@
     <string name="validation_route_dns_final">سرور DNS پیش‌فرض باید ریموت یا مستقیم باشد، نه \"%1$s\".</string>
     <string name="validation_route_dns_dropped">تنظیمات DNS اختصاصی پروفایل کنار گذاشته شد، بنابراین از تنظیمات سراسری استفاده می‌کند: %1$s</string>
     <string name="route_dns_global_servers">ریموت %1$s، مستقیم %2$s</string>
-    <string name="dns_server_suggestions">سرورهای اخیر و پیشنهادی</string>
     <string name="warp_api_tls_fragment_title">قطعه‌بندی TLS برای ثبت‌نام WARP</string>
     <string name="warp_api_tls_fragment_note">فقط وقتی اعمال می‌شود که ثبت‌نام مستقیم وصل شود، نه از طریق پروفایل در حال اجرا.</string>
     <string name="backup_warn_tor_egress">پشتیبان ترافیک را از طریق Tor می‌فرستد که در Android در دسترس نیست؛ اینجا ترافیک مستقیم از طریق سرور انتخاب‌شده خارج می‌شود.</string>
     <string name="validation_dns_server_item">سرور %1$s (\"%2$s\"): %3$s</string>
-    <string name="dns_server_list_hint">چند سرور را با کاما جدا کنید: همه با هم پرس‌وجو می‌شوند و نخستین پاسخ برنده است.</string>
+    <string name="dns_server_add">افزودن سرور</string>
+    <string name="dns_server_custom">نشانی دلخواه</string>
+    <string name="dns_server_recent">اخیر</string>
+    <string name="dns_server_address_hint">نشانی، مثلاً tls://1.1.1.1</string>
+    <string name="dns_server_list_race">هم‌زمان پرس‌وجو می‌شوند؛ سریع‌ترین پاسخ پذیرفته می‌شود.</string>
+    <string name="dns_server_list_primary">نشانی سرورهای پراکسی را هم حل می‌کند</string>
+    <string name="dns_server_list_empty">دست‌کم یک سرور بیفزایید.</string>
+    <string name="dns_server_drag">برای تغییر ترتیب بکشید</string>
     <string name="juicity_pinned_certchain_sha256">SHA256 زنجیرهٔ گواهی</string>
     <string name="juicity_pinned_certchain_sha256_hint">هش زنجیرهٔ گواهی که juicity-server چاپ می‌کند؛ حتی با «اتصال محافظت نشده» جایگزین اعتبارسنجی CA می‌شود</string>
     <string name="validation_juicity_certchain">هش 32 بایتی زنجیرهٔ گواهی را به صورت base64 (44 نویسه که با = تمام می‌شود)، همان‌طور که juicity-server چاپ می‌کند، وارد کنید.</string>
@@ -2714,9 +2711,9 @@
     <string name="chain_step_untestable">زنجیره‌هایی که گامی با پیکربندی سفارشی Xray دارند قابل آزمایش نیستند</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">شیوه انتخاب</string>
-    <string name="autosel_strategy_latency">سریع‌ترین و پایدارترین</string>
+    <string name="autosel_strategy_latency">سریع‌ترین</string>
     <string name="autosel_strategy_priority">به ترتیب اولویت</string>
-    <string name="autosel_strategy_latency_tip">سریع‌ترین و پایدارترین: همیشه از بهترین پروفایل اندازه‌گیری‌شده در میان همه پروفایل‌ها استفاده می‌شود.</string>
+    <string name="autosel_strategy_latency_tip">سریع‌ترین: همیشه از بهترین پروفایل اندازه‌گیری‌شده در میان همه پروفایل‌ها استفاده می‌شود.</string>
     <string name="autosel_strategy_priority_tip">به ترتیب اولویت: رده‌های زیر از بالا امتحان می‌شوند. انتخابگر روی بالاترین رده‌ای می‌ماند که پروفایلی در حال کار دارد و هرگاه رده بالاتری دوباره کار کند، به آن بازمی‌گردد.</string>
     <string name="autosel_tier_add">افزودن رده</string>
     <string name="autosel_tiers_hint">هر پروفایل به نخستین رده‌ای تعلق دارد که با آن منطبق باشد و پروفایل‌هایی که با هیچ رده‌ای منطبق نیستند در انتها قرار می‌گیرند. انتخابگر از بالاترین رده‌ای استفاده می‌کند که پروفایلی در حال کار دارد و در آن رده، بهترین پروفایل اندازه‌گیری‌شده را برمی‌گزیند.</string>
@@ -2735,20 +2732,8 @@
     <string name="autosel_tier_any_profile">هر پروفایلی</string>
     <string name="autosel_tier_fallback">رده %d</string>
     <string name="autosel_tier_short">رده %d</string>
-    <string name="autosel_failback_checks">بازگشت به بالا پس از</string>
-    <string name="autosel_failback_checks_tip">به ترتیب اولویت: وقتی پروفایلی از رده بالاتر دوباره کار کند، انتخابگر فقط پس از آنکه آن پروفایل این تعداد بررسی پیاپی را با موفقیت بگذراند به آن بازمی‌گردد. نمی‌تواند بیشتر از نمونه‌های نگه‌داشته‌شده باشد.</string>
-    <plurals name="autosel_checks">
-        <item quantity="one">%d بررسی</item>
-        <item quantity="other">%d بررسی</item>
-    </plurals>
-    <string name="autosel_failback_delay">بدون شکست به مدت</string>
-    <string name="autosel_failback_delay_tip">به ترتیب اولویت: پروفایلی از رده بالاتر همچنین باید این مدت را بدون بررسی یا اتصال ناموفق بگذراند تا انتخابگر به آن بازگردد.</string>
-    <string name="autosel_failback_interrupt">قطع اتصالات هنگام بازگشت به بالا</string>
-    <string name="autosel_failback_interrupt_tip">به ترتیب اولویت. خاموش: اتصالاتی که از قبل باز هستند روی پروفایل خود می‌مانند و فقط اتصالات جدید به رده بالاتر منتقل می‌شوند. روشن: همه‌چیز یکباره به بالا منتقل می‌شود.</string>
     <string name="autosel_passive">یادگیری از اتصال‌های واقعی</string>
     <string name="autosel_passive_tip">پروفایل‌ها را علاوه بر بررسی‌های سلامت، بر اساس اتصال‌هایی که برنامه‌های شما از طریق آن‌ها برقرار می‌کنند نیز می‌سنجد. اتصالی که هیچ پاسخی نگیرد یا نتواند وصل شود ناموفق به حساب می‌آید. وقتی اتصال‌های اخیر از طریق یک پروفایل دست‌کم به اندازه موفقیت‌هایشان شکست بخورند و شمار شکست‌ها به سه یا بیشتر برسد، آن پروفایل حتی اگر بررسی‌هایش موفق باشند کنار گذاشته می‌شود: به مدت یک دقیقه، که با هر تکرار دو برابر می‌شود، تا حداکثر 16 دقیقه. هر وب‌سایت نیز به پروفایلی که آخرین بار برایش کار کرده پایبند می‌ماند و از پروفایلی که همین حالا برایش شکست خورده دوری می‌کند. تا وقتی ترافیک واقعی جریان دارد، بررسی‌های سلامت کمتری فرستاده می‌شود.</string>
-    <string name="autosel_site_memory">به خاطر سپردن انتخاب هر سایت به مدت</string>
-    <string name="autosel_site_memory_tip">مدتی که یک وب‌سایت همچنان از پروفایلی که آخرین بار برایش کار کرده استفاده می‌کند و از پروفایلی که برایش شکست خورده دوری می‌کند.</string>
     <string name="autosel_balance_hint_priority">در حالت به ترتیب اولویت، ترافیک فقط بین پروفایل‌های آماده رده در حال استفاده پخش می‌شود.</string>
     <string name="autosel_plan_by_tier">بر اساس رده: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2759,7 +2744,6 @@
     <string name="autosel_plan_truncated_tiers">بیش از %d پروفایل منطبق است، بنابراین از هر رده فقط بهترین‌های رتبه‌بندی‌شده نگه داشته می‌شوند.</string>
     <string name="validation_autoselector_tier_match">برای این رده یک گروه انتخاب کنید یا یک الگوی نام وارد کنید.</string>
     <string name="validation_autoselector_tier_count">برای انتخاب به ترتیب اولویت، دست‌کم یک رده اضافه کنید.</string>
-    <string name="validation_autoselector_failback_checks">تعداد بررسی‌های پیاپی لازم نمی‌تواند بیشتر از نمونه‌های نگه‌داشته‌شده (%1$s) باشد.</string>
     <string name="autosel_status_on_tier">انتخابگر خودکار روی %1$s، رده %2$d (%3$d از %4$d کار می‌کند)</string>
     <string name="autosel_detail_suspect">%d مشکوک</string>
     <string name="autosel_state_suspect">مشکوک</string>
@@ -2799,6 +2783,17 @@
     <string name="service_ip_risk">ریسک %d</string>
     <string name="service_check_checked_now">همین الان بررسی شد</string>
     <string name="service_check_checked_at">%s بررسی شد</string>
+    <string name="service_check_services">سرویس‌ها</string>
+    <string name="service_check_services_all">همه سرویس‌ها</string>
+    <string name="service_check_services_count">%1$d از %2$d سرویس</string>
+    <string name="service_check_none_selected">هیچ سرویسی انتخاب نشده</string>
+    <string name="service_check_services_unknown">فهرست سرویس‌ها بارگیری نشد</string>
+    <string name="service_check_current">بررسی سرویس‌های اتصال فعلی</string>
+    <string name="service_category_ai">هوش مصنوعی</string>
+    <string name="service_category_streaming">استریم</string>
+    <string name="service_category_social">شبکه‌های اجتماعی</string>
+    <string name="service_category_reputation">اعتبار IP</string>
+    <string name="service_category_other">سایر</string>
     <string name="validation_chain_selector_twice">یک زنجیره فقط می‌تواند یک انتخابگر خودکار داشته باشد.</string>
     <string name="validation_chain_selector_custom">انتخابگر خودکار نمی‌تواند با پیکربندی سفارشی در یک زنجیره باشد.</string>
     <string name="chain_step_selector">زنجیره‌های دارای انتخابگر خودکار را نمی‌توان گام به گام آزمایش کرد؛ به‌جای آن اعضای آن را آزمایش کنید</string>
@@ -2806,6 +2801,8 @@
     <string name="autosel_notice_exhausted_upstream">همه پروفایل‌های در حال اجرا از طریق گام‌های جلوی آن از کار افتادند — بازسازی با نامزدهای بعدی.</string>
     <string name="validation_route_outbound_chain_selector">قوانین مسیریابی نمی‌توانند از زنجیره \"%1$s\" استفاده کنند: این زنجیره یک انتخابگر خودکار دارد، پس فقط قابل اجراست. خروجی دیگری انتخاب کنید.</string>
     <string name="route_outbound_chain_selector">پروفایل مسیریابی ترافیک را به %1$s می‌فرستد که یک انتخابگر خودکار دارد؛ چنین زنجیره‌ای فقط قابل اجراست و نمی‌توان آن را در قوانین مسیریابی به کار برد</string>
+    <string name="xray_full_config_tag_clash">پیکربندی سفارشی Xray از برچسب «%1$s» استفاده می‌کند که Throne آن را برای یک پروفایل Xray دیگر هم می‌سازد؛ نام آن را در پیکربندی سفارشی تغییر دهید</string>
+    <string name="xray_full_config_selector_clash">انتخابگر «%1$s» در پیکربندی سفارشی Xray با «%2$s» هم تطبیق دارد که Throne آن را برای یک پروفایل Xray دیگر می‌سازد؛ انتخابگر را در پیکربندی سفارشی دقیق‌تر کنید</string>
     <string name="grp_filter_countries">کشورها</string>
     <string name="grp_filter_countries_tip">کشورهای خروجی برای نگه داشتن (مثلاً HK,JP) یا حذف (مثلاً !RU).</string>
     <string name="grp_filter_countries_hint">مثلاً HK,JP یا !RU</string>
@@ -2847,4 +2844,8 @@
     <string name="vpn_auth_submitting">در حال ورود…</string>
     <string name="vpn_auth_gone">این درخواست ورود دیگر در انتظار نیست.</string>
     <string name="vpn_auth_no_browser">هیچ برنامه‌ای نمی‌تواند این نشانی را باز کند.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">یک کد دوحرفی کشور به کار ببرید، مانند US.</string>
+    <string name="validation_psiphon_ignored">%1$s نادیده گرفته شد: پروفایل‌های Psiphon فقط منطقه را می‌پذیرند.</string>
+    <string name="exit_runs_over_itself">پروفایل انتخاب‌شده خودش از طریق %1$s خارج می‌شود، پس خروجی %1$s نمی‌تواند روی آن اجرا شود. در «تنظیمات › مسیریابی › خروجی» خروجی دیگری انتخاب کنید.</string>
 </resources>

@@ -466,7 +466,6 @@ class AutoSelectorStatusActivity : ThemedActivity(), SagerConnection.Callback {
             }
             if (member.samples > 0 && member.averageMs > 0) {
                 lines.add(getString(R.string.autosel_row_latency, member.averageMs, member.minMs, member.maxMs))
-                lines.add(getString(R.string.autosel_row_jitter, member.deviationMs))
             }
             if (member.samples > 0) {
                 lines.add(getString(R.string.autosel_row_checks, member.samples - member.failures, member.samples))

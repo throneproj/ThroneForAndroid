@@ -2,7 +2,8 @@ package io.nekohasekai.sagernet.ui.settings
 
 import androidx.annotation.StringRes
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.SettingsRegistry
+import io.nekohasekai.sagernet.database.SettingsRegistry.Listener
 import io.nekohasekai.sagernet.validation.Empty
 import io.nekohasekai.sagernet.validation.Family
 import io.nekohasekai.sagernet.validation.Rule
@@ -84,29 +85,39 @@ object SettingChecks {
         return range
     }
 
-    /** The local listeners whose ports must differ; the inbound and the core screens each hold two of them. */
-    enum class Listener(@StringRes val label: Int) {
-        MIXED(R.string.cag_mixed_inbound),
-        DNS(R.string.dns_in_port),
-        CLASH_API(R.string.cag_clash_api),
-        BOX_API(R.string.cag_api_dashboard),
-    }
-
-    /** The stored port of [listener] while it listens, else null. */
-    private fun portOf(listener: Listener): Int? = when (listener) {
-        Listener.MIXED -> DataStore.inboundSocksPort.takeIf { !DataStore.disableMixedInbound && !DataStore.randomInboundPort }
-        Listener.DNS -> DataStore.coreDnsInPort
-        Listener.CLASH_API -> DataStore.coreBoxClashApi.takeIf { it > 0 }
-        Listener.BOX_API -> DataStore.coreBoxApiPort.takeIf { it > 0 }
+    /** The name of a local listener whose port must differ; the inbound and the core screens each hold two of them. */
+    @StringRes
+    fun label(listener: Listener): Int = when (listener) {
+        Listener.MIXED -> R.string.cag_mixed_inbound
+        Listener.DNS_IN -> R.string.dns_in_port
+        Listener.CLASH_API -> R.string.cag_clash_api
+        Listener.BOX_API -> R.string.cag_api_dashboard
     }
 
     /** Why [text] as the port of [own] collides with another listener; only while [own] itself listens. */
     @JvmStatic
     fun portCollision(own: Listener, text: String): String {
-        if (portOf(own) == null) return ""
+        if (SettingsRegistry.listenerPort(own) == null) return ""
         val port = Validation.toInt(text)?.takeIf { it > 0 } ?: return ""
-        val other = Listener.entries.firstOrNull { it != own && portOf(it)?.toLong() == port } ?: return ""
-        return vtr(R.string.validation_port_used, port.toString(), vtr(other.label))
+        val other = Listener.entries.firstOrNull { it != own && SettingsRegistry.listenerPort(it)?.toLong() == port }
+            ?: return ""
+        return vtr(R.string.validation_port_used, port.toString(), vtr(label(other)))
+    }
+
+    /**
+     * The commit check of the listener switches (SettingsService::Update's PortConflict): "" when [pending] (key ->
+     * stored text) leaves every listening port distinct, else why not.
+     */
+    @JvmStatic
+    fun portConflict(pending: Map<String, String>): String {
+        val conflict = SettingsRegistry.portConflict(pending) ?: return ""
+        val port = conflict.port.toString()
+        val holder = vtr(label(conflict.holder))
+        return if (conflict.reenabled) {
+            vtr(R.string.validation_port_reenabled, vtr(label(conflict.listener)), port, holder)
+        } else {
+            vtr(R.string.validation_port_used, port, holder)
+        }
     }
 
     /** Validation::Rules::Port plus [portCollision]. */

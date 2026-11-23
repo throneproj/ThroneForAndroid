@@ -26,6 +26,8 @@ import io.nekohasekai.sagernet.ktx.alert
 import io.nekohasekai.sagernet.ktx.getColorAttr
 import io.nekohasekai.sagernet.ktx.tryToShow
 import io.nekohasekai.sagernet.ui.test.RowPhase
+import io.nekohasekai.sagernet.ui.test.ServiceCheckDialog
+import io.nekohasekai.sagernet.ui.test.ServiceResults
 import moe.matsuri.nb4a.Protocols
 import moe.matsuri.nb4a.Protocols.getProtocolColor
 import java.math.BigDecimal
@@ -48,6 +50,8 @@ internal class RowContent(
     val trafficDescription: String?,
     val address: String,
     val error: String?,
+    /** The result ends with the service icons; a tap on it opens the service check. */
+    val services: Boolean,
     private val brief: Boolean,
 ) {
     /** The lines under the type line, which a grid neighbour keeps room for; the lines above align by themselves. */
@@ -110,6 +114,18 @@ internal class RowContent(
                     }
                 }
             }
+            // ProfilesTableModel ServiceItemsRole: the stored check's icons beside the exit IP, the last item, as the
+            // group shows them
+            val checks = if (brief || phase == RowPhase.TESTING || !adapter.showServices) {
+                emptyList<ServiceResults.Check>()
+            } else {
+                ServiceResults.shown(profile.serviceChecks)
+            }
+            if (checks.isNotEmpty()) {
+                if (result.isNotEmpty()) result.append(GAP)
+                result.append(ServiceResults.iconStrip(context, checks))
+                description = listOfNotNull(description, ServiceResults.spoken(context, checks)).joinToString(", ")
+            }
             val error = if (phase == null) profile.testError?.takeIf { it.isNotBlank() } else null
             return RowContent(
                 result = result,
@@ -120,6 +136,7 @@ internal class RowContent(
                 trafficDescription = if (showTraffic) context.getString(R.string.profile_row_traffic, up, down) else null,
                 address = address,
                 error = error,
+                services = checks.isNotEmpty(),
                 brief = brief,
             )
         }
@@ -252,6 +269,9 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
     /** The bound profile, null while [placeholder] or before the first bind. */
     val boundProfile: ProxyEntity? get() = if (placeholder || !::profile.isInitialized) null else profile
 
+    /** [RowContent.services] of the last bind: a tap on the result opens the service check, not the error. */
+    private var resultShowsServices = false
+
     /** The optional rows of the last bind ([RowContent.rows]), null before the first. */
     var boundRows: Int? = null
         private set
@@ -281,7 +301,14 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
             val text = boundProfile?.testError
             if (!text.isNullOrBlank()) it.context.alert(text).tryToShow()
         }
-        result.setOnClickListener(showError)
+        result.setOnClickListener {
+            val profile = boundProfile ?: return@setOnClickListener
+            if (resultShowsServices) {
+                ServiceCheckDialog.show(it.context, profile.displayName(), profile.serviceChecks)
+            } else {
+                showError.onClick(it)
+            }
+        }
         error.setOnClickListener(showError)
         result.isFocusable = false
         view.findViewById<ImageView>(R.id.shareIcon).setColorFilter(Color.GRAY)
@@ -314,7 +341,8 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
         traffic.isVisible = content.traffic.isNotEmpty()
         error.text = content.error?.let(Protocols::genFriendlyMsg)
         error.maxLines = if (adapter.isCompact) 1 else 2
-        result.isClickable = content.error != null
+        resultShowsServices = content.services
+        result.isClickable = content.error != null || content.services
         error.isClickable = content.error != null
 
         val rows = content.rows

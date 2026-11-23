@@ -64,6 +64,11 @@ class RouteRule {
     @JvmField var type: Int = RuleType.CUSTOM.id
     /** Kept in the profile but left out of the generated config. */
     @JvmField var disabled: Boolean = false
+    /**
+     * Came from the profile's remote source, so the next update replaces it (RouteRule.h). Local state, never shared;
+     * stored as the profile's `remote_rules`.
+     */
+    @JvmField var remote: Boolean = false
     @JvmField var ip_version: String = ""
     @JvmField var network: String = ""
     @JvmField var protocol: String = ""
@@ -114,6 +119,7 @@ class RouteRule {
         c.name = name
         c.type = type
         c.disabled = disabled
+        c.remote = remote
         for (f in STRING_FIELDS) f.set(c, f.get(this))
         for (f in LIST_FIELDS) f.set(c, ArrayList(f.get(this)))
         for (f in BOOL_FIELDS) f.set(c, f.get(this))
@@ -454,6 +460,24 @@ class RouteRule {
         return out
     }
 
+    /**
+     * RuleProblems (RouteEditorCommon.cpp), what the editors check: [validate], plus an error for an enabled custom
+     * rule that has no conditions yet ends the match (anything but sniff, resolve and route-options), while a disabled
+     * rule only warns.
+     */
+    @JvmOverloads
+    fun editorIssues(env: RuleEnv = RuleEnv()): List<RuleIssue> {
+        val catchAll = type == RuleType.CUSTOM.id && effectiveAction() !in NON_FINAL_ACTIONS && !hasMatchConditions()
+        val out = ArrayList<RuleIssue>()
+        for (issue in validate(env)) {
+            // The error below replaces validate's own catch-all warning.
+            if (catchAll && issue.attr == "action" && issue.severity == Severity.Warning && issue.related.isEmpty()) continue
+            out.add(if (disabled) issue.copy(severity = Severity.Warning) else issue)
+        }
+        if (catchAll && !disabled) out.add(0, RuleIssue(Severity.Error, "action", vtr(R.string.validation_route_catch_all)))
+        return out
+    }
+
     private fun putStrings(obj: JsonObject, key: String, list: List<String>) {
         val arr = JsonArray()
         for (item in list) {
@@ -500,6 +524,9 @@ class RouteRule {
 
         /** sing-box's network_type values (constant/network.go). */
         val NETWORK_TYPES = listOf("wifi", "cellular", "ethernet", "other")
+
+        /** The actions after which matching goes on with the next rule. */
+        private val NON_FINAL_ACTIONS = setOf("sniff", "resolve", "route-options")
 
         /** Rule JSON keys that configure the action rather than narrow the match. */
         private val ACTION_KEYS = setOf(

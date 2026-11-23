@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.preference.PreferenceDataStore
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,11 +18,14 @@ import io.nekohasekai.sagernet.database.ProfileName
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.SagerDatabase
+import io.nekohasekai.sagernet.database.SettingsRegistry
+import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.ktx.FixedGridLayoutManager
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
 import io.nekohasekai.sagernet.ui.test.RowPhase
+import io.nekohasekai.sagernet.ui.test.ServiceResults
 import io.nekohasekai.sagernet.ui.test.TestUiState
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
 import kotlinx.coroutines.Dispatchers
@@ -72,8 +76,18 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         private const val AUTO_SELECTOR = "autoselector"
     }
 
-    /** What the filter matches a row against: its [ProxyEntity.searchText] while its type and JSON stay the same. */
-    private class SearchKey(val type: String, val jsonLength: Int, val jsonHash: Int, val text: String)
+    /**
+     * What the filter matches a row against: its [ProxyEntity.searchText] while its type and JSON stay the same, and
+     * its test words' [ProfileTestFilter.Key] while its test country and service checks do ([testHash]).
+     */
+    private class SearchKey(
+        val type: String,
+        val jsonLength: Int,
+        val jsonHash: Int,
+        val text: String,
+        val testHash: Int,
+        val test: ProfileTestFilter.Key,
+    )
 
     val groupId = fragment.groupId
     val host: ConfigurationFragment? get() = fragment.host
@@ -90,6 +104,9 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
     var group: ProxyGroup? = null
         private set
     val testItemsToShow: Int get() = group?.testItemsToShow ?: 0
+
+    /** groups.show_services: the rows' service icons. */
+    val showServices: Boolean get() = group?.showServices ?: true
 
     /** The group's order as stored. */
     var memberIds: List<Long> = emptyList()
@@ -213,6 +230,28 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         holder.onRecycled()
     }
 
+    /** Services turned off leave the rows' icons and the test words. */
+    private val serviceSettingListener = object : OnPreferenceDataStoreChangeListener {
+        override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
+            if (key != SettingsRegistry.SERVICE_CHECK_DISABLED.key) return
+            ServiceResults.invalidateDisabled()
+            fragment.onMain {
+                notifyAllContent()
+                if (isFiltered) refilter(0L)
+            }
+        }
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        DataStore.configurationStore.registerChangeListener(serviceSettingListener)
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        DataStore.configurationStore.unregisterChangeListener(serviceSettingListener)
+        super.onDetachedFromRecyclerView(recyclerView)
+    }
+
     override fun onViewAttachedToWindow(holder: ProfileRowHolder) {
         super.onViewAttachedToWindow(holder)
         val profile = cache[holder.itemId] ?: return
@@ -317,7 +356,9 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
 
     /** [rows] are the re-read loaded rows; with [onlyRead] the others are dropped, their data is unknown now. */
     private fun apply(newGroup: ProxyGroup, names: List<ProfileName>, rows: List<ProxyEntity>, onlyRead: Boolean) {
-        val displayChanged = group?.let { it.testItemsToShow != newGroup.testItemsToShow } == true
+        val displayChanged = group?.let {
+            it.testItemsToShow != newGroup.testItemsToShow || it.showServices != newGroup.showServices
+        } == true
         group = newGroup
         val oldPinned = pinned
         pinned = newGroup.pinned.toHashSet()
@@ -425,8 +466,9 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
 
     /**
      * Matches [query] against every row on a background thread after [delayMs] and publishes the result; an empty
-     * query applies at once. A row matches when its display name, type or address contains the query. The rows are
-     * read again after each reload, but only those whose outbound changed are parsed again.
+     * query applies at once. A row matches when its display name, type or address contains the query, or by its test
+     * words ([ProfileTestFilter]). The rows are read again after each reload, but only those whose outbound changed
+     * are parsed again, and only those whose test results changed have their test words read again.
      */
     private fun refilter(delayMs: Long) {
         val previous = filterJob
@@ -456,15 +498,38 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
                                 val json = row.outboundJson
                                 val known = searchIndex[row.id]
                                 // an auto selector shows its tracked groups' current names, which its JSON does not hold
-                                if (row.type != AUTO_SELECTOR && known != null && known.type == row.type &&
+                                val sameText = row.type != AUTO_SELECTOR && known != null && known.type == row.type &&
                                     known.jsonLength == json.length && known.jsonHash == json.hashCode()
-                                ) continue
-                                searchIndex[row.id] = SearchKey(row.type, json.length, json.hashCode(), row.searchText())
+                                val testHash = 31 * row.testCountry.hashCode() + row.serviceChecks.hashCode()
+                                val sameTest = known != null && known.testHash == testHash
+                                if (sameText && sameTest) continue
+                                searchIndex[row.id] = SearchKey(
+                                    row.type, json.length, json.hashCode(),
+                                    if (sameText) known!!.text else row.searchText(),
+                                    testHash,
+                                    if (sameTest) known!!.test else ProfileTestFilter.keyOf(row),
+                                )
                             }
                         }
                         if (searchIndex.size > members.size) searchIndex.keys.retainAll(members.toHashSet())
                     }
-                    members.filterTo(HashSet()) { id -> searchIndex[id]?.text?.contains(filter) == true }
+                    val tests = ProfileTestFilter(filter)
+                    val disabled = ServiceResults.disabled
+                    // ProfilesTableModel::termPicksAnyService over the group's rows
+                    val anyService = HashMap<String, Boolean>()
+                    val picksAny = { term: String ->
+                        anyService.getOrPut(term) {
+                            members.any { id ->
+                                searchIndex[id]?.test?.services?.any {
+                                    it.id !in disabled && ProfileTestFilter.picks(it.names, it.words, term)
+                                } == true
+                            }
+                        }
+                    }
+                    members.filterTo(HashSet()) { id ->
+                        val key = searchIndex[id] ?: return@filterTo false
+                        key.text.contains(filter) || tests.matches(key.text, key.test, disabled, picksAny)
+                    }
                 }
             } catch (e: IOException) {
                 Logs.w(e)
@@ -577,17 +642,19 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         scope.launch(Dispatchers.Main.immediate) {
             val fresh = withContext(Dispatchers.IO) { ProfileManager.getProfiles(loadedIds) }
             if (dragging) return@launch
-            var outboundChanged = false
+            var searchChanged = false
             for (entity in fresh) {
                 val old = cache[entity.id] ?: continue
                 if (entity.groupId != groupId) continue
                 withLiveTraffic(entity)
                 if (old == entity) continue
                 cache[entity.id] = entity
-                if (old.type != entity.type || old.outboundJson != entity.outboundJson) outboundChanged = true
+                if (old.type != entity.type || old.outboundJson != entity.outboundJson ||
+                    old.testCountry != entity.testCountry || old.serviceChecks != entity.serviceChecks
+                ) searchChanged = true
                 notifyId(entity.id, PAYLOAD_CONTENT)
             }
-            if (outboundChanged && isFiltered) {
+            if (searchChanged && isFiltered) {
                 indexedGeneration = -1
                 refilter(0L)
             }
@@ -827,7 +894,8 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
     override suspend fun groupUpdated(group: ProxyGroup) {
         if (group.id != groupId) return
         fragment.onMain {
-            val displayChanged = this.group?.testItemsToShow != group.testItemsToShow
+            val displayChanged = this.group?.testItemsToShow != group.testItemsToShow ||
+                this.group?.showServices != group.showServices
             val pinsChanged = this.group?.pinnedJson != group.pinnedJson
             this.group = group
             if (displayChanged) notifyAllContent()

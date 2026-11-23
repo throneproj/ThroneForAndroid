@@ -63,6 +63,8 @@ data class ProxyGroup(
      * so [GroupRepo.save] keeps the stored value.
      */
     @ColumnInfo(name = "pinned_json", defaultValue = "[]") var pinnedJson: String = "[]",
+    /** Group::show_services: the rows show the service checks' results (1c4d920a). */
+    @ColumnInfo(name = "show_services", defaultValue = "1") var showServices: Boolean = true,
 ) : Parcelable {
 
     @get:Ignore
@@ -186,6 +188,13 @@ data class ProxyGroup(
 
         @Query("SELECT `id` FROM `groups` WHERE `pinned_json` != '[]'")
         fun idsWithPins(): List<Long>
+
+        /** ClearHopReferences, only while the front proxy is still [profileId]; 0 when nothing changed. */
+        @Query("UPDATE `groups` SET `front_proxy_id` = -1 WHERE `id` = :groupId AND `front_proxy_id` = :profileId")
+        fun clearFrontProxy(groupId: Long, profileId: Long): Int
+
+        @Query("UPDATE `groups` SET `landing_proxy_id` = -1 WHERE `id` = :groupId AND `landing_proxy_id` = :profileId")
+        fun clearLandingProxy(groupId: Long, profileId: Long): Int
 
         /** The group's profiles go by the foreign key cascade. */
         @Query("DELETE FROM `groups` WHERE `id` = :groupId")

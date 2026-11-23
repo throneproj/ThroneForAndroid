@@ -18,32 +18,35 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.widget.AlertDialogFragment
 import io.nekohasekai.sagernet.widget.Empty
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.QuickToggleShortcut
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.ProfileManager
+import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.SettingsMapper
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
+import io.nekohasekai.sagernet.group.SubscriptionClient
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
-import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
 import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.ui.ThemedActivity
 import io.nekohasekai.sagernet.ui.ValidationForm
 import io.nekohasekai.sagernet.ui.json.JsonEditorActivity
 import io.nekohasekai.sagernet.ui.json.ProfileJson
+import io.nekohasekai.sagernet.ui.profiles.SelectionMode
 import io.nekohasekai.sagernet.validation.Issue
 import io.nekohasekai.sagernet.widget.ListListener
 import kotlinx.parcelize.Parcelize
@@ -72,11 +75,11 @@ abstract class ProfileSettingsActivity<T : Outbound>(
     }
 
     @Parcelize
-    data class ProfileIdArg(val profileId: Long, val groupId: Long, val name: String) : Parcelable
+    data class ProfileIdArg(val profileId: Long, val groupId: Long, val name: String, val warning: String = "") : Parcelable
     class DeleteConfirmationDialogFragment : AlertDialogFragment<ProfileIdArg, Empty>() {
         override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
             setTitle(resources.getQuantityString(R.plurals.confirm_remove_profiles, 1, 1))
-            setMessage(arg.name)
+            setMessage(arg.name + arg.warning)
             setPositiveButton(R.string.delete) { _, _ ->
                 runOnDefaultDispatcher {
                     ProfileManager.deleteProfile(arg.groupId, arg.profileId)
@@ -243,6 +246,12 @@ abstract class ProfileSettingsActivity<T : Outbound>(
                 finish()
                 return
             }
+            // DialogEditProfile::accept: the stored test results describe the old server. Parsed afresh, as the
+            // edited outbound is the entity's cached one.
+            val stored = ProxyEntity.parseOutbound(entity.type, entity.outboundJson)
+            if (stored.getAddress() != outbound.getAddress() || stored.getPort() != outbound.getPort()) {
+                ProfileManager.clearTestResults(listOf(entity.id))
+            }
             // dialog_edit_profile.cpp:947-951: saving a profile the running config uses asks for a restart.
             if (ProfileManager.updateOutbound(entity.putOutbound(outbound)) && ProfileManager.runningUses(entity.id)) {
                 setResult(RESULT_OK, Intent().putExtra(EXTRA_RESTART_NEEDED, true))
@@ -307,9 +316,9 @@ abstract class ProfileSettingsActivity<T : Outbound>(
         menu.findItem(R.id.action_delete)?.isVisible =
             DataStore.editingId == 0L || ProfileManager.runningProfileId() != DataStore.editingId
         menu.findItem(R.id.action_move)?.apply {
+            // The picker always offers "New group".
             if (DataStore.editingId != 0L // not new profile
                 && SagerDatabase.groupDao.getById(DataStore.editingGroup)?.isSubscription == false
-                && SagerDatabase.groupDao.allGroups().count { !it.isSubscription } > 1 // have other basic group
             ) isVisible = true
         }
         menu.findItem(R.id.action_create_shortcut)?.apply {
@@ -402,8 +411,9 @@ abstract class ProfileSettingsActivity<T : Outbound>(
                     requireActivity().finish()
                 } else {
                     val name = activity?.proxyEntity?.displayName().orEmpty()
+                    val warning = GroupRepo.hopWarning(listOf(DataStore.editingId))
                     DeleteConfirmationDialogFragment().apply {
-                        arg(ProfileIdArg(DataStore.editingId, DataStore.editingGroup, name))
+                        arg(ProfileIdArg(DataStore.editingId, DataStore.editingGroup, name, warning))
                         key()
                     }.show(parentFragmentManager, null)
                 }
@@ -442,22 +452,19 @@ abstract class ProfileSettingsActivity<T : Outbound>(
             R.id.action_move -> {
                 val activity = requireActivity() as ProfileSettingsActivity<*>
                 val ent = activity.proxyEntity!!
-                val targets = SagerDatabase.groupDao.allGroups()
-                    .filter { !it.isSubscription && it.id != ent.groupId }
-                MaterialAlertDialogBuilder(activity)
-                    .setTitle(R.string.profiles_move_to_group)
-                    .setItems(targets.map { it.displayName() }.toTypedArray()) { _, which ->
-                        val newGroupId = targets[which].id
-                        runOnDefaultDispatcher {
-                            ProfileManager.moveToGroup(listOf(ent.id), newGroupId)
-                            DataStore.editingGroup = newGroupId // post switch animation
-                            runOnMainDispatcher {
-                                activity.finish()
-                            }
+                val groups = SagerDatabase.groupDao.allGroups()
+                SelectionMode.pickMoveTarget(activity, activity.lifecycleScope, groups, ent.groupId) { target, created ->
+                    val refusal = ProfileManager.moveToGroup(listOf(ent.id), target.id, SubscriptionClient.states.value.keys).refusal
+                    if (refusal == null) DataStore.editingGroup = target.id // post switch animation
+                    onMainDispatcher {
+                        if (refusal == null) {
+                            if (created) SelectionMode.editGroup(activity, target)
+                            activity.finish()
+                        } else {
+                            Toast.makeText(activity, SubscriptionClient.refusalText(refusal, move = true), Toast.LENGTH_LONG).show()
                         }
                     }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show()
+                }
                 true
             }
 

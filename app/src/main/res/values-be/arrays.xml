@@ -40,22 +40,14 @@
         <item>3</item>
     </string-array>
 
-    <string-array name="int_array_5">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-    </string-array>
-
     <string-array name="app_tls_version">
         <item>1.2</item>
         <item>1.3</item>
     </string-array>
 
     <string-array name="autosel_balance_modes">
-        <item>Чаргаванне па таймеры (трымае сесіі стабільнымі)</item>
-        <item>Для кожнага злучэння (найшырэйшае размеркаванне)</item>
+        <item>Чаргаванне кожныя 30 с</item>
+        <item>Для кожнага злучэння</item>
     </string-array>
 
     <string-array name="congestion_control_entry">
@@ -239,7 +231,6 @@
         <item>@string/speed_test_mode_download</item>
         <item>@string/speed_test_mode_upload</item>
         <item>@string/speed_test_mode_simple_download</item>
-        <item>@string/speed_test_mode_country</item>
     </string-array>
 
     <string-array name="ss_enc_method_value">

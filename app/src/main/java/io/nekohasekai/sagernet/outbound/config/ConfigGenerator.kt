@@ -87,7 +87,7 @@ class ConfigGenerator @JvmOverloads constructor(
             ?: return GeneratedConfig.failure("Routing profile does not exist, try resetting the route profile in Routing Settings")
 
         val state = BuildState(forTest = false, ports)
-        val chains = ChainBuilder(reads, buildContext, state, if (settings.enableWarp) WarpHop.outbound(settings) else null)
+        val chains = ChainBuilder(reads, buildContext, state, ExitHop.outbound(settings))
         // One plan serves the Xray decision and the build (the desktop plans twice, :446-452 and :1631): the started
         // selector's, or that of a chain's selector hop.
         val selectorHop = if (profile.type == "chain") chains.selectorHop(profile) else null
@@ -144,8 +144,9 @@ class ConfigGenerator @JvmOverloads constructor(
     private fun outboundNames(state: BuildState, profile: Outbound): Map<String, String> {
         val names = LinkedHashMap<String, String>()
         state.autoSelector?.members?.forEach { (tag, id) -> profiles.get(id)?.let { names[tag] = it.displayName() } }
-        names[if (settings.enableWarp) Tags.WARP_BYPASS else Tags.PROXY] = profile.displayName()
-        if (settings.enableWarp) names[Tags.PROXY] = "WARP"
+        val exitWraps = ExitHop.wraps(settings)
+        names[if (exitWraps) Tags.WARP_BYPASS else Tags.PROXY] = profile.displayName()
+        if (exitWraps) names[Tags.PROXY] = ExitHop.name(settings)
         for ((id, tag) in state.prerequisites.outboundMap) {
             if (id < 0) continue
             profiles.get(id)?.let { names[tag] = it.displayName() }
@@ -164,21 +165,22 @@ class ConfigGenerator @JvmOverloads constructor(
     }
 
     /**
-     * calculatePrerequisites (:542-745) minus auxiliary endpoints, the DNS-server hijack and extra cores: the WARP
-     * identity check, the Xray decision, the route outbounds, the rule-sets, the DNS site lists and the tun exclusions.
+     * calculatePrerequisites (:542-745) minus auxiliary endpoints, the DNS-server hijack and extra cores: the exit
+     * check, the Xray decision, the route outbounds, the rule-sets, the DNS site lists and the tun exclusions.
      */
     private fun calculatePrerequisites(
         state: BuildState, chains: ChainBuilder, reads: ProfileProvider, profile: Outbound, route: RouteProfile,
         landingProxyId: Long, frontProxyId: Long, plan: AutoSelectorPlan?,
     ) {
         val pre = state.prerequisites
-        if (settings.enableWarp && WarpHop.missing(settings)) {
-            state.error = WarpHop.MISSING_ERROR
+        val exitRefusal = ExitHop.error(settings, reads, profile, landingProxyId)
+        if (exitRefusal.isNotEmpty()) {
+            state.error = exitRefusal
             return
         }
         pre.outboundMap[OutboundIds.PROXY] = Tags.PROXY
         pre.outboundMap[OutboundIds.DIRECT] = Tags.DIRECT
-        pre.outboundMap[OutboundIds.WARP_BYPASS] = if (settings.enableWarp) Tags.WARP_BYPASS else Tags.PROXY
+        pre.outboundMap[OutboundIds.WARP_BYPASS] = if (ExitHop.wraps(settings)) Tags.WARP_BYPASS else Tags.PROXY
         state.proxyUsesXray = chains.proxyPathUsesXray(profile, plan?.build ?: emptyList())
 
         // Route outbounds (:580-618), each profile once (D12): a chain takes as many suffixes as it has hops.
@@ -474,14 +476,21 @@ class ConfigGenerator @JvmOverloads constructor(
         val resolved = candidates.distinctBy { it.id }.map { it to profiles.get(it.id) }
         var xrayCount = 0
         var chainCount = 0
-        for ((_, outbound) in resolved) {
+        var fullConfigCount = 0
+        fun frontIsXrayFullConfig(candidate: TestCandidate): Boolean =
+            candidate.frontProxyId > 0 && profiles.get(candidate.frontProxyId)?.isXrayFullConfig() == true
+        for ((candidate, outbound) in resolved) {
             if (outbound == null) continue
             if (outbound.isXray()) xrayCount++
             if (outbound.type == "chain") chainCount++
+            if (outbound.isXrayFullConfig() || frontIsXrayFullConfig(candidate)) fullConfigCount++
         }
         // Reserved in one batch so no two candidates collide; every chain is assumed to transition twice (:2553-2554).
-        val xrayPorts = ports.reserve(xrayCount + 2 * chainCount)
+        val xrayPorts = ports.reserve(xrayCount + 2 * chainCount + fullConfigCount)
         var xrayPortIdx = 0
+        // Every drained full config takes one too: they run side by side.
+        var fullConfigPortIdx = xrayCount + 2 * chainCount
+        fun takeFullConfigPort(): Int = if (fullConfigPortIdx < xrayPorts.size) xrayPorts[fullConfigPortIdx++] else -1
         var suffix = 1
 
         for ((candidate, outbound) in resolved) {
@@ -507,7 +516,9 @@ class ConfigGenerator @JvmOverloads constructor(
                 }
                 // The single xrayConfig slot is drained per full config so they all share one sing-box.
                 val mark = ChainBuildMark(state)
-                val tag = chains.buildOutboundChain(ChainRequest(listOf(id), prefix = "${Tags.TEST_XRAY_FULL_PREFIX}-$id"))
+                val tag = chains.buildOutboundChain(
+                    ChainRequest(listOf(id), prefix = "${Tags.TEST_XRAY_FULL_PREFIX}-$id", xrayFullConfigPort = takeFullConfigPort()),
+                )
                 if (state.failed) {
                     if (!options.validate) return GeneratedConfig.failure(state.error)
                     skipped[id] = state.error
@@ -554,7 +565,8 @@ class ConfigGenerator @JvmOverloads constructor(
             val tag = chains.buildOutboundChain(
                 ChainRequest(
                     hopIds, options.chainPrefix?.let { hopTag(it, suffix) } ?: "${Tags.TEST_CHAIN_PREFIX}-$id",
-                    singToXrayPort = singToXrayPort, xrayToSingPort = xrayToSingPort, origin = origin,
+                    singToXrayPort = singToXrayPort, xrayToSingPort = xrayToSingPort,
+                    xrayFullConfigPort = if (frontIsXrayFullConfig(candidate)) takeFullConfigPort() else -1, origin = origin,
                 ),
             )
             // skipFailedBuild (generate.cpp): a profile whose chain fails halfway is reported failed; the rest still test.
@@ -564,6 +576,12 @@ class ConfigGenerator @JvmOverloads constructor(
                 mark.rollback()
                 suffix++
                 continue
+            }
+            // A custom Xray config as the group's front proxy ends this chain; it runs in its own instance like a full config candidate.
+            if (state.xrayConfig.isNotEmpty()) {
+                xrayFullConfigs.add(state.xrayConfig.toCompact())
+                state.xrayConfig = JsonObject()
+                state.isXrayNeeded = false
             }
             outboundTags.add(tag)
             tagToProfileId[tag] = id
@@ -742,23 +760,23 @@ class ConfigGenerator @JvmOverloads constructor(
     }
 
     /**
-     * buildOutboundsSection (:1795-1911): the main chain (WARP in front of it with enable_warp), the auto-selector
-     * group, or a chain built around its auto-selector hop ([selectorHop], planned by [plan]), one chain per route
-     * outbound, then bridges and `direct`. [origin] names a deleted hop of the main and route chains.
+     * buildOutboundsSection (:1795-1911): the main chain (the exit, WARP or Psiphon, in front of it while one is on),
+     * the auto-selector group, or a chain built around its auto-selector hop ([selectorHop], planned by [plan]), one
+     * chain per route outbound, then bridges and `direct`. [origin] names a deleted hop of the main and route chains.
      */
     private fun buildOutboundsSection(
         state: BuildState, chains: ChainBuilder, reads: ProfileProvider, profile: Outbound, profileId: Long,
         landingProxyId: Long, frontProxyId: Long, plan: AutoSelectorPlan?, selectorHop: Pair<Long, AutoSelector>?,
         origin: HopOrigin,
     ) {
-        val warpWrap = settings.enableWarp
+        val warpWrap = ExitHop.wraps(settings)
         if (profile is AutoSelector && plan != null) {
-            // With WARP in front every member sits behind the single `proxy`-tagged WARP outbound, so the group takes warp-bypass.
+            // With an exit in front every member sits behind the single `proxy`-tagged exit outbound, so the group takes warp-bypass.
             val request = SelectorGroupRequest(if (warpWrap) Tags.WARP_BYPASS else Tags.PROXY, landsOnProxy = warpWrap)
             buildAutoSelectorGroup(state, chains, reads, profile, profileId, plan, request)
             if (state.failed) return
             if (warpWrap) {
-                buildWarpInFrontOfSelector(state)
+                buildExitInFrontOfSelector(state)
                 if (state.failed) return
             }
         } else if (selectorHop != null && plan != null) {
@@ -982,9 +1000,9 @@ class ConfigGenerator @JvmOverloads constructor(
             members[tag] = member.id
             if (member.id == selector.pinnedID) pinnedTag = tag
             // A direct result does not describe a member reached through the upstream.
-            if (!viaUpstream && member.latency != 0 && member.latencyAt > 0 && selector.resultValidityMins > 0) {
+            if (!viaUpstream && member.latency != 0 && member.latencyAt > 0) {
                 val age = builtAt - member.latencyAt
-                if (age >= 0 && age <= selector.resultValidityMins.toLong() * 60) {
+                if (age >= 0 && age <= AutoSelectorPlanner.resultValiditySecs(member.latency)) {
                     // rtt 0 is how the core reads "known bad" rather than "never measured".
                     warm.add(jsonObjectOf("tag" to tag, "rtt" to (if (member.latency > 0) member.latency else 0), "age" to age))
                 }
@@ -1001,13 +1019,13 @@ class ConfigGenerator @JvmOverloads constructor(
             "outbounds" to memberTags,
             "url" to selector.testURL.ifEmpty { settings.testUrl },
             "interval" to "${selector.intervalSec}s",
-            "bench_interval" to "${selector.benchIntervalSec}s",
+            "bench_interval" to "${selector.benchIntervalSec(memberTags.size)}s",
             "watch_interval" to "${selector.watchIntervalSec}s",
             "active_size" to selector.activeSize,
-            "sampling" to selector.sampling,
+            "sampling" to AutoSelector.SAMPLING,
             "tolerance" to selector.toleranceMs,
             "expected" to selector.expected,
-            "dial_retries" to selector.dialRetries,
+            "dial_retries" to AutoSelector.DIAL_RETRIES,
             "interrupt_exist_connections" to selector.interruptOnSwitch,
         )
         if (warm.isNotEmpty()) group["warm"] = warm
@@ -1020,17 +1038,16 @@ class ConfigGenerator @JvmOverloads constructor(
         if (selector.balance) {
             group["balance"] = true
             group["balance_mode"] = selector.balanceMode
-            group["balance_interval"] = "${selector.balanceIntervalSec}s"
+            group["balance_interval"] = "${AutoSelector.BALANCE_INTERVAL_SEC}s"
         }
         if (selector.prioritized) {
             group["strategy"] = AutoSelector.STRATEGY_PRIORITY
             group["tiers"] = JsonArray().also { tiers -> tierTags.forEach { tiers.add(it) } }
-            group["failback_checks"] = selector.failbackChecks
-            group["failback_delay"] = "${selector.failbackDelaySec}s"
-            if (selector.failbackInterrupt) group["failback_interrupt"] = true
+            group["failback_checks"] = AutoSelector.FAILBACK_CHECKS
+            group["failback_delay"] = "${AutoSelector.FAILBACK_DELAY_SEC}s"
         }
         if (selector.passive) {
-            group["passive"] = jsonObjectOf("enabled" to true, "site_memory" to "${selector.siteMemoryMins}m")
+            group["passive"] = jsonObjectOf("enabled" to true, "site_memory" to "${AutoSelector.SITE_MEMORY_MINS}m")
         }
         state.outbounds.add(group)
         state.autoSelector = AutoSelectorBuild(
@@ -1064,10 +1081,10 @@ class ConfigGenerator @JvmOverloads constructor(
         return rejected
     }
 
-    /** buildWarpInFrontOfSelector (:1779-1792): the group holds warp-bypass, so WARP is `proxy` dialing through it. */
-    private fun buildWarpInFrontOfSelector(state: BuildState) {
-        val warp = WarpHop.outbound(settings)
-        val result = warp.buildChecked(buildContext)
+    /** buildExitInFrontOfSelector (generate_outbounds.cpp): the group holds warp-bypass, so the exit is `proxy` dialing through it. */
+    private fun buildExitInFrontOfSelector(state: BuildState) {
+        val exit = ExitHop.outbound(settings) ?: return
+        val result = exit.buildChecked(buildContext)
         if (!result.ok) {
             state.error += result.error
             return
@@ -1075,7 +1092,7 @@ class ConfigGenerator @JvmOverloads constructor(
         val obj = result.json
         obj["tag"] = Tags.PROXY
         obj["detour"] = Tags.WARP_BYPASS
-        if (warp.isEndpoint()) state.endpoints.add(obj) else state.outbounds.add(obj)
+        if (exit.isEndpoint()) state.endpoints.add(obj) else state.outbounds.add(obj)
     }
 
     /**
@@ -1397,7 +1414,7 @@ class ConfigGenerator @JvmOverloads constructor(
         routeObj["rule_set"] = buildRuleSetArray(state)
         routeObj["final"] = when (defaultOutbound) {
             OutboundIds.BLOCK -> Tags.DIRECT
-            OutboundIds.WARP_BYPASS -> if (settings.enableWarp) Tags.WARP_BYPASS else Tags.PROXY
+            OutboundIds.WARP_BYPASS -> if (ExitHop.wraps(settings)) Tags.WARP_BYPASS else Tags.PROXY
             else -> OutboundIds.toName(defaultOutbound)
         }
         if (settings.trafficStats) routeObj["find_process"] = true
@@ -1551,6 +1568,11 @@ class ConfigGenerator @JvmOverloads constructor(
             inbounds.add(xraySocksInbound(inboundTag, state.singToXrayBridges[i]))
             routeRules.add(jsonObjectOf("type" to "field", "inboundTag" to JsonArray.of(inboundTag), "outboundTag" to outboundTag))
         }
+        // Only a custom Xray full config that ended a chain can already be in the slot.
+        if (state.xrayConfig.isNotEmpty()) {
+            mergeIntoXrayFullConfig(state, inbounds, routeRules)
+            return
+        }
         state.xrayConfig["log"] = jsonObjectOf(
             "loglevel" to settings.xrayLogLevel,
             "access" to if (settings.xrayLogLevel == "info") "" else "none",
@@ -1558,6 +1580,54 @@ class ConfigGenerator @JvmOverloads constructor(
         state.xrayConfig["inbounds"] = inbounds
         state.xrayConfig["outbounds"] = state.xrayOutbounds
         state.xrayConfig["routing"] = jsonObjectOf("domainStrategy" to "AsIs", "rules" to routeRules)
+    }
+
+    /**
+     * mergeIntoXrayFullConfig (generate_xray.cpp): the user's first outbound stays the default, and the bridge rules go
+     * first so no user rule takes their traffic. The user's log and other keys are kept.
+     */
+    private fun mergeIntoXrayFullConfig(state: BuildState, inbounds: JsonArray, routeRules: JsonArray) {
+        val config = state.xrayConfig
+        val userInbounds = config.array("inbounds")
+        val userOutbounds = config.array("outbounds")
+        fun clash(generated: JsonArray, user: JsonArray): String {
+            val userTags = user.mapTo(HashSet<String>()) { (it as? JsonObject)?.string("tag").orEmpty() }
+            return generated.firstNotNullOfOrNull { item -> (item as? JsonObject)?.string("tag")?.takeIf { it in userTags } }.orEmpty()
+        }
+        for (tag in listOf(clash(inbounds, userInbounds), clash(state.xrayOutbounds, userOutbounds))) {
+            if (tag.isEmpty()) continue
+            state.error = vtr(R.string.xray_full_config_tag_clash, tag)
+            return
+        }
+        val selectors = xrayTagSelectors(config)
+        for (item in state.xrayOutbounds) {
+            val tag = (item as? JsonObject)?.string("tag").orEmpty()
+            val selector = selectors.firstOrNull { tag.startsWith(it) } ?: continue
+            state.error = vtr(R.string.xray_full_config_selector_clash, selector, tag)
+            return
+        }
+        for (item in inbounds) userInbounds.add(item)
+        for (item in state.xrayOutbounds) userOutbounds.add(item)
+        val routing = if (config.contains("routing")) config.obj("routing") else jsonObjectOf("domainStrategy" to "AsIs")
+        val rules = routeRules.copy()
+        for (rule in routing.array("rules")) rules.add(rule)
+        routing["rules"] = rules
+        config["inbounds"] = userInbounds
+        config["outbounds"] = userOutbounds
+        config["routing"] = routing
+    }
+
+    /** xrayTagSelectors (generate_xray.cpp): Xray picks these outbounds by tag prefix; a balancer's selector may also be one comma-separated string. */
+    private fun xrayTagSelectors(config: JsonObject): List<String> {
+        val selectors = ArrayList<String>()
+        fun collect(value: Any?) {
+            if (value is String) selectors.addAll(value.split(','))
+            if (value is JsonArray) for (item in value) if (item is String) selectors.add(item)
+        }
+        for (balancer in config.obj("routing").array("balancers")) collect((balancer as? JsonObject)?.get("selector"))
+        collect(config.obj("observatory")["subjectSelector"])
+        collect(config.obj("burstObservatory")["subjectSelector"])
+        return selectors
     }
 
     /** The first IPv4 tun address of a custom full config (:2316-2331). */

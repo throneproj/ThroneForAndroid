@@ -51,9 +51,9 @@
     <string name="connection_test_testing">اختبارات…</string>
     <string name="speed">%s/s</string>
     <string name="speed_detail">بروکسی:
-\n\t%1$s↑ %2$s↓
+\n\t↓%2$s ↑%1$s
 \nمباشر:
-\n\t%3$s↑ %4$s↓</string>
+\n\t↓%4$s ↑%3$s</string>
     <string name="allow_insecure_sum">تعطيل فحص الشهادة. عند التمكين ، يكون هذا التكوين آمنًا مثل النص العادي</string>
     <string name="allow_insecure">السماح بعدم الأمان</string>
     <string name="security_settings">اعدادات الامان</string>
@@ -312,8 +312,6 @@
     <string name="auto_select_proxy_apps_message">سيُستبدل اختيارك الحالي.</string>
     <string name="auto_update_interval">فترة التحديث</string>
     <string name="auto_update_interval_sum">%d دقيقة</string>
-    <string name="autosel_active_size">فحص دقيق</string>
-    <string name="autosel_active_size_tip">تُعاد معايرة الملفات الأعلى تصنيفًا في كل فترة. تُفحص البقية أيضًا، لكن موزعة على المسح الشامل الأبطأ.</string>
     <string name="autosel_advanced">متقدم</string>
     <string name="autosel_advanced_hide">إخفاء الخيارات المتقدمة</string>
     <string name="autosel_advanced_show">كل ما هنا له افتراضي يعمل. افتحه فقط إذا أردت ضبط طريقة قياس المنتقي والتبديل.</string>
@@ -321,18 +319,13 @@
     <string name="autosel_ago_hours">قبل %d ساعة</string>
     <string name="autosel_ago_minutes">قبل %d دقيقة</string>
     <string name="autosel_ago_seconds">قبل %d ثانية</string>
-    <string name="autosel_always_retest">إعادة الاختبار دائمًا</string>
     <string name="autosel_back_to_automatic">العودة إلى التلقائي</string>
     <string name="autosel_balance">توزيع حركة المرور بين أفضل الملفات</string>
     <string name="autosel_balance_hint_connection">قد يأخذ كل اتصال جديد ملفًا مختلفًا. أوسع توزيع، لكن عنوان IP يتغير أثناء الجلسة ويصبح حساب حركة المرور لكل ملف تقريبيًا.</string>
     <string name="autosel_balance_hint_off">يحمل الملف الأفضل كل حركة المرور؛ وتُبقي الملفات الجاهزة الأخرى موثقة حتى يستطيع أحدها التولى فورًا.</string>
     <string name="autosel_balance_hint_rotate">تنتقل الاتصالات الجديدة إلى ملف جيد آخر في كل دورة؛ وتُترك المفتوحة لتكمل في ملفها الأصلي. يُحتسب حجم المرور بدقة.</string>
-    <string name="autosel_balance_interval">تدوير كل</string>
-    <string name="autosel_balance_interval_tip">المدة التي يبقى فيها المنتقي على ملف واحد قبل الانتقال إلى الملف الجاهز التالي.</string>
     <string name="autosel_balance_mode">الوضع</string>
     <string name="autosel_balance_tip">معطّل افتراضيًا: ملف واحد يحمل كل شيء والبقية في وضع الاستعداد. فعّله لتوزيع حركة المرور على الملفات المؤكدة عملها.</string>
-    <string name="autosel_bench_interval">مسح شامل كل</string>
-    <string name="autosel_bench_interval_tip">المدة التي يستغرقها مرور واحد على كل ملف قيد التشغيل. تُوزع الفحوصات بالتساوي عليها، فلا تسبب المجموعة الكبيرة انفجارًا في حركة المرور.</string>
     <string name="autosel_build_limit">تشغيل الأفضل</string>
     <string name="autosel_build_limit_tip">عدد الملفات المحمّلة في تكوين التشغيل. يبدّل بينها المنتقي فورًا دون إعادة اتصال. الزيادة تكلف ذاكرة ووقت بدء أكثر.</string>
     <string name="autosel_cat_balance">موازنة حمل</string>
@@ -354,13 +347,9 @@
     <string name="autosel_detail_health">%1$d ملف: %2$s</string>
     <string name="autosel_detail_untested">%d لم تُفحص بعد</string>
     <string name="autosel_detail_working">%d تعمل</string>
-    <string name="autosel_dial_retries">محاولات التحويل</string>
-    <string name="autosel_dial_retries_tip">عند فشل الملف المختار في الاتصال، كم ملفًا آخر يُجرَّب فورًا قبل أن يظهر الخطأ للتطبيق.</string>
     <string name="autosel_edit">تحرير المنتقي التلقائي</string>
     <string name="autosel_error_no_group">يشير المنتقي التلقائي إلى مجموعة لم تعد موجودة</string>
     <string name="autosel_error_no_members">لا يملك المنتقي التلقائي أعضاء صالحين للاستخدام</string>
-    <string name="autosel_exclude_unavailable">تخطي الملفات المتعثرة</string>
-    <string name="autosel_exclude_unavailable_tip">يُبقي الخوادم التي فشل اختبارها الأخير خارج المجموعة، ما دامت النتيجة ضمن فترة الثقة. أطفئه إذا كانت اختباراتك غير موثوقة وتفضل أن يقرر المنتقي بنفسه.</string>
     <string name="autosel_expected">إبقاء جاهزين</string>
     <string name="autosel_expected_tip">عدد الملفات المُبقية مؤكدة عملها طوال الوقت، لتغطية أي عطل فورًا. هذه هي أيضًا الملفات التي تُوزَّع عليها حركة المرور عند تفعيل الموازنة.</string>
     <string name="autosel_footer_exhausted">لا يعمل أي شيء الآن — إن استمر هذا، سيبني المنتقي من الملفات التالية الأفضل.</string>
@@ -370,18 +359,18 @@
     <string name="autosel_footer_pinned_other">اخترت %s، لكنه لا يعمل الآن، لذا اختار المنتقي ملفًا آخر. سيعود إلى اختيارك بمجرد تعافيه.</string>
     <string name="autosel_footer_pinned_using">يُستخدم %s لأنك اخترته.</string>
     <string name="autosel_footer_suspended">الفحوصات متوقفة لأن هذا الجهاز لا اتصال له بالشبكة. لا يُلام أي ملف لذلك، ويُجمَّد الترتيب حتى عودة الاتصال.</string>
-    <string name="autosel_group">الخوادم من</string>
+    <string name="autosel_group">الملفات من</string>
     <string name="autosel_group_archived">%s (مؤرشف)</string>
     <string name="autosel_group_missing">مجموعة مفقودة (#%d)</string>
-    <string name="autosel_interrupt">إسقاط الاتصالات عند التبديل</string>
-    <string name="autosel_interrupt_tip">يُطبَّق عندما يبدّل المنتقي بسبب تدهور ملف أو فشله. مفعّل: ينتقل كل شيء إلى الملف الجديد دفعة واحدة. معطّل: تُكمل التنزيلات الحالية على الملف القديم. دورات الموازنة لا تسقط الاتصالات في كلتا الحالتين.</string>
+    <string name="autosel_interrupt">إسقاط الاتصالات عند فشل ملف</string>
+    <string name="autosel_interrupt_tip">تنتقل الاتصالات المفتوحة فورًا بدلًا من أن تكتمل على الملف الفاشل. الانتقال إلى ملف أسرع وتناوب الموازنة لا يُسقطان الاتصالات أبدًا.</string>
     <string name="autosel_interval">فترة الفحص</string>
-    <string name="autosel_interval_tip">كم مرة تُعاد معايرة الملفات المفحوصة بدقة.</string>
+    <string name="autosel_interval_tip">كم مرة يُعاد قياس الملفات الأعلى ترتيبًا.</string>
     <string name="autosel_just_now">الآن</string>
     <string name="autosel_last_ok_short">ناجح %s</string>
     <string name="autosel_list_separator">"، "</string>
     <string name="autosel_max_rtt">أقصى زمن استجابة</string>
-    <string name="autosel_max_rtt_tip">لا تُختار الملفات أبطأ من هذا أبدًا، حتى لو لم يكن هناك بديل أفضل.</string>
+    <string name="autosel_max_rtt_tip">لا تُستخدم الملفات الأبطأ من هذا إلا عندما لا يعمل أي ملف أسرع.</string>
     <string name="autosel_ms">%d مللي ثانية</string>
     <string name="autosel_name_empty">لا يمكن أن يكون الاسم فارغًا.</string>
     <string name="autosel_name_filter">الأسماء المطابقة فقط</string>
@@ -418,27 +407,19 @@
     <string name="autosel_plan">الملفات</string>
     <string name="autosel_plan_calculating">فحص المجموعة…</string>
     <string name="autosel_plan_counts">%1$d من %2$d ملف في المجموعة قابل للاستخدام؛ وسيعمل %3$d.</string>
-    <string name="autosel_plan_kept_unavailable">فشل آخر اختبار لكل الملف، ما يعني عادة أن الشبكة هي المشكلة لا الخوادم، لذا تُبقي كل الملفات وعددها %d وستُفحص مجددًا.</string>
     <string name="autosel_plan_needs_ranking">ستُقاس البقية عند بدء المنتقي: يعمل بمجرد أن تعمل ملفات كافية، وينتقل إلى الترتيب الكامل بعد قياسها جميعًا.</string>
     <string name="autosel_plan_reused">لدى %d نتيجة اختبار حديثة ستُعاد استخدامها.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">تم التخطي: %s.</string>
     <string name="autosel_plan_truncated">تطابق أكثر من %d ملف، لذا تُبقي الأعلى ترتيبًا فقط.</string>
-    <string name="autosel_pool_cap">ترتيب حد أقصى</string>
-    <string name="autosel_pool_cap_tip">سقف صارم لعدد الملفات المعايرة والمحتفظ بها في القائمة المصنفة. عندما يموت كل ملف قيد التشغيل، تُؤخذ البدائل من هذه القائمة.</string>
-    <string name="autosel_result_validity">الثقة بالنتائج لمدة</string>
-    <string name="autosel_result_validity_tip">نتائج اختبار URL بهذه الحداثة تُعاد استخدامها بدل إعادة قياسها — بما فيها اختباراتك اليدوية على المجموعة، لذا لا يكرر المنتقي العمل إذا شغّلته بعدها مباشرة. النتائج الأقدم تُعامَل كأن الملف لم يُختبر قط. اضبطه على صفر لتشغيل اختبار جديد دائمًا.</string>
     <string name="autosel_row_checks">الفحوصات: %1$d / %2$d ناجحة</string>
     <string name="autosel_row_connects">الاتصالات: %1$d / %2$d ناجحة</string>
     <string name="autosel_row_error">آخر خطأ: %s</string>
-    <string name="autosel_row_jitter">التذبذب: %d مللي ثانية</string>
     <string name="autosel_row_last_ok">آخر نجاح: %s</string>
     <string name="autosel_row_latency">زمن الاستجابة: %1$d مللي ثانية (الأفضل %2$d، الأسوأ %3$d)</string>
     <string name="autosel_row_state">الحالة: %s</string>
     <string name="autosel_row_tested">آخر اختبار URL: %1$s، %2$s</string>
     <string name="autosel_row_untested">لا توجد نتيجة اختبار URL بعد.</string>
-    <string name="autosel_sampling">العينات المحتفظ بها</string>
-    <string name="autosel_sampling_tip">يستخدم الترتيب المتوسط والتذبذب على هذا العدد من الفحوصات الحديثة، فلا تستطيع نتيجة سيئة واحدة خفض خادم جيد.</string>
     <string name="autosel_select_group">حدد المجموعة التي سيتتبعها هذا المنتقي التلقائي.</string>
     <string name="autosel_skip_core_transitions">يتطلب تبديلات كثيرة للنواة</string>
     <string name="autosel_skip_country">مُستبعد حسب البلد</string>
@@ -450,7 +431,6 @@
     <string name="autosel_skip_missing">ملف مفقود</string>
     <string name="autosel_skip_name">مُستبعد حسب الاسم</string>
     <string name="autosel_skip_tailscale">ملف Tailscale</string>
-    <string name="autosel_skip_unavailable">فشل آخر اختبار</string>
     <string name="autosel_skip_unsupported">نوع لا يستطيع هذا البناء استخدامه</string>
     <string name="autosel_skip_xray_chained">لا يمكن دمج تكوين Xray الكامل مع بروکسی المجموعة</string>
     <string name="autosel_state_cooldown">متوقف مؤقتًا</string>
@@ -482,8 +462,6 @@
     <string name="autosel_use_automatic_tip">التوقف عن تفضيل هذا الملف ودع المنتقي يختار بناءً على القياسات مجددًا.</string>
     <string name="autosel_use_this">استخدام هذا الملف</string>
     <string name="autosel_use_this_tip">يُبقي هذا الملف قيد الاستخدام بدل ترك الاختيار للترتيب. يبقى تفضيلًا لا قيدًا: إذا توقف الملف عن العمل ينتقل المنتقي، ويعود إلى اختيارك بمجرد تعافيه.</string>
-    <string name="autosel_watch_interval">مراقبة الملف المستخدم</string>
-    <string name="autosel_watch_interval_tip">كم مرة يُفحص الملف الذي يحمل حركة مرورك حاليًا وحده. اجعلها قصيرة: يمكن لخادم أن يتوقف عن العمل مع استقبال الاتصالات، ولا يلاحظ أحد ذلك حتى الفحص الشامل التالي.</string>
     <string name="backup">النسخ الاحتياطي</string>
     <string name="backup_create">إنشاء نسخة احتياطية</string>
     <string name="backup_created">تم إنشاء النسخة الاحتياطية. تضمنت: %s</string>
@@ -501,7 +479,7 @@
     <string name="backup_local">نسخ احتياطي محلي</string>
     <string name="backup_local_summary">تستخدم النسخ الاحتياطية تنسيق Throne لسطح المكتب (.thrbackup): يمكن لأي من التطبيقين استعادتها. تبقى بيانات اعتماد WebDAV على هذا الجهاز.</string>
     <string name="backup_open_label">استعادة نسخة Throne الاحتياطية</string>
-    <string name="backup_part_otp">ملفات OTP (لا تُستعاد على Android)</string>
+    <string name="backup_part_otp">إدخالات OTP (لا تُستعاد على Android)</string>
     <string name="backup_part_profiles">الملفات (المجموعات والبروكسی)</string>
     <string name="backup_part_routes">ملفات التوجيه</string>
     <string name="backup_part_settings">الإعدادات</string>
@@ -613,7 +591,7 @@
     <string name="direct_test_url">عنوان URL للاختبار المباشر</string>
     <string name="direct_test_url_empty">حالة شبكة النظام</string>
     <string name="direct_test_url_sum">يُجلب بدون أي بروکسي للتمييز بين اتصال ميت وخوادم ميتة. اتركه فارغًا لاستخدام حالة شبكة النظام.</string>
-    <string name="disable_traffic_stats">تعطيل إحصائيات حركة المرور</string>
+    <string name="disable_traffic_stats">تعطيل عدّادات حركة المرور</string>
     <string name="disable_traffic_stats_sum">لا يُحتسب حركة مرور الملف</string>
     <string name="dns_address_dialog_message">أمثلة: https://8.8.8.8/dns-query، tls://1.1.1.1، 8.8.8.8، localhost</string>
     <string name="dns_advanced">إعدادات متقدمة</string>
@@ -646,7 +624,7 @@
     <string name="enable_ech">تمكين ECH</string>
     <string name="enable_ntp">عميل NTP</string>
     <string name="enable_ntp_sum">مزامنة ساعة النواة مع خادم NTP</string>
-    <string name="enable_reality">تمكين Reality</string>
+    <string name="enable_reality">تمكين REALITY</string>
     <string name="enable_stats">إحصائيات الاتصال</string>
     <string name="enable_stats_sum">تتبع الاتصالات وعملياتها</string>
     <string name="enable_tls">تمكين TLS</string>
@@ -695,7 +673,11 @@
     <string name="grp_keep_working_tip">تُبقي الملفات التي نجح آخر اختبار لها عندما يسقطها الاشتراك من قائمته.</string>
     <string name="grp_landing_proxy">بروکسي الهبوط</string>
     <string name="grp_last_update">آخر تحديث: %1$s</string>
-    <string name="grp_missing_profile">ملف #%1$d (مفقود)</string>
+    <string name="grp_missing_profile">ملف مفقود (#%1$d)</string>
+    <string name="hop_refs_warning">تستخدم هذه المجموعات ملفًا سيُحذف بروكسيًا أماميًا أو بروكسي هبوط. ستتم إزالته منها، فتتصل دونه:</string>
+    <string name="hop_refs_cleared">كانت هذه المجموعات تستخدم ملفًا محذوفًا بروكسيًا أماميًا أو بروكسي هبوط. أُزيل منها، فأصبحت تتصل دونه:</string>
+    <string name="hop_ref_front">%1$s (البروكسي الأمامي)</string>
+    <string name="hop_ref_landing">%1$s (بروكسي الهبوط)</string>
     <string name="grp_route_profile">ملف التوجيه</string>
     <string name="grp_route_profile_default">افتراضي (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (من هذا الاشتراك)</string>
@@ -732,7 +714,7 @@
     <string name="grp_state_running">جارٍ التحديث…</string>
     <string name="grp_sub_auto_update">التحديث التلقائي للاشتراك</string>
     <string name="grp_sub_auto_update_interval">الفترة (بالدقائق، غير صالحة إذا أقل من 30)</string>
-    <string name="grp_sub_clear">مسح الخوادم قبل تحديث الاشتراك</string>
+    <string name="grp_sub_clear">مسح الملفات قبل تحديث الاشتراك</string>
     <string name="grp_sub_custom_hwid_params">معاملات معرّف العتاد المخصصة (اختياري)</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
     <string name="grp_sub_custom_hwid_params_tip">الصيغة: hwid=value,os=value,osVersion=value,model=value\nاتركه فارغًا لاستخدام القيم الافتراضية. حدد فقط المعاملات التي تريد تجاوزها.</string>
@@ -923,11 +905,15 @@
     <string name="profiles_empty_subscription_hint">حدّث الاشتراك لتنزيل ملفاته.</string>
     <string name="profiles_more_options">خيارات أخرى</string>
     <string name="profiles_move_down">نزول</string>
-    <string name="profiles_move_no_target">لا توجد مجموعة أساسية أخرى للنقل إليها.</string>
     <string name="profiles_move_to_group">النقل إلى مجموعة</string>
+    <string name="import_target_subscription">هذه المجموعة اشتراك: يزيل تحديثها التالي الملفات المستوردة إليها. اختر مجموعة أخرى، ثم أعد الاستيراد.</string>
+    <string name="import_target_archived">هذه المجموعة مؤرشفة. اختر مجموعة أخرى، ثم أعد الاستيراد.</string>
+    <string name="import_target_gone">لم تعد هذه المجموعة موجودة.</string>
+    <string name="profiles_move_target_subscription">يزيل التحديث التالي لمجموعة الاشتراك الملفات المنقولة إليها. اختر مجموعة أخرى.</string>
+    <string name="profiles_move_source_updating">يجري تحديث اشتراك هذه المجموعة. أعد المحاولة عند انتهائه.</string>
     <string name="profiles_move_up">صعود</string>
     <string name="profiles_no_duplicates">لا توجد ملفات مكررة.</string>
-    <string name="profiles_no_insecure">لا توجد إعدادات غير آمنة.</string>
+    <string name="profiles_no_insecure">لا توجد ملفات غير آمنة.</string>
     <string name="profiles_no_unavailable">لا توجد ملفات غير متاحة.</string>
     <string name="profiles_remove">إزالة</string>
     <string name="profiles_remove_duplicates">المكررة</string>
@@ -939,14 +925,14 @@
     <string name="profiles_running_kept">أُبقي الملف قيد التشغيل.</string>
     <string name="profiles_select_all">تحديد الكل</string>
     <string name="profiles_show">إظهار</string>
-    <string name="profiles_show_out_ip">IP الصادر</string>
+    <string name="profiles_show_out_ip">IP الخروج</string>
     <string name="profiles_show_speed">السرعة</string>
     <string name="profiles_sort">ترتيب</string>
     <string name="profiles_sort_address">العنوان</string>
     <string name="profiles_sort_ascending">تصاعدي</string>
     <string name="profiles_sort_descending">تنازلي</string>
     <string name="profiles_sort_download">سرعة التنزيل</string>
-    <string name="profiles_sort_ip_out">IP الصادر</string>
+    <string name="profiles_sort_ip_out">IP الخروج</string>
     <string name="profiles_sort_latency">زمن الاستجابة</string>
     <string name="profiles_sort_name">الاسم</string>
     <string name="profiles_sort_security">الأمان</string>
@@ -982,9 +968,9 @@
     <string name="raw_json">JSON خام</string>
     <string name="raw_json_invalid">ليس هذا الملف نوعًا صالحًا من JSON</string>
     <string name="raw_json_summary">تحرير كل حقل من هذا الملف كـ JSON</string>
-    <string name="reality_public_key">المفتاح العام لـ Reality</string>
-    <string name="reality_settings">إعدادات Reality</string>
-    <string name="reality_short_id">المعرّف القصير لـ Reality</string>
+    <string name="reality_public_key">المفتاح العام لـ REALITY</string>
+    <string name="reality_settings">إعدادات REALITY</string>
+    <string name="reality_short_id">المعرّف القصير لـ REALITY</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="remote_dns_disable_ipv6">DNS البعيد: تعطيل IPv6</string>
     <string name="reserved_hint">ثلاثة أرقام، واحد في كل سطر</string>
@@ -1041,7 +1027,7 @@
     <string name="route_profile_empty">لا قواعد صالحة في الملف</string>
     <string name="route_profile_empty_title">ملف توجيه فارغ</string>
     <string name="route_profile_fetch">جلب الآن</string>
-    <string name="route_profile_fetch_confirm">تُستبدل القواعد الحالية بالتي تُجلب من الرابط.</string>
+    <string name="route_profile_fetch_confirm">تُستبدل القواعد الواردة من الرابط، بما فيها تعديلاتك عليها، بالقواعد التي تُجلب الآن. تُحفظ القواعد المضافة هنا.</string>
     <string name="route_profile_fetch_failed">تعذّر جلب ملف التوجيه</string>
     <string name="route_profile_fetched">تم تحميل %d قاعدة من الرابط البعيد.</string>
     <string name="route_profile_fetched_title">تم الجلب</string>
@@ -1055,7 +1041,7 @@
     <string name="route_profile_never_updated">لم يُحدَّث بعد</string>
     <string name="route_profile_quick_switch">ملف التوجيه</string>
     <string name="route_profile_remote_source">المصدر البعيد</string>
-    <string name="route_profile_remote_rules_note">يستبدل كل تحديث قواعد هذا الملف بالقواعد الواردة من الرابط، لذا تضيع القواعد التي تضيفها أو تغيّرها هنا. للاحتفاظ بقواعدك الخاصة، استخدم «استنساخ» في قائمة ملفات التوجيه: النسخة المستنسخة نسخة محلية لا تُحدَّث أبدًا.</string>
+    <string name="route_profile_remote_rules_note">يستبدل كل تحديث القواعد الواردة من الرابط، لذا تبقى تعديلاتك عليها حتى التحديث التالي فقط. تُحفظ القواعد المضافة هنا.</string>
     <string name="route_profile_rules">القواعد (%d)</string>
     <string name="route_profile_title">ملف التوجيه</string>
     <string name="route_profile_url">الرابط</string>
@@ -1081,8 +1067,8 @@
     <string name="route_rule_advanced_show">إظهار الشروط والخيارات الأخرى</string>
     <string name="route_rule_any">أي</string>
     <string name="route_rule_apps">التطبيقات</string>
-    <string name="route_rule_catch_all">لا تحتوي هذه القاعدة على شروط، لذا تطابق كل اتصال. حفظها على أي حال؟</string>
-    <string name="route_rule_catch_all_title">لا شروط</string>
+    <string name="route_rule_default_name">القاعدة %d</string>
+    <string name="route_rule_dns_queries">استعلامات DNS</string>
     <string name="route_rule_category_match">التطابق</string>
     <string name="route_rule_category_rule">القاعدة</string>
     <string name="route_rule_domain">النطاق</string>
@@ -1103,6 +1089,8 @@
     <string name="route_rule_ip_version">إصدار IP</string>
     <string name="route_rule_lines_hint">مدخل في كل سطر</string>
     <string name="route_rule_missing_server">خادم مفقود (#%d)</string>
+    <string name="route_outbound_no_exit">بروكسي بدون خروج</string>
+    <string name="route_outbound_no_exit_hint">لا يختلف عن «بروكسي» إلا عند تشغيل مخرج (إعدادات › التوجيه › الخروج): تتجاوزه هذه المواقع وتخرج عبر الملف المحدد.</string>
     <string name="route_rule_name">الاسم</string>
     <string name="route_rule_network">الشبكة</string>
     <string name="route_rule_no_drop">بدون إسقاط</string>
@@ -1206,7 +1194,6 @@
     <string name="snell_reuse_summary">v4-v6 فقط</string>
     <string name="snell_userkey">مفتاح المستخدم</string>
     <string name="snell_version">الإصدار</string>
-    <string name="speed_test_mode_country">البلد فقط</string>
     <string name="ss_plugin">إضافة SIP003</string>
     <string name="ss_plugin_opts">خيارات الإضافة</string>
     <string name="ssh_client_version">إصدار العميل</string>
@@ -1258,7 +1245,7 @@
     <string name="test_engine_fg_busy">جارٍ العمل في الخلفية…</string>
     <string name="test_engine_fg_subscriptions">جارٍ تحديث الاشتراكات…</string>
     <string name="test_engine_ip_current_unsupported">اختبار IP للاتصال الجاري غير مدعوم</string>
-    <string name="test_engine_kind_ip">اختبار IP</string>
+    <string name="test_engine_kind_ip">اختبار IP الخروج</string>
     <string name="test_engine_kind_speed">اختبار السرعة</string>
     <string name="test_engine_kind_url">اختبار URL</string>
     <string name="test_engine_progress">%1$d / %2$d</string>
@@ -1283,7 +1270,6 @@
     <string name="test_panel_completed">مكتمل</string>
     <string name="test_panel_countries">البلدان</string>
     <string name="test_panel_country_description">%1$s: %2$d</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_current_unavailable">غير متاح: %s</string>
     <string name="test_panel_dismiss">إخفاء نتائج الاختبار</string>
     <string name="test_panel_distinct_ips">%d عناوين IP صادرة مختلفة</string>
@@ -1336,7 +1322,6 @@
     <string name="test_panel_summary_stopped">متوقف · تم اختبار %1$d من %2$d في %3$s</string>
     <string name="test_panel_summary_tested">تم اختبار %1$d في %2$s</string>
     <string name="test_panel_summary_working">%d تعمل</string>
-    <string name="test_panel_summary_working_countries">%1$d تعمل في %2$d بلد</string>
     <string name="test_panel_summary_working_fastest">%1$d تعمل، الأسرع %2$s</string>
     <string name="test_panel_title">%1$s · %2$s</string>
     <string name="test_panel_unnamed">ملف %d</string>
@@ -1481,9 +1466,16 @@
     <string name="warp_public_key">مفتاح عام</string>
     <string name="warp_registration">التسجيل</string>
     <string name="warp_reserved">محجوز</string>
-    <string name="warp_settings">WARP</string>
-    <string name="warp_state_off">معطّل</string>
-    <string name="warp_state_on">مفعّل · %s</string>
+    <string name="warp_settings">الخروج</string>
+    <string name="exit_through">الخروج عبر</string>
+    <string name="exit_server">الملف المحدد</string>
+    <string name="exit_server_hint">تخرج حركة المرور عبر الملف الذي شغّلته.</string>
+    <string name="exit_psiphon_hint">Psiphon شبكة مجانية تديرها Psiphon Inc.، ويمكنها رؤية المواقع التي تزورها، مثل أي مزوّد VPN.</string>
+    <string name="exit_tor_hint">Tor غير متاح على Android، لذا تخرج حركة المرور عبر الملف المحدد.</string>
+    <string name="exit_unavailable">%s (غير متاح على Android)</string>
+    <string name="psiphon_egress_region">المنطقة</string>
+    <string name="psiphon_region_best">أفضل أداء</string>
+    <string name="psiphon_egress_region_sum">بلد خادم Psiphon؛ «أفضل أداء» يترك الاختيار لـ Psiphon.</string>
     <string name="warp_tos_message"><![CDATA[إنشاء هوية WARP يسجّل جهازًا جديدًا مع Cloudflare.<br><br>هل تقبل <a href="%1$s">شروط خدمة Cloudflare WARP</a>؟]]></string>
     <string name="warp_wireguard_note">يعتمد WARP على بروکسيك: يحتاج WireGuard إلى بروکسي يمرر UDP.</string>
     <string name="webdav_auth_error">فشلت المصادقة: اسم المستخدم أو كلمة المرور غير صحيحة</string>
@@ -1632,7 +1624,7 @@
     <string name="xray_verify_peer_cert_by_name">التحقق من شهادة النظير بالاسم</string>
     <string name="xray_vless_all">كل VLESS</string>
     <string name="xray_vless_preference">تفضيل VLESS في Xray</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP وReality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP وREALITY</string>
     <string name="xray_vless_xhttp_only">XHTTP فقط</string>
     <string name="xtls_flow">التدفق (بروتوكول VLESS الفرعي)</string>
 
@@ -1643,14 +1635,6 @@
         <item quantity="few">%d مللي ثانية</item>
         <item quantity="many">%d مللي ثانية</item>
         <item quantity="other">%d مللي ثانية</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="zero">%d دقيقة</item>
-        <item quantity="one">%d دقيقة</item>
-        <item quantity="two">%d دقيقتان</item>
-        <item quantity="few">%d دقائق</item>
-        <item quantity="many">%d دقيقة</item>
-        <item quantity="other">%d دقيقة</item>
     </plurals>
     <plurals name="autosel_profiles">
         <item quantity="zero">%d ملف</item>
@@ -1960,9 +1944,9 @@
     <string name="grp_http_version">إصدار HTTP</string>
     <string name="grp_http_version_tip">يستخدم «تلقائي» HTTP/2 عندما يعرضه الخادم. «الإبقاء على الافتراضي» يتبع الإعدادات › الاشتراكات.</string>
     <string name="grp_update_interval">فترة التحديث (بالدقائق)</string>
-    <string name="grp_update_interval_tip">عدد الدقائق بين التحديثات التلقائية لهذا الاشتراك، 30 على الأقل. الفارغ يتبع الإعدادات › الاشتراكات، حيث يجب تفعيل التحديث التلقائي.</string>
+    <string name="grp_update_interval_tip">عدد الدقائق بين التحديثات التلقائية لهذا الاشتراك، 30 على الأقل، حتى عند إيقاف التحديث التلقائي في الإعدادات › الاشتراكات. الفارغ يتبع ذلك الإعداد.</string>
     <string name="grp_server_interval">فترة الخادم</string>
-    <string name="grp_server_interval_tip">استخدام فترة التحديث التي يرسلها خادم الاشتراك؛ تُطبَّق الفترة أعلاه عندما لا يرسل أي فترة. «الإبقاء على الافتراضي» يتبع الإعدادات › الاشتراكات.</string>
+    <string name="grp_server_interval_tip">استخدام فترة التحديث التي يرسلها خادم الاشتراك، حتى عند إيقاف التحديث التلقائي في الإعدادات › الاشتراكات؛ تُطبَّق الفترة أعلاه عندما لا يرسل أي فترة. «الإبقاء على الافتراضي» يتبع ذلك الإعداد.</string>
     <string name="grp_server_interval_use">استخدام</string>
     <string name="grp_server_interval_ignore">تجاهل</string>
     <string name="grp_server_interval_last">آخر ما أرسله هذا الخادم: %1$d ساعة.</string>
@@ -2261,9 +2245,9 @@
     <string name="validation_tls_pem_private_key">الصق المفتاح الخاص كنص PEM، يبدأ بـ -----BEGIN PRIVATE KEY-----.</string>
     <string name="validation_tls_pin_base64">هذا SHA-256 بالنظام السداسي عشر؛ اكتبه بترميز base64 (44 حرفًا تنتهي بـ =).</string>
     <string name="validation_tls_ech_config">الصق قائمة تكوينات ECH بترميز base64، أو ككتلة واحدة -----BEGIN ECH CONFIGS-----.</string>
-    <string name="validation_tls_reality_ech">لا يمكن الجمع بين Reality وECH. عطّل ECH، أو امسح المفتاح العام لـ Reality.</string>
-    <string name="validation_tls_reality_disable_sni">لا يمكن استخدام Reality مع «تعطيل SNI». أوقف «تعطيل SNI».</string>
-    <string name="validation_tls_reality_spoof">لا يمكن الجمع بين Reality وتزييف TLS. اضبط TLS Spoof على «معطّل».</string>
+    <string name="validation_tls_reality_ech">لا يمكن الجمع بين REALITY وECH. عطّل ECH، أو امسح المفتاح العام لـ REALITY.</string>
+    <string name="validation_tls_reality_disable_sni">لا يمكن استخدام REALITY مع «تعطيل SNI». أوقف «تعطيل SNI».</string>
+    <string name="validation_tls_reality_spoof">لا يمكن الجمع بين REALITY وتزييف TLS. اضبط TLS Spoof على «معطّل».</string>
     <string name="validation_tls_pins_with_certificate">لا يمكن الجمع بين شهادة مخصصة وتثبيت الشهادات؛ أبقِ أحدهما فقط.</string>
     <string name="validation_tls_client_pair">اضبط شهادة العميل ومفتاح العميل معًا.</string>
     <string name="validation_tls_spoof_needs_sni">يحتاج تزييف TLS إلى SNI. أوقف «تعطيل SNI»، أو اضبط TLS Spoof على «معطّل».</string>
@@ -2275,7 +2259,7 @@
     <string name="validation_transport_headers_pairs">يجب أن تتناوب الترويسات بين الأسماء والقيم مفصولة بـ |، مثل User-Agent|curl، لذا تم تجاهلها.</string>
     <string name="validation_transport_type">لا يدعم sing-box وسيلة النقل «%1$s». استخدم ws أو httpupgrade أو http أو grpc أو quic.</string>
     <string name="validation_transport_quic_tls">تحتاج وسيلة النقل QUIC إلى TLS. فعّل «تمكين TLS».</string>
-    <string name="validation_transport_quic_reality">لا يعمل Reality مع وسيلة النقل QUIC. امسح مفتاح Reality، أو اختر وسيلة نقل أخرى.</string>
+    <string name="validation_transport_quic_reality">لا يعمل REALITY مع وسيلة النقل QUIC. امسح مفتاح REALITY، أو اختر وسيلة نقل أخرى.</string>
     <string name="validation_transport_quic_utls">لا تُستخدم uTLS مع وسيلة النقل QUIC.</string>
     <string name="validation_mux_brutal_needs_custom">يعمل TCP Brutal فقط مع مضاعفة مخصصة. اضبط Multiplex على «مخصص».</string>
     <string name="validation_mux_brutal_both_speeds">يحتاج TCP Brutal إلى السرعتين معًا؛ وتُرسل السرعة المفقودة كـ 1 ميغابت/ث.</string>
@@ -2314,6 +2298,12 @@
     <string name="validation_xray_vless_encryption_mode">يجب أن يكون الجزء بعد mlkem768x25519plus هو native أو xorpub أو random.</string>
     <string name="validation_xray_vless_encryption_rtt">يجب أن يكون الجزء بعد الوضع هو 1rtt أو 0rtt.</string>
     <string name="validation_xray_vless_encryption_key">يجب أن يكون كل مفتاح في السلسلة بترميز base64 الآمن للروابط بطول 32 أو 1184 بايت، بدون حشو.</string>
+    <string name="validation_xray_vless_encryption_padding_order">ضع أجزاء الحشو قبل المفاتيح.</string>
+    <string name="validation_xray_vless_encryption_mlkem">مفتاح بطول 1184 بايت في السلسلة ليس مفتاح ML-KEM-768 صالحًا: انسخ السلسلة من الخادم مرة أخرى.</string>
+    <string name="validation_xray_vless_encryption_no_key">لا تحتوي السلسلة على أي مفتاح: انسخ السلسلة كاملة كما يعطيها الخادم.</string>
+    <string name="validation_xray_vless_padding_format">يجب أن يكون كل جزء من الحشو ثلاثة أرقام تفصل بينها شرطات، مثل 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_first">يحتاج جزء الحشو الأول إلى احتمال لا يقل عن 100 وأطوال لا تقل عن 35، مثل 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_total">قد يتجاوز مجموع أطوال الحشو 65553 بايت.</string>
     <string name="validation_xray_vless_vision">يحتاج XTLS Vision إلى الشبكة raw مع TLS أو REALITY، أو إلى تشفير VLESS: غيّر الشبكة أو الأمان، أو امسح flow.</string>
     <string name="validation_xray_xdrive_no_link">لا يملك XDRIVE صيغة لروابط المشاركة. استورد تكوين JSON الخاص بالخادم بدلًا من ذلك.</string>
     <string name="validation_xray_xdrive_service">يجب أن تكون google-drive أو s3 أو template أو local.</string>
@@ -2539,11 +2529,6 @@
     <string name="validation_custom_xray_geodata">أُزيل محدّث geodata من التكوين المستورد: كان سينزّل ملفات من عناوين اختارها المُرسِل ويستبدل ملفات في مجلد Throne.</string>
     <string name="validation_custom_xray_webhook">أُزيل webhook من قاعدة التوجيه هذه: كان سيرسل تفاصيل كل اتصال مطابق إلى عنوان اختاره المُرسِل.</string>
     <string name="validation_autoselector_countries">استخدم رموز بلدان من حرفين مفصولة بفواصل، مثل DE,NL,FR.</string>
-    <string name="validation_autoselector_build_limit">لا يمكن تشغيل ملفات أكثر من عدد الملفات المصنَّفة (%1$s).</string>
-    <string name="validation_autoselector_bench_interval">لا يمكن للمسح الشامل أن يجري بوتيرة أعلى من فترة الفحص (%1$s ث).</string>
-    <string name="validation_autoselector_watch_interval">لا يمكن أن تكون مراقبة الملف المستخدم أبطأ من فترة الفحص (%1$s ث).</string>
-    <string name="validation_autoselector_ready_count">اجعل الفحص الدقيق يشمل عددًا من الملفات لا يقل عن عدد الملفات الجاهزة (%1$s).</string>
-    <string name="validation_autoselector_close_count">لا يمكن إجراء فحص دقيق لملفات أكثر من عدد الملفات المشغَّلة (%1$s).</string>
     <string name="validation_chain_empty">أضف ملفًا واحدًا على الأقل إلى السلسلة.</string>
     <string name="validation_ss_plugin_opts_dangling">الشرطة المائلة العكسية في النهاية لا يتبعها ما تُهرِّبه.</string>
     <string name="validation_ss_plugin_opts_name">يحتاج كل خيار إلى اسم، كما في obfs=http;obfs-host=example.com.</string>
@@ -2647,6 +2632,7 @@
     <string name="validation_route_no_drop_unused">لا أثر له مع طريقة drop.</string>
     <string name="validation_route_ignored_by_action">تتجاهله قاعدة %1$s؛ وهو ينطبق فقط على هذه الإجراءات: %2$s.</string>
     <string name="validation_route_matches_all">ليس لهذه القاعدة شروط مطابقة، لذا تطابق كل حركة المرور.</string>
+    <string name="validation_route_catch_all">لا تحتوي هذه القاعدة على شروط، لذا ستلتقط كل حركة المرور. أضف شرطًا، أو أوقف القاعدة.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s («%2$s»): %3$s</string>
     <string name="validation_route_rule_warning">القاعدة «%1$s»: %2$s</string>
@@ -2702,6 +2688,7 @@
     <string name="validation_millis_or_default">أدخل عددًا صحيحًا من الميلي ثانية، مثل %1$s (بدون وحدة)، أو 0 للقيمة الافتراضية.</string>
     <string name="validation_group_update_interval">يجب ألا تقل عن 30 دقيقة، أو اتركها فارغة للإبقاء على الافتراضي.</string>
     <string name="validation_port_used">المنفذ %1$s مستخدم بالفعل من: %2$s. اختر منفذًا آخر.</string>
+    <string name="validation_port_reenabled">تشغيل %1$s على المنفذ %2$s سيتعارض مع %3$s. اختر منفذًا آخر.</string>
     <string name="validation_mtu_ipv6">يحتاج IPv6 إلى MTU لا يقل عن %1$s؛ وأقل من ذلك قد يُسقط النظام IPv6 من TUN.</string>
     <string name="validation_private_range_all">هذا يشمل كل عنوان، مما سيمنع TUN من توجيه أي شيء.</string>
     <string name="validation_dns_local_ip">استخدم عنوان IP، مثل 223.5.5.5 أو tls://1.1.1.1: يحلّل هذا الخادم أسماء الخوادم الأخرى.</string>
@@ -2724,12 +2711,18 @@
     <string name="validation_route_dns_final">يجب أن يكون خادم DNS الافتراضي بعيدًا أو مباشرًا، وليس «%1$s».</string>
     <string name="validation_route_dns_dropped">أُسقطت إعدادات DNS الخاصة بملف التوجيه، لذا يستخدم الإعدادات العامة: %1$s</string>
     <string name="route_dns_global_servers">البعيد %1$s، المباشر %2$s</string>
-    <string name="dns_server_suggestions">الخوادم المستخدمة مؤخرًا والمقترحة</string>
     <string name="warp_api_tls_fragment_title">تقطيع TLS لتسجيل WARP</string>
     <string name="warp_api_tls_fragment_note">يُطبَّق فقط عندما يتصل التسجيل مباشرةً، لا عبر ملف قيد التشغيل.</string>
     <string name="backup_warn_tor_egress">ترسل النسخة الاحتياطية حركة المرور عبر Tor، وهو غير متاح على Android؛ هنا تخرج مباشرةً عبر الخادم المحدد.</string>
     <string name="validation_dns_server_item">الخادم %1$s («%2$s»): %3$s</string>
-    <string name="dns_server_list_hint">افصل بين عدة خوادم بفواصل: يُستعلَم منها معًا ويُعتمَد أول رد.</string>
+    <string name="dns_server_add">إضافة خادم</string>
+    <string name="dns_server_custom">عنوان مخصص</string>
+    <string name="dns_server_recent">الأخيرة</string>
+    <string name="dns_server_address_hint">العنوان، مثل tls://1.1.1.1</string>
+    <string name="dns_server_list_race">يُستعلم عنها معًا؛ ويُعتمد أسرع رد.</string>
+    <string name="dns_server_list_primary">يحلّ أيضًا عناوين خوادم البروكسي</string>
+    <string name="dns_server_list_empty">أضف خادمًا واحدًا على الأقل.</string>
+    <string name="dns_server_drag">اسحب لإعادة الترتيب</string>
     <string name="juicity_pinned_certchain_sha256">تجزئة SHA256 لسلسلة الشهادات</string>
     <string name="juicity_pinned_certchain_sha256_hint">تجزئة سلسلة الشهادات التي يطبعها juicity-server؛ تحل محل التحقق عبر CA، حتى مع «السماح بعدم الأمان»</string>
     <string name="validation_juicity_certchain">استخدم تجزئة سلسلة الشهادات ذات 32 بايت بترميز base64 (44 حرفًا تنتهي بـ =)، كما يطبعها juicity-server.</string>
@@ -2841,9 +2834,9 @@
     <string name="chain_step_untestable">لا يمكن اختبار السلاسل التي تحتوي على قفزة بإعداد Xray مخصص</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">طريقة الاختيار</string>
-    <string name="autosel_strategy_latency">الأسرع والأكثر ثباتًا</string>
+    <string name="autosel_strategy_latency">الأسرع</string>
     <string name="autosel_strategy_priority">حسب ترتيب الأولوية</string>
-    <string name="autosel_strategy_latency_tip">الأسرع والأكثر ثباتًا: يُستخدم دائمًا الملف صاحب أفضل قياس من بين جميع الملفات.</string>
+    <string name="autosel_strategy_latency_tip">الأسرع: يُستخدم دائمًا الملف صاحب أفضل قياس من بين جميع الملفات.</string>
     <string name="autosel_strategy_priority_tip">حسب ترتيب الأولوية: تُجرَّب المستويات أدناه بدءًا من الأعلى. يبقى المنتقي على أعلى مستوى فيه ملف يعمل، ويعود إلى الأعلى بمجرد أن يعمل مستوى أعلى مجددًا.</string>
     <string name="autosel_tier_add">إضافة مستوى</string>
     <string name="autosel_tiers_hint">ينتمي الملف إلى أول مستوى يطابقه، وتأتي الملفات التي لا تطابق أي مستوى في الأخير. يستخدم المنتقي أعلى مستوى فيه ملف يعمل، وضمنه الملف صاحب أفضل قياس.</string>
@@ -2862,24 +2855,8 @@
     <string name="autosel_tier_any_profile">أي ملف</string>
     <string name="autosel_tier_fallback">المستوى %d</string>
     <string name="autosel_tier_short">م%d</string>
-    <string name="autosel_failback_checks">العودة إلى الأعلى بعد</string>
-    <string name="autosel_failback_checks_tip">حسب ترتيب الأولوية: عندما يعمل ملف من مستوى أعلى مجددًا، لا يعود إليه المنتقي إلا بعد أن يجتاز هذا العدد من الفحوصات المتتالية. لا يمكن أن يزيد على عدد العينات المحتفظ بها.</string>
-    <plurals name="autosel_checks">
-        <item quantity="zero">%d فحص</item>
-        <item quantity="one">%d فحص</item>
-        <item quantity="two">%d فحصان</item>
-        <item quantity="few">%d فحوصات</item>
-        <item quantity="many">%d فحصًا</item>
-        <item quantity="other">%d فحص</item>
-    </plurals>
-    <string name="autosel_failback_delay">دون أي فشل لمدة</string>
-    <string name="autosel_failback_delay_tip">حسب ترتيب الأولوية: يجب أيضًا أن يمضي ملف من مستوى أعلى هذه المدة دون فشل في فحص أو اتصال قبل أن يعود إليه المنتقي.</string>
-    <string name="autosel_failback_interrupt">إسقاط الاتصالات عند العودة إلى الأعلى</string>
-    <string name="autosel_failback_interrupt_tip">حسب ترتيب الأولوية. معطّل: تبقى الاتصالات المفتوحة على ملفها، وتنتقل الجديدة فقط إلى المستوى الأعلى. مفعّل: ينتقل كل شيء إلى الأعلى دفعة واحدة.</string>
     <string name="autosel_passive">التعلم من الاتصالات الحقيقية</string>
     <string name="autosel_passive_tip">تُقيَّم الملفات أيضًا بحسب الاتصالات التي تجريها تطبيقاتك عبرها، لا بفحوصات الصحة وحدها. يُعَدّ الاتصال فاشلًا عندما لا يتلقى أي رد على الإطلاق أو يتعذر عليه الاتصال. عندما تفشل الاتصالات الحديثة عبر ملف ما بقدر ما تنجح على الأقل، ثلاث مرات أو أكثر، يُنحّى الملف جانبًا حتى لو نجحت فحوصاته: لمدة دقيقة، وتتضاعف المدة في كل مرة يتكرر فيها ذلك، حتى 16 دقيقة. ويلتزم كل موقع أيضًا بالملف الذي نجح معه آخر مرة، ويتجنب ملفًا فشل معه للتو. وأثناء تدفق حركة مرور حقيقية، تُرسَل فحوصات صحة أقل.</string>
-    <string name="autosel_site_memory">تذكّر اختيار كل موقع لمدة</string>
-    <string name="autosel_site_memory_tip">المدة التي يظل فيها الموقع يستخدم الملف الذي نجح معه آخر مرة، ويظل يتجنب ملفًا فشل معه.</string>
     <string name="autosel_balance_hint_priority">في وضع ترتيب الأولوية، تُوزَّع حركة المرور فقط على الملفات الجاهزة في المستوى المستخدم.</string>
     <string name="autosel_plan_by_tier">حسب المستوى: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2890,7 +2867,6 @@
     <string name="autosel_plan_truncated_tiers">تطابق أكثر من %d ملف، لذا يُحتفظ بالأعلى ترتيبًا فقط من كل مستوى.</string>
     <string name="validation_autoselector_tier_match">اختر مجموعة أو أدخل نمط اسم لهذا المستوى.</string>
     <string name="validation_autoselector_tier_count">أضف مستوى واحدًا على الأقل للاختيار حسب ترتيب الأولوية.</string>
-    <string name="validation_autoselector_failback_checks">لا يمكن اشتراط فحوصات متتالية أكثر من عدد العينات المحتفظ بها (%1$s).</string>
     <string name="autosel_status_on_tier">المنتقي التلقائي على %1$s، المستوى %2$d (%3$d من %4$d تعمل)</string>
     <string name="autosel_detail_suspect">%d مشبوهة</string>
     <string name="autosel_state_suspect">مشبوه</string>
@@ -2934,6 +2910,17 @@
     <string name="service_ip_risk">الخطورة %d</string>
     <string name="service_check_checked_now">فُحص للتو</string>
     <string name="service_check_checked_at">فُحص %s</string>
+    <string name="service_check_services">الخدمات</string>
+    <string name="service_check_services_all">كل الخدمات</string>
+    <string name="service_check_services_count">%1$d من %2$d خدمة</string>
+    <string name="service_check_none_selected">لم تُحدَّد أي خدمة</string>
+    <string name="service_check_services_unknown">تعذّر تحميل قائمة الخدمات</string>
+    <string name="service_check_current">فحص خدمات الاتصال الحالي</string>
+    <string name="service_category_ai">الذكاء الاصطناعي</string>
+    <string name="service_category_streaming">البث</string>
+    <string name="service_category_social">التواصل الاجتماعي</string>
+    <string name="service_category_reputation">سمعة IP</string>
+    <string name="service_category_other">أخرى</string>
     <string name="validation_chain_selector_twice">لا يمكن أن تحتوي السلسلة إلا على منتقٍ تلقائي واحد.</string>
     <string name="validation_chain_selector_custom">لا يمكن أن يشارك المنتقي التلقائي سلسلةً مع تكوين مخصص.</string>
     <string name="chain_step_selector">لا يمكن اختبار السلاسل التي تحتوي على منتقٍ تلقائي قفزةً بقفزة؛ اختبر أعضاءه بدلًا من ذلك</string>
@@ -2941,6 +2928,8 @@
     <string name="autosel_notice_exhausted_upstream">توقف كل ملف قيد التشغيل عن العمل عبر القفزات التي أمامه — إعادة البناء بالمرشحين التاليين.</string>
     <string name="validation_route_outbound_chain_selector">لا يمكن لقواعد التوجيه استخدام السلسلة «%1$s»: فهي تحتوي على منتقٍ تلقائي، لذا لا يمكن إلا تشغيلها. اختر صادرًا آخر.</string>
     <string name="route_outbound_chain_selector">يرسل ملف التوجيه حركة المرور إلى %1$s، الذي يحتوي على منتقٍ تلقائي؛ لا يمكن إلا تشغيل مثل هذه السلسلة، لا استخدامها في قواعد التوجيه</string>
+    <string name="xray_full_config_tag_clash">يستخدم إعداد Xray المخصص الوسم \"%1$s\"، الذي ينشئه Throne أيضًا لملف تعريف Xray آخر؛ أعد تسميته في الإعداد المخصص</string>
+    <string name="xray_full_config_selector_clash">المحدِّد \"%1$s\" في إعداد Xray المخصص يطابق أيضًا \"%2$s\"، الذي ينشئه Throne لملف تعريف Xray آخر؛ اجعل المحدِّد أدق في الإعداد المخصص</string>
     <string name="grp_filter_countries">البلدان</string>
     <string name="grp_filter_countries_tip">بلدان الخروج المراد إبقاؤها، مثل HK,JP، أو إزالتها، مثل !RU.</string>
     <string name="grp_filter_countries_hint">مثلًا HK,JP أو !RU</string>
@@ -2986,4 +2975,8 @@
     <string name="vpn_auth_submitting">جارٍ تسجيل الدخول…</string>
     <string name="vpn_auth_gone">لم يعد طلب تسجيل الدخول هذا معلقًا.</string>
     <string name="vpn_auth_no_browser">لا يوجد تطبيق يمكنه فتح هذا العنوان.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">استخدم رمز بلد من حرفين، مثل US.</string>
+    <string name="validation_psiphon_ignored">تم تجاهل %1$s: ملفات Psiphon تقبل المنطقة فقط.</string>
+    <string name="exit_runs_over_itself">الملف المحدد يخرج أصلاً عبر %1$s، لذا لا يمكن تشغيل مخرج %1$s فوقه. اختر مخرجاً آخر في إعدادات › التوجيه › الخروج.</string>
 </resources>

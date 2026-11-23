@@ -115,6 +115,7 @@ internal object SubscriptionRefresh {
         val working = snapshot.working
         val cleared = snapshot.cleared
         var stoppedRunning = snapshot.stopped
+        val clearedHops = ArrayList(snapshot.clearedHops)
         var dbFailed = false
         val index = ContentIndex(old)
         val sink = ImportSink(gid, if (cleared) null else index)
@@ -155,6 +156,7 @@ internal object SubscriptionRefresh {
             disturbed.addAll(outcome.deleted)
             removed.addAll(outcome.deleted)
             outcome.stopped?.let { stoppedRunning = it }
+            clearedHops.addAll(outcome.clearedHops)
 
             // Survivors of the deletion (the running profile, working ones) return to their previous position.
             val ordered = order.toHashSet()
@@ -195,6 +197,7 @@ internal object SubscriptionRefresh {
                 changeText = str(R.string.subs_nothing)
             }
         }
+        changeText += GroupRepo.hopNotice(clearedHops)
 
         val filteredOut = parsed.size - servers.size
         if (filteredOut > 0) changeText += "\n" + str(R.string.subs_filtered_out, filteredOut) + "\n"
@@ -377,6 +380,7 @@ internal object SubscriptionRefresh {
         @JvmField val working: HashSet<Long>,
         @JvmField val cleared: Boolean,
         @JvmField val stopped: ProxyEntity?,
+        @JvmField val clearedHops: List<GroupRepo.HopReference>,
     )
 
     /**
@@ -405,6 +409,7 @@ internal object SubscriptionRefresh {
         val routeNames = SubscriptionRouteRebind.referencedNames(members)
         var cleared = false
         var stopped: ProxyEntity? = null
+        var clearedHops: List<GroupRepo.HopReference> = emptyList()
         if (DataStore.subClear) {
             Logs.i(str(R.string.subs_clearing))
             val doomed = members.filter { !keptWorking(it) }
@@ -418,6 +423,7 @@ internal object SubscriptionRefresh {
             disturbed.addAll(outcome.deleted)
             removed.addAll(outcome.deleted)
             stopped = outcome.stopped
+            clearedHops = outcome.clearedHops
             // A survivor still belongs to the subscription: fall through to the diff. A row gone meanwhile is none.
             val alive = ProfileManager.memberIds(gid).toHashSet()
             members = members.filter { it.id in alive }
@@ -437,7 +443,7 @@ internal object SubscriptionRefresh {
                 if (keptWorking(profile)) working.add(profile.id)
             }
         }
-        return Snapshot(sticky, stickyIds, membersBefore, routeNames, old, working, cleared, stopped)
+        return Snapshot(sticky, stickyIds, membersBefore, routeNames, old, working, cleared, stopped, clearedHops)
     }
 
     /**

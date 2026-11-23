@@ -28,14 +28,14 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * One test sweep (TestRunner's session): resolves the profiles, runs the kind's runner, persists every result as it
- * lands (desktop result codes) and streams it to [client], shows the progress notification, and after a URL sweep
- * clears the unavailable profiles of a group with `auto_clear_unavailable`.
+ * lands (desktop result codes) and streams it to [client], shows the progress notification, and after a URL sweep that
+ * ran to the end clears the unavailable profiles of the tested groups with `auto_clear_unavailable`.
  */
 internal class TestSession(
     val id: Int,
     val spec: TestSpec,
     client: ITestSessionCallback?,
-    /** Gets each URL result once stored (TestRunner's ResultHook). */
+    /** Gets each URL result once stored (TestRunner's ResultHook); set for auto-selector ranking. */
     private val onUrlStored: ((ProxyEntity) -> Unit)? = null,
 ) {
 
@@ -44,8 +44,9 @@ internal class TestSession(
         val url: String = spec.url.ifBlank { DataStore.testUrl }
         val timeoutMs: Int = spec.timeoutMs.takeIf { it > 0 } ?: DataStore.urlTestTimeoutMs
         val concurrency: Int = spec.concurrency.takeIf { it > 0 } ?: DataStore.testConcurrent
-        val speedMode: Int = spec.speedMode.takeIf { it in SpeedTestSettings.FULL..SpeedTestSettings.COUNTRY }
-            ?: DataStore.speedTestMode
+        // The removed "Only country" mode (4) runs as FULL, as on the desktop.
+        val speedMode: Int = (spec.speedMode.takeIf { it >= 0 } ?: DataStore.speedTestMode)
+            .takeIf { it in SpeedTestSettings.FULL..SpeedTestSettings.SIMPLE_DOWNLOAD } ?: SpeedTestSettings.FULL
         val speedTimeoutMs: Int = spec.speedTimeoutMs.takeIf { it > 0 } ?: DataStore.speedTestTimeoutMs
         val simpleDlUrl: String = spec.simpleDlUrl.ifBlank { DataStore.simpleDlUrl }
         val creditTraffic: Boolean = !DataStore.disableTrafficStats
@@ -180,7 +181,8 @@ internal class TestSession(
         when (kind) {
             TestSpec.KIND_URL -> {
                 UrlTestRunner(this).run(profiles)
-                autoClearUnavailable(profiles)
+                // Ranking never deletes the selector's members.
+                if (!cancelled && onUrlStored == null) autoClearUnavailable(profiles)
             }
 
             TestSpec.KIND_IP -> IpTestRunner(this).run(profiles)
@@ -196,11 +198,7 @@ internal class TestSession(
         when (kind) {
             TestSpec.KIND_URL -> UrlTestRunner(this).runCurrent(running)
             TestSpec.KIND_SPEED -> SpeedTestRunner(this).runCurrent(running)
-            // runCurrentServiceCheck is not ported: the menus check stored profiles only
-            TestSpec.KIND_SERVICE -> reportService(
-                listOf(ProbeResult(running?.profileId ?: 0L, error = ERROR_ABORTED, measured = false))
-            )
-
+            TestSpec.KIND_SERVICE -> ServiceTestRunner(this).runCurrent(running)
             else -> reportIp(
                 listOf(
                     ProbeResult(
@@ -226,12 +224,17 @@ internal class TestSession(
         notification.changed()
     }
 
-    /** TestRunner.cpp:393-404: the first tested profile's group drops its unavailable ones; the running one stays. */
+    /**
+     * TestRunner::runLatencyGroup: each tested group with `auto_clear_unavailable` drops its tested profiles that are
+     * unavailable; the running one stays.
+     */
     private suspend fun autoClearUnavailable(profiles: List<ProxyEntity>) {
-        val group = profiles.firstOrNull()?.let { GroupRepo.get(it.groupId) } ?: return
-        if (!group.autoClearUnavailable) return
+        val clearable = profiles.groupBy({ it.groupId }, { it.id }).flatMap { (groupId, ids) ->
+            if (GroupRepo.get(groupId)?.autoClearUnavailable == true) ids else emptyList()
+        }
+        if (clearable.isEmpty()) return
         val unavailable = try {
-            profiles.map { it.id }.chunked(ProfileManager.CHUNK).flatMap { ids ->
+            clearable.chunked(ProfileManager.CHUNK).flatMap { ids ->
                 SagerDatabase.proxyDao.getWithoutData(ids).filter { it.isUnavailable() }.map { it.id }
             }
         } catch (e: SQLException) {
@@ -310,21 +313,25 @@ internal class TestSession(
     }
 
     /**
-     * The speed result loop of TestRunner.cpp:632-647 (the server's country name mapped to its code); the callback
-     * carries the values as stored.
+     * The speed result loop of TestRunner::runSpeedProbe: a cancelled, aborted or never-measured result stores nothing
+     * and keeps the previous speeds; the callback carries the values as stored.
      */
     fun reportSpeed(profileId: Long, result: SpeedTestResult) {
         val error = result.error.orEmpty()
         val dl = result.dlSpeed.orEmpty()
         val ul = result.ulSpeed.orEmpty()
-        val country = CountryNames.toCode(result.serverCountry)
+        if (result.cancelled || !ProxyEntity.isSpeedMeasured(dl, ul, error)) {
+            val reason = when {
+                ProxyEntity.isTestAborted(error) -> error
+                result.cancelled || cancelled -> ERROR_ABORTED
+                else -> ERROR_NO_RESULT
+            }
+            reportSpeedUnmeasured(profileId, reason)
+            return
+        }
         if (error.isNotEmpty()) Logs.w("[${nameOf(profileId)}] speed test error: $error")
         val stored = try {
-            if (error.isEmpty()) {
-                ProfileManager.saveSpeedTestResult(profileId, dl, ul, result.latency, country, "")
-            } else {
-                ProfileManager.saveSpeedTestResult(profileId, "", "", 0, "", error)
-            }
+            ProfileManager.saveSpeedTestResult(profileId, dl, ul, error)
         } catch (e: Exception) {
             Logs.w(e)
             null
@@ -337,9 +344,9 @@ internal class TestSession(
                     stored.testCountry.orEmpty(), error,
                 )
             } else if (error.isEmpty()) {
-                it.onSpeedResult(profileId, dl, ul, result.latency, country, error)
+                it.onSpeedResult(profileId, dl, ul, 0, "", error)
             } else {
-                it.onSpeedResult(profileId, ProxyEntity.SPEED_NA, ProxyEntity.SPEED_NA, -1, "", error)
+                it.onSpeedResult(profileId, ProxyEntity.SPEED_NA, ProxyEntity.SPEED_NA, 0, "", error)
             }
         }
     }

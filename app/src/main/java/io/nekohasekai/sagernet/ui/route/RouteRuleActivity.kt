@@ -284,17 +284,8 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             // D11: a desktop simple rule keeps its type only while it still fits it.
             val type = RuleType.ofId(edited.type)
             if (type != RuleType.CUSTOM && !edited.fitsType(type)) edited.type = RuleType.CUSTOM.id
-            val action = edited.effectiveAction()
-            if (!RouteRuleChecks.hasConditions(edited) && (action == "route" || action == "bypass" || action == "reject")) {
-                MaterialAlertDialogBuilder(this@RouteRuleActivity)
-                    .setTitle(R.string.route_rule_catch_all_title)
-                    .setMessage(R.string.route_rule_catch_all)
-                    .setPositiveButton(R.string.yes) { _, _ -> finishWith(edited) }
-                    .setNegativeButton(R.string.no, null)
-                    .show()
-            } else {
-                finishWith(edited)
-            }
+            // RuleProblems made an enabled catch-all rule an error, so the form has refused it already.
+            finishWith(edited)
         }
     }
 
@@ -478,7 +469,10 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             return if (items.size > max) shown + separator + "…" else shown
         }
 
-        /** proxy, direct, block, warp-bypass, then every server as "[group] name"; stored values outside that list stay selectable. */
+        /**
+         * proxy, direct, block, Proxy without exit (warp-bypass, explained while chosen), then every server as
+         * "[group] name"; stored values outside that list stay selectable.
+         */
         private fun setupOutbounds() {
             val pref = findPreference<SimpleMenuPreference>("outbound_id") ?: return
             val current = pref.value?.toLongOrNull() ?: OutboundIds.DIRECT
@@ -491,7 +485,7 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             add(OutboundIds.toName(OutboundIds.PROXY), OutboundIds.PROXY)
             add(OutboundIds.toName(OutboundIds.DIRECT), OutboundIds.DIRECT)
             add(OutboundIds.toName(OutboundIds.BLOCK), OutboundIds.BLOCK)
-            add(RouteTexts.WARP_BYPASS, OutboundIds.WARP_BYPASS)
+            add(getString(R.string.route_outbound_no_exit), OutboundIds.WARP_BYPASS)
             if (current == OutboundIds.HIJACK_DNS) add("hijack-dns", OutboundIds.HIJACK_DNS)
             for ((id, label) in host.servers) add(label, id)
             if (current > 0 && host.servers.none { it.first == current }) {
@@ -500,6 +494,10 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             pref.entries = entries.toTypedArray()
             pref.entryValues = values.toTypedArray()
             pref.value = current.toString()
+            pref.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
+                val label = it.entry ?: it.value.orEmpty()
+                if (it.value == OutboundIds.WARP_BYPASS.toString()) "$label\n${getString(R.string.route_outbound_no_exit_hint)}" else label
+            }
         }
 
         /** A stored value the menu does not offer (e.g. from a desktop profile) is added so it is not replaced. */

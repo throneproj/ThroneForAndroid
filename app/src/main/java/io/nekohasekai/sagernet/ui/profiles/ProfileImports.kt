@@ -12,6 +12,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.SettingsMapper
+import io.nekohasekai.sagernet.group.SubscriptionClient
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.snackbar
@@ -38,6 +39,7 @@ import io.nekohasekai.sagernet.ui.profile.MieruSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.NaiveSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.OpenConnectSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.OpenVpnSettingsActivity
+import io.nekohasekai.sagernet.ui.profile.PsiphonSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.SSHSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.ShadowTLSSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.ShadowsocksSettingsActivity
@@ -104,6 +106,10 @@ class ProfileImports(private val host: ConfigurationFragment) {
                     host.onUi { SubscribeFlows.importUri(activity, uri, groupId) }
                     return@launchIo
                 }
+                SubscriptionClient.importRefusal(groupId)?.let { refusal ->
+                    host.onUi { snackbar(refusal).show() }
+                    return@launchIo
+                }
                 val outbounds = mutableListOf<Outbound>()
                 val report = ImportReport()
                 val preference = SettingsMapper.xrayVlessPreference()
@@ -159,6 +165,7 @@ class ProfileImports(private val host: ConfigurationFragment) {
         R.id.action_new_trusttunnel -> TrustTunnelSettingsActivity::class.java
         R.id.action_new_dnstt -> DnsttSettingsActivity::class.java
         R.id.action_new_masterdns -> MasterDnsSettingsActivity::class.java
+        R.id.action_new_psiphon -> PsiphonSettingsActivity::class.java
         R.id.action_new_direct -> DirectSettingsActivity::class.java
         R.id.action_new_masque -> MasqueSettingsActivity::class.java
         R.id.action_new_openvpn -> OpenVpnSettingsActivity::class.java

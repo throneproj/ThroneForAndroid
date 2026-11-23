@@ -6,6 +6,7 @@ import io.nekohasekai.sagernet.ui.SaveDocument
 import androidx.appcompat.widget.PopupMenu
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.bg.autoselector.AutoSelectorProfiles
 import io.nekohasekai.sagernet.bg.test.TestSpec
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupRepo
@@ -85,6 +86,9 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
             !profile.outbound.invalid && address.isNotEmpty() && !address.isIpAddress()
         menu.findItem(R.id.action_clear_test_results).isVisible = profile.hasTestResults()
         menu.findItem(R.id.action_service_results).isVisible = profile.serviceChecks.isNotEmpty()
+        // RuntimeStatsWidget's Check button: the running connection, never an auto-selector
+        menu.findItem(R.id.action_test_service_current).isVisible = host.isStartedProfile(profile.id) &&
+            DataStore.serviceState.connected && profile.type != AutoSelectorProfiles.TYPE
         menu.findItem(R.id.action_clear_traffic_statistics).isVisible = profile.tx != 0L || profile.rx != 0L
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -94,6 +98,7 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
                 R.id.action_test_ip -> test(profile, TestSpec.KIND_IP)
                 R.id.action_test_speed -> test(profile, TestSpec.KIND_SPEED)
                 R.id.action_test_service -> ProfileTests.startServiceProfiles(host, listOf(profile.id), profile.groupId)
+                R.id.action_test_service_current -> ProfileTests.startServiceCurrent(host)
                 R.id.action_service_results -> showServiceResults(profile)
                 R.id.action_pin ->setPinned(host, profile.groupId, listOf(profile.id), !pinned)
                 R.id.action_resolve_domain -> resolve(profile)

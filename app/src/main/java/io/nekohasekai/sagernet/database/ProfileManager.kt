@@ -3,6 +3,7 @@ package io.nekohasekai.sagernet.database
 import android.database.sqlite.SQLiteCantOpenDatabaseException
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.aidl.TrafficData
+import io.nekohasekai.sagernet.group.SubscriptionClient
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.outbound.Outbound
 import java.io.IOException
@@ -32,14 +33,22 @@ object ProfileManager {
 
     /**
      * The result of [batchDeleteProfiles]: [kept] holds the requested ids that were not deleted, [stopped] the running
-     * profile this delete stopped (allow_stopping_active_profile).
+     * profile this delete stopped (allow_stopping_active_profile), [clearedHops] the groups that lost a deleted profile
+     * as front/landing proxy.
      */
     class DeleteOutcome(
         @JvmField val ok: Boolean,
         @JvmField val deleted: List<Long>,
         @JvmField val kept: List<Long>,
         @JvmField val stopped: ProxyEntity? = null,
+        @JvmField val clearedHops: List<GroupRepo.HopReference> = emptyList(),
     )
+
+    /** Why a group takes no imported or moved profiles: ImportService::CheckTarget's refusals and MoveToGroup's [BUSY]. */
+    enum class TargetRefusal { NOT_FOUND, ARCHIVED, SUBSCRIPTION, BUSY }
+
+    /** The result of [moveToGroup]: how many profiles moved, or why none did. */
+    class MoveOutcome(@JvmField val moved: Int, @JvmField val refusal: TargetRefusal? = null)
 
     /** SQLite's bound-parameter limit is 999; id lists are split below it. */
     internal const val CHUNK = 500
@@ -120,6 +129,36 @@ object ProfileManager {
         val running = runningProfileId()
         if (running <= 0L || profileId <= 0L) return false
         return profileId == running || profileId.toString() in DataStore.runningProfiles
+    }
+
+    /**
+     * Whether a change to [profileIds] leaves the running config stale: it uses one of them besides the running
+     * profile itself, which a delete either stops or keeps. Read before the change, which may stop the service.
+     */
+    internal fun runningUsesOther(profileIds: Collection<Long>): Boolean {
+        val running = runningProfileId()
+        return running > 0L && profileIds.any { it != running && runningUses(it) }
+    }
+
+    /**
+     * ProfileService's noteRestartNeeded for a change made in the main process: the window's reload hint. The deletes of
+     * :bg (subscription refreshes, test clean-ups) give none, as GroupUpdater's do not.
+     */
+    internal fun noteRestartNeeded(groupId: Long) {
+        if (!SagerNet.application.isBgProcess) SubscriptionClient.reloadNeeded(groupId)
+    }
+
+    /**
+     * ImportService::CheckTarget: null when group [groupId] takes imported or moved profiles. An archived group takes
+     * none, nor does a subscription, whose next update would delete them.
+     */
+    fun checkTarget(groupId: Long): TargetRefusal? {
+        val group = GroupRepo.get(groupId) ?: return TargetRefusal.NOT_FOUND
+        return when {
+            group.archive -> TargetRefusal.ARCHIVED
+            group.isSubscription -> TargetRefusal.SUBSCRIPTION
+            else -> null
+        }
     }
 
     // ------------------------------------------------------------------------------------------------ add
@@ -213,8 +252,12 @@ object ProfileManager {
 
     // ------------------------------------------------------------------------------------------------ delete
 
-    /** Deletes one profile (the list's own delete, no running-profile rule) and closes the gap in its group. */
+    /**
+     * Deletes one profile (the list's own delete, no running-profile rule) and closes the gap in its group; groups
+     * lose it as front/landing proxy, and one the running config uses gives the reload hint (ProfileService::Delete).
+     */
     suspend fun deleteProfile(groupId: Long, profileId: Long) {
+        val used = runningUsesOther(listOf(profileId))
         val deleted = SagerDatabase.instance.runInTransaction(Callable {
             // In a group numbered 0..n-1, shifting the rows behind the gap is the same as renumbering them all.
             val order = dao.orderInGroup(profileId, groupId)?.takeIf { dao.isDense(groupId) }
@@ -228,12 +271,16 @@ object ProfileManager {
             DataStore.selectedProxy = 0L
         }
         iterator { onRemoved(groupId, profileId) }
+        GroupRepo.clearHopReferences(listOf(profileId))
+        if (used) noteRestartNeeded(groupId)
     }
 
     /**
      * ProfilesRepo::BatchDeleteProfiles through GroupUpdater's deleteProfiles: when the running profile is among
      * [profileIds] the service is stopped if [stopRunning] (allow_stopping_active_profile), otherwise that profile is
-     * kept. Each affected group is compacted and reloaded once.
+     * kept. Each affected group is compacted and reloaded once, and groups lose the deleted ones as front/landing proxy
+     * (ClearHopReferences). A delete that leaves the service running with a config built from a deleted profile gives
+     * the reload hint ([noteRestartNeeded]).
      */
     suspend fun batchDeleteProfiles(
         profileIds: List<Long>,
@@ -243,6 +290,7 @@ object ProfileManager {
         if (requested.isEmpty()) return DeleteOutcome(true, emptyList(), emptyList())
         val toDelete = ArrayList(requested)
         val running = runningProfileId()
+        val used = requested.filter { runningUsesOther(listOf(it)) }
         var stopping: ProxyEntity? = null
         if (running > 0 && running in toDelete) {
             if (stopRunning) {
@@ -275,8 +323,12 @@ object ProfileManager {
         }
         if (DataStore.selectedProxy in deleted) DataStore.selectedProxy = 0L
         for (gid in groups) GroupRepo.postReload(gid)
+        val clearedHops = GroupRepo.clearHopReferences(deleted)
         val deletedSet = deleted.toHashSet()
-        return DeleteOutcome(ok, deleted, requested.filter { it !in deletedSet }, stopping?.takeIf { ok && it.id in deletedSet })
+        if (stopping == null && used.any { it in deletedSet }) noteRestartNeeded(-1L)
+        return DeleteOutcome(
+            ok, deleted, requested.filter { it !in deletedSet }, stopping?.takeIf { ok && it.id in deletedSet }, clearedHops,
+        )
     }
 
     // ------------------------------------------------------------------------------------------------ order
@@ -298,32 +350,45 @@ object ProfileManager {
         GroupRepo.postReload(groupId)
     }
 
-    /** Android extra: moves [profileIds] to the end of group [groupId] in the given order. */
-    suspend fun moveToGroup(profileIds: List<Long>, groupId: Long) {
-        if (GroupRepo.get(groupId) == null) return
+    /**
+     * ProfileService::MoveToGroup: [profileIds] to the end of group [groupId] in the given order, refused for a target
+     * [checkTarget] refuses. Refused too while the subscription of a group they leave is [updating] (queued or running):
+     * the refresh rewrites its group from a snapshot, which would bring a moved profile back or delete it. Moving a
+     * profile the running config uses gives the reload hint, as that config was built with the old group's proxies,
+     * routing and endpoint.
+     */
+    suspend fun moveToGroup(profileIds: List<Long>, groupId: Long, updating: Collection<Long>): MoveOutcome {
+        checkTarget(groupId)?.let { return MoveOutcome(0, it) }
+        val busy = updating.toHashSet()
         val sources = HashSet<Long>()
         val moved = ArrayList<Long>()
-        SagerDatabase.instance.runInTransaction {
-            var order = dao.nextOrder(groupId)
+        val refusal = SagerDatabase.instance.runInTransaction(Callable<TargetRefusal?> {
+            val movable = ArrayList<Long>()
             for (chunk in profileIds.distinct().chunked(CHUNK)) {
-                val movable = dao.idsOutsideGroup(chunk, groupId).toHashSet()
-                if (movable.isEmpty()) continue
-                sources.addAll(dao.groupsOf(movable.toList()))
-                for (id in chunk) {
-                    if (id !in movable) continue
-                    dao.setGroup(id, groupId, order++)
-                    moved.add(id)
-                }
+                val outside = dao.idsOutsideGroup(chunk, groupId).toHashSet()
+                chunk.filterTo(movable) { it in outside }
+            }
+            for (chunk in movable.chunked(CHUNK)) sources.addAll(dao.groupsOf(chunk))
+            if (sources.any { it in busy }) return@Callable TargetRefusal.BUSY
+            var order = dao.nextOrder(groupId)
+            for (id in movable) {
+                dao.setGroup(id, groupId, order++)
+                moved.add(id)
             }
             // A pin stays with its group: the moved profiles arrive unpinned.
             for (gid in sources) {
                 compactLocked(gid)
                 normalizePinsLocked(gid)
             }
-        }
+            null
+        })
+        if (refusal != null) return MoveOutcome(0, refusal)
+        if (moved.isEmpty()) return MoveOutcome(0)
         for (gid in sources) GroupRepo.postReload(gid)
         GroupRepo.postReload(groupId)
         GroupSort.repositionLater(mapOf(groupId to moved), SortInput.MEMBERSHIP)
+        if (moved.any { runningUses(it) }) noteRestartNeeded(groupId)
+        return MoveOutcome(moved.size)
     }
 
     /** Renumbers the group's members 0..n-1 in their current order. */
@@ -492,33 +557,29 @@ object ProfileManager {
         )
     }
 
-    /** TestRunner::applyUrlResult; returns the updated profile, null when it no longer exists. */
+    /**
+     * TestRunner::applyUrlResult; returns the updated profile, null when it no longer exists or the test was aborted
+     * (nothing saved).
+     */
     fun saveUrlTestResult(profileId: Long, latencyMs: Int, error: String, connectOnly: Boolean = false): ProxyEntity? {
         val profile = getProfile(profileId) ?: return null
-        profile.applyUrlResult(latencyMs, error, connectOnly)
+        if (!profile.applyUrlResult(latencyMs, error, connectOnly)) return null
         saveTestResult(profile)
         return profile
     }
 
-    /** TestRunner::applyIpResult. */
+    /** TestRunner::applyIpResult; null as for [saveUrlTestResult]. */
     fun saveIpTestResult(profileId: Long, ip: String, country: String, error: String): ProxyEntity? {
         val profile = getProfile(profileId) ?: return null
-        profile.applyIpResult(ip, country, error)
+        if (!profile.applyIpResult(ip, country, error)) return null
         saveTestResult(profile)
         return profile
     }
 
-    /** The speed-test result loop of TestRunner.cpp:614-648; [country] is an ISO code. */
-    fun saveSpeedTestResult(
-        profileId: Long,
-        dl: String,
-        ul: String,
-        latencyMs: Int,
-        country: String,
-        error: String,
-    ): ProxyEntity? {
+    /** The speed-test result loop of TestRunner::runSpeedProbe; null as for [saveUrlTestResult]. */
+    fun saveSpeedTestResult(profileId: Long, dl: String, ul: String, error: String): ProxyEntity? {
         val profile = getProfile(profileId) ?: return null
-        profile.applySpeedResult(dl, ul, latencyMs, country, error)
+        if (!profile.applySpeedResult(dl, ul, error)) return null
         saveTestResult(profile)
         return profile
     }

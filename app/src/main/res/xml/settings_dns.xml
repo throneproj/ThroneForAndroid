@@ -10,7 +10,6 @@
         app:key="dnsServers"
         app:title="@string/cag_dns_servers">
         <io.nekohasekai.sagernet.ui.settings.DnsServerPreference
-            app:dialogMessage="@string/dns_address_dialog_message"
             app:icon="@drawable/ic_action_dns"
             app:key="remote_dns"
             app:title="@string/remote_dns"
@@ -20,7 +19,6 @@
             app:summary="@string/dns_disable_ipv6_sum"
             app:title="@string/remote_dns_disable_ipv6" />
         <io.nekohasekai.sagernet.ui.settings.DnsServerPreference
-            app:dialogMessage="@string/dns_address_dialog_message"
             app:icon="@drawable/ic_action_dns"
             app:key="direct_dns"
             app:title="@string/direct_dns"

@@ -91,6 +91,7 @@ internal object SubscriptionFilters {
         val outcome = ProfileManager.batchDeleteProfiles(doomed)
         if (!outcome.ok) SubscriptionRefresh.dbError(gid)
         if (outcome.kept.isNotEmpty()) sections.append('\n').append(app.getString(R.string.subs_running_kept))
+        sections.append(GroupRepo.hopNotice(outcome.clearedHops))
         return Outcome(outcome.deleted, sections.toString(), outcome.stopped, outcome.ok)
     }
 
@@ -150,6 +151,7 @@ internal object SubscriptionFilters {
             report.append('\n').append(app.getString(R.string.subs_removed_countries, refusedNames.size)).append('\n')
                 .append(SubscriptionRefresh.notice(refusedNames, "[-]", "removed"))
             if (deleted.kept.isNotEmpty()) report.append('\n').append(app.getString(R.string.subs_running_kept))
+            report.append(GroupRepo.hopNotice(deleted.clearedHops))
             outcome = deleted
         }
         SubscriptionCountryVerdicts.save(gid, verdicts)
@@ -175,6 +177,7 @@ internal object SubscriptionFilters {
                 report.append('\n').append(app.getString(R.string.subs_removed_unavailable, names.size)).append('\n')
                     .append(SubscriptionRefresh.notice(names, "[-]", "removed"))
                 if (outcome.kept.isNotEmpty()) report.append('\n').append(app.getString(R.string.subs_running_kept))
+                report.append(GroupRepo.hopNotice(outcome.clearedHops))
             }
         }
         if (options.sortByLatency && !GroupSort.sortProfiles(group.id, GroupSortAction(GroupSortMethod.BY_LATENCY))) {
@@ -201,6 +204,7 @@ internal object SubscriptionFilters {
         var report = app.getString(R.string.subs_removed_invalid, names.size) + "\n" +
             SubscriptionRefresh.notice(names, "[-]", "removed")
         if (outcome.kept.isNotEmpty()) report += "\n" + app.getString(R.string.subs_running_kept)
+        report += GroupRepo.hopNotice(outcome.clearedHops)
         Logs.i(report)
         return report.trim()
     }

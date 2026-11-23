@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- theSVG microsoft-copilot (MIT), as the desktop's ServiceIcons.cpp -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="513"
+    android:viewportHeight="513">
+    <path android:pathData="M348.3 116.17L343.14 136.8L293.52 136.8C256.75 136.8 224.7 161.83 215.78 197.5L170.86 377.2L81.17 377.2C29.04 377.2 -9.21 328.21 3.43 277.63L48.46 97.53C60.35 49.97 103.08 16.6 152.11 16.6L270.56 16.6C322.69 16.6 360.94 65.59 348.3 116.17">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0.999"
+                android:startY="16.6"
+                android:endX="0.999"
+                android:endY="377.2">
+                <item android:offset="0" android:color="#FF109DF2" />
+                <item android:offset="0.5" android:color="#FFAAD445" />
+                <item android:offset="1" android:color="#FFFFD400" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M165.7 397.83L170.86 377.2L220.48 377.2C257.25 377.2 289.3 352.17 298.22 316.5L343.14 136.8L432.83 136.8C484.96 136.8 523.21 185.79 510.57 236.37L465.55 416.47C453.66 464.03 410.92 497.4 361.89 497.4L243.44 497.4C191.31 497.4 153.06 448.41 165.7 397.83">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="163.269"
+                android:startY="136.8"
+                android:endX="163.269"
+                android:endY="497.4">
+                <item android:offset="0" android:color="#FF8C48FF" />
+                <item android:offset="0.5" android:color="#FFF2598A" />
+                <item android:offset="1" android:color="#FFFFB152" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>

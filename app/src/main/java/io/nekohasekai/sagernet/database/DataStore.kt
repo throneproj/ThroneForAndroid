@@ -16,6 +16,7 @@ import io.nekohasekai.sagernet.ktx.int
 import io.nekohasekai.sagernet.ktx.long
 import io.nekohasekai.sagernet.ktx.string
 import io.nekohasekai.sagernet.ktx.stringToInt
+import io.nekohasekai.sagernet.outbound.config.ExitThrough
 import moe.matsuri.nb4a.TempDatabase
 import java.util.UUID
 
@@ -143,6 +144,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var rememberEnable by SettingsRegistry.REMEMBER_ENABLE
     var skipDeleteConfirmation by SettingsRegistry.SKIP_DELETE_CONFIRMATION
     var allowBetaUpdate by SettingsRegistry.ALLOW_BETA_UPDATE
+    var backupParts by SettingsRegistry.BACKUP_PARTS
 
     // inbound
 
@@ -280,9 +282,40 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var subHttpVersion by SettingsRegistry.SUB_HTTP_VERSION
     var subRespectServerInterval by SettingsRegistry.SUB_RESPECT_SERVER_INTERVAL
 
+    // exit
+    @Volatile
+    private var legacyExitMigrated = false
+
+    /** exit_through; an unknown stored value reads as [ExitThrough.SERVER] and stays stored until the exit is changed. */
+    var exitThrough: ExitThrough
+        get() {
+            migrateLegacyExit()
+            return ExitThrough.of(SettingsRegistry.EXIT_THROUGH.read(configurationStore))
+        }
+        set(value) {
+            migrateLegacyExit()
+            SettingsRegistry.EXIT_THROUGH.write(configurationStore, value.value)
+        }
+
+    /** WARP is the exit (the desktop's former enable_warp). */
+    val isWarpExit: Boolean get() = exitThrough == ExitThrough.WARP
+
+    var torExitCountry by SettingsRegistry.TOR_EXIT_COUNTRY
+    var psiphonEgressRegion by SettingsRegistry.PSIPHON_EGRESS_REGION
+
+    /**
+     * SettingsRepo::load: enable_tor / enable_warp become exit_through when it is absent, then go; once per process,
+     * since both processes share the table and the migration is idempotent.
+     */
+    fun migrateLegacyExit() {
+        if (legacyExitMigrated) return
+        val store = configurationStore
+        SettingsRegistry.legacyExitThrough(store::getRaw)?.let { SettingsRegistry.EXIT_THROUGH.write(store, it) }
+        for (key in SettingsRegistry.LEGACY_EXIT_KEYS) if (store.contains(key)) store.remove(key)
+        legacyExitMigrated = true
+    }
+
     // warp
-    var enableWarp by SettingsRegistry.ENABLE_WARP
-    var enableTor by SettingsRegistry.ENABLE_TOR
     var warpMode by SettingsRegistry.WARP_MODE
     var warpEp by SettingsRegistry.WARP_EP
     var warpPrivateKey by SettingsRegistry.WARP_PRIVATE_KEY

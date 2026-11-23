@@ -21,6 +21,7 @@ import io.nekohasekai.sagernet.database.backup.DesktopSchema.SETTINGS
 import io.nekohasekai.sagernet.group.RemoteRouteUpdater
 import io.nekohasekai.sagernet.group.SubscriptionScheduler
 import io.nekohasekai.sagernet.ktx.app
+import io.nekohasekai.sagernet.outbound.config.ExitThrough
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.json.JsonValues
@@ -276,6 +277,7 @@ object BackupRestore {
         if (rules.rows.size < before) warnings.add(app.getString(R.string.backup_warn_orphan_rules, before - rules.rows.size))
         if (owner >= 0) {
             skipUnsupportedRules(bak, main, rules, warnings)
+            remapRemoteRules(bak, profiles, rules)
             // RoutesRepo numbers each profile's rules 0..n-1: close the gaps of skipped rows and of the backup itself.
             val order = rules.index("rule_order")
             val next = HashMap<Any?, Long>()
@@ -289,6 +291,42 @@ object BackupRestore {
         if (raw > 0) warnings.add(app.getString(R.string.backup_warn_raw_routes, raw))
         staged.routeProfiles = profiles
         staged.routeRules = rules
+    }
+
+    /**
+     * `remote_rules` lists rule positions (RoutesRepo.cpp routesRepoRemoteIndexes), which the rules skipped here shift:
+     * each position follows its rule, and a skipped remote rule drops out. NULL stays NULL (origins not tracked).
+     */
+    private fun remapRemoteRules(bak: SQLiteDatabase, profiles: SqlTable, rules: SqlTable) {
+        val column = profiles.index("remote_rules")
+        if (column < 0) return
+        val original = HashMap<Pair<Any?, Any?>, Int>()
+        val counted = HashMap<Any?, Int>()
+        bak.rawQuery("SELECT `route_profile_id`, `rule_order` FROM `$ROUTE_RULES` ORDER BY `route_profile_id`, `rule_order`", null).use { c ->
+            while (c.moveToNext()) {
+                val profile = c.value(0)
+                val n = counted[profile] ?: 0
+                original[profile to c.value(1)] = n
+                counted[profile] = n + 1
+            }
+        }
+        val owner = rules.index("route_profile_id")
+        val order = rules.index("rule_order")
+        val positions = HashMap<Any?, HashMap<Int, Int>>()
+        val kept = HashMap<Any?, Int>()
+        for (row in rules.rows) {
+            val n = kept[row[owner]] ?: 0
+            original[row[owner] to row[order]]?.let { positions.getOrPut(row[owner]) { HashMap() }[it] = n }
+            kept[row[owner]] = n + 1
+        }
+        val id = profiles.index("id")
+        for (row in profiles.rows) {
+            val array = (row[column] as? String)?.let { JsonInput.parseValue(it) } as? JsonArray ?: continue
+            val moved = positions[row[id]].orEmpty()
+            val out = JsonArray()
+            array.filter { it is Long || it is Double }.mapNotNull { moved[JsonValues.toInt(it)] }.distinct().sorted().forEach { out.add(it) }
+            row[column] = out.toCompact()
+        }
     }
 
     /**
@@ -411,13 +449,14 @@ object BackupRestore {
     }
 
     /**
-     * R10 §8.3: an Android backup replaces every row but the device-local keys; a desktop backup replaces the desktop
-     * rows and keeps this phone's Android-only rows (adopting only those the phone lacks). Unknown and desktop-only
-     * keys are stored as they are so they go back to the desktop; enable_tor is one, with a warning since Android has
-     * no Tor exit.
+     * R10 §8.3: an Android backup replaces every row but the device-local and Host keys; a desktop backup replaces the
+     * desktop rows and keeps this phone's Android-only rows (adopting only those the phone lacks). Unknown and
+     * desktop-only keys are stored as they are so they go back to the desktop; exit_through "tor" is kept too, with a
+     * warning since Android has no Tor exit.
      */
     private fun applySettings(db: SupportSQLiteDatabase, staged: Staged, fromAndroid: Boolean, warnings: MutableList<String>) {
-        val kept = if (fromAndroid) SettingsRegistry.DEVICE_LOCAL_KEYS else SettingsRegistry.DEVICE_LOCAL_KEYS + SettingsRegistry.ANDROID_KEYS
+        val local = SettingsRegistry.DEVICE_LOCAL_KEYS + SettingsRegistry.HOST_KEYS
+        val kept = if (fromAndroid) local else local + SettingsRegistry.ANDROID_KEYS
         db.execSQL(
             "DELETE FROM `$SETTINGS` WHERE `key` NOT IN (${kept.joinToString(",") { "?" }})",
             kept.toTypedArray<Any?>()
@@ -425,7 +464,7 @@ object BackupRestore {
         db.compileStatement("INSERT OR REPLACE INTO `$SETTINGS` (`key`, `value`) VALUES (?, ?)").use { replace ->
             db.compileStatement("INSERT OR IGNORE INTO `$SETTINGS` (`key`, `value`) VALUES (?, ?)").use { ignore ->
                 for ((key, value) in staged.settings.orEmpty()) {
-                    if (key in SettingsRegistry.DEVICE_LOCAL_KEYS) continue
+                    if (key in local) continue
                     val statement = if (!fromAndroid && key in SettingsRegistry.ANDROID_KEYS) ignore else replace
                     statement.clearBindings()
                     statement.bindString(1, key)
@@ -434,8 +473,12 @@ object BackupRestore {
                 }
             }
         }
-        val tor = staged.settings?.get(SettingsRegistry.ENABLE_TOR.key)
-        if (tor != null && SettingsRegistry.ENABLE_TOR.decode(tor) == true) warnings.add(app.getString(R.string.backup_warn_tor_egress))
+        // SettingsRepo::load: a backup from before exit_through brings enable_tor / enable_warp instead.
+        SettingsRegistry.legacyExitThrough { readSetting(db, it) }?.let { writeSetting(db, SettingsRegistry.EXIT_THROUGH.key, it) }
+        for (key in SettingsRegistry.LEGACY_EXIT_KEYS) writeSetting(db, key, null)
+        if (ExitThrough.of(readSetting(db, SettingsRegistry.EXIT_THROUGH.key)) == ExitThrough.TOR) {
+            warnings.add(app.getString(R.string.backup_warn_tor_egress))
+        }
         // Database.cpp:357-359: without a markers table the backup predates the migrations, which then run again.
         db.execSQL("DELETE FROM `$MARKERS`")
         staged.markers?.let { insertRows(db, MARKERS, it) }

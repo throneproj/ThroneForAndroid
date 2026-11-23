@@ -122,7 +122,8 @@ object SettingsMapper {
             xrayLogLevel = DataStore.xrayLogLevel,
             testUrl = DataStore.testUrl,
             directTestUrl = DataStore.directTestUrl,
-            enableWarp = DataStore.enableWarp,
+            exitThrough = DataStore.exitThrough,
+            psiphonEgressRegion = DataStore.psiphonEgressRegion,
             warpMode = DataStore.warpMode,
             warpEp = DataStore.warpEp,
             warpPrivateKey = DataStore.warpPrivateKey,
@@ -178,6 +179,7 @@ object SettingsMapper {
         directDnsDisableIpv6 = dns?.directDnsDisableIpv6 ?: DataStore.directDnsDisableIpv6,
         useDnsObject = DataStore.useDnsObject,
         routeOwnsDns = dns != null,
+        rulesetMirror = DataStore.rulesetMirror,
     )
 
     /** xray_vless_preference for link and subscription imports (utils.cpp:50-70). */

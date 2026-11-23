@@ -20,7 +20,6 @@ enum class AutoSelectorSkip(@JvmField val reason: String) {
     ManagementEndpoint("OpenVPN or OpenConnect profile"),
     NameFilter("filtered out by name"),
     CountryFilter("filtered out by country"),
-    Unavailable("last test failed"),
     XrayFullChained("Xray full config cannot be combined with the group's proxies"),
 
     /** Android only: a stored type this build cannot generate. */
@@ -65,7 +64,7 @@ fun interface SelectorStore {
 
 /** AutoSelectorPlan (AutoSelectorPlan.h:31-58) over every tracked group. */
 class AutoSelectorPlan internal constructor() {
-    /** Eligible members, best first, capped at pool_cap; in priority mode tier by tier, each tier keeping a share. */
+    /** Eligible members, best first, capped at [AutoSelector.POOL_CAP]; in priority mode tier by tier, each tier keeping a share. */
     var pool: List<Long> = emptyList()
         internal set
 
@@ -98,10 +97,6 @@ class AutoSelectorPlan internal constructor() {
 
     /** Eligible members whose fresh result will be reused. */
     var rankedByTest = 0
-        internal set
-
-    /** Failed-last-test members kept anyway, because excluding them would have emptied the pool. */
-    var keptUnavailable = 0
         internal set
 
     /** Skip reason and count, in [AutoSelectorSkip] order. */
@@ -162,12 +157,6 @@ class AutoSelectorPlan internal constructor() {
         if (missingGroups > 1) lines.add("$missingGroups tracked groups no longer exist and are skipped.")
         if (skipped.isNotEmpty()) {
             lines.add("Skipped: " + skipped.joinToString(", ") { (skip, count) -> "$count ${skip.reason}" } + ".")
-        }
-        if (keptUnavailable > 0) {
-            lines.add(
-                "Every profile's last test failed, which usually means the network was down rather than the servers, " +
-                    "so all $keptUnavailable are kept and will be re-checked.",
-            )
         }
         if (truncated) {
             val kept = if (tierBuilt.isNotEmpty()) "the best-ranked ones of each tier" else "the best-ranked ones"
@@ -234,7 +223,7 @@ class AutoSelectorPlanner @JvmOverloads constructor(
     fun plan(selectorId: Long, selector: AutoSelector): AutoSelectorPlan {
         val plan = AutoSelectorPlan()
         selector.normalize()
-        plan.poolCapUsed = selector.poolCap
+        plan.poolCapUsed = AutoSelector.POOL_CAP
         plan.buildLimitUsed = selector.buildLimit
         val now = clock()
         val tracked = track(selector)
@@ -256,22 +245,22 @@ class AutoSelectorPlanner @JvmOverloads constructor(
 
         var ordered = orderMembers(members, selector.pool, selector, tracked, now)
         val noTier = selector.tiers.size
-        plan.truncated = ordered.size > selector.poolCap
+        plan.truncated = ordered.size > AutoSelector.POOL_CAP
         if (selector.prioritized) {
             // The core reads this order as its ranking prior, and capByTier keeps it.
             ordered = ordered.sortedBy { plan.tiers[it] ?: noTier }
             plan.tierEligible = tierCounts(ordered, plan.tiers, noTier)
-            ordered = capByTier(ordered, selector.poolCap, plan.tiers, noTier)
+            ordered = capByTier(ordered, AutoSelector.POOL_CAP, plan.tiers, noTier)
             plan.pool = ordered
             plan.build = capByTier(ordered, selector.buildLimit, plan.tiers, noTier)
             plan.tierBuilt = tierCounts(plan.build, plan.tiers, noTier)
         } else {
-            if (plan.truncated) ordered = ordered.take(selector.poolCap)
+            if (plan.truncated) ordered = ordered.take(AutoSelector.POOL_CAP)
             plan.pool = ordered
             plan.build = ordered.take(selector.buildLimit)
         }
         if (ordered.size > selector.buildLimit) {
-            plan.needsRanking = plan.build.any { effectiveLatency(tracked.byId[it], selector, now) == 0 }
+            plan.needsRanking = plan.build.any { effectiveLatency(tracked.byId[it], now) == 0 }
         }
         return plan
     }
@@ -283,9 +272,9 @@ class AutoSelectorPlanner @JvmOverloads constructor(
     }
 
     /**
-     * AutoSelectorUnmeasuredCandidates (cpp:332-353): the candidates without a fresh result, plus those in [stale]
+     * AutoSelectorUnmeasuredCandidates (cpp:423-444): the candidates without a fresh result, plus those in [stale]
      * (members whose stored result no longer reflects reality), to URL-test before [rerank]; and how many of the other
-     * candidates already hold a fresh successful result.
+     * candidates already count as working ([memberWorks]).
      */
     @JvmOverloads
     fun unmeasuredCandidates(
@@ -298,14 +287,14 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         val needed = ArrayList<Long>()
         var working = 0
         for (id in eligibleMembers(selectorId, selector, tracked, now, null)) {
-            val latency = if (id in staleSet) 0 else effectiveLatency(tracked.byId[id], selector, now)
-            if (latency == 0) needed.add(id) else if (latency > 0) working++
+            val latency = if (id in staleSet) 0 else effectiveLatency(tracked.byId[id], now)
+            if (latency == 0) needed.add(id) else if (qualifyingLatency(latency, selector)) working++
         }
         return needed to working
     }
 
     /**
-     * AutoSelectorBuildChanged (cpp:371-390): whether the build the plan takes now drops a member of [built] (the
+     * AutoSelectorBuildChanged (cpp:463-482): whether the build the plan takes now drops a member of [built] (the
      * members of the last build) or adds one known to work.
      */
     @JvmOverloads
@@ -317,13 +306,13 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         if (builtSet.any { it !in next }) return true
         // The build drops members that fail validation, so an unbuilt one counts only when it is known to work.
         val now = clock()
-        return next.any { it !in builtSet && effectiveLatency(plan.member(it), selector, now) > 0 }
+        return next.any { it !in builtSet && qualifyingLatency(effectiveLatency(plan.member(it), now), selector) }
     }
 
     /**
-     * RerankAutoSelectorPool (cpp:392-406): every eligible member by effective latency, capped at pool_cap, written
-     * into [AutoSelector.pool] / [AutoSelector.poolRankedAt]; [untrusted] members rank as untested whatever their
-     * stored result says. The caller saves the profile.
+     * RerankAutoSelectorPool (cpp:484-498): every eligible member by effective latency, capped at
+     * [AutoSelector.POOL_CAP], written into [AutoSelector.pool] / [AutoSelector.poolRankedAt]; [untrusted] members rank
+     * as untested whatever their stored result says. The caller saves the profile.
      */
     @JvmOverloads
     fun rerank(selectorId: Long, selector: AutoSelector, untrusted: Collection<Long> = emptyList()): List<Long> {
@@ -331,7 +320,7 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         val now = clock()
         val eligible = eligibleMembers(selectorId, selector, tracked, now, null)
         var members = sortByLatency(eligible, selector, tracked.byId, now, untrusted.toHashSet())
-        if (members.size > selector.poolCap) members = members.take(selector.poolCap)
+        if (members.size > AutoSelector.POOL_CAP) members = members.take(AutoSelector.POOL_CAP)
         selector.pool = members.toMutableList()
         selector.poolRankedAt = clock()
         return members
@@ -388,8 +377,8 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         return filters.tiers.size
     }
 
-    // eligibilityOf (cpp:50-82); null = eligible.
-    private fun eligibilityOf(member: SelectorMember, selector: AutoSelector, filters: Filters, now: Long): AutoSelectorSkip? {
+    // eligibilityOf (cpp:91-122); null = eligible. A failed result only ranks a member last, never excludes it.
+    private fun eligibilityOf(member: SelectorMember, filters: Filters): AutoSelectorSkip? {
         val outbound = member.outbound ?: return AutoSelectorSkip.Missing
         val type = outbound.type
         if (type == "chain" || type == "autoselector") return AutoSelectorSkip.MetaType
@@ -417,27 +406,22 @@ class AutoSelectorPlanner @JvmOverloads constructor(
                 (filters.countries.isNotEmpty() && country !in filters.countries)
             ) return AutoSelectorSkip.CountryFilter
         }
-        // Only a fresh failure excludes a member; an old one would exile it permanently.
-        if (selector.excludeUnavailable && member.latency < 0 && hasFreshResult(member, selector, now)) {
-            return AutoSelectorSkip.Unavailable
-        }
         return null
     }
 
-    // eligibleMembers (cpp:139-198), each member against the landing / front proxy of its group; [plan] collects the counters when set.
+    // eligibleMembers (cpp:200-264), each member against the landing / front proxy of its group; [plan] collects the counters when set.
     private fun eligibleMembers(
         selectorId: Long, selector: AutoSelector, tracked: Tracked, now: Long, plan: AutoSelectorPlan?,
     ): List<Long> {
         val filters = buildFilters(selector)
         val skips = EnumMap<AutoSelectorSkip, Int>(AutoSelectorSkip::class.java)
         val members = ArrayList<Long>()
-        val unavailable = ArrayList<Long>()
         for (member in tracked.members) {
             if (member.id == selectorId) continue
             val group = tracked.groupOf[member.id] ?: continue
             if (plan != null) plan.membersInGroup++
-            val skip = eligibilityOf(member, selector, filters, now)
-            if (skip != null && skip != AutoSelectorSkip.Unavailable) {
+            val skip = eligibilityOf(member, filters)
+            if (skip != null) {
                 skips.merge(skip, 1, Int::plus)
                 continue
             }
@@ -452,26 +436,15 @@ class AutoSelectorPlanner @JvmOverloads constructor(
                 continue
             }
             if (plan != null && selector.prioritized) plan.tiers[member.id] = memberTierOf(outbound, group, filters)
-            if (skip == AutoSelectorSkip.Unavailable) {
-                unavailable.add(member.id)
-                continue
-            }
             members.add(member.id)
-            if (plan != null && effectiveLatency(member, selector, now) > 0) plan.rankedByTest++
-        }
-        // Every member's last test failing is an outage, not a dead subscription: excluding them all would leave
-        // nothing that could discover the servers came back.
-        if (members.isEmpty() && unavailable.isNotEmpty()) {
-            members.addAll(unavailable)
-            if (plan != null) plan.keptUnavailable = unavailable.size
-        } else if (unavailable.isNotEmpty()) {
-            skips.merge(AutoSelectorSkip.Unavailable, unavailable.size, Int::plus)
+            if (plan != null && effectiveLatency(member, now) > 0) plan.rankedByTest++
         }
         if (plan != null) plan.skipped = skips.entries.map { it.key to it.value }
         return members
     }
 
-    // orderMembers (cpp:200-222): the persisted pool is the core's ranking prior; newcomers follow by latency.
+    // orderMembers (cpp:266-296): the persisted pool is the core's ranking prior; newcomers follow by latency, over-cap
+    // then failed members last.
     private fun orderMembers(
         members: List<Long>, persistedPool: List<Long>, selector: AutoSelector, tracked: Tracked, now: Long,
     ): List<Long> {
@@ -483,7 +456,15 @@ class AutoSelectorPlanner @JvmOverloads constructor(
             ordered.add(id)
         }
         ordered.addAll(sortByLatency(members.filter { it !in placed }, selector, tracked.byId, now))
-        return ordered
+        val demotion = ordered.associateWith { id ->
+            val latency = effectiveLatency(tracked.byId[id], now)
+            when {
+                latency < 0 -> 2
+                overCap(latency, selector) -> 1
+                else -> 0
+            }
+        }
+        return ordered.sortedBy { demotion[it] ?: 0 }
     }
 
     // capByTier (cpp:296-330): cuts a tier-sorted list to [limit] without crowding out a tier: each one first gets a
@@ -525,62 +506,84 @@ class AutoSelectorPlanner @JvmOverloads constructor(
         return counts.toList()
     }
 
-    // sortByLatency (cpp:149-159): each effective latency read once up front, [untrusted] members as untested, then
+    // sortByLatency (cpp:188-198): each effective latency read once up front, [untrusted] members as untested, then
     // a stable sort.
     private fun sortByLatency(
         ids: List<Long>, selector: AutoSelector, byId: Map<Long, SelectorMember>, now: Long, untrusted: Set<Long> = emptySet(),
     ): List<Long> {
-        val latency = ids.associateWith { if (it in untrusted) 0 else effectiveLatency(byId[it], selector, now) }
-        return ids.sortedWith(byLatency(latency))
+        val latency = ids.associateWith { if (it in untrusted) 0 else effectiveLatency(byId[it], now) }
+        return ids.sortedWith(byLatency(latency, selector))
     }
 
-    // byLatency (cpp:140-147) as a comparator: fresh ok ascending, then untested, then failed.
-    private fun byLatency(latency: Map<Long, Int>): Comparator<Long> {
+    // byLatency (cpp:178-185) as a comparator: qualifying ascending, then untested, then over the cap ascending, then failed.
+    private fun byLatency(latency: Map<Long, Int>, selector: AutoSelector): Comparator<Long> {
         return Comparator { left, right ->
             val leftLatency = latency[left] ?: 0
             val rightLatency = latency[right] ?: 0
-            val leftRank = latencyRank(leftLatency)
-            val rightRank = latencyRank(rightLatency)
+            val leftRank = latencyRank(leftLatency, selector)
+            val rightRank = latencyRank(rightLatency, selector)
             when {
                 leftRank != rightRank -> leftRank.compareTo(rightRank)
-                leftRank == 0 -> leftLatency.compareTo(rightLatency)
+                leftLatency > 0 -> leftLatency.compareTo(rightLatency)
                 else -> 0
             }
         }
     }
 
     companion object {
-        /** hasFreshResult (cpp:41-48): a stored result inside the trust window; rows without a timestamp are stale. */
+        // ProxyEntity.LATENCY_CONNECT_ONLY; the outbound layer has no database.
+        private const val LATENCY_CONNECT_ONLY = -2
+
+        /**
+         * AutoSelectorResultValiditySecs (cpp:334-337): how long a stored result counts, a success (connect-only
+         * included) for a day, a failure for an hour so it gets retested.
+         */
         @JvmStatic
-        fun hasFreshResult(member: SelectorMember?, selector: AutoSelector, now: Long): Boolean {
+        fun resultValiditySecs(latency: Int): Long =
+            if (latency < 0 && latency != LATENCY_CONNECT_ONLY) AutoSelector.FAILURE_VALIDITY_SECS
+            else AutoSelector.SUCCESS_VALIDITY_SECS
+
+        /** hasFreshResult (cpp:83-89): a stored result inside its validity window; rows without a timestamp are stale. */
+        @JvmStatic
+        fun hasFreshResult(member: SelectorMember?, now: Long): Boolean {
             if (member == null || member.latency == 0) return false
-            if (selector.resultValidityMins <= 0) return false
             if (member.latencyAt <= 0) return false
-            return now - member.latencyAt <= selector.resultValidityMins.toLong() * 60
+            return now - member.latencyAt <= resultValiditySecs(member.latency)
         }
 
-        /** effectiveLatency (cpp:118-121): stale results count as untested (0). */
+        /** effectiveLatency (cpp:168-171): stale results count as untested (0). */
         @JvmStatic
-        fun effectiveLatency(member: SelectorMember?, selector: AutoSelector, now: Long): Int =
-            if (member != null && hasFreshResult(member, selector, now)) member.latency else 0
+        fun effectiveLatency(member: SelectorMember?, now: Long): Int =
+            if (member != null && hasFreshResult(member, now)) member.latency else 0
 
-        /** AutoSelectorMemberWorks (cpp:355-360): the ranking counts [member] as working, a success inside the validity window. */
+        /**
+         * AutoSelectorMemberWorks (cpp:446-452): the ranking counts [member] as working, a success inside the validity
+         * window and under the latency cap.
+         */
         @JvmStatic
         fun memberWorks(member: SelectorMember?, selector: AutoSelector, now: Long): Boolean =
-            effectiveLatency(member, selector, now) > 0
+            qualifyingLatency(effectiveLatency(member, now), selector)
 
-        /** AutoSelectorStartQuorum (cpp:362-369): working members a selector needs before it may start while its sweep runs. */
+        /** AutoSelectorStartQuorum (cpp:454-461): working members a selector needs before it may start while its sweep runs. */
         @JvmStatic
         fun startQuorum(selector: AutoSelector): Int {
             selector.normalize()
-            return minOf(maxOf(selector.expected, selector.activeSize), selector.buildLimit)
+            return selector.activeSize
         }
 
-        // latencyRank (cpp:110-116): untested (1) outranks failed (2) so a fresh subscription still gets explored.
-        private fun latencyRank(latency: Int): Int = when {
-            latency > 0 -> 0
+        // overCap (cpp:150-153), the core's qualifies(): at or over the cap a member is only a fallback.
+        private fun overCap(latency: Int, selector: AutoSelector): Boolean =
+            latency > 0 && selector.maxRTTms > 0 && latency >= selector.maxRTTms
+
+        private fun qualifyingLatency(latency: Int, selector: AutoSelector): Boolean =
+            latency > 0 && !overCap(latency, selector)
+
+        // latencyRank (cpp:160-166): untested outranks over-cap and failed, as it may still qualify, so a fresh
+        // subscription gets explored.
+        private fun latencyRank(latency: Int, selector: AutoSelector): Int = when {
+            latency > 0 -> if (overCap(latency, selector)) 2 else 0
             latency == 0 -> 1
-            else -> 2
+            else -> 3
         }
 
         // coreTransitions (cpp:84-98): a chain may hand off sing-box <-> Xray at most twice.

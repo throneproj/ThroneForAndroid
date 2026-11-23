@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Simple Icons (CC0-1.0), as the desktop's ServiceIcons.cpp -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFF0000"
+        android:pathData="M23.498 6.186A3.016 3.016 0 0 0 21.376 4.05C19.505 3.545 12 3.545 12 3.545S4.495 3.545 2.623 4.05A3.017 3.017 0 0 0 0.502 6.186C0 8.07 0 12 0 12S0 15.93 0.502 17.814A3.016 3.016 0 0 0 2.624 19.95C4.495 20.455 12 20.455 12 20.455S19.505 20.455 21.377 19.95A3.015 3.015 0 0 0 23.499 17.814C24 15.93 24 12 24 12S24 8.07 23.498 6.186ZM9.545 15.568L9.545 8.432L15.818 12L9.545 15.568Z" />
+</vector>

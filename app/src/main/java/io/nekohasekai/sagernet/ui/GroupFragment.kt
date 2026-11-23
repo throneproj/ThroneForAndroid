@@ -180,27 +180,36 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group), Toolbar.OnMenuItem
     }
 
     private fun confirmClear(group: ProxyGroup) {
-        requireContext().confirmAction(
-            getString(R.string.confirm_clear_group), group.displayName(), R.string.confirm_clear,
-        ) {
-            runOnDefaultDispatcher {
-                val outcome = ProfileManager.batchDeleteProfiles(ProfileManager.memberIds(group.id))
-                if (outcome.kept.isNotEmpty()) withContext(Dispatchers.Main) {
-                    snackbar(R.string.grp_running_kept).show()
+        lifecycleScope.launch {
+            val warning = withContext(Dispatchers.IO) { GroupRepo.hopWarning(ProfileManager.memberIds(group.id)) }
+            requireContext().confirmAction(
+                getString(R.string.confirm_clear_group), group.displayName() + warning, R.string.confirm_clear,
+            ) {
+                runOnDefaultDispatcher {
+                    val outcome = ProfileManager.batchDeleteProfiles(ProfileManager.memberIds(group.id))
+                    if (outcome.kept.isNotEmpty()) withContext(Dispatchers.Main) {
+                        snackbar(R.string.grp_running_kept).show()
+                    }
                 }
             }
         }
     }
 
-    /** GroupItem::on_remove_clicked: never the last group; a running profile of the group is stopped first. */
+    /**
+     * GroupItem::on_remove_clicked: never the last group; a running profile of the group is stopped first. The question
+     * names the other groups that lose one of its profiles as front/landing proxy.
+     */
     private fun confirmRemove(group: ProxyGroup) {
         val remove = { runOnDefaultDispatcher { if (GroupRepo.delete(group.id)) SubscriptionScheduler.schedule() } }
         if (DataStore.skipDeleteConfirmation) {
             remove()
             return
         }
-        requireContext().confirmAction(getString(R.string.confirm_remove_group), group.displayName(), R.string.delete) {
-            remove()
+        lifecycleScope.launch {
+            val warning = withContext(Dispatchers.IO) { GroupRepo.hopWarning(ProfileManager.memberIds(group.id), group.id) }
+            requireContext().confirmAction(getString(R.string.confirm_remove_group), group.displayName() + warning, R.string.delete) {
+                remove()
+            }
         }
     }
 

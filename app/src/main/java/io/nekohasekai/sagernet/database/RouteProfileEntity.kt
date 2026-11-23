@@ -3,10 +3,13 @@ package io.nekohasekai.sagernet.database
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonInput
+import io.nekohasekai.sagernet.outbound.json.JsonValues
 import io.nekohasekai.sagernet.route.RouteDns
 import io.nekohasekai.sagernet.route.RouteProfile
 import io.nekohasekai.sagernet.route.RouteRule
+import io.nekohasekai.sagernet.route.RuleType
 
 /**
  * The desktop's `route_profiles` row (RoutesRepo.cpp:14-49). The raw and endpoint columns only carry desktop data
@@ -30,8 +33,13 @@ data class RouteProfileEntity(
     /** The profile's RouteDns as Qt-compact JSON, '' when it has none. */
     @ColumnInfo(name = "dns_json", defaultValue = "") var dnsJson: String = "",
     @ColumnInfo(name = "custom_dns", defaultValue = "0") var customDns: Boolean = false,
-    /** The subscription group whose refreshes overwrite this profile's rules, -1 = none (RoutesRepo.cpp). */
+    /** The subscription group whose refreshes replace this profile's remote rules, -1 = none (RoutesRepo.cpp). */
     @ColumnInfo(name = "source_gid", defaultValue = "-1") var sourceGid: Long = -1L,
+    /**
+     * The positions of the rules that came from the remote source, a compact JSON int array (870c720b); NULL for a row
+     * written before rule origins were kept, or restored from such a backup.
+     */
+    @ColumnInfo(name = "remote_rules") var remoteRules: String? = null,
 ) {
 
     /** custom_dns only counts when dns_json holds an object (RoutesRepo.cpp routeProfileFromJson). */
@@ -52,6 +60,7 @@ data class RouteProfileEntity(
         it.custom_dns = customDns && it.dns != null
         it.source_gid = sourceGid
         it.rules = rules.sortedBy { r -> r.ruleOrder }.mapTo(ArrayList<RouteRule>()) { r -> r.toModel() }
+        markRemote(it, remoteIndexes(remoteRules))
     }
 
     companion object {
@@ -73,7 +82,26 @@ data class RouteProfileEntity(
             dnsJson = p.dns?.toJson()?.toCompact() ?: "",
             customDns = p.custom_dns,
             sourceGid = p.source_gid,
+            remoteRules = JsonArray().also { a -> p.rules.forEachIndexed { i, r -> if (r.remote) a.add(i) } }.toCompact(),
         )
+
+        /** routesRepoRemoteIndexes: null for NULL; anything but a JSON array reads as no remote rule. */
+        private fun remoteIndexes(text: String?): Set<Int>? {
+            if (text == null) return null
+            val array = JsonInput.parseValue(text) as? JsonArray ?: return emptySet()
+            return array.filter { it is Long || it is Double }.mapTo(HashSet()) { JsonValues.toInt(it) }
+        }
+
+        /**
+         * routesRepoMarkRemote: untracked, a remote-sourced profile's rules all came from its source but the endpoint
+         * rules, as updates used to replace them all.
+         */
+        private fun markRemote(p: RouteProfile, indexes: Set<Int>?) {
+            val sourced = p.is_remote || p.source_gid > 0L
+            p.rules.forEachIndexed { i, rule ->
+                rule.remote = indexes?.contains(i) ?: (sourced && rule.type != RuleType.ENDPOINT_PREFERRED_BY.id)
+            }
+        }
 
         /** A stored dns_json; anything but a JSON object reads as no DNS. */
         fun dnsFromJson(text: String?): RouteDns? {

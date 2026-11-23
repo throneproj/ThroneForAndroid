@@ -8,6 +8,7 @@ import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
 import io.nekohasekai.sagernet.outbound.types.AutoSelector
+import io.nekohasekai.sagernet.outbound.types.Custom
 import io.nekohasekai.sagernet.outbound.types.Socks
 
 /** ChainBuildRequest (generate.cpp:1413-1428). */
@@ -24,7 +25,7 @@ internal class ChainRequest(
     val xrayFullConfigPort: Int = -1,
     /** Drops the user's own inbounds from a custom Xray full config (siblings would repeat the ports). */
     val soleXrayInbound: Boolean = false,
-    /** Hop 0 is the WARP hop: it becomes `proxy` dialing through hop 1, which becomes `warp-bypass`. */
+    /** Hop 0 is the exit (WARP or Psiphon): it becomes `proxy` dialing through hop 1, which becomes `warp-bypass`. */
     val warpWrap: Boolean = false,
     val origin: HopOrigin = HopOrigin.NONE,
     /** The directly dialed hop detours here instead; an Xray one is bridged back into sing-box for it. */
@@ -99,7 +100,7 @@ internal fun xraySocksInbound(tag: String, bridge: BridgeConfig): JsonObject = j
 
 /**
  * The hop-list machinery of generate.cpp:1204-1600: the core-transition scan, the sing-box and Xray chain builders,
- * the loopback bridges between the two cores and the built-in WARP hop ([warp], resolved for [WarpHop.PROFILE_ID]).
+ * the loopback bridges between the two cores and the exit hop ([warp], WARP or Psiphon, resolved for [WarpHop.PROFILE_ID]).
  * Auxiliary VPN endpoints are not generated on Android.
  */
 internal class ChainBuilder(
@@ -338,6 +339,7 @@ internal class ChainBuilder(
                 "destOverride" to JsonArray.of("http", "tls", "quic"),
                 "routeOnly" to false,
             )
+            Custom.routeXrayListenerRulesViaBridge(userXrayConfig)
             val inbounds = JsonArray()
             inbounds.add(bridgeInbound)
             if (!state.forTest && !req.soleXrayInbound) for (item in userXrayConfig.array("inbounds")) inbounds.add(item)

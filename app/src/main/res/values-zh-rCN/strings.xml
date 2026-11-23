@@ -23,8 +23,8 @@
     <string name="allow_access">允许来自局域网的连接</string>
     <string name="allow_access_sum">将入站绑定至 0.0.0.0</string>
     <string name="cag_ws">WebSocket 设置</string>
-    <string name="speed_detail">代理： %1$s↑ %2$s↓
-        \n直连： %3$s↑ %4$s↓</string>
+    <string name="speed_detail">代理： ↓%2$s ↑%1$s
+        \n直连： ↓%4$s ↑%3$s</string>
     <string name="speed">%s/s</string>
     <string name="connection_test_testing">测试中…</string>
     <string name="connection_test_available">HTTPS：%d 毫秒</string>
@@ -418,8 +418,6 @@
     <string name="auto_connect_superseded">已被始终开启的 VPN 取代</string>
     <string name="auto_update_interval">更新间隔</string>
     <string name="auto_update_interval_sum">%d 分钟</string>
-    <string name="autosel_active_size">密集检查</string>
-    <string name="autosel_active_size_tip">排名靠前的配置会按间隔重新检查。其余配置也会检查，只是摊在更慢的全量扫描中。</string>
     <string name="autosel_advanced">高级</string>
     <string name="autosel_advanced_hide">隐藏高级选项</string>
     <string name="autosel_advanced_show">这里的一切都有可用的默认值。只有想调整选择器的测量与切换方式时才展开。</string>
@@ -427,18 +425,13 @@
     <string name="autosel_ago_hours">%d 小时前</string>
     <string name="autosel_ago_minutes">%d 分钟前</string>
     <string name="autosel_ago_seconds">%d 秒前</string>
-    <string name="autosel_always_retest">始终重新测试</string>
     <string name="autosel_back_to_automatic">恢复自动</string>
     <string name="autosel_balance">在最佳配置之间分配流量</string>
     <string name="autosel_balance_hint_connection">每个新连接可能使用不同的配置。分散最广，但会话中途出口 IP 会变化，各配置的流量变为估算值。</string>
     <string name="autosel_balance_hint_off">最佳配置承载全部流量；其余就绪配置保持已验证状态，以便随时接管。</string>
     <string name="autosel_balance_hint_rotate">每次轮换时新连接转到另一个良好配置；已打开的连接不受影响，在其开始的配置上完成。流量精确统计。</string>
-    <string name="autosel_balance_interval">轮换间隔</string>
-    <string name="autosel_balance_interval_tip">选择器在一个配置上停留多久后切换到下一个就绪配置。</string>
     <string name="autosel_balance_mode">模式</string>
     <string name="autosel_balance_tip">默认关闭：一个配置承载全部流量，其余待命。开启后可将流量分散到已确认可用的配置上。</string>
-    <string name="autosel_bench_interval">全量扫描间隔</string>
-    <string name="autosel_bench_interval_tip">对每个运行中的配置完成一轮检查所需的时间。检查会均匀分布在此期间，因此大配置池也不会造成流量突增。</string>
     <string name="autosel_build_limit">运行前</string>
     <string name="autosel_build_limit_tip">有多少配置被载入运行配置中。选择器在它们之间即时切换，无需重连。数值越高，内存与启动耗时越多。</string>
     <string name="autosel_cat_balance">负载均衡</string>
@@ -460,13 +453,9 @@
     <string name="autosel_detail_health">%1$d 个配置：%2$s</string>
     <string name="autosel_detail_untested">%d 个尚未检查</string>
     <string name="autosel_detail_working">%d 个可用</string>
-    <string name="autosel_dial_retries">故障转移尝试</string>
-    <string name="autosel_dial_retries_tip">当所选配置连接失败时，在应用看到错误前立即再尝试多少个其他配置。</string>
     <string name="autosel_edit">编辑自动选择</string>
     <string name="autosel_error_no_group">自动选择指向的分组已不存在</string>
     <string name="autosel_error_no_members">自动选择没有可用成员</string>
-    <string name="autosel_exclude_unavailable">跳过失败的配置</string>
-    <string name="autosel_exclude_unavailable_tip">只要结果仍在信任窗口内，就将上次测试失败的服务器排除在池外。如果测试不可靠、宁愿让选择器自行判断，可关闭。</string>
     <string name="autosel_expected">保持就绪</string>
     <string name="autosel_expected_tip">始终保持多少个配置处于已确认可用状态，以便故障时立即顶上。均衡开启时，流量也在这些配置之间分配。</string>
     <string name="autosel_footer_exhausted">当前没有可用项——若持续如此，选择器将从次优配置重建。</string>
@@ -476,18 +465,18 @@
     <string name="autosel_footer_pinned_other">你选择了 %s，但它当前不可用，所以选择器选了另一个。它恢复后会切回你的选择。</string>
     <string name="autosel_footer_pinned_using">正在使用 %s，因为这是你的选择。</string>
     <string name="autosel_footer_suspended">因设备无网络连接，检查已暂停。不会因此归咎任何配置，排名冻结直到网络恢复。</string>
-    <string name="autosel_group">服务器来源</string>
+    <string name="autosel_group">配置来源</string>
     <string name="autosel_group_archived">%s（已归档）</string>
     <string name="autosel_group_missing">分组缺失（#%d）</string>
-    <string name="autosel_interrupt">切换时断开连接</string>
-    <string name="autosel_interrupt_tip">在选择器因配置变差或失败而切换时生效。开：所有连接立即迁移到新配置。关：进行中的下载在旧配置上完成。无论开关，均衡轮换都不会断开连接。</string>
+    <string name="autosel_interrupt">配置失效时断开连接</string>
+    <string name="autosel_interrupt_tip">已打开的连接会立即迁移，而不是在失效的配置上完成。切换到更快的配置以及均衡轮换都不会断开连接。</string>
     <string name="autosel_interval">检查间隔</string>
-    <string name="autosel_interval_tip">密集检查的配置多久重新测量一次。</string>
+    <string name="autosel_interval_tip">排名靠前的配置多久重新测量一次。</string>
     <string name="autosel_just_now">刚刚</string>
     <string name="autosel_last_ok_short">正常 %s</string>
     <string name="autosel_list_separator">", "</string>
     <string name="autosel_max_rtt">最大延迟</string>
-    <string name="autosel_max_rtt_tip">慢于此值的配置永远不会被选中，即使没有更好的可用项。</string>
+    <string name="autosel_max_rtt_tip">慢于此值的配置仅在没有更快的配置可用时才会使用。</string>
     <string name="autosel_ms">%d 毫秒</string>
     <string name="autosel_name_empty">名称不能为空。</string>
     <string name="autosel_name_filter">仅限名称匹配</string>
@@ -524,27 +513,19 @@
     <string name="autosel_plan">配置</string>
     <string name="autosel_plan_calculating">正在检查分组…</string>
     <string name="autosel_plan_counts">分组中 %2$d 个配置有 %1$d 个可用；将运行 %3$d 个。</string>
-    <string name="autosel_plan_kept_unavailable">每个配置的上次测试都失败了，这通常意味着是网络而非服务器的问题，因此全部 %d 个都保留并将重新检查。</string>
     <string name="autosel_plan_needs_ranking">其余配置将在选择器启动时测量：一旦有足够的配置可用，选择器就会运行，并在全部测量完成后切换到完整排名。</string>
     <string name="autosel_plan_reused">%d 个有近期测试结果将被复用。</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">已跳过：%s。</string>
     <string name="autosel_plan_truncated">匹配的配置超过 %d 个，仅保留排名最高的。</string>
-    <string name="autosel_pool_cap">排名上限</string>
-    <string name="autosel_pool_cap_tip">测量并保留在排名列表中的配置数量硬上限。当所有运行中的配置都失效时，从该列表取替补。</string>
-    <string name="autosel_result_validity">结果信任时长</string>
-    <string name="autosel_result_validity_tip">此时间内的 URL 测试结果会被复用而不再测量——包括你在分组上手动运行的测试，因此紧接着启动选择器不会重复劳动。更早的结果视为从未测试过。设为 0 则总是运行新测试。</string>
     <string name="autosel_row_checks">检查：%1$d / %2$d 正常</string>
     <string name="autosel_row_connects">连接：%1$d / %2$d 成功</string>
     <string name="autosel_row_error">上次错误：%s</string>
-    <string name="autosel_row_jitter">抖动：%d 毫秒</string>
     <string name="autosel_row_last_ok">上次正常：%s</string>
     <string name="autosel_row_latency">延迟：%1$d 毫秒（最佳 %2$d，最差 %3$d）</string>
     <string name="autosel_row_state">状态：%s</string>
     <string name="autosel_row_tested">上次 URL 测试：%1$s，%2$s</string>
     <string name="autosel_row_untested">尚无 URL 测试结果。</string>
-    <string name="autosel_sampling">保留样本数</string>
-    <string name="autosel_sampling_tip">排名使用最近这么多次检查的平均值与抖动，单次坏结果不会拉低好服务器。</string>
     <string name="autosel_select_group">选择此自动选择要跟踪的分组。</string>
     <string name="autosel_skip_core_transitions">需要过多的核心切换</string>
     <string name="autosel_skip_country">被国家过滤排除</string>
@@ -556,7 +537,6 @@
     <string name="autosel_skip_missing">配置缺失</string>
     <string name="autosel_skip_name">被名称过滤排除</string>
     <string name="autosel_skip_tailscale">Tailscale 配置</string>
-    <string name="autosel_skip_unavailable">上次测试失败</string>
     <string name="autosel_skip_unsupported">此构建无法使用的类型</string>
     <string name="autosel_skip_xray_chained">Xray 完整配置无法与分组的代理组合</string>
     <string name="autosel_state_cooldown">已暂停</string>
@@ -588,8 +568,6 @@
     <string name="autosel_use_automatic_tip">不再偏好此配置，让选择器根据测量结果重新选择。</string>
     <string name="autosel_use_this">使用此配置</string>
     <string name="autosel_use_this_tip">保持使用此配置而不交给排名选择。它仍是偏好而非锁定：配置失效时选择器依然会切换，恢复后回到你的选择。</string>
-    <string name="autosel_watch_interval">监视使用中的配置</string>
-    <string name="autosel_watch_interval_tip">当前承载你流量的配置单独检查的频率。保持较短：服务器可能在仍接受连接时停止工作，其他检查要到下一轮全量检查才会发现。</string>
     <string name="backup_create">创建备份</string>
     <string name="backup_created">备份已创建。包含：%s</string>
     <string name="backup_creating">正在创建备份…</string>
@@ -604,7 +582,7 @@
     <string name="backup_failed">创建备份失败：%s</string>
     <string name="backup_local_summary">备份使用 Throne 桌面版格式（.thrbackup）：任一端应用都可恢复。WebDAV 凭据保存在本设备。</string>
     <string name="backup_open_label">恢复 Throne 备份</string>
-    <string name="backup_part_otp">OTP 配置（Android 上不恢复）</string>
+    <string name="backup_part_otp">OTP 条目（Android 上不恢复）</string>
     <string name="backup_part_profiles">配置（分组与代理）</string>
     <string name="backup_part_routes">路由配置</string>
     <string name="backup_part_settings">设置</string>
@@ -712,7 +690,7 @@
     <string name="direct_test_url">直连测试 URL</string>
     <string name="direct_test_url_empty">系统网络状态</string>
     <string name="direct_test_url_sum">不经任何代理获取，用于区分断网与服务器故障。留空则使用系统网络状态。</string>
-    <string name="disable_traffic_stats">禁用流量统计</string>
+    <string name="disable_traffic_stats">禁用流量计数器</string>
     <string name="disable_traffic_stats_sum">不统计配置流量</string>
     <string name="dns_address_dialog_message">示例：https://8.8.8.8/dns-query, tls://1.1.1.1, 8.8.8.8, localhost</string>
     <string name="dns_advanced">高级设置</string>
@@ -740,7 +718,7 @@
     <string name="enable_clash_api_summary">为外部控制器与面板提供 Clash API</string>
     <string name="enable_ntp">NTP 客户端</string>
     <string name="enable_ntp_sum">与 NTP 服务器同步核心时钟</string>
-    <string name="enable_reality">启用 Reality</string>
+    <string name="enable_reality">启用 REALITY</string>
     <string name="enable_stats">连接统计</string>
     <string name="enable_stats_sum">跟踪连接及其所属进程</string>
     <string name="enable_tls">启用 TLS</string>
@@ -787,7 +765,11 @@
     <string name="grp_keep_working_tip">当订阅不再列出上次测试成功的配置时，仍保留它们。</string>
     <string name="grp_landing_proxy">落地代理</string>
     <string name="grp_last_update">上次更新：%1$s</string>
-    <string name="grp_missing_profile">配置 #%1$d（缺失）</string>
+    <string name="grp_missing_profile">缺失的配置（#%1$d）</string>
+    <string name="hop_refs_warning">以下分组把要删除的配置用作前置代理或落地代理。该配置将从这些分组中移除，之后它们连接时不再经过它：</string>
+    <string name="hop_refs_cleared">以下分组曾把已删除的配置用作前置代理或落地代理。该配置已从这些分组中移除，它们现在连接时不再经过它：</string>
+    <string name="hop_ref_front">%1$s（前置代理）</string>
+    <string name="hop_ref_landing">%1$s（落地代理）</string>
     <string name="grp_route_profile">路由配置</string>
     <string name="grp_route_profile_default">默认（%1$s）</string>
     <string name="grp_route_profile_from_subscription">%1$s（来自此订阅）</string>
@@ -824,7 +806,7 @@
     <string name="grp_state_running">更新中…</string>
     <string name="grp_sub_auto_update">订阅自动更新</string>
     <string name="grp_sub_auto_update_interval">间隔（分钟，小于 30 无效）</string>
-    <string name="grp_sub_clear">更新订阅前清除服务器</string>
+    <string name="grp_sub_clear">更新订阅前清除配置</string>
     <string name="grp_sub_custom_hwid_params">自定义 HWID 参数（可选）</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
     <string name="grp_sub_custom_hwid_params_tip">格式：hwid=value,os=value,osVersion=value,model=value\n留空使用默认值。只填写要覆盖的参数。</string>
@@ -983,8 +965,12 @@
     <string name="profiles_empty_subscription_hint">更新订阅以下载其配置。</string>
     <string name="profiles_more_options">更多选项</string>
     <string name="profiles_move_down">下移</string>
-    <string name="profiles_move_no_target">没有其他可移动到的基础分组。</string>
     <string name="profiles_move_to_group">移动到分组</string>
+    <string name="import_target_subscription">这个分组是订阅：下次更新会移除导入到其中的配置。请选择另一个分组，然后重新导入。</string>
+    <string name="import_target_archived">这个分组已归档。请选择另一个分组，然后重新导入。</string>
+    <string name="import_target_gone">这个分组不再存在。</string>
+    <string name="profiles_move_target_subscription">订阅分组的下次更新会移除移动到其中的配置。请选择另一个分组。</string>
+    <string name="profiles_move_source_updating">这个分组的订阅正在更新。请在更新完成后重试。</string>
     <string name="profiles_move_up">上移</string>
     <string name="profiles_no_duplicates">未发现重复配置。</string>
     <string name="profiles_no_insecure">未发现不安全配置。</string>
@@ -1040,9 +1026,9 @@
     <string name="raw_json">原始 JSON</string>
     <string name="raw_json_invalid">该 JSON 不是此类型的有效配置</string>
     <string name="raw_json_summary">以 JSON 编辑此配置的每个字段</string>
-    <string name="reality_public_key">Reality 公钥</string>
-    <string name="reality_settings">Reality 设置</string>
-    <string name="reality_short_id">Reality 短 ID</string>
+    <string name="reality_public_key">REALITY 公钥</string>
+    <string name="reality_settings">REALITY 设置</string>
+    <string name="reality_short_id">REALITY 短 ID</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="remote_dns_disable_ipv6">远程 DNS：禁用 IPv6</string>
     <string name="reserved_hint">三个数字，每行一个</string>
@@ -1094,7 +1080,7 @@
     <string name="route_profile_empty">配置中没有有效规则</string>
     <string name="route_profile_empty_title">空路由配置</string>
     <string name="route_profile_fetch">立即获取</string>
-    <string name="route_profile_fetch_confirm">当前规则将被从 URL 获取的规则替换。</string>
+    <string name="route_profile_fetch_confirm">来自该 URL 的规则（包括对它们所做的修改）将被现在获取的规则替换。在这里添加的规则会被保留。</string>
     <string name="route_profile_fetch_failed">无法获取路由配置</string>
     <string name="route_profile_fetched">已从远程 URL 加载 %d 条规则。</string>
     <string name="route_profile_fetched_title">已获取</string>
@@ -1108,7 +1094,7 @@
     <string name="route_profile_never_updated">尚未更新</string>
     <string name="route_profile_quick_switch">路由配置</string>
     <string name="route_profile_remote_source">远程来源</string>
-    <string name="route_profile_remote_rules_note">每次更新都会用 URL 中的规则替换此配置的规则，因此你在这里添加或更改的规则会丢失。若要保留自己的规则，请在路由配置列表中使用「克隆」：克隆是一份永不更新的本地副本。</string>
+    <string name="route_profile_remote_rules_note">每次更新都会替换来自该 URL 的规则，因此对这些规则的修改只保留到下一次更新。在这里添加的规则会被保留。</string>
     <string name="route_profile_rules">规则（%d）</string>
     <string name="route_profile_title">路由配置</string>
     <string name="route_profile_url">URL</string>
@@ -1134,8 +1120,8 @@
     <string name="route_rule_advanced_show">显示其他条件与选项</string>
     <string name="route_rule_any">任意</string>
     <string name="route_rule_apps">应用</string>
-    <string name="route_rule_catch_all">此规则没有任何条件，将匹配所有连接。仍要保存吗？</string>
-    <string name="route_rule_catch_all_title">无条件</string>
+    <string name="route_rule_default_name">规则 %d</string>
+    <string name="route_rule_dns_queries">DNS 查询</string>
     <string name="route_rule_category_match">匹配</string>
     <string name="route_rule_category_rule">规则</string>
     <string name="route_rule_domain">域名</string>
@@ -1156,6 +1142,8 @@
     <string name="route_rule_ip_version">IP 版本</string>
     <string name="route_rule_lines_hint">每行一条</string>
     <string name="route_rule_missing_server">服务器缺失（#%d）</string>
+    <string name="route_outbound_no_exit">不经出口的代理</string>
+    <string name="route_outbound_no_exit_hint">仅在开启出口（设置 › 路由 › 出口）时与“代理”不同：这些网站会跳过出口，经由所选配置发出。</string>
     <string name="route_rule_name">名称</string>
     <string name="route_rule_network">网络</string>
     <string name="route_rule_no_drop">不丢弃</string>
@@ -1249,7 +1237,6 @@
     <string name="skip_cert_sum">默认跳过 TLS 证书验证（allowInsecure）</string>
     <string name="skip_delete_confirmation">跳过删除确认</string>
     <string name="skip_delete_confirmation_sum">删除配置前不再询问</string>
-    <string name="speed_test_mode_country">仅国家</string>
     <string name="ss_plugin">SIP003 插件</string>
     <string name="ss_plugin_opts">插件选项</string>
     <string name="ssh_client_version">客户端版本</string>
@@ -1300,7 +1287,7 @@
     <string name="test_engine_fg_busy">正在后台工作…</string>
     <string name="test_engine_fg_subscriptions">正在更新订阅…</string>
     <string name="test_engine_ip_current_unsupported">不支持对当前运行连接进行 IP 测试</string>
-    <string name="test_engine_kind_ip">IP 测试</string>
+    <string name="test_engine_kind_ip">出口 IP 测试</string>
     <string name="test_engine_kind_speed">速度测试</string>
     <string name="test_engine_kind_url">URL 测试</string>
     <string name="test_engine_progress">%1$d / %2$d</string>
@@ -1325,7 +1312,6 @@
     <string name="test_panel_completed">已完成</string>
     <string name="test_panel_countries">国家/地区</string>
     <string name="test_panel_country_description">%1$s：%2$d</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_current_unavailable">不可用：%s</string>
     <string name="test_panel_dismiss">关闭测试结果</string>
     <string name="test_panel_distinct_ips">%d 个不同出口 IP</string>
@@ -1378,7 +1364,6 @@
     <string name="test_panel_summary_stopped">已停止 · %3$s 内测试了 %2$d 个中的 %1$d 个</string>
     <string name="test_panel_summary_tested">在 %2$s 内测试了 %1$d 个</string>
     <string name="test_panel_summary_working">%d 个可用</string>
-    <string name="test_panel_summary_working_countries">在 %2$d 个国家/地区有 %1$d 个可用</string>
     <string name="test_panel_summary_working_fastest">%1$d 个可用，最快 %2$s</string>
     <string name="test_panel_title">%1$s · %2$s</string>
     <string name="test_panel_unnamed">配置 %d</string>
@@ -1509,9 +1494,16 @@
     <string name="warp_public_key">公钥</string>
     <string name="warp_registration">注册</string>
     <string name="warp_reserved">Reserved</string>
-    <string name="warp_settings">WARP</string>
-    <string name="warp_state_off">关</string>
-    <string name="warp_state_on">开 · %s</string>
+    <string name="warp_settings">出口</string>
+    <string name="exit_through">出口方式</string>
+    <string name="exit_server">所选配置</string>
+    <string name="exit_server_hint">流量从你启动的配置出去。</string>
+    <string name="exit_psiphon_hint">Psiphon 是由 Psiphon Inc. 运营的免费网络，与任何 VPN 提供商一样，它能看到你访问的网站。</string>
+    <string name="exit_tor_hint">Android 上无法使用 Tor，因此流量从所选配置出去。</string>
+    <string name="exit_unavailable">%s（Android 上不可用）</string>
+    <string name="psiphon_egress_region">区域</string>
+    <string name="psiphon_region_best">最佳性能</string>
+    <string name="psiphon_egress_region_sum">Psiphon 服务器所在国家；选择“最佳性能”由 Psiphon 决定。</string>
     <string name="warp_tos_message"><![CDATA[生成 WARP 身份会向 Cloudflare 注册新设备。<br><br>你是否接受 <a href="%1$s">Cloudflare WARP 服务条款</a>？]]></string>
     <string name="warp_wireguard_note">WARP 依托你的代理：WireGuard 需要转发 UDP 的代理。</string>
     <string name="webdav_choose_backup">选择备份</string>
@@ -1636,13 +1628,10 @@
     <string name="xray_verify_peer_cert_by_name">按名称验证对端证书</string>
     <string name="xray_vless_all">全部 VLESS</string>
     <string name="xray_vless_preference">Xray VLESS 偏好</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP 与 Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP 与 REALITY</string>
     <string name="xray_vless_xhttp_only">仅 XHTTP</string>
     <plurals name="autosel_milliseconds">
         <item quantity="other">%d 毫秒</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="other">%d 分钟</item>
     </plurals>
     <plurals name="autosel_profiles">
         <item quantity="other">%d 个配置</item>
@@ -1847,9 +1836,9 @@
     <string name="grp_http_version">HTTP 版本</string>
     <string name="grp_http_version_tip">「自动」会在服务器支持时使用 HTTP/2。「保持默认」遵循「设置 › 订阅」。</string>
     <string name="grp_update_interval">更新间隔（分钟）</string>
-    <string name="grp_update_interval_tip">此订阅两次自动更新之间的分钟数，至少为 30。留空则遵循「设置 › 订阅」，且那里必须启用自动更新。</string>
+    <string name="grp_update_interval_tip">此订阅两次自动更新之间的分钟数，至少为 30；即使「设置 › 订阅」中关闭了自动更新也会生效。留空则遵循该设置。</string>
     <string name="grp_server_interval">服务器间隔</string>
-    <string name="grp_server_interval_tip">使用订阅服务器下发的更新间隔；服务器未下发时采用上方的间隔。「保持默认」遵循「设置 › 订阅」。</string>
+    <string name="grp_server_interval_tip">使用订阅服务器下发的更新间隔；即使「设置 › 订阅」中关闭了自动更新也会生效。服务器未下发时采用上方的间隔。「保持默认」遵循该设置。</string>
     <string name="grp_server_interval_use">使用</string>
     <string name="grp_server_interval_ignore">忽略</string>
     <string name="grp_server_interval_last">该服务器上次下发 %1$d 小时。</string>
@@ -2108,9 +2097,9 @@
     <string name="validation_tls_pem_private_key">请以 PEM 文本粘贴私钥，以 -----BEGIN PRIVATE KEY----- 开头。</string>
     <string name="validation_tls_pin_base64">这是十六进制的 SHA-256；请改写为 base64（44 个字符，以 = 结尾）。</string>
     <string name="validation_tls_ech_config">请以 base64 粘贴 ECH 配置列表，或粘贴一个 -----BEGIN ECH CONFIGS----- 块。</string>
-    <string name="validation_tls_reality_ech">Reality 不能与 ECH 同时使用。请关闭 ECH，或清除 Reality 公钥。</string>
-    <string name="validation_tls_reality_disable_sni">Reality 不能与「禁用 SNI」同时使用。请关闭「禁用 SNI」。</string>
-    <string name="validation_tls_reality_spoof">Reality 不能与 TLS 伪装同时使用。请将 TLS 伪装设为关闭。</string>
+    <string name="validation_tls_reality_ech">REALITY 不能与 ECH 同时使用。请关闭 ECH，或清除 REALITY 公钥。</string>
+    <string name="validation_tls_reality_disable_sni">REALITY 不能与「禁用 SNI」同时使用。请关闭「禁用 SNI」。</string>
+    <string name="validation_tls_reality_spoof">REALITY 不能与 TLS 伪装同时使用。请将 TLS 伪装设为关闭。</string>
     <string name="validation_tls_pins_with_certificate">自定义证书不能与证书固定同时使用；请只保留其中一个。</string>
     <string name="validation_tls_client_pair">请同时设置客户端证书和客户端密钥。</string>
     <string name="validation_tls_spoof_needs_sni">TLS 伪装需要 SNI。请关闭「禁用 SNI」，或将 TLS 伪装设为关闭。</string>
@@ -2122,7 +2111,7 @@
     <string name="validation_transport_headers_pairs">请求头必须按名称和值交替排列，并以 | 分隔，例如 User-Agent|curl，因此已被忽略。</string>
     <string name="validation_transport_type">sing-box 不支持传输协议 \"%1$s\"。请使用 ws、httpupgrade、http、grpc 或 quic。</string>
     <string name="validation_transport_quic_tls">QUIC 传输需要 TLS。请开启「启用 TLS」。</string>
-    <string name="validation_transport_quic_reality">Reality 不适用于 QUIC 传输。请清除 Reality 密钥，或选择其他传输协议。</string>
+    <string name="validation_transport_quic_reality">REALITY 不适用于 QUIC 传输。请清除 REALITY 密钥，或选择其他传输协议。</string>
     <string name="validation_transport_quic_utls">QUIC 传输不使用 uTLS。</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal 仅适用于自定义多路复用。请将多路复用设为「自定义」。</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal 需要同时设置两个速度；缺失的一项会按 1 Mbps 发送。</string>
@@ -2161,6 +2150,12 @@
     <string name="validation_xray_vless_encryption_mode">mlkem768x25519plus 之后的部分必须是 native、xorpub 或 random。</string>
     <string name="validation_xray_vless_encryption_rtt">模式之后的部分必须是 1rtt 或 0rtt。</string>
     <string name="validation_xray_vless_encryption_key">字符串中的每个密钥必须是 32 或 1184 字节、不带填充的 URL 安全 base64。</string>
+    <string name="validation_xray_vless_encryption_padding_order">请将填充部分放在密钥之前。</string>
+    <string name="validation_xray_vless_encryption_mlkem">字符串中的 1184 字节密钥不是有效的 ML-KEM-768 密钥：请重新从服务器复制该字符串。</string>
+    <string name="validation_xray_vless_encryption_no_key">字符串中没有密钥：请复制服务器提供的完整字符串。</string>
+    <string name="validation_xray_vless_padding_format">每个填充部分必须是用短横线连接的三个数字，例如 100-111-1111。</string>
+    <string name="validation_xray_vless_padding_first">第一个填充部分的概率必须至少为 100，长度至少为 35，例如 100-111-1111。</string>
+    <string name="validation_xray_vless_padding_total">填充长度之和可能超过 65553 字节。</string>
     <string name="validation_xray_vless_vision">XTLS Vision 需要 raw 网络配合 TLS 或 REALITY，或配合 VLESS 加密：请更改网络或安全类型，或清除 flow。</string>
     <string name="validation_xray_xdrive_no_link">XDRIVE 没有分享链接格式。请改为导入服务器的 JSON 配置。</string>
     <string name="validation_xray_xdrive_service">必须是 google-drive、s3、template 或 local。</string>
@@ -2381,11 +2376,6 @@
     <string name="validation_custom_xray_geodata">已从导入的配置中移除 geodata 更新器：它会从发送者选定的地址下载文件，并替换 Throne 文件夹中的文件。</string>
     <string name="validation_custom_xray_webhook">已从此路由规则中移除 webhook：它会把每个匹配连接的详细信息发送到发送者选定的地址。</string>
     <string name="validation_autoselector_countries">请使用以逗号分隔的两位国家代码，例如 DE,NL,FR。</string>
-    <string name="validation_autoselector_build_limit">运行的配置数不能多于参与排名的配置数（%1$s）。</string>
-    <string name="validation_autoselector_bench_interval">全量扫描的间隔不能短于检查间隔（%1$s 秒）。</string>
-    <string name="validation_autoselector_watch_interval">监视使用中配置的间隔不能长于检查间隔（%1$s 秒）。</string>
-    <string name="validation_autoselector_ready_count">密集检查的配置数至少应与保持就绪的配置数相同（%1$s）。</string>
-    <string name="validation_autoselector_close_count">密集检查的配置数不能多于运行的配置数（%1$s）。</string>
     <string name="validation_chain_empty">请至少向链中添加一个配置。</string>
     <string name="validation_ss_plugin_opts_dangling">末尾的反斜杠后面没有可转义的内容。</string>
     <string name="validation_ss_plugin_opts_name">每个选项都需要名称，如 obfs=http;obfs-host=example.com。</string>
@@ -2489,6 +2479,7 @@
     <string name="validation_route_no_drop_unused">对 drop 方式不起作用。</string>
     <string name="validation_route_ignored_by_action">%1$s 规则会忽略它；它只适用于这些动作：%2$s。</string>
     <string name="validation_route_matches_all">此规则没有任何匹配条件，因此会匹配所有流量。</string>
+    <string name="validation_route_catch_all">此规则没有条件，会匹配所有流量。请添加条件，或关闭此规则。</string>
     <string name="validation_route_issue">%1$s：%2$s</string>
     <string name="validation_route_issue_value">%1$s（\"%2$s\"）：%3$s</string>
     <string name="validation_route_rule_warning">规则 \"%1$s\"：%2$s</string>
@@ -2534,6 +2525,7 @@
     <string name="validation_millis_or_default">请输入整数毫秒数，例如 %1$s（不带单位），或输入 0 使用默认值。</string>
     <string name="validation_group_update_interval">必须至少为 30 分钟，或留空以保持默认。</string>
     <string name="validation_port_used">端口 %1$s 已被以下项使用：%2$s。请选择其他端口。</string>
+    <string name="validation_port_reenabled">在端口 %2$s 上开启 %1$s 会与 %3$s 冲突。请选择其他端口。</string>
     <string name="validation_mtu_ipv6">IPv6 需要至少 %1$s 的 MTU；低于该值时系统可能会从 Tun 中移除 IPv6。</string>
     <string name="validation_private_range_all">这涵盖了所有地址，会导致 Tun 不路由任何流量。</string>
     <string name="validation_dns_local_ip">请使用 IP 地址，例如 223.5.5.5 或 tls://1.1.1.1：此服务器负责解析其他服务器的名称。</string>
@@ -2556,12 +2548,18 @@
     <string name="validation_route_dns_final">默认 DNS 服务器必须是远程或直连，不能是 \"%1$s\"。</string>
     <string name="validation_route_dns_dropped">该路由配置自己的 DNS 设置已被丢弃，因此改用全局设置：%1$s</string>
     <string name="route_dns_global_servers">远程 %1$s，直连 %2$s</string>
-    <string name="dns_server_suggestions">最近使用和推荐的服务器</string>
     <string name="warp_api_tls_fragment_title">WARP 注册时的 TLS 分片</string>
     <string name="warp_api_tls_fragment_note">仅在注册直接连接、而非经由正在运行的配置时生效。</string>
     <string name="backup_warn_tor_egress">备份通过 Tor 出站，但 Android 不支持 Tor；此处流量将直接经由所选服务器出站。</string>
     <string name="validation_dns_server_item">第 %1$s 个服务器（\"%2$s\"）：%3$s</string>
-    <string name="dns_server_list_hint">多个服务器用逗号分隔：将同时查询，采用最先返回的应答。</string>
+    <string name="dns_server_add">添加服务器</string>
+    <string name="dns_server_custom">自定义地址</string>
+    <string name="dns_server_recent">最近使用</string>
+    <string name="dns_server_address_hint">地址，例如 tls://1.1.1.1</string>
+    <string name="dns_server_list_race">同时查询，采用最快的应答。</string>
+    <string name="dns_server_list_primary">也用于解析代理服务器地址</string>
+    <string name="dns_server_list_empty">请至少添加一个服务器。</string>
+    <string name="dns_server_drag">拖动以调整顺序</string>
     <string name="juicity_pinned_certchain_sha256">证书链 SHA256</string>
     <string name="juicity_pinned_certchain_sha256_hint">juicity-server 输出的证书链哈希；即使启用了「允许不安全的连接」，也会替代 CA 验证</string>
     <string name="validation_juicity_certchain">请使用 base64 格式的 32 字节证书链哈希（44 个字符，以 = 结尾），即 juicity-server 输出的值。</string>
@@ -2584,9 +2582,9 @@
     <string name="subs_running_updated_reconnect">%1$s 已被该更新修改；正在以新设置重新连接。</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">选择方式</string>
-    <string name="autosel_strategy_latency">最快最稳</string>
+    <string name="autosel_strategy_latency">最快</string>
     <string name="autosel_strategy_priority">按优先级顺序</string>
-    <string name="autosel_strategy_latency_tip">最快最稳：始终使用所有配置中测量结果最佳的那个。</string>
+    <string name="autosel_strategy_latency_tip">最快：始终使用所有配置中测量结果最佳的那个。</string>
     <string name="autosel_strategy_priority_tip">按优先级顺序：从上到下依次尝试下方的层级。选择器停留在有可用配置的最高层级，更高层级恢复可用后会移回该层级。</string>
     <string name="autosel_tier_add">添加层级</string>
     <string name="autosel_tiers_hint">配置归属于其匹配的第一个层级，不匹配任何层级的配置排在最后。选择器使用有可用配置的最高层级，并在该层级中使用测量结果最佳的配置。</string>
@@ -2605,19 +2603,8 @@
     <string name="autosel_tier_any_profile">任意配置</string>
     <string name="autosel_tier_fallback">层级 %d</string>
     <string name="autosel_tier_short">层%d</string>
-    <string name="autosel_failback_checks">移回前需通过</string>
-    <string name="autosel_failback_checks_tip">按优先级顺序：更高层级的配置恢复可用后，需连续通过这么多次检查，选择器才会移回它。不能多于保留样本数。</string>
-    <plurals name="autosel_checks">
-        <item quantity="other">%d 次检查</item>
-    </plurals>
-    <string name="autosel_failback_delay">无失败持续</string>
-    <string name="autosel_failback_delay_tip">按优先级顺序：更高层级的配置还必须在这么长时间内没有失败的检查或连接，选择器才会移回它。</string>
-    <string name="autosel_failback_interrupt">移回时断开连接</string>
-    <string name="autosel_failback_interrupt_tip">按优先级顺序时生效。关：已打开的连接留在原配置上，只有新连接移到更高层级。开：所有连接立即移回。</string>
     <string name="autosel_passive">从真实连接中学习</string>
     <string name="autosel_passive_tip">除健康检查外，还根据应用经由配置建立的连接来评判配置。连接完全没有收到回复或无法建立时计为失败。当某配置近期连接的失败次数达到 3 次或以上且不少于成功次数时，即使其检查通过，该配置也会被暂时搁置：首次 1 分钟，每再发生一次时长加倍，最长 16 分钟。每个网站也会继续使用上次对它可用的配置，并避开刚对它失败的配置。有真实流量时，会减少发送健康检查。</string>
-    <string name="autosel_site_memory">网站选择记忆时长</string>
-    <string name="autosel_site_memory_tip">网站继续使用上次对它可用的配置、并继续避开对它失败的配置的时长。</string>
     <string name="autosel_balance_hint_priority">按优先级顺序时，流量只在当前使用层级的就绪配置之间分配。</string>
     <string name="autosel_plan_by_tier">按层级：%s。</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2628,7 +2615,6 @@
     <string name="autosel_plan_truncated_tiers">匹配的配置超过 %d 个，每个层级仅保留排名最高的。</string>
     <string name="validation_autoselector_tier_match">请为此层级选择分组或输入名称模式。</string>
     <string name="validation_autoselector_tier_count">按优先级顺序选择时，请至少添加一个层级。</string>
-    <string name="validation_autoselector_failback_checks">要求的连续检查次数不能多于保留样本数（%1$s）。</string>
     <string name="autosel_status_on_tier">自动选择使用 %1$s，层级 %2$d（%4$d 个中 %3$d 个可用）</string>
     <string name="autosel_detail_suspect">%d 个存疑</string>
     <string name="autosel_state_suspect">存疑</string>
@@ -2756,6 +2742,17 @@
     <string name="service_ip_risk">风险 %d</string>
     <string name="service_check_checked_now">刚刚检测</string>
     <string name="service_check_checked_at">%s检测</string>
+    <string name="service_check_services">服务</string>
+    <string name="service_check_services_all">全部服务</string>
+    <string name="service_check_services_count">%2$d 个服务中的 %1$d 个</string>
+    <string name="service_check_none_selected">未选择任何服务</string>
+    <string name="service_check_services_unknown">无法加载服务列表</string>
+    <string name="service_check_current">检查当前连接的服务</string>
+    <string name="service_category_ai">AI</string>
+    <string name="service_category_streaming">流媒体</string>
+    <string name="service_category_social">社交</string>
+    <string name="service_category_reputation">IP 信誉</string>
+    <string name="service_category_other">其他</string>
     <string name="validation_chain_selector_twice">一条链只能包含一个自动选择。</string>
     <string name="validation_chain_selector_custom">自动选择不能与自定义配置位于同一条链中。</string>
     <string name="chain_step_selector">包含自动选择的链无法逐跳测试；请改为测试其成员</string>
@@ -2763,6 +2760,8 @@
     <string name="autosel_notice_exhausted_upstream">所有运行中的配置经由其前方的跳均已停止工作——正用下一批候选重建。</string>
     <string name="validation_route_outbound_chain_selector">路由规则不能使用链 \"%1$s\"：它包含自动选择，因此只能被启动。请选择其他出站。</string>
     <string name="route_outbound_chain_selector">路由配置将流量发送到 %1$s，而它包含自动选择；这样的链只能被启动，不能用于路由规则</string>
+    <string name="xray_full_config_tag_clash">自定义 Xray 配置使用了标签 \"%1$s\"，而 Throne 也会为另一个 Xray 配置生成这个标签；请在自定义配置中将其重命名</string>
+    <string name="xray_full_config_selector_clash">自定义 Xray 配置的选择器 \"%1$s\" 也会匹配到 \"%2$s\"，而它是 Throne 为另一个 Xray 配置生成的；请在自定义配置中让该选择器更精确</string>
     <string name="grp_filter_countries">国家/地区</string>
     <string name="grp_filter_countries_tip">要保留（例如 HK,JP）或移除（例如 !RU）的出口国家/地区。</string>
     <string name="grp_filter_countries_hint">例如 HK,JP 或 !RU</string>
@@ -2803,4 +2802,8 @@
     <string name="vpn_auth_submitting">正在登录…</string>
     <string name="vpn_auth_gone">此登录请求已不再等待处理。</string>
     <string name="vpn_auth_no_browser">没有可以打开此地址的应用。</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">使用两字母的国家/地区代码，例如 US。</string>
+    <string name="validation_psiphon_ignored">已忽略 %1$s：Psiphon 配置只接受地区。</string>
+    <string name="exit_runs_over_itself">所选配置本身已经经由 %1$s 出去，因此 %1$s 出口无法在其之上运行。请在“设置 › 路由 › 出口”中选择其他出口。</string>
 </resources>

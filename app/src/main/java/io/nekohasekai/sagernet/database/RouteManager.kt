@@ -147,6 +147,22 @@ object RouteManager {
     }
 
     /**
+     * Saves [updated] only while the stored profile is still [original] (a profile as stored, e.g. from [get]); false
+     * when it was edited or deleted meanwhile, so that change wins.
+     */
+    fun saveIfUnchanged(original: RouteProfile, updated: RouteProfile): Boolean =
+        SagerDatabase.instance.runInTransaction(Callable {
+            val stored = get(original.id) ?: return@Callable false
+            if (storedForm(stored) != storedForm(original)) return@Callable false
+            save(updated)
+            true
+        })
+
+    /** The rows [save] writes for [p], to compare two profiles as stored. */
+    private fun storedForm(p: RouteProfile): Pair<RouteProfileEntity, List<RouteRuleEntity>> =
+        RouteProfileEntity.of(p) to p.rules.mapIndexed { index, rule -> RouteRuleEntity.of(p.id, index, rule) }
+
+    /**
      * Refuses to delete the last profile; deleting the current one makes the first remaining profile current. Groups
      * routed by it follow the global profile again, and the group owning it stops importing (RoutesRepo::forgetDeleted).
      */

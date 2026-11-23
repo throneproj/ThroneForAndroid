@@ -116,16 +116,16 @@ object AutoSelectorRuntime {
 
     /**
      * ProxyInstance.init, before the config is built: ranks the selector the profile runs (itself or a chain's
-     * selector hop) when its plan asks for measurements, until enough members work. Behind fixed hops a direct test
-     * says nothing about a member, so the core ranks them itself.
+     * selector hop) when its plan asks for measurements, until enough members work, and otherwise reranks its pool on
+     * the stored results. Behind fixed hops a direct test says nothing about a member, so the core ranks them itself.
      */
     suspend fun beforeStart(proxy: ProxyInstance) {
         val service = proxy.service ?: return
         val profile = proxy.profile
-        // Right after a sweep a pool can still want ranking (validity 0): a ranked restart must not measure again.
-        val justRanked = synchronized(lock) {
+        // Right after a sweep, ranking again would loop on a refused one, or undo an early start's untrusted order.
+        val (justRanked, sweeping) = synchronized(lock) {
             this.service = service
-            (rankedFor == profile.id).also { rankedFor = -1L }
+            (rankedFor == profile.id).also { rankedFor = -1L } to (sweep != null)
         }
         val selectorId = if (profile.type != AutoSelectorProfiles.TYPE && !profile.isChain()) null
         else withContext(Dispatchers.IO) { runCatching { AutoSelectorProfiles.rankedSelectorOf(profile) }.getOrNull() }
@@ -134,9 +134,14 @@ object AutoSelectorRuntime {
             return
         }
         if (justRanked) return
-        if (!withContext(Dispatchers.IO) { runCatching { AutoSelectorProfiles.needsRanking(selectorId) }.getOrDefault(false) }) {
-            return
+        val needed = withContext(Dispatchers.IO) {
+            runCatching {
+                // A sweep under way owns the pool order; the start builds from what it left.
+                if (sweeping) AutoSelectorProfiles.needsRanking(selectorId)
+                else AutoSelectorProfiles.needsRankingOrRerank(selectorId)
+            }.onFailure { Logs.w(it) }.getOrDefault(false)
         }
+        if (!needed) return
         measure(service, profile.id, selectorId, emptyList())
         val title = withContext(Dispatchers.IO) { ServiceNotification.genTitle(profile) }
         service.data.notification?.postNotificationTitle(title)

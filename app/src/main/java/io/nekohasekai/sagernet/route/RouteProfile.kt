@@ -33,7 +33,7 @@ class RouteProfile {
 
     @JvmField var rules: MutableList<RouteRule> = mutableListOf()
 
-    /** The subscription group whose refreshes overwrite [rules], -1 = none; local only, never shared. */
+    /** The subscription group whose refreshes replace the [RouteRule.remote] rules, -1 = none; local only, never shared. */
     @JvmField var source_gid: Long = -1L
 
     fun copy(): RouteProfile {

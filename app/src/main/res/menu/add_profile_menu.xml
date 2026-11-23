@@ -98,6 +98,9 @@
                             android:id="@+id/action_new_masterdns"
                             android:title="@string/action_masterdns" />
                         <item
+                            android:id="@+id/action_new_psiphon"
+                            android:title="@string/action_psiphon" />
+                        <item
                             android:id="@+id/action_new_direct"
                             android:title="@string/action_direct" />
                         <item
@@ -268,6 +271,10 @@
                                 android:id="@+id/action_show_out_ip"
                                 android:checkable="true"
                                 android:title="@string/profiles_show_out_ip" />
+                            <item
+                                android:id="@+id/action_show_services"
+                                android:checkable="true"
+                                android:title="@string/service_check_services" />
                             <item
                                 android:id="@+id/action_show_speed"
                                 android:checkable="true"

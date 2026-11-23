@@ -29,6 +29,7 @@ import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.ui.profile.MuxBlock
 import io.nekohasekai.sagernet.ui.profile.XrayMuxBlock
 import io.nekohasekai.sagernet.ui.profile.keepUnlistedValue
+import io.nekohasekai.sagernet.ui.test.ServiceCheckSelector
 import io.nekohasekai.sagernet.validation.Empty
 import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.validation.vtr
@@ -218,6 +219,7 @@ class TestingSettingsFragment : SettingsScreenFragment(R.xml.settings_testing) {
             simpleUrl.isEnabled = (newValue as String).toIntOrNull() == SpeedTestSettings.SIMPLE_DOWNLOAD
             true
         }
+        ServiceCheckSelector.bind(pref(ServiceCheckSelector.PREFERENCE_KEY))
     }
 
     /**
@@ -340,6 +342,9 @@ class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
 
         enabled.setOnPreferenceChangeListener { _, newValue ->
             val on = newValue as Boolean
+            if (on && refusedByPorts(enabled, SettingsRegistry.CORE_BOX_CLASH_API.key to portValue().toString())) {
+                return@setOnPreferenceChangeListener false
+            }
             DataStore.coreBoxClashApi = if (on) portValue() else -portValue()
             sync(on)
             needReload()
@@ -355,7 +360,7 @@ class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
             needReload()
             true
         }
-        validation.bind(port.key, SettingChecks.listenPort(SettingChecks.Listener.CLASH_API)).gate()
+        validation.bind(port.key, SettingChecks.listenPort(SettingsRegistry.Listener.CLASH_API)).gate()
         // Empty listens on the loopback address, as the desktop's placeholder says.
         gateText(listen.key, Validation.Rules.host(Empty.Allowed))
         listen.summaryProvider = DefaultSummaryProvider(SettingsRegistry.LOOPBACK_ADDRESS)
@@ -386,6 +391,9 @@ class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
 
         enabled.setOnPreferenceChangeListener { _, newValue ->
             val on = newValue as Boolean
+            if (on && refusedByPorts(enabled, SettingsRegistry.CORE_BOX_API_PORT.key to portValue().toString())) {
+                return@setOnPreferenceChangeListener false
+            }
             DataStore.coreBoxApiPort = if (on) portValue() else -portValue()
             sync(on)
             (activity as? MainActivity)?.refreshNavMenu(on)
@@ -402,7 +410,7 @@ class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
             needReload()
             true
         }
-        validation.bind(port.key, SettingChecks.listenPort(SettingChecks.Listener.BOX_API)).gate()
+        validation.bind(port.key, SettingChecks.listenPort(SettingsRegistry.Listener.BOX_API)).gate()
         secret.setOnPreferenceChangeListener { _, newValue ->
             val value = newValue?.toString()?.trim().orEmpty()
             // Reading an empty secret back generates and saves a new one.

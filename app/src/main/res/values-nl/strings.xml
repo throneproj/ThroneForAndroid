@@ -43,7 +43,7 @@
     <string name="security_settings">TLS-beveiligingsinstellingen</string>
     <string name="allow_insecure">Onveilig toestaan</string>
     <string name="allow_insecure_sum">Certificaatverificatie uitschakelen. Indien ingeschakeld is deze configuratie net zo veilig als platte tekst</string>
-    <string name="speed_detail">Proxy: %1$s↑ %2$s↓\nDirect: %3$s↑ %4$s↓</string>
+    <string name="speed_detail">Proxy: ↓%2$s ↑%1$s\nDirect: ↓%4$s ↑%3$s</string>
     <string name="speed">%s/s</string>
     <string name="connection_test_testing">Testen…</string>
     <string name="connection_test_available">HTTPS: %d ms</string>
@@ -336,9 +336,9 @@
     <string name="tls_fragment_fallback_delay">Fragment-terugvalvertraging</string>
     <string name="tls_record_fragment">TLS-recordfragment</string>
     <string name="tls_tricks">TLS-trucs</string>
-    <string name="enable_reality">Reality inschakelen</string>
-    <string name="reality_public_key">Reality-publieke sleutel</string>
-    <string name="reality_short_id">Reality short ID</string>
+    <string name="enable_reality">REALITY inschakelen</string>
+    <string name="reality_public_key">REALITY-publieke sleutel</string>
+    <string name="reality_short_id">REALITY short ID</string>
     <string name="vmess_global_padding">Globale opvulling</string>
     <string name="vmess_authenticated_length">Geauthenticeerde lengte</string>
     <string name="transport_settings">Transportinstellingen</string>
@@ -429,7 +429,7 @@
     <string name="xray_xdns_resolvers_hint">Eén per regel. Vervangt de resolvers in Finalmask; leeg behoudt ze.</string>
     <string name="xray_pinned_peer_cert_sha256">Vastgezet peercertificaat SHA256</string>
     <string name="xray_verify_peer_cert_by_name">Peercertificaat verifiëren op naam</string>
-    <string name="reality_settings">Reality-instellingen</string>
+    <string name="reality_settings">REALITY-instellingen</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="xray_mux_concurrency">Gelijktijdigheid</string>
     <string name="xray_mux_concurrency_hint">Streams die één verbinding draagt voordat een volgende opent. 0 gebruikt de 8 van Xray en -1 stuurt TCP buiten de mux om.</string>
@@ -692,7 +692,6 @@
     <string name="direct_test_url">Directe test-URL</string>
     <string name="direct_test_url_sum">Opgehaald zonder enige proxy om een dode verbinding van dode servers te onderscheiden. Laat leeg om de systeemnetwerkstatus te gebruiken.</string>
     <string name="direct_test_url_empty">systeemnetwerkstatus</string>
-    <string name="speed_test_mode_country">Alleen land</string>
     <string name="net_use_proxy">Proxy gebruiken</string>
     <string name="net_use_proxy_sum">Abonnement- en updateverzoeken via de lokale proxy sturen</string>
     <string name="net_insecure">TLS-fouten negeren</string>
@@ -701,14 +700,14 @@
     <string name="log_buffer_size">Logbuffergrootte (kb)</string>
     <string name="enable_stats">Verbindingsstatistieken</string>
     <string name="enable_stats_sum">Verbindingen en hun processen volgen</string>
-    <string name="disable_traffic_stats">Verkeersstatistieken uitschakelen</string>
+    <string name="disable_traffic_stats">Verkeerstellers uitschakelen</string>
     <string name="disable_traffic_stats_sum">Profielverkeer wordt niet geteld</string>
     <string name="listen_port">Luisterpoort</string>
     <string name="listen_address">Luisteradres</string>
     <string name="clash_api_secret">Geheim</string>
     <string name="xray_vless_preference">Xray VLESS-voorkeur</string>
     <string name="xray_vless_xhttp_only">Alleen XHTTP</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP en Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP en REALITY</string>
     <string name="xray_vless_all">Alle VLESS</string>
     <string name="skip_cert_sum">TLS-certificaatverificatie standaard overslaan (allowInsecure)</string>
     <string name="use_mozilla_certs">Mozilla-certificaatopslag gebruiken</string>
@@ -822,7 +821,7 @@
     <string name="route_profile_name">Naam</string>
     <string name="route_profile_default_outbound">Standaard outbound</string>
     <string name="route_profile_remote_source">Externe bron</string>
-    <string name="route_profile_remote_rules_note">Elke update vervangt de regels van dit profiel door die van de URL, dus regels die u hier toevoegt of wijzigt, gaan verloren. Gebruik Klonen in de lijst met routeringsprofielen om uw eigen regels te behouden: de kloon is een lokale kopie die nooit wordt bijgewerkt.</string>
+    <string name="route_profile_remote_rules_note">Elke update vervangt de regels die van de URL kwamen, dus wijzigingen daarin blijven tot de volgende. Regels die hier zijn toegevoegd, blijven behouden.</string>
     <string name="route_profile_url">URL</string>
     <string name="route_profile_url_hint">https://… (throne://route-link, base64 of JSON)</string>
     <string name="route_profile_auto_update">Automatisch bijwerken</string>
@@ -842,7 +841,7 @@
     </plurals>
     <string name="route_profile_invalid_url_title">Ongeldige URL</string>
     <string name="route_profile_invalid_url">Voer eerst een geldige http(s)-URL in.</string>
-    <string name="route_profile_fetch_confirm">De huidige regels worden vervangen door de regels die van de URL zijn opgehaald.</string>
+    <string name="route_profile_fetch_confirm">De regels die van de URL kwamen, inclusief wijzigingen daarin, worden vervangen door de nu opgehaalde regels. Regels die hier zijn toegevoegd, blijven behouden.</string>
     <string name="route_profile_fetch_failed">Routeringsprofiel kon niet worden opgehaald</string>
     <string name="route_profile_fetched_title">Opgehaald</string>
     <string name="route_profile_fetched_warnings_title">Opgehaald met waarschuwingen</string>
@@ -859,6 +858,8 @@
     <string name="route_rule_action">Actie</string>
     <string name="route_rule_outbound">Outbound</string>
     <string name="route_rule_missing_server">Ontbrekende server (#%d)</string>
+    <string name="route_outbound_no_exit">Proxy zonder uitgang</string>
+    <string name="route_outbound_no_exit_hint">Verschilt alleen van Proxy terwijl een uitgang aan staat (Instellingen › Routering › Uitgang): deze sites slaan die over en gaan via het geselecteerde profiel naar buiten.</string>
     <string name="route_rule_reject_method">Afwijzingsmethode</string>
     <string name="route_rule_strategy">Oplosstrategie</string>
     <string name="route_rule_override_destination">Bestemming overschrijven</string>
@@ -909,8 +910,8 @@
     <string name="route_rule_any">Elke</string>
     <string name="route_rule_invalid_title">Ongeldige regel</string>
     <string name="route_rule_unknown_rule_sets">Onbekende regelsets: %s\n\nKies namen uit de regelsetlijst, of gebruik de URL van een .srs-bestand.</string>
-    <string name="route_rule_catch_all_title">Geen condities</string>
-    <string name="route_rule_catch_all">Deze regel heeft geen condities en matcht daarom elke verbinding. Toch opslaan?</string>
+    <string name="route_rule_default_name">Regel %d</string>
+    <string name="route_rule_dns_queries">DNS-query\'s</string>
     <string name="rule_set_picker_title">Regelsets</string>
     <string name="rule_set_search">Regelsets zoeken…</string>
     <string name="rule_set_add_url">URL toevoegen</string>
@@ -950,7 +951,11 @@
     <string name="grp_front_proxy">Frontproxy</string>
     <string name="grp_landing_proxy">Landingproxy</string>
     <string name="grp_none">Geen</string>
-    <string name="grp_missing_profile">Profiel #%1$d (ontbreekt)</string>
+    <string name="grp_missing_profile">Ontbrekend profiel (#%1$d)</string>
+    <string name="hop_refs_warning">Deze groepen gebruiken een profiel dat wordt verwijderd als front- of landingproxy. Het wordt eruit gehaald, dus ze verbinden zonder:</string>
+    <string name="hop_refs_cleared">Deze groepen gebruikten een verwijderd profiel als front- of landingproxy. Het is eruit gehaald, dus ze verbinden nu zonder:</string>
+    <string name="hop_ref_front">%1$s (frontproxy)</string>
+    <string name="hop_ref_landing">%1$s (landingproxy)</string>
     <string name="grp_route_profile">Routeringsprofiel</string>
     <string name="grp_route_profile_default">Standaard (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (van dit abonnement)</string>
@@ -992,7 +997,7 @@
     <string name="grp_settings_user_agent">User agent</string>
     <string name="grp_sub_auto_update">Automatisch abonnement bijwerken</string>
     <string name="grp_sub_auto_update_interval">Interval (minuten, ongeldig als kleiner dan 30)</string>
-    <string name="grp_sub_clear">Servers wissen voordat het abonnement wordt bijgewerkt</string>
+    <string name="grp_sub_clear">Profielen wissen voordat het abonnement wordt bijgewerkt</string>
     <string name="grp_sub_show_change_popup">Het wijzigingenvenster tonen na een handmatige abonnementupdate</string>
     <string name="grp_sub_show_change_popup_tip">Indien ingeschakeld wordt na een handmatige abonnementupdate een venster getoond met toegevoegde / bijgewerkte / verwijderde profielen. Dezelfde informatie wordt altijd in het log geschreven.</string>
     <string name="grp_sub_send_hwid">Verzenden van HWID, apparaatmodel en OS-versie bij abonnementupdate inschakelen</string>
@@ -1085,13 +1090,13 @@
     <string name="profiles_sort_latency">Latentie</string>
     <string name="profiles_sort_download">Downloadsnelheid</string>
     <string name="profiles_sort_upload">Uploadsnelheid</string>
-    <string name="profiles_sort_ip_out">Uitgaand IP</string>
+    <string name="profiles_sort_ip_out">Uitgangs-IP</string>
     <string name="profiles_sort_traffic">Verkeer</string>
     <string name="profiles_sort_traffic_total">Totaal</string>
     <string name="profiles_sort_traffic_downloaded">Gedownload</string>
     <string name="profiles_sort_traffic_uploaded">Geüpload</string>
     <string name="profiles_show">Tonen</string>
-    <string name="profiles_show_out_ip">Uitgaand IP</string>
+    <string name="profiles_show_out_ip">Uitgangs-IP</string>
     <string name="profiles_show_speed">Snelheid</string>
     <string name="confirm_clear">Wissen</string>
     <string name="confirm_restore">Herstellen</string>
@@ -1131,7 +1136,7 @@
     <string name="confirm_auto_select_apps">Proxy-apps automatisch selecteren?</string>
     <string name="profiles_no_duplicates">Geen dubbele profielen gevonden.</string>
     <string name="profiles_no_unavailable">Geen niet beschikbare profielen gevonden.</string>
-    <string name="profiles_no_insecure">Geen onveilige configuraties gevonden.</string>
+    <string name="profiles_no_insecure">Geen onveilige profielen gevonden.</string>
     <string name="profiles_running_kept">Het actieve profiel is behouden.</string>
     <string name="profiles_delete_failed">De profielen konden niet worden verwijderd.</string>
     <string name="profiles_test_busy">De laatste test is nog niet volledig voltooid, even geduld.</string>
@@ -1142,7 +1147,11 @@
     </plurals>
     <string name="profiles_select_all">Alles selecteren</string>
     <string name="profiles_move_to_group">Naar groep verplaatsen</string>
-    <string name="profiles_move_no_target">Er is geen andere basisgroep om naar te verplaatsen.</string>
+    <string name="import_target_subscription">Deze groep is een abonnement: de volgende update verwijdert profielen die erin zijn geïmporteerd. Selecteer een andere groep en importeer opnieuw.</string>
+    <string name="import_target_archived">Deze groep is gearchiveerd. Selecteer een andere groep en importeer opnieuw.</string>
+    <string name="import_target_gone">Deze groep bestaat niet meer.</string>
+    <string name="profiles_move_target_subscription">De volgende update van een abonnementsgroep verwijdert profielen die erin zijn verplaatst. Kies een andere groep.</string>
+    <string name="profiles_move_source_updating">Het abonnement van deze groep wordt bijgewerkt. Probeer het opnieuw wanneer dat klaar is.</string>
     <plurals name="profiles_moved">
         <item quantity="one">%1$d profiel naar %2$s verplaatst</item>
         <item quantity="other">%1$d profielen naar %2$s verplaatst</item>
@@ -1212,9 +1221,7 @@
     <string name="test_panel_summary_none_working">geen werkend</string>
     <string name="test_panel_summary_resolved">%1$d opgelost in %2$d landen</string>
     <string name="test_panel_summary_none_resolved">geen opgelost</string>
-    <string name="test_panel_summary_working_countries">%1$d werkend in %2$d landen</string>
     <string name="test_panel_current_unavailable">Niet beschikbaar: %s</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_failure_empty">Niets te testen</string>
     <string name="test_panel_failure_busy">Er is nog een andere test bezig</string>
     <string name="test_panel_failure_unreachable">De testservice reageerde niet</string>
@@ -1244,7 +1251,7 @@
     <string name="test_panel_select_description">Selecteren %1$s, %2$s</string>
     <string name="test_panel_country_description">%1$s: %2$d</string>
     <string name="test_engine_kind_url">URL-test</string>
-    <string name="test_engine_kind_ip">IP-test</string>
+    <string name="test_engine_kind_ip">Uitgangs-IP-test</string>
     <string name="test_engine_kind_speed">Snelheidstest</string>
     <string name="test_engine_title">%1$s · %2$s</string>
     <string name="test_engine_scope_current">Huidige verbinding</string>
@@ -1256,7 +1263,7 @@
     <string name="test_engine_fg_subscriptions">Abonnementen bijwerken…</string>
     <string name="action_auto_selector">Automatische selector</string>
     <string name="autosel_title">Automatische selector</string>
-    <string name="autosel_group">Servers van</string>
+    <string name="autosel_group">Profielen van</string>
     <string name="autosel_group_archived">%s (gearchiveerd)</string>
     <string name="autosel_group_missing">Ontbrekende groep (#%d)</string>
     <string name="autosel_name_filter">Alleen overeenkomende namen</string>
@@ -1275,7 +1282,6 @@
     <string name="autosel_plan_skipped">Overgeslagen: %s.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_list_separator">\", \"</string>
-    <string name="autosel_plan_kept_unavailable">De laatste test van elk profiel is mislukt, wat meestal betekent dat het netwerk plat lag in plaats van de servers, dus alle %d worden behouden en opnieuw gecontroleerd.</string>
     <string name="autosel_plan_truncated">Meer dan %d profielen komen in aanmerking, dus alleen de best beoordeelde worden behouden.</string>
     <string name="autosel_plan_reused">%d hebben een recent testresultaat dat wordt hergebruikt.</string>
     <string name="autosel_plan_needs_ranking">De rest wordt gemeten wanneer de selector start: die draait zodra genoeg profielen werken en schakelt over op de volledige rangschikking zodra alle zijn gemeten.</string>
@@ -1291,7 +1297,6 @@
     <string name="autosel_skip_management">OpenVPN- of OpenConnect-profiel</string>
     <string name="autosel_skip_name">op naam uitgefilterd</string>
     <string name="autosel_skip_country">op land uitgefilterd</string>
-    <string name="autosel_skip_unavailable">laatste test mislukt</string>
     <string name="autosel_skip_xray_chained">Xray-volledige configuratie kan niet worden gecombineerd met de proxies van de groep</string>
     <string name="autosel_skip_unsupported">type dat deze build niet kan gebruiken</string>
     <string name="autosel_advanced">Geavanceerd</string>
@@ -1303,40 +1308,21 @@
     <string name="autosel_country_filter_empty">Elk land (bijv. NL,DE,FR)</string>
     <string name="autosel_build_limit">De beste draaien</string>
     <string name="autosel_build_limit_tip">Hoeveel profielen in de draaiende configuratie worden geladen. De selector wisselt hier instant tussen, zonder herverbinding. Meer kost meer geheugen en opstarttijd.</string>
-    <string name="autosel_pool_cap">Hoogstens beoordelen</string>
-    <string name="autosel_pool_cap_tip">Harde bovengrens voor hoeveel profielen worden gemeten en in de beoordeelde lijst bewaard. Wanneer elk draaiend profiel doodgaat, worden vervangers uit deze lijst genomen.</string>
-    <string name="autosel_result_validity">Resultaten vertrouwen voor</string>
-    <string name="autosel_result_validity_tip">URL-testresultaten van deze recentheid worden hergebruikt in plaats van opnieuw gemeten, inclusief tests die u zelf op de groep draaide, dus de selector starten vlak daarna herhaalt het werk niet. Oudere resultaten worden behandeld als was het profiel nooit getest. Zet op nul om altijd een verse test te draaien.</string>
-    <string name="autosel_always_retest">Altijd opnieuw testen</string>
-    <string name="autosel_exclude_unavailable">Mislukte profielen overslaan</string>
-    <string name="autosel_exclude_unavailable_tip">Houdt servers waarvan de laatste test mislukte uit de pool, zolang dat resultaat binnen het vertrouwensvenster valt. Zet uit als uw tests onbetrouwbaar zijn en u de selector liever zelf laat beslissen.</string>
     <string name="autosel_cat_health">Gezondheidscontroles</string>
     <string name="autosel_expected">Klaar houden</string>
     <string name="autosel_expected_tip">Hoeveel profielen altijd als werkend bevestigd worden gehouden, zodat een storing direct kan worden opgevangen. Dit zijn ook degenen waarover het verkeer wordt verdeeld wanneer balanceren aan staat.</string>
-    <string name="autosel_active_size">Nauwlettend controleren</string>
-    <string name="autosel_active_size_tip">De best beoordeelde profielen worden elk interval opnieuw gecontroleerd. De rest wordt ook gecontroleerd, alleen verdeeld over de tragere volledige ronde.</string>
     <string name="autosel_interval">Controle-interval</string>
-    <string name="autosel_interval_tip">Hoe vaak de nauwlettend gecontroleerde profielen opnieuw worden gemeten.</string>
-    <string name="autosel_bench_interval">Volledige ronde elke</string>
-    <string name="autosel_bench_interval_tip">Hoe lang één ronde over alle draaiende profielen duurt. Controles worden gelijkmatig verdeeld, dus een grote pool veroorzaakt nooit een verkeerspiek.</string>
-    <string name="autosel_watch_interval">Profiel in gebruik volgen</string>
-    <string name="autosel_watch_interval_tip">Hoe vaak het profiel dat nu uw verkeer draagt op zichzelf wordt gecontroleerd. Houd dit kort: een server kan stoppen met werken terwijl hij nog verbindingen accepteert, en niets anders zou het merken tot de volgende volledige controle.</string>
-    <string name="autosel_sampling">Bewaarde steekproeven</string>
-    <string name="autosel_sampling_tip">De beoordeling gebruikt het gemiddelde en de jitter over dit aantal recente controles, zodat één slecht resultaat een goede server niet kan degraderen.</string>
+    <string name="autosel_interval_tip">Hoe vaak de hoogst gerangschikte profielen opnieuw worden gemeten.</string>
     <string name="autosel_cat_switching">Wisselen</string>
     <string name="autosel_tolerance">Wisseltolerantie</string>
     <string name="autosel_tolerance_tip">Een ander profiel moet minstens zoveel sneller zijn voordat de selector ernaartoe wisselt. Hogere waarden betekenen minder wisselingen.</string>
     <string name="autosel_max_rtt">Maximale latentie</string>
-    <string name="autosel_max_rtt_tip">Profielen die trager zijn dan dit worden nooit geselecteerd, zelfs als er niets beters beschikbaar is.</string>
+    <string name="autosel_max_rtt_tip">Profielen die trager zijn dan dit worden alleen gebruikt als geen sneller profiel werkt.</string>
     <string name="autosel_no_limit">Geen limiet</string>
-    <string name="autosel_dial_retries">Failover-pogingen</string>
-    <string name="autosel_dial_retries_tip">Wanneer het gekozen profiel geen verbinding krijgt, hoeveel anderen direct proberen voordat de app een fout ziet.</string>
-    <string name="autosel_interrupt">Verbindingen verbreken bij wisselen</string>
-    <string name="autosel_interrupt_tip">Geldt wanneer de selector wisselt omdat een profiel slechter werd of faalde. Aan: alles gaat in één keer naar het nieuwe profiel. Uit: lopende downloads eindigen op de oude. Balansrotaties verbreken hoe dan ook nooit verbindingen.</string>
+    <string name="autosel_interrupt">Verbindingen verbreken als een profiel faalt</string>
+    <string name="autosel_interrupt_tip">Open verbindingen gaan meteen over in plaats van af te ronden op het gefaalde profiel. Overstappen naar een sneller profiel en balanceringsrotaties verbreken nooit verbindingen.</string>
     <string name="autosel_cat_balance">Belastingsverdeling</string>
     <string name="autosel_balance_mode">Modus</string>
-    <string name="autosel_balance_interval">Roterende elke</string>
-    <string name="autosel_balance_interval_tip">Hoe lang de selector op één profiel blijft voordat naar de volgende vrije wordt gegaan.</string>
     <string name="autosel_balance_hint_off">Het beste profiel draagt al het verkeer; de andere vrije profielen worden geverifieerd gehouden zodat er één direct kan overnemen.</string>
     <string name="autosel_balance_hint_rotate">Nieuwe verbindingen gaan bij elke rotatie naar een ander goed profiel; open verbindingen blijven alleen en eindigen waar ze begonnen. Het verkeer wordt exact geteld.</string>
     <string name="autosel_balance_hint_connection">Elke nieuwe verbinding kan een ander profiel nemen. Grootste spreiding, maar uw uitgangs-IP verandert midden in de sessie en het verkeer per profiel wordt bij benadering.</string>
@@ -1353,10 +1339,6 @@
     <plurals name="autosel_profiles">
         <item quantity="one">%d profiel</item>
         <item quantity="other">%d profielen</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="one">%d min</item>
-        <item quantity="other">%d min</item>
     </plurals>
     <plurals name="autosel_seconds">
         <item quantity="one">%d s</item>
@@ -1436,7 +1418,6 @@
     <string name="autosel_last_ok_short">OK %s</string>
     <string name="autosel_row_state">Status: %s</string>
     <string name="autosel_row_latency">Latentie: %1$d ms (beste %2$d ms, slechtste %3$d ms)</string>
-    <string name="autosel_row_jitter">Jitter: %d ms</string>
     <string name="autosel_row_checks">Controles: %1$d / %2$d ok</string>
     <string name="autosel_row_connects">Verbindingen: %1$d / %2$d ok</string>
     <string name="autosel_row_last_ok">Laatste OK: %s</string>
@@ -1444,11 +1425,18 @@
     <string name="autosel_row_tested">Laatste URL-test: %1$s, %2$s</string>
     <string name="autosel_row_untested">Nog geen URL-testresultaat.</string>
     <string name="cag_warp">Cloudflare WARP</string>
-    <string name="warp_settings">WARP</string>
-    <string name="warp_state_on">Aan · %s</string>
-    <string name="warp_state_off">Uit</string>
+    <string name="warp_settings">Uitgang</string>
+    <string name="exit_through">Uitgang via</string>
+    <string name="exit_server">Geselecteerd profiel</string>
+    <string name="exit_server_hint">Verkeer gaat via het gestarte profiel naar buiten.</string>
+    <string name="exit_psiphon_hint">Psiphon is een gratis netwerk van Psiphon Inc., dat net als elke VPN-aanbieder kan zien welke sites je bezoekt.</string>
+    <string name="exit_tor_hint">Tor is niet beschikbaar op Android, dus verkeer gaat via het geselecteerde profiel naar buiten.</string>
+    <string name="exit_unavailable">%s (niet beschikbaar op Android)</string>
+    <string name="psiphon_egress_region">Regio</string>
+    <string name="psiphon_region_best">Beste prestaties</string>
+    <string name="psiphon_egress_region_sum">Het land van de Psiphon-server; Beste prestaties laat Psiphon kiezen.</string>
     <string name="warp_enable">WARP inschakelen</string>
-    <string name="warp_enable_sum">Maakt het mogelijk de onderstaande configuratie als egress te gebruiken, handig voor het omzeilen van diensten die niet-WARP-VPN\'s beperken</string>
+    <string name="warp_enable_sum">Maakt het mogelijk de onderstaande configuratie als uitgang te gebruiken, handig voor het omzeilen van diensten die niet-WARP-VPN\'s beperken</string>
     <string name="warp_mode">Modus</string>
     <string name="warp_mode_sum">%s\nWireGuard draait over UDP. AmneziaWG voegt WARP-compatibele junk- en camouflagepakketten toe. MASQUE tunnelt over HTTP/3 of HTTP/2.</string>
     <string name="warp_amnezia_generating">AmneziaWG-QUIC-handtekening genereren…</string>
@@ -1537,7 +1525,7 @@
     <string name="backup_part_profiles">Profielen (groepen en proxies)</string>
     <string name="backup_part_routes">Routeringsprofielen</string>
     <string name="backup_part_settings">Instellingen</string>
-    <string name="backup_part_otp">OTP-profielen (niet hersteld op Android)</string>
+    <string name="backup_part_otp">OTP-items (niet hersteld op Android)</string>
     <string name="backup_local_summary">Back-ups gebruiken het Throne-desktopformaat (.thrbackup): beide apps kunnen ze herstellen. WebDAV-inloggegevens blijven op dit apparaat.</string>
     <string name="backup_create">Back-up maken</string>
     <string name="backup_restore">Herstellen</string>
@@ -1853,9 +1841,9 @@
     <string name="grp_http_version">HTTP-versie</string>
     <string name="grp_http_version_tip">Auto gebruikt HTTP/2 als de server dat aanbiedt. \"Standaard behouden\" volgt Instellingen › Abonnementen.</string>
     <string name="grp_update_interval">Update-interval (minuten)</string>
-    <string name="grp_update_interval_tip">Minuten tussen automatische updates van dit abonnement, minimaal 30. Leeg volgt Instellingen › Abonnementen, waar automatische updates ingeschakeld moeten zijn.</string>
+    <string name="grp_update_interval_tip">Minuten tussen automatische updates van dit abonnement, minimaal 30, ook als automatische updates uit staan in Instellingen › Abonnementen. Leeg volgt die instelling.</string>
     <string name="grp_server_interval">Serverinterval</string>
-    <string name="grp_server_interval_tip">Gebruik het update-interval dat de abonnementsserver meestuurt; het interval hierboven geldt als de server er geen stuurt. \"Standaard behouden\" volgt Instellingen › Abonnementen.</string>
+    <string name="grp_server_interval_tip">Gebruik het update-interval dat de abonnementsserver meestuurt, ook als automatische updates uit staan in Instellingen › Abonnementen; het interval hierboven geldt als de server er geen stuurt. \"Standaard behouden\" volgt die instelling.</string>
     <string name="grp_server_interval_use">Gebruiken</string>
     <string name="grp_server_interval_ignore">Negeren</string>
     <string name="grp_server_interval_last">Deze server stuurde laatst %1$d u.</string>
@@ -2122,9 +2110,9 @@
     <string name="validation_tls_pem_private_key">Plak de privésleutel als PEM-tekst, beginnend met -----BEGIN PRIVATE KEY-----.</string>
     <string name="validation_tls_pin_base64">Dit is een hexadecimale SHA-256; schrijf hem in base64 (44 tekens, eindigend op =).</string>
     <string name="validation_tls_ech_config">Plak de ECH-configuratielijst als base64, of als één blok met -----BEGIN ECH CONFIGS-----.</string>
-    <string name="validation_tls_reality_ech">Reality kan niet met ECH worden gecombineerd. Schakel ECH uit, of wis de publieke Reality-sleutel.</string>
-    <string name="validation_tls_reality_disable_sni">Reality kan niet worden gebruikt met \"SNI uitschakelen\". Schakel \"SNI uitschakelen\" uit.</string>
-    <string name="validation_tls_reality_spoof">Reality kan niet met TLS-spoof worden gecombineerd. Zet TLS-spoof op Uit.</string>
+    <string name="validation_tls_reality_ech">REALITY kan niet met ECH worden gecombineerd. Schakel ECH uit, of wis de publieke REALITY-sleutel.</string>
+    <string name="validation_tls_reality_disable_sni">REALITY kan niet worden gebruikt met \"SNI uitschakelen\". Schakel \"SNI uitschakelen\" uit.</string>
+    <string name="validation_tls_reality_spoof">REALITY kan niet met TLS-spoof worden gecombineerd. Zet TLS-spoof op Uit.</string>
     <string name="validation_tls_pins_with_certificate">Een aangepast certificaat kan niet met certificaatpins worden gecombineerd; houd er maar één van over.</string>
     <string name="validation_tls_client_pair">Stel het clientcertificaat en de clientsleutel samen in.</string>
     <string name="validation_tls_spoof_needs_sni">TLS-spoof heeft een SNI nodig. Schakel \"SNI uitschakelen\" uit, of zet TLS-spoof op Uit.</string>
@@ -2136,7 +2124,7 @@
     <string name="validation_transport_headers_pairs">De headers moeten afwisselend namen en waarden bevatten, gescheiden door |, bijvoorbeeld User-Agent|curl, dus ze zijn genegeerd.</string>
     <string name="validation_transport_type">sing-box ondersteunt het transport \"%1$s\" niet. Gebruik ws, httpupgrade, http, grpc of quic.</string>
     <string name="validation_transport_quic_tls">Het QUIC-transport heeft TLS nodig. Zet de schakelaar \"TLS inschakelen\" aan.</string>
-    <string name="validation_transport_quic_reality">Reality werkt niet met het QUIC-transport. Wis de Reality-sleutel, of kies een ander transport.</string>
+    <string name="validation_transport_quic_reality">REALITY werkt niet met het QUIC-transport. Wis de REALITY-sleutel, of kies een ander transport.</string>
     <string name="validation_transport_quic_utls">uTLS wordt niet gebruikt met het QUIC-transport.</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal werkt alleen met een aangepaste multiplex. Zet Multiplex op Aangepast.</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal heeft beide snelheden nodig; een ontbrekende wordt als 1 Mbps verzonden.</string>
@@ -2175,6 +2163,12 @@
     <string name="validation_xray_vless_encryption_mode">Het deel na mlkem768x25519plus moet native, xorpub of random zijn.</string>
     <string name="validation_xray_vless_encryption_rtt">Het deel na de modus moet 1rtt of 0rtt zijn.</string>
     <string name="validation_xray_vless_encryption_key">Elke sleutel in de string moet URL-veilige base64 van 32 of 1184 bytes zijn, zonder padding.</string>
+    <string name="validation_xray_vless_encryption_padding_order">Zet de paddingdelen vóór de sleutels.</string>
+    <string name="validation_xray_vless_encryption_mlkem">Een sleutel van 1184 bytes in de string is geen geldige ML-KEM-768-sleutel: kopieer de string opnieuw van de server.</string>
+    <string name="validation_xray_vless_encryption_no_key">De string bevat geen sleutel: kopieer de hele string die de server geeft.</string>
+    <string name="validation_xray_vless_padding_format">Elk paddingdeel moet bestaan uit drie getallen verbonden door streepjes, zoals 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_first">Het eerste paddingdeel heeft een kans van minstens 100 en lengtes van minstens 35 nodig, zoals 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_total">De paddinglengtes kunnen samen meer dan 65553 bytes bedragen.</string>
     <string name="validation_xray_vless_vision">XTLS Vision vereist het raw-netwerk met TLS of REALITY, of VLESS-versleuteling: wijzig het netwerk of de beveiliging, of wis de flow.</string>
     <string name="validation_xray_xdrive_no_link">XDRIVE heeft geen deellinkformaat. Importeer in plaats daarvan de JSON-configuratie van de server.</string>
     <string name="validation_xray_xdrive_service">Moet google-drive, s3, template of local zijn.</string>
@@ -2396,11 +2390,6 @@
     <string name="validation_custom_xray_geodata">De geodata-updater is uit de geïmporteerde configuratie verwijderd: hij zou bestanden downloaden van adressen die de afzender koos en bestanden in de map van Throne vervangen.</string>
     <string name="validation_custom_xray_webhook">De webhook is uit deze routeringsregel verwijderd: hij zou de details van elke overeenkomende verbinding naar een adres sturen dat de afzender koos.</string>
     <string name="validation_autoselector_countries">Gebruik landcodes van twee letters, gescheiden door komma\'s, bijvoorbeeld DE,NL,FR.</string>
-    <string name="validation_autoselector_build_limit">Kan niet meer profielen laten draaien dan er gerangschikt zijn (%1$s).</string>
-    <string name="validation_autoselector_bench_interval">De volledige ronde kan niet vaker draaien dan het controle-interval (%1$s s).</string>
-    <string name="validation_autoselector_watch_interval">Het profiel in gebruik volgen kan niet trager dan het controle-interval (%1$s s).</string>
-    <string name="validation_autoselector_ready_count">Controleer minimaal zoveel profielen nauwlettend als er paraat worden gehouden (%1$s).</string>
-    <string name="validation_autoselector_close_count">Kan niet meer profielen nauwlettend controleren dan er draaien (%1$s).</string>
     <string name="validation_chain_empty">Voeg minimaal één profiel aan de keten toe.</string>
     <string name="validation_ss_plugin_opts_dangling">Een backslash aan het einde heeft niets om te escapen.</string>
     <string name="validation_ss_plugin_opts_name">Elke optie heeft een naam nodig, zoals in obfs=http;obfs-host=example.com.</string>
@@ -2504,6 +2493,7 @@
     <string name="validation_route_no_drop_unused">Heeft geen effect met de drop-methode.</string>
     <string name="validation_route_ignored_by_action">Een %1$s-regel negeert dit; het geldt alleen voor deze acties: %2$s.</string>
     <string name="validation_route_matches_all">Deze regel heeft geen matchcondities, dus hij matcht al het verkeer.</string>
+    <string name="validation_route_catch_all">Deze regel heeft geen voorwaarden en zou dus al het verkeer afvangen. Voeg een voorwaarde toe of schakel de regel uit.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s (\"%2$s\"): %3$s</string>
     <string name="validation_route_rule_warning">Regel \"%1$s\": %2$s</string>
@@ -2551,6 +2541,7 @@
     <string name="validation_millis_or_default">Voer een geheel aantal milliseconden in, bijvoorbeeld %1$s (zonder eenheid), of 0 voor de standaard.</string>
     <string name="validation_group_update_interval">Moet minimaal 30 minuten zijn, of leeg om de standaard te behouden.</string>
     <string name="validation_port_used">Poort %1$s wordt al gebruikt door: %2$s. Kies een andere poort.</string>
+    <string name="validation_port_reenabled">%1$s inschakelen op poort %2$s botst met %3$s. Kies een andere poort.</string>
     <string name="validation_mtu_ipv6">IPv6 vereist een MTU van minimaal %1$s; daaronder kan het systeem IPv6 van de TUN laten vallen.</string>
     <string name="validation_private_range_all">Dit omvat elk adres, waardoor de TUN niets meer zou routeren.</string>
     <string name="validation_dns_local_ip">Gebruik een IP-adres, bijvoorbeeld 223.5.5.5 of tls://1.1.1.1: deze server lost de namen van de andere op.</string>
@@ -2573,12 +2564,18 @@
     <string name="validation_route_dns_final">De standaard DNS-server moet extern of direct zijn, niet \"%1$s\".</string>
     <string name="validation_route_dns_dropped">De eigen DNS-instellingen van het profiel zijn weggelaten, dus het gebruikt de globale: %1$s</string>
     <string name="route_dns_global_servers">Extern %1$s, direct %2$s</string>
-    <string name="dns_server_suggestions">Recente en voorgestelde servers</string>
     <string name="warp_api_tls_fragment_title">TLS-fragmentatie voor WARP-registratie</string>
     <string name="warp_api_tls_fragment_note">Geldt alleen wanneer de registratie direct verbindt, niet via een actief profiel.</string>
     <string name="backup_warn_tor_egress">De back-up stuurt verkeer naar buiten via Tor, dat niet beschikbaar is op Android; hier gaat het direct via de geselecteerde server naar buiten.</string>
     <string name="validation_dns_server_item">Server %1$s (\"%2$s\"): %3$s</string>
-    <string name="dns_server_list_hint">Scheid meerdere servers met komma\'s: ze worden samen bevraagd en het eerste antwoord wint.</string>
+    <string name="dns_server_add">Server toevoegen</string>
+    <string name="dns_server_custom">Aangepast adres</string>
+    <string name="dns_server_recent">Recent</string>
+    <string name="dns_server_address_hint">Adres, bijv. tls://1.1.1.1</string>
+    <string name="dns_server_list_race">Samen bevraagd; het snelste antwoord wint.</string>
+    <string name="dns_server_list_primary">Zet ook de adressen van proxyservers om</string>
+    <string name="dns_server_list_empty">Voeg minstens één server toe.</string>
+    <string name="dns_server_drag">Sleep om de volgorde te wijzigen</string>
     <string name="juicity_pinned_certchain_sha256">SHA256 van certificaatketen</string>
     <string name="juicity_pinned_certchain_sha256_hint">Hash van de certificaatketen die juicity-server toont; vervangt CA-verificatie, ook met \"Onveilig toestaan\"</string>
     <string name="validation_juicity_certchain">Gebruik de 32-byte-hash van de certificaatketen in base64 (44 tekens, eindigend op =), zoals juicity-server hem toont.</string>
@@ -2630,9 +2627,9 @@
     <string name="chain_step_untestable">Ketens met een schakel met een eigen Xray-configuratie kunnen niet worden getest</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">Keuzemethode</string>
-    <string name="autosel_strategy_latency">Snelste en stabielste</string>
+    <string name="autosel_strategy_latency">Snelste</string>
     <string name="autosel_strategy_priority">In volgorde van prioriteit</string>
-    <string name="autosel_strategy_latency_tip">Snelste en stabielste: altijd het best gemeten profiel van allemaal gebruiken.</string>
+    <string name="autosel_strategy_latency_tip">Snelste: altijd het best gemeten profiel van allemaal gebruiken.</string>
     <string name="autosel_strategy_priority_tip">In volgorde van prioriteit: de niveaus hieronder worden van boven af geprobeerd. De selector blijft op het hoogste niveau met een werkend profiel en gaat terug omhoog zodra een hoger niveau weer werkt.</string>
     <string name="autosel_tier_add">Niveau toevoegen</string>
     <string name="autosel_tiers_hint">Een profiel hoort bij het eerste niveau waarop het past, en profielen die op geen enkel niveau passen komen als laatste. De selector gebruikt het hoogste niveau met een werkend profiel en daarbinnen het best gemeten profiel.</string>
@@ -2651,20 +2648,8 @@
     <string name="autosel_tier_any_profile">elk profiel</string>
     <string name="autosel_tier_fallback">niveau %d</string>
     <string name="autosel_tier_short">N%d</string>
-    <string name="autosel_failback_checks">Terug omhoog na</string>
-    <string name="autosel_failback_checks_tip">In volgorde van prioriteit: zodra een profiel uit een hoger niveau weer werkt, gaat de selector er pas naar terug nadat het zoveel controles op rij heeft doorstaan. Kan niet meer zijn dan het aantal bewaarde steekproeven.</string>
-    <plurals name="autosel_checks">
-        <item quantity="one">%d controle</item>
-        <item quantity="other">%d controles</item>
-    </plurals>
-    <string name="autosel_failback_delay">Foutloos gedurende</string>
-    <string name="autosel_failback_delay_tip">In volgorde van prioriteit: een profiel uit een hoger niveau moet ook zo lang zonder mislukte controle of verbinding blijven voordat de selector ernaar teruggaat.</string>
-    <string name="autosel_failback_interrupt">Verbindingen verbreken bij terugkeer naar boven</string>
-    <string name="autosel_failback_interrupt_tip">In volgorde van prioriteit. Uit: verbindingen die al open zijn blijven op hun profiel, en alleen nieuwe gaan naar het hogere niveau. Aan: alles gaat in één keer omhoog.</string>
     <string name="autosel_passive">Leren van echte verbindingen</string>
     <string name="autosel_passive_tip">Profielen ook beoordelen op de verbindingen die uw apps erdoor maken, niet alleen op gezondheidscontroles. Een verbinding telt als mislukt wanneer ze helemaal geen antwoord krijgt of geen verbinding kan maken. Wanneer recente verbindingen via een profiel minstens drie keer en minstens zo vaak mislukken als slagen, wordt het profiel opzijgezet, ook al slagen de controles: een minuut lang, bij elke herhaling twee keer zo lang, tot 16 minuten. Elke website blijft ook bij het profiel dat er het laatst voor werkte en vermijdt een profiel dat er net voor faalde. Zolang er echt verkeer loopt, worden er minder gezondheidscontroles verstuurd.</string>
-    <string name="autosel_site_memory">Keuze per website onthouden voor</string>
-    <string name="autosel_site_memory_tip">Hoe lang een website het profiel blijft gebruiken dat er het laatst voor werkte, en een profiel blijft vermijden dat ervoor faalde.</string>
     <string name="autosel_balance_hint_priority">In volgorde van prioriteit wordt het verkeer alleen verdeeld over de klaarstaande profielen van het niveau in gebruik.</string>
     <string name="autosel_plan_by_tier">Per niveau: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2675,7 +2660,6 @@
     <string name="autosel_plan_truncated_tiers">Meer dan %d profielen komen in aanmerking, dus alleen de best beoordeelde van elk niveau worden behouden.</string>
     <string name="validation_autoselector_tier_match">Kies een groep of voer een naampatroon in voor dit niveau.</string>
     <string name="validation_autoselector_tier_count">Voeg minstens één niveau toe om in volgorde van prioriteit te kiezen.</string>
-    <string name="validation_autoselector_failback_checks">Kan niet meer controles op rij vereisen dan er worden bewaard (%1$s).</string>
     <string name="autosel_status_on_tier">Automatische selector op %1$s, niveau %2$d (%3$d van %4$d werkend)</string>
     <string name="autosel_detail_suspect">%d verdacht</string>
     <string name="autosel_state_suspect">Verdacht</string>
@@ -2775,6 +2759,17 @@
     <string name="service_ip_risk">risico %d</string>
     <string name="service_check_checked_now">Zojuist gecontroleerd</string>
     <string name="service_check_checked_at">Gecontroleerd %s</string>
+    <string name="service_check_services">Diensten</string>
+    <string name="service_check_services_all">Alle diensten</string>
+    <string name="service_check_services_count">%1$d van %2$d diensten</string>
+    <string name="service_check_none_selected">Geen diensten geselecteerd</string>
+    <string name="service_check_services_unknown">De lijst met diensten kon niet worden geladen</string>
+    <string name="service_check_current">Diensten van huidige verbinding controleren</string>
+    <string name="service_category_ai">AI</string>
+    <string name="service_category_streaming">Streaming</string>
+    <string name="service_category_social">Sociaal</string>
+    <string name="service_category_reputation">IP-reputatie</string>
+    <string name="service_category_other">Overig</string>
     <string name="validation_chain_selector_twice">Een keten kan maar één automatische selector bevatten.</string>
     <string name="validation_chain_selector_custom">Een automatische selector kan niet in een keten met een aangepaste configuratie zitten.</string>
     <string name="chain_step_selector">Ketens met een automatische selector kunnen niet schakel voor schakel worden getest; test in plaats daarvan de leden</string>
@@ -2782,6 +2777,8 @@
     <string name="autosel_notice_exhausted_upstream">Elk draaiend profiel is gestopt met werken via de schakels ervoor, opnieuw opbouwen met de volgende kandidaten.</string>
     <string name="validation_route_outbound_chain_selector">Routeringsregels kunnen de keten \"%1$s\" niet gebruiken: die bevat een automatische selector en kan dus alleen worden gestart. Kies een andere outbound.</string>
     <string name="route_outbound_chain_selector">Het routeringsprofiel stuurt verkeer naar %1$s, dat een automatische selector bevat; zo\'n keten kan alleen worden gestart, niet in routeringsregels worden gebruikt</string>
+    <string name="xray_full_config_tag_clash">De eigen Xray-configuratie gebruikt de tag \"%1$s\", die Throne ook voor een ander Xray-profiel genereert; geef hem een andere naam in de eigen configuratie</string>
+    <string name="xray_full_config_selector_clash">De selector \"%1$s\" van de eigen Xray-configuratie komt ook overeen met \"%2$s\", die Throne voor een ander Xray-profiel genereert; maak de selector specifieker in de eigen configuratie</string>
     <string name="grp_filter_countries">Landen</string>
     <string name="grp_filter_countries_tip">Uitgangslanden om te behouden, bijv. HK,JP, of te verwijderen, bijv. !RU.</string>
     <string name="grp_filter_countries_hint">bijv. HK,JP of !RU</string>
@@ -2823,4 +2820,8 @@
     <string name="vpn_auth_submitting">Aanmelden…</string>
     <string name="vpn_auth_gone">Dit aanmeldverzoek staat niet meer open.</string>
     <string name="vpn_auth_no_browser">Geen app kan dit adres openen.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">Gebruik een landcode van twee letters, zoals US.</string>
+    <string name="validation_psiphon_ignored">%1$s genegeerd: Psiphon-profielen nemen alleen een regio aan.</string>
+    <string name="exit_runs_over_itself">Het geselecteerde profiel gaat al via %1$s naar buiten, dus de %1$s-uitgang kan er niet overheen lopen. Kies een andere uitgang in Instellingen › Routering › Uitgang.</string>
 </resources>

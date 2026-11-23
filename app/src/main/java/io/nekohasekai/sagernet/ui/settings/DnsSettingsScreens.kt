@@ -6,6 +6,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.SwitchPreference
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.DnsServerHistory
 import io.nekohasekai.sagernet.database.RouteManager
 import io.nekohasekai.sagernet.database.SagerDatabase
@@ -30,8 +31,15 @@ class DnsSettingsFragment : SettingsScreenFragment(R.xml.settings_dns) {
         val server: Rule = { DnsServers.dnsAddressListProblem(it) }
         gateText(SettingsRegistry.REMOTE_DNS.key, server, invalid = R.string.invalid_dns_address) { it.isNotEmpty() }
         gateText(SettingsRegistry.DIRECT_DNS.key, server, invalid = R.string.invalid_dns_address) { it.isNotEmpty() }
-        pref<DnsServerPreference>(SettingsRegistry.REMOTE_DNS.key).suggestions = DnsServerHistory::remoteSuggestions
-        pref<DnsServerPreference>(SettingsRegistry.DIRECT_DNS.key).suggestions = DnsServerHistory::directSuggestions
+        pref<DnsServerPreference>(SettingsRegistry.REMOTE_DNS.key).apply {
+            presets = DnsServerHistory.REMOTE_PRESETS
+            recent = { DataStore.remoteDnsHistory }
+        }
+        pref<DnsServerPreference>(SettingsRegistry.DIRECT_DNS.key).apply {
+            presets = DnsServerHistory.DIRECT_PRESETS
+            recent = { DataStore.directDnsHistory }
+            primaryNote = true
+        }
         acceptServers(SettingsRegistry.REMOTE_DNS.key, DnsServerHistory::rememberRemote)
         acceptServers(SettingsRegistry.DIRECT_DNS.key, DnsServerHistory::rememberDirect)
         gateText(SettingsRegistry.CORE_BOX_UNDERLYING_DNS.key, ::localDnsProblem, invalid = R.string.invalid_dns_address)

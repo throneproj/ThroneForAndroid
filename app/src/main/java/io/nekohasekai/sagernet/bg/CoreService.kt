@@ -8,6 +8,7 @@ import io.nekohasekai.sagernet.aidl.ICoreService
 import io.nekohasekai.sagernet.aidl.ISubscriptionCallback
 import io.nekohasekai.sagernet.aidl.ITestSessionCallback
 import io.nekohasekai.sagernet.bg.test.ChainStepRunner
+import io.nekohasekai.sagernet.bg.test.ServiceDefinitions
 import io.nekohasekai.sagernet.bg.test.TestEngine
 import io.nekohasekai.sagernet.bg.test.TestSpec
 import io.nekohasekai.sagernet.group.SubscriptionQueue
@@ -74,6 +75,10 @@ class CoreService : Service() {
         override fun stopDiagnostics() = CoreDiagnostics.stop()
 
         override fun testRoute(requestJson: String?): String = RouteTester.test(requestJson.orEmpty())
+
+        override fun describeServiceChecks(): String = ServiceDefinitions.prepare().list
+
+        override fun psiphonRegions(): Array<String> = PsiphonRegions.reported()
     }
 
     override fun onCreate() {

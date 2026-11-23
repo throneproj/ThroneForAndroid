@@ -1,8 +1,8 @@
 package io.nekohasekai.sagernet.database
 
 /**
- * DnsServerHistory (RouteDnsEditor.cpp): the servers typed into the remote / direct DNS fields (remote_dns_history,
- * direct_dns_history), newest first, offered together with fixed presets.
+ * DnsServerHistory (RouteDnsEditor.cpp): the server lists saved in the remote / direct DNS settings (remote_dns_history,
+ * direct_dns_history), newest first, offered as recent servers next to fixed presets.
  */
 object DnsServerHistory {
 
@@ -14,23 +14,12 @@ object DnsServerHistory {
     )
     val DIRECT_PRESETS: List<String> = listOf("localhost", "223.5.5.5", "119.29.29.29", "178.22.122.100", "77.88.8.8")
 
-    fun remoteSuggestions(): List<String> = suggestions(DataStore.remoteDnsHistory, REMOTE_PRESETS)
-
-    fun directSuggestions(): List<String> = suggestions(DataStore.directDnsHistory, DIRECT_PRESETS)
-
     fun rememberRemote(server: String) {
         remember(DataStore.remoteDnsHistory, REMOTE_PRESETS, server)?.let { DataStore.remoteDnsHistory = it }
     }
 
     fun rememberDirect(server: String) {
         remember(DataStore.directDnsHistory, DIRECT_PRESETS, server)?.let { DataStore.directDnsHistory = it }
-    }
-
-    /** Fill: the history, then the presets it does not repeat. */
-    fun suggestions(history: List<String>, presets: List<String>): List<String> {
-        val out = ArrayList(history)
-        for (preset in presets) if (preset !in out) out.add(preset)
-        return out
     }
 
     /**

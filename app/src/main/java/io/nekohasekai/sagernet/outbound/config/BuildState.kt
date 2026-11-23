@@ -4,6 +4,7 @@ import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.link.Hosts
+import io.nekohasekai.sagernet.outbound.types.Custom
 import io.nekohasekai.sagernet.outbound.types.Dnstt
 import io.nekohasekai.sagernet.outbound.types.MasterDns
 import java.util.TreeMap
@@ -24,7 +25,7 @@ internal object Tags {
     const val DNS_IN = "dns-in"
     const val MIXED_IN = "mixed-in"
     const val TUN_IN = "tun-in"
-    const val XRAY_FULL_CONFIG_IN = "throne-bridge"
+    const val XRAY_FULL_CONFIG_IN = Custom.XRAY_FULL_CONFIG_BRIDGE_TAG
 
     const val MAIN_CHAIN_PREFIX = "config"
     const val ROUTE_CHAIN_PREFIX = "route"

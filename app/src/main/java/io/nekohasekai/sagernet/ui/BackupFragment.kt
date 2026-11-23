@@ -72,6 +72,9 @@ class BackupFragment : Fragment(R.layout.layout_backup) {
         }
 
         fun fileName(): String = "Throne-backup-${SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())}.thrbackup"
+
+        /** BackupArchive::PartNames, Android's three and the desktop-only ones. */
+        private val PART_NAMES = setOf("profiles", "routes", "settings", "otp", "ip_lists", "icons")
     }
 
     private var binding: LayoutBackupBinding? = null
@@ -106,6 +109,7 @@ class BackupFragment : Fragment(R.layout.layout_backup) {
         }
         binding.backupToWebdav.setOnClickListener { selection()?.let(::uploadToWebDav) }
         binding.restoreFromWebdav.setOnClickListener { restoreFromWebDav() }
+        restoreCheckedParts(binding)
 
         val restore = arguments?.getString(ARG_RESTORE)
         if (restore != null) {
@@ -146,8 +150,30 @@ class BackupFragment : Fragment(R.layout.layout_backup) {
         return selection
     }
 
+    /** basicSettingsRestoreCheckedParts: the parts of the last backup made; none, or a name it does not know, ticks all. */
+    private fun restoreCheckedParts(b: LayoutBackupBinding) {
+        val saved = DataStore.backupParts
+        if (saved.isEmpty() || saved.any { it !in PART_NAMES }) return
+        val selection = BackupExport.Selection(profiles = "profiles" in saved, routes = "routes" in saved, settings = "settings" in saved)
+        if (!selection.any()) return
+        b.backupProfiles.isChecked = selection.profiles
+        b.backupRoutes.isChecked = selection.routes
+        b.backupSettings.isChecked = selection.settings
+    }
+
+    /** basicSettingsRememberCheckedParts, once a backup is under way. */
+    private fun rememberCheckedParts(selection: BackupExport.Selection) {
+        val names = listOfNotNull(
+            "profiles".takeIf { selection.profiles },
+            "routes".takeIf { selection.routes },
+            "settings".takeIf { selection.settings },
+        )
+        if (DataStore.backupParts != names) DataStore.backupParts = names
+    }
+
     private fun createTo(uri: Uri) {
         val selection = selection() ?: return
+        rememberCheckedParts(selection)
         runTask(R.string.backup_creating, R.string.backup_failed, work = {
             app.contentResolver.openOutputStream(uri)?.use { BackupExport.write(selection, it) }
                 ?: error("cannot write $uri")
@@ -157,6 +183,7 @@ class BackupFragment : Fragment(R.layout.layout_backup) {
     }
 
     private fun share(selection: BackupExport.Selection) {
+        rememberCheckedParts(selection)
         runTask(R.string.backup_creating, R.string.backup_failed, work = {
             val dir = File(app.cacheDir, SHARE_DIR).apply { mkdirs() }
             val stale = System.currentTimeMillis() - 10 * 60_000L
@@ -186,6 +213,7 @@ class BackupFragment : Fragment(R.layout.layout_backup) {
 
     private fun uploadToWebDav(selection: BackupExport.Selection) {
         val dav = webDav() ?: return
+        rememberCheckedParts(selection)
         runTask(R.string.webdav_uploading, R.string.webdav_backup_failed, work = {
             val file = File(app.cacheDir, "thrupload-${System.currentTimeMillis()}.thrbackup")
             try {

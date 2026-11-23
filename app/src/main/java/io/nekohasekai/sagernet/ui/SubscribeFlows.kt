@@ -24,7 +24,8 @@ import java.nio.charset.Charset
 /**
  * The desktop's import entry points (mainwindow_deeplink.cpp): pasted, scanned or shared text
  * (import_or_handle_deeplink, import_text), the throne:// deep links and the "Add this subscription?" prompt.
- * Imports go to group [gid] of each call, the current group when it is negative.
+ * Imports go to group [gid] of each call, the current group when it is negative; an archived or subscription group
+ * takes none (importTargetAccepted).
  */
 object SubscribeFlows {
 
@@ -174,7 +175,10 @@ object SubscribeFlows {
             .show()
         binding.addProfiles.setOnClickListener {
             dialog.dismiss()
-            runOnDefaultDispatcher { SubscriptionClient.importUrl(url, gid) }
+            runOnDefaultDispatcher {
+                val refusal = SubscriptionClient.importRefusal(gid)
+                if (refusal != null) onMainDispatcher { notify(activity, refusal) } else SubscriptionClient.importUrl(url, gid)
+            }
         }
         binding.newGroup.setOnClickListener {
             dialog.dismiss()
@@ -202,13 +206,16 @@ object SubscribeFlows {
         }
     }
 
-    /** ImportText into the group, then "Imported N profile(s)" unless MainActivity's report popup already said so. */
+    /**
+     * ImportText into the group, then "Imported N profile(s)" unless MainActivity's report popup already said so, or
+     * why the group takes no imports.
+     */
     private fun importInto(activity: FragmentActivity, content: String, gid: Long) {
         runOnDefaultDispatcher {
             val message = try {
                 val result = SubscriptionClient.importText(content, gid)
                 if (result.reported && activity is MainActivity) return@runOnDefaultDispatcher
-                activity.getString(R.string.grp_imported_count, result.count)
+                result.refused ?: activity.getString(R.string.grp_imported_count, result.count)
             } catch (e: Exception) {
                 Logs.w(e)
                 e.readableMessage

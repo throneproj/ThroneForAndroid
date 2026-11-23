@@ -6,4 +6,7 @@
     <item
         android:id="@+id/action_test_speed_current"
         android:title="@string/profiles_test_speed_current" />
+    <item
+        android:id="@+id/action_test_service_current"
+        android:title="@string/service_check_current" />
 </menu>

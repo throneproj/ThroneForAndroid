@@ -95,11 +95,11 @@ object AutoSelectorProfiles {
     }
 
     /**
-     * AutoSelectorMonitor::PersistHealth (AutoSelectorMonitor.cpp:104-135): a probed member's average becomes its
-     * profile's latency, a dead one's -1 with the core's last error as the test error; softer states are inconclusive
-     * and keep their result. Only changed latencies are written, and only the latency result: traffic and the other
-     * test columns stay; kept sorts that read test results move the changed ones. [profileIds] maps the members'
-     * tags to profiles.
+     * AutoSelectorMonitor::PersistHealth (AutoSelectorMonitor.cpp:142-178): a probed member's average becomes its
+     * profile's latency, the member in use (TCP or UDP) its best time, a dead one's -1 with the core's last error as the
+     * test error; softer states are inconclusive and keep their result. Only changed latencies are written, and only
+     * the latency result: traffic and the other test columns stay; kept sorts that read test results move the changed
+     * ones. [profileIds] maps the members' tags to profiles.
      */
     fun saveHealth(profileIds: Map<String, Long>, members: List<AutoSelectorStatus.Member>) {
         val at = System.currentTimeMillis() / 1000
@@ -110,6 +110,10 @@ object AutoSelectorProfiles {
                 val id = profileIds[member.tag] ?: continue
                 if (member.probes == 0) continue
                 val written = when {
+                    // The core ranks the member carrying traffic by its best time, since that traffic inflates its average.
+                    member.isUsable && (member.selected || member.selectedUdp) && member.minMs > 0 ->
+                        dao.updateLatency(id, member.minMs, at, null)
+
                     member.isUsable && member.averageMs > 0 -> dao.updateLatency(id, member.averageMs, at, null)
                     member.isDead -> dao.updateLatency(id, -1, at, member.lastError.ifEmpty { null })
                     else -> 0
@@ -125,6 +129,20 @@ object AutoSelectorProfiles {
         val selector = load(id) ?: return false
         val plan = AutoSelectorPlanner(SettingsMapper.selectorStore()).plan(id, selector)
         return plan.ok && plan.needsRanking
+    }
+
+    /**
+     * rankBeforeStart (AutoSelectorController.cpp:60-90): [needsRanking], and when the plan succeeds without wanting
+     * measurements, the results stored since the last sweep (manual tests, persisted health) rerank the pool this
+     * build takes.
+     */
+    suspend fun needsRankingOrRerank(id: Long): Boolean {
+        val selector = load(id) ?: return false
+        val plan = AutoSelectorPlanner(SettingsMapper.selectorStore()).plan(id, selector)
+        if (!plan.ok) return false
+        if (plan.needsRanking) return true
+        writes.withLock { rerank(id) }
+        return false
     }
 
     /**

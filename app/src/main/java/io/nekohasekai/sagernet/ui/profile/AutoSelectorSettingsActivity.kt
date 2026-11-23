@@ -36,9 +36,7 @@ import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
 import io.nekohasekai.sagernet.outbound.types.AutoSelector
 import io.nekohasekai.sagernet.outbound.types.AutoSelectorChecks
-import io.nekohasekai.sagernet.ui.FormIssue
 import io.nekohasekai.sagernet.ui.ValidationForm
-import io.nekohasekai.sagernet.validation.Severity
 import io.nekohasekai.sagernet.validation.Validation
 import java.util.Collections
 import kotlinx.coroutines.Dispatchers
@@ -69,13 +67,9 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
         const val STATE_ADVANCED = "autoselAdvancedExpanded"
         val ADVANCED_CATEGORIES =
             listOf("autoselMembership", "autoselHealth", "autoselSwitching", "autoselBalancing", "autoselEndpoints")
-        val FAILBACK_KEYS = listOf("failbackChecks", "failbackDelaySec", "failbackInterrupt")
 
         /** The fields refreshPlanSummary reads. */
-        val PLAN_KEYS = setOf(
-            KEY_GIDS, "nameFilter", "countryFilter", "excludeUnavailable", "poolCap", "buildLimit", "resultValidityMins",
-            KEY_STRATEGY, KEY_TIERS,
-        )
+        val PLAN_KEYS = setOf(KEY_GIDS, "nameFilter", "countryFilter", "buildLimit", KEY_STRATEGY, KEY_TIERS)
 
         /** Top-level rows are this far apart in order, so the tier rows fit between the strategy and "Add tier". */
         const val ROW_ORDER_GAP = 1000
@@ -95,21 +89,10 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
 
     private val intFields = listOf(
         IntField("buildLimit", 1, AutoSelector.MAX_BUILD_LIMIT, R.plurals.autosel_profiles),
-        IntField("poolCap", 1, AutoSelector.MAX_POOL_CAP, R.plurals.autosel_profiles),
-        IntField("resultValidityMins", 0, 10080, R.plurals.autosel_minutes, R.string.autosel_always_retest),
         IntField("expected", 1, AutoSelector.MAX_BUILD_LIMIT, R.plurals.autosel_profiles),
-        IntField("activeSize", 1, AutoSelector.MAX_BUILD_LIMIT, R.plurals.autosel_profiles),
         IntField("intervalSec", 10, 3600, R.plurals.autosel_seconds),
-        IntField("benchIntervalSec", 10, 86400, R.plurals.autosel_seconds),
-        IntField("watchIntervalSec", 5, 3600, R.plurals.autosel_seconds),
-        IntField("sampling", 2, 60),
-        IntField("toleranceMs", 0, 10000, R.plurals.autosel_milliseconds),
+        IntField("toleranceMs", AutoSelector.MIN_TOLERANCE_MS, 10000, R.plurals.autosel_milliseconds),
         IntField("maxRTTms", 0, 60000, R.plurals.autosel_milliseconds, R.string.autosel_no_limit),
-        IntField("dialRetries", 0, 5),
-        IntField("failbackChecks", 1, 60, R.plurals.autosel_checks),
-        IntField("failbackDelaySec", 1, 3600, R.plurals.autosel_seconds),
-        IntField("siteMemoryMins", 1, 1440, R.plurals.autosel_minutes),
-        IntField("balanceIntervalSec", 5, 3600, R.plurals.autosel_seconds),
     )
 
     override fun createEntity() = AutoSelector().apply { gids = arrayListOf(DataStore.editingGroup) }
@@ -123,10 +106,8 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
         pbm.text("nameFilter")
         pbm.bool("balance")
         pbm.text("countryFilter")
-        pbm.bool("excludeUnavailable")
         pbm.bool("interruptOnSwitch")
         pbm.text(KEY_STRATEGY)
-        pbm.bool("failbackInterrupt")
         pbm.bool("passive")
         pbm.text("balanceMode")
         pbm.text("testURL")
@@ -221,25 +202,7 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
         bind("name") { if (it.isEmpty()) getString(R.string.autosel_name_empty) else "" }
         // The form reads a row's text, which a multi-select does not have, so the rule reads the checked set itself.
         bind(KEY_GIDS) { _ -> if (checkedIds().any { it in knownGroups }) "" else getString(R.string.autosel_select_group) }
-        // Rows of the collapsed Advanced section are skipped by rules, so these always run and reveal the section.
-        addIssueSource {
-            fun value(key: String) = DataStore.profileCacheStore.getString(key)?.trim()?.toIntOrNull() ?: 0
-            val buildLimit = value("buildLimit")
-            val interval = value("intervalSec")
-            val activeSize = value("activeSize")
-            listOfNotNull(
-                crossIssue("buildLimit", "poolCap", AutoSelectorChecks.autoSelectorBuildLimit(buildLimit, value("poolCap"))),
-                crossIssue("benchIntervalSec", "intervalSec", AutoSelectorChecks.autoSelectorBenchInterval(value("benchIntervalSec"), interval)),
-                crossIssue("watchIntervalSec", "intervalSec", AutoSelectorChecks.autoSelectorWatchInterval(value("watchIntervalSec"), interval)),
-                crossIssue("activeSize", "expected", AutoSelectorChecks.autoSelectorReadyCount(activeSize, value("expected"))),
-                crossIssue("activeSize", "buildLimit", AutoSelectorChecks.autoSelectorCloseCount(activeSize, buildLimit)),
-                // Sampling stays checkable in latency mode, where failback is not used.
-                if (!prioritySelected) null else crossIssue(
-                    "failbackChecks", "sampling",
-                    AutoSelectorChecks.autoSelectorFailbackChecks(value("failbackChecks"), value("sampling")),
-                ),
-            )
-        }
+        // The save gate's first error in the collapsed Advanced section expands it.
         revealer = { key ->
             val section = fragment?.findPreference<Preference>(key)?.parent?.key
             if (!advancedExpanded && section != null && section in ADVANCED_CATEGORIES) {
@@ -247,12 +210,6 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
                 refreshAdvanced()
             }
         }
-    }
-
-    private fun crossIssue(key: String, other: String, message: String): FormIssue? {
-        if (message.isEmpty()) return null
-        val label = fragment?.findPreference<Preference>(key)?.title?.toString() ?: key
-        return FormIssue(Severity.Error, label, message, key, listOf(other))
     }
 
     override fun PreferenceFragmentCompat.onPreferencesCreated() {
@@ -293,7 +250,6 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
             refreshStrategy()
             refreshBalance()
         }
-        onSwitch("passive") { findPreference<Preference>("siteMemoryMins")?.isEnabled = it }
         findPreference<Preference>(KEY_PINNED)?.setOnPreferenceClickListener {
             MaterialAlertDialogBuilder(this@AutoSelectorSettingsActivity)
                 .setTitle(R.string.autosel_pinned)
@@ -415,7 +371,6 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
         val on = balanceOn
         val rotating = on && balanceMode != "connection"
         fragment.findPreference<Preference>("balanceMode")?.isEnabled = on
-        fragment.findPreference<Preference>("balanceIntervalSec")?.isEnabled = rotating
         val hint = getString(
             when {
                 !on -> R.string.autosel_balance_hint_off
@@ -427,11 +382,10 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
             if (on && prioritySelected) hint + " " + getString(R.string.autosel_balance_hint_priority) else hint
     }
 
-    /** updateStrategyControls (cpp:381-389): the tiers only show, and the failback rows only work, in priority order. */
+    /** updateStrategyControls: the tiers only show in priority order. */
     private fun refreshStrategy() {
         val fragment = fragment ?: return
         fragment.findPreference<Preference>(KEY_TIERS)?.isVisible = prioritySelected
-        for (key in FAILBACK_KEYS) fragment.findPreference<Preference>(key)?.isEnabled = prioritySelected
         refreshTierRows()
     }
 
@@ -618,10 +572,7 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
         preview.gids = checkedGroups(preview.gids)
         preview.nameFilter = store.getString("nameFilter").orEmpty().trim()
         preview.countryFilter = store.getString("countryFilter").orEmpty().trim()
-        preview.excludeUnavailable = store.getBoolean("excludeUnavailable", true)
-        store.getString("poolCap")?.trim()?.toIntOrNull()?.let { preview.poolCap = it }
         store.getString("buildLimit")?.trim()?.toIntOrNull()?.let { preview.buildLimit = it }
-        store.getString("resultValidityMins")?.trim()?.toIntOrNull()?.let { preview.resultValidityMins = it }
         store.getString(KEY_STRATEGY)?.let { preview.strategy = it }
         preview.tiers = cachedTiers()
         val selectorId = DataStore.editingId
@@ -682,7 +633,6 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
             }
             lines.add(getString(R.string.autosel_plan_skipped, reasons))
         }
-        if (plan.keptUnavailable > 0) lines.add(getString(R.string.autosel_plan_kept_unavailable, plan.keptUnavailable))
         if (plan.truncated) {
             val text = if (plan.tierBuilt.isNotEmpty()) R.string.autosel_plan_truncated_tiers else R.string.autosel_plan_truncated
             lines.add(getString(text, plan.poolCapUsed))
@@ -705,7 +655,6 @@ class AutoSelectorSettingsActivity : BindingSettingsActivity<AutoSelector>() {
         AutoSelectorSkip.ManagementEndpoint -> R.string.autosel_skip_management
         AutoSelectorSkip.NameFilter -> R.string.autosel_skip_name
         AutoSelectorSkip.CountryFilter -> R.string.autosel_skip_country
-        AutoSelectorSkip.Unavailable -> R.string.autosel_skip_unavailable
         AutoSelectorSkip.XrayFullChained -> R.string.autosel_skip_xray_chained
         AutoSelectorSkip.Unsupported -> R.string.autosel_skip_unsupported
     }

@@ -35,11 +35,11 @@ internal object RouteRuleChecks {
         .distinct()
 
     /**
-     * [RouteRule.validate] against the stored profiles (the database allows main-thread reads); rule-set names are
+     * [RouteRule.editorIssues] against the stored profiles (the database allows main-thread reads); rule-set names are
      * judged only with a [catalog] (RouteManager.catalog(), which may read a file: off the main thread).
      */
     fun issues(rule: RouteRule, catalog: RuleSetCatalog? = null): List<RuleIssue> =
-        rule.validate(RuleEnv(catalog, RuleEnv.storedProfiles()))
+        rule.editorIssues(RuleEnv(catalog, RuleEnv.storedProfiles()))
 
     /** One line per error of [rule], which the core would refuse or which leaves the rule not doing what it says. */
     fun problems(context: Context, rule: RouteRule): List<String> =
@@ -84,9 +84,6 @@ internal object RouteRuleChecks {
     /** The error [check] reports for one line, or "". */
     fun lineError(line: String, check: (String) -> RuleIssue?): String =
         check(line)?.takeIf { it.severity == Severity.Error }?.message.orEmpty()
-
-    /** The match attributes, i.e. everything that narrows which connections the rule applies to. */
-    fun hasConditions(rule: RouteRule): Boolean = rule.hasMatchConditions()
 
     private val LABELS: Map<String, Int> = mapOf(
         "action" to R.string.route_rule_action,

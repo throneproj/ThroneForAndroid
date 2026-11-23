@@ -161,6 +161,17 @@ abstract class SettingsScreenFragment(@XmlRes private val preferences: Int) : Pr
         return validation.bind(key, rule).gate()
     }
 
+    /**
+     * SettingsService::Update's port check on a listener switch: refuses (with the dialog) when [change] would give two
+     * local listeners one port.
+     */
+    protected fun refusedByPorts(preference: Preference, change: Pair<String, String>): Boolean {
+        val message = SettingChecks.portConflict(mapOf(change))
+        if (message.isEmpty()) return false
+        refuse(preference, message)
+        return true
+    }
+
     /** The refusal dialog of a gate, for checks a [ValidationForm.Field.gate] cannot express. */
     protected fun refuse(preference: Preference, message: String) {
         MaterialAlertDialogBuilder(requireContext())

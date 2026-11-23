@@ -41,14 +41,16 @@ class TestSettingsContractTest {
     fun desktopBackupOnlyAcceptsValidTestValues() {
         assertFalse(SettingsRegistry.SPEED_TEST_MODE.accepts("invalid"))
         assertFalse(SettingsRegistry.SPEED_TEST_MODE.accepts("5"))
-        assertTrue(SettingsRegistry.SPEED_TEST_MODE.accepts(SpeedTestSettings.COUNTRY.toString()))
+        assertTrue(SettingsRegistry.SPEED_TEST_MODE.accepts(SpeedTestSettings.SIMPLE_DOWNLOAD.toString()))
+        // The removed "Only country" mode reads as the default, download + upload.
+        assertFalse(SettingsRegistry.SPEED_TEST_MODE.accepts("4"))
         assertFalse(SettingsRegistry.SPEED_TEST_TIMEOUT_MS.accepts("0"))
         assertTrue(SettingsRegistry.SPEED_TEST_TIMEOUT_MS.accepts("5000"))
         assertFalse(SettingsRegistry.SIMPLE_DL_URL.accepts("file:///tmp/test.bin"))
         assertTrue(SettingsRegistry.SIMPLE_DL_URL.accepts("https://example.com/imported.bin"))
 
         assertEquals(SpeedTestSettings.MODE_SIMPLE_DOWNLOAD, SpeedTestSettings.modeName(SpeedTestSettings.SIMPLE_DOWNLOAD))
-        assertEquals(SpeedTestSettings.MODE_COUNTRY, SpeedTestSettings.modeName(SpeedTestSettings.COUNTRY))
+        assertEquals(SpeedTestSettings.MODE_DOWNLOAD_UPLOAD, SpeedTestSettings.modeName(4))
         assertEquals(SpeedTestSettings.MODE_DOWNLOAD_UPLOAD, SpeedTestSettings.modeName(42))
     }
 

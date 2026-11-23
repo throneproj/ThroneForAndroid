@@ -8,6 +8,7 @@ import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.RouteManager
 import io.nekohasekai.sagernet.ktx.snackbar
+import io.nekohasekai.sagernet.outbound.config.ExitThrough
 import io.nekohasekai.sagernet.route.RouteProfile
 import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.ui.settings.WarpSettingsFragment
@@ -23,7 +24,7 @@ object RouteQuickSwitch {
     fun show(fragment: Fragment, onSwitched: ((RouteProfile) -> Unit)? = null) {
         fragment.lifecycleScope.launch {
             val (profiles, currentId, warp) = withContext(Dispatchers.IO) {
-                Triple(RouteManager.usable(), RouteManager.current().id, DataStore.enableWarp)
+                Triple(RouteManager.usable(), RouteManager.current().id, DataStore.isWarpExit)
             }
             val context = fragment.context ?: return@launch
             val names = Array<CharSequence>(profiles.size) { profiles[it].name.ifBlank { "#" + profiles[it].id } }
@@ -67,19 +68,19 @@ object RouteQuickSwitch {
     }
 
     /**
-     * "Enable Warp" (mainwindow_setup.cpp:893-903): saves enable_warp (turning on also turns the desktop's enable_tor
-     * off, as WarpService::Apply does) and reloads a running service.
+     * "Enable Warp" (WarpService::Apply): turning WARP on makes it the exit in place of any other, turning it off falls
+     * back to the selected profile only while WARP is the exit; a running service reloads.
      */
     fun setWarpEnabled(fragment: Fragment, enabled: Boolean) {
-        DataStore.enableWarp = enabled
-        if (enabled) DataStore.enableTor = false
+        if (enabled) DataStore.exitThrough = ExitThrough.WARP
+        else if (DataStore.isWarpExit) DataStore.exitThrough = ExitThrough.SERVER
         if (DataStore.serviceState.started) SagerNet.reloadService()
         val activity = fragment.activity as? MainActivity
         if (enabled && !WarpClient.isGenerated()) {
             fragment.snackbar(fragment.getString(R.string.warp_not_generated)).apply {
                 if (activity != null) setAction(R.string.settings) {
                     val screen = WarpSettingsFragment::class.java.name
-                    activity.openSettingsScreen(screen, activity.getString(R.string.warp_settings))
+                    activity.openSettingsScreen(screen, activity.getString(R.string.exit_through))
                 }
             }.show()
         } else {

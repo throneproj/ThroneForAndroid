@@ -80,6 +80,8 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         const val TYPE_SUBSCRIPTION = 1
 
         private const val STATE_ADVANCED = "advancedExpanded"
+        private const val STATE_LOADED_FRONT = "loadedFrontProxy"
+        private const val STATE_LOADED_LANDING = "loadedLandingProxy"
         private const val AUTO_SELECTOR = "autoselector"
 
         private const val KEY_FRONT = "groupFrontProxyId"
@@ -165,6 +167,13 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
     /** "[group] name" of the profiles the front/landing menus offer. */
     private val proxyLabels = HashMap<Long, String>()
 
+    /**
+     * The front/landing ids as the editor first loaded them: [save] writes one only when it changed, so a profile
+     * deleted meanwhile (ClearHopReferences) is not restored.
+     */
+    private var loadedFront = -1L
+    private var loadedLanding = -1L
+
     /** The "Routing profile" menu as (route id, label), Default ("-1") first. */
     private var routeChoices: List<Pair<String, String>> = emptyList()
 
@@ -194,6 +203,10 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         }
         editingId = intent.getLongExtra(EXTRA_GROUP_ID, 0L)
         advancedExpanded = savedInstanceState?.getBoolean(STATE_ADVANCED) ?: false
+        if (savedInstanceState != null) {
+            loadedFront = savedInstanceState.getLong(STATE_LOADED_FRONT, -1L)
+            loadedLanding = savedInstanceState.getLong(STATE_LOADED_LANDING, -1L)
+        }
         onBackPressedDispatcher.addCallback(this) { close() }
 
         val fresh = savedInstanceState == null
@@ -201,11 +214,12 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         lifecycleScope.launch {
             val found = withContext(Dispatchers.IO) {
                 val group = if (editingId > 0) GroupRepo.get(editingId) ?: return@withContext false else ProxyGroup()
-                if (editingId > 0) resetDanglingProxies(group)
                 loadRouteChoices(group)
                 unknownTypes = group.subOptions.typeExclude.filter { id -> SubscriptionNameFilter.PROTOCOLS.none { it.id == id } }
                 if (fresh) {
                     writeToCache(group)
+                    loadedFront = proxyId(KEY_FRONT)
+                    loadedLanding = proxyId(KEY_LANDING)
                     val prefilled = editingId == 0L && !link.isNullOrBlank()
                     if (prefilled) {
                         DataStore.groupType = TYPE_SUBSCRIPTION
@@ -246,6 +260,8 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(STATE_ADVANCED, advancedExpanded)
+        outState.putLong(STATE_LOADED_FRONT, loadedFront)
+        outState.putLong(STATE_LOADED_LANDING, loadedLanding)
     }
 
     override fun onDestroy() {
@@ -303,32 +319,22 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             .show()
     }
 
+    /** The question names the other groups that lose one of its profiles as front/landing proxy (HopReferenceWarning). */
     private fun confirmRemove() {
         val name = ProxyGroup(name = DataStore.groupName.trim()).displayName()
-        confirmAction(getString(R.string.confirm_remove_group), name, R.string.delete) {
-            lifecycleScope.launch {
-                withContext(Dispatchers.IO) { GroupRepo.delete(editingId) }
-                SubscriptionScheduler.schedule()
-                finish()
+        lifecycleScope.launch {
+            val warning = withContext(Dispatchers.IO) { GroupRepo.hopWarning(ProfileManager.memberIds(editingId), editingId) }
+            confirmAction(getString(R.string.confirm_remove_group), name + warning, R.string.delete) {
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) { GroupRepo.delete(editingId) }
+                    SubscriptionScheduler.schedule()
+                    finish()
+                }
             }
         }
     }
 
     // ------------------------------------------------------------------------------------------------ load / save
-
-    /** dialog_edit_group.cpp:42-49: a front/landing profile that no longer exists is reset and saved on open. */
-    private suspend fun resetDanglingProxies(group: ProxyGroup) {
-        var changed = false
-        if (group.frontProxyId > 0 && ProfileManager.getProfile(group.frontProxyId) == null) {
-            group.frontProxyId = -1L
-            changed = true
-        }
-        if (group.landingProxyId > 0 && ProfileManager.getProfile(group.landingProxyId) == null) {
-            group.landingProxyId = -1L
-            changed = true
-        }
-        if (changed) GroupRepo.save(group)
-    }
 
     private fun writeToCache(group: ProxyGroup) {
         val store = DataStore.profileCacheStore
@@ -456,8 +462,8 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             // DialogEditGroup::accept: new filters apply to an existing subscription right away.
             refreshNeeded = editingId > 0 && newUrl.isNotEmpty() && !group.archive && !group.subOptions.sameFilters(options)
             group.subOptions = options
-            group.frontProxyId = proxyId(KEY_FRONT)
-            group.landingProxyId = proxyId(KEY_LANDING)
+            proxyId(KEY_FRONT).let { if (it != loadedFront) group.frontProxyId = it }
+            proxyId(KEY_LANDING).let { if (it != loadedLanding) group.landingProxyId = it }
             val pickedRoute = store.getString(KEY_ROUTE) ?: initialRoute
             if (pickedRoute != initialRoute) group.routeId = pickedRoute.toLongOrNull()?.takeIf { it > 0 } ?: -1L
             group.importSubRoute = newUrl.isNotEmpty() && store.getBoolean(KEY_IMPORT_ROUTE, false)
@@ -477,7 +483,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
 
     // ------------------------------------------------------------------------------------------------ front / landing
 
-    /** get_proxy_name: "[group] name"; null when the profile or its group is gone. */
+    /** get_proxy_name: "[group] name"; null when the profile or its group is gone, shown as a missing profile. */
     private fun proxyLabel(id: Long): String? {
         val profile = ProfileManager.getProfile(id) ?: return null
         val group = GroupRepo.get(profile.groupId) ?: return null
@@ -570,10 +576,12 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             if (host.serverIntervalHours > 0) {
                 serverTip += "\n" + getString(R.string.grp_server_interval_last, host.serverIntervalHours)
             }
+            // ResolveAutoUpdate: the inherited choice follows the global switch, so it is "Ignore" while that is off.
+            val globalOn = host.globalAutoUpdate >= SubscriptionScheduler.MIN_INTERVAL_MINUTES
             overrideMenu(
                 KEY_SERVER_INTERVAL,
                 listOf(getString(R.string.grp_server_interval_use), getString(R.string.grp_server_interval_ignore)),
-                if (host.globalRespectServerInterval) 0 else 1,
+                if (globalOn && host.globalRespectServerInterval) 0 else 1,
                 serverTip,
             )
             updateInterval()

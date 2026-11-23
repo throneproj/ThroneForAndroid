@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
-    <SwitchPreference
+    <moe.matsuri.nb4a.ui.SimpleMenuPreference
         app:icon="@drawable/ic_file_cloud_queue"
-        app:key="enable_warp"
-        app:summary="@string/warp_enable_sum"
-        app:title="@string/warp_enable" />
+        app:key="exit_through"
+        app:title="@string/exit_through" />
+    <moe.matsuri.nb4a.ui.SimpleMenuPreference
+        app:icon="@drawable/baseline_public_24"
+        app:key="psiphon_egress_region"
+        app:title="@string/psiphon_egress_region" />
     <moe.matsuri.nb4a.ui.SimpleMenuPreference
         app:entries="@array/warp_mode_entries"
         app:entryValues="@array/warp_mode_values"

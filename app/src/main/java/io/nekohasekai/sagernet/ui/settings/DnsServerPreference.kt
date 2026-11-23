@@ -2,14 +2,15 @@ package io.nekohasekai.sagernet.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.AutoCompleteTextView
 import androidx.core.content.res.TypedArrayUtils
 import androidx.preference.EditTextPreference
-import com.google.android.material.textfield.TextInputLayout
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.ui.DnsServerSuggestions
+import io.nekohasekai.sagernet.ui.DnsServerListDialog
 
-/** A DNS server setting whose dialog offers [suggestions] (DnsServerHistory::Fill), read each time it opens. */
+/**
+ * A DNS server setting edited as a list (DnsServerListEdit) and stored as its comma list; the change listeners see
+ * the list before it is stored, as they would a typed text.
+ */
 class DnsServerPreference
 @JvmOverloads
 constructor(
@@ -22,14 +23,16 @@ constructor(
     defStyleRes: Int = 0
 ) : EditTextPreference(context, attrs, defStyleAttr, defStyleRes) {
 
-    var suggestions: () -> List<String> = { emptyList() }
+    var presets: List<String> = emptyList()
 
-    init {
-        dialogLayoutResource = R.layout.layout_dns_server_dialog
-        setOnBindEditTextListener { edit ->
-            val field = edit as? AutoCompleteTextView ?: return@setOnBindEditTextListener
-            val layout = edit.rootView.findViewById<TextInputLayout>(R.id.server_layout) ?: return@setOnBindEditTextListener
-            DnsServerSuggestions.attach(layout, field, suggestions())
-        }
+    /** The servers saved before, read each time the editor opens. */
+    var recent: () -> List<String> = { emptyList() }
+
+    var primaryNote = false
+
+    override fun onClick() {
+        DnsServerListDialog(context, title, text.orEmpty(), presets, recent(), primaryNote) { value ->
+            if (callChangeListener(value)) text = value
+        }.show()
     }
 }

@@ -42,6 +42,7 @@ internal object SubscriptionNameFilter {
         Protocol("masque", R.string.action_masque, setOf("masque")),
         Protocol("dnstt", R.string.action_dnstt, setOf("dnstt")),
         Protocol("masterdns", R.string.action_masterdns, setOf("masterdns")),
+        Protocol("psiphon", R.string.action_psiphon, setOf("psiphon")),
         Protocol("openvpn", R.string.action_openvpn, setOf("openvpn")),
         Protocol("openconnect", R.string.action_openconnect, setOf("openconnect")),
         Protocol("custom", R.string.custom_config, setOf("custom")),

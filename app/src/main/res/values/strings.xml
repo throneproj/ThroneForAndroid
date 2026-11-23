@@ -52,8 +52,8 @@
     <string name="allow_insecure">Allow insecure</string>
     <string name="allow_insecure_sum">Disable certificate checking. When enabled, this configuration
         is as secure as plaintext</string>
-    <string name="traffic" translatable="false">%1$s↑ %2$s↓</string>
-    <string name="speed_detail">Proxy: %1$s↑ %2$s↓\nDirect: %3$s↑ %4$s↓</string>
+    <string name="traffic" translatable="false">↓%2$s ↑%1$s</string>
+    <string name="speed_detail">Proxy: ↓%2$s ↑%1$s\nDirect: ↓%4$s ↑%3$s</string>
     <string name="speed">%s/s</string>
     <string name="connection_test_testing">Testing…</string>
     <string name="connection_test_available">HTTPS: %d ms</string>
@@ -393,9 +393,9 @@
     <string name="tls_fragment_fallback_delay">Fragment fallback delay</string>
     <string name="tls_record_fragment">TLS record fragment</string>
     <string name="tls_tricks">TLS tricks</string>
-    <string name="enable_reality">Enable Reality</string>
-    <string name="reality_public_key">Reality public key</string>
-    <string name="reality_short_id">Reality short ID</string>
+    <string name="enable_reality">Enable REALITY</string>
+    <string name="reality_public_key">REALITY public key</string>
+    <string name="reality_short_id">REALITY short ID</string>
     <string name="vmess_global_padding">Global padding</string>
     <string name="vmess_authenticated_length">Authenticated length</string>
     <string name="transport_settings">Transport settings</string>
@@ -488,7 +488,7 @@
     <string name="xray_verify_peer_cert_by_name">Verify peer certificate by name</string>
     <string name="xray_ech_config_list">ECH config list</string>
     <string name="xray_ech_config_list_hint">A base64 ECHConfigList, or domain+DoH URL to let Xray fetch it (e.g. cloudflare-ech.com+https://8.8.8.8/dns-query)</string>
-    <string name="reality_settings">Reality settings</string>
+    <string name="reality_settings">REALITY settings</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="xray_mux_concurrency">Concurrency</string>
     <string name="xray_mux_concurrency_hint">Streams one connection carries before another opens. 0 uses Xray\'s 8, and -1 sends TCP outside the mux.</string>
@@ -758,7 +758,6 @@
     <string name="exit_country_lookup_sum">After connecting, ask an IP lookup service (through the proxy) which IP address and country the connection exits from. When off, no such service is contacted automatically.</string>
     <string name="exit_lookup_provider">Lookup service</string>
     <string name="exit_lookup_provider_auto">Automatic</string>
-    <string name="speed_test_mode_country">Only country</string>
     <string name="net_use_proxy">Use proxy</string>
     <string name="net_use_proxy_sum">Send subscription and update requests through the local proxy</string>
     <string name="net_insecure">Ignore TLS errors</string>
@@ -767,7 +766,7 @@
     <string name="log_buffer_size">Log buffer size (kb)</string>
     <string name="enable_stats">Connection statistics</string>
     <string name="enable_stats_sum">Track connections and their processes</string>
-    <string name="disable_traffic_stats">Disable traffic stats</string>
+    <string name="disable_traffic_stats">Disable traffic counters</string>
     <string name="disable_traffic_stats_sum">Profile traffic is not counted</string>
     <string name="listen_port">Listen port</string>
     <string name="listen_address">Listen address</string>
@@ -792,7 +791,7 @@
     <string name="dashboard_no_webview">The dashboard needs Android System WebView, which is missing or disabled on this device.</string>
     <string name="xray_vless_preference">Xray VLESS preference</string>
     <string name="xray_vless_xhttp_only">XHTTP only</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP and Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP and REALITY</string>
     <string name="xray_vless_all">All VLESS</string>
     <string name="xray_geo_assets">Xray geo assets</string>
     <string name="xray_geo_assets_sum">geoip.dat and geosite.dat for Xray configs with geoip: or geosite: rules</string>
@@ -939,7 +938,7 @@
     <string name="route_profile_name">Name</string>
     <string name="route_profile_default_outbound">Default outbound</string>
     <string name="route_profile_remote_source">Remote source</string>
-    <string name="route_profile_remote_rules_note">Every update replaces this profile\'s rules with the ones from the URL, so rules you add or change here are lost. To keep your own rules, use Clone in the routing profile list: the clone is a local copy that is never updated.</string>
+    <string name="route_profile_remote_rules_note">Each update replaces the rules that came from the URL, so edits to them last until the next one. Rules added here are kept.</string>
     <string name="route_profile_url">URL</string>
     <string name="route_profile_url_hint">https://… (throne://route link, base64, or JSON)</string>
     <string name="route_profile_auto_update">Auto update</string>
@@ -959,7 +958,7 @@
     </plurals>
     <string name="route_profile_invalid_url_title">Invalid URL</string>
     <string name="route_profile_invalid_url">Enter a valid http(s) URL first.</string>
-    <string name="route_profile_fetch_confirm">The current rules are replaced with the ones fetched from the URL.</string>
+    <string name="route_profile_fetch_confirm">The rules that came from the URL, edits to them included, are replaced with the ones fetched now. Rules added here are kept.</string>
     <string name="route_profile_fetch_failed">Could not fetch routing profile</string>
     <string name="route_profile_fetched_title">Fetched</string>
     <string name="route_profile_fetched_warnings_title">Fetched with warnings</string>
@@ -977,6 +976,8 @@
     <string name="route_rule_action">Action</string>
     <string name="route_rule_outbound">Outbound</string>
     <string name="route_rule_missing_server">Missing server (#%d)</string>
+    <string name="route_outbound_no_exit">Proxy without exit</string>
+    <string name="route_outbound_no_exit_hint">Only differs from Proxy while an exit is on (Settings › Routing › Exit): these sites skip it and leave through the selected profile.</string>
     <string name="route_rule_reject_method">Reject method</string>
     <string name="route_rule_strategy">Resolve strategy</string>
     <string name="route_rule_override_destination">Override destination</string>
@@ -1038,8 +1039,8 @@
     <string name="route_rule_any">Any</string>
     <string name="route_rule_invalid_title">Invalid rule</string>
     <string name="route_rule_unknown_rule_sets">Unknown rule-sets: %s\n\nPick names from the rule-set list, or use the URL of an .srs file.</string>
-    <string name="route_rule_catch_all_title">No conditions</string>
-    <string name="route_rule_catch_all">This rule has no conditions, so it matches every connection. Save it anyway?</string>
+    <string name="route_rule_default_name">Rule %d</string>
+    <string name="route_rule_dns_queries">DNS queries</string>
     <string name="rule_set_picker_title">Rule-sets</string>
     <string name="rule_set_search">Search rule-sets…</string>
     <string name="rule_set_add_url">Add URL</string>
@@ -1086,7 +1087,11 @@
     <string name="grp_front_proxy">Front proxy</string>
     <string name="grp_landing_proxy">Landing proxy</string>
     <string name="grp_none">None</string>
-    <string name="grp_missing_profile">Profile #%1$d (missing)</string>
+    <string name="grp_missing_profile">Missing profile (#%1$d)</string>
+    <string name="hop_refs_warning">These groups use a profile being deleted as their front or landing proxy. It will be removed from them, so they will connect without it:</string>
+    <string name="hop_refs_cleared">These groups used a deleted profile as their front or landing proxy. It was removed from them, so they connect without it:</string>
+    <string name="hop_ref_front">%1$s (front proxy)</string>
+    <string name="hop_ref_landing">%1$s (landing proxy)</string>
     <string name="grp_route_profile">Routing profile</string>
     <string name="grp_route_profile_default">Default (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (from this subscription)</string>
@@ -1132,7 +1137,7 @@
     <string name="grp_settings_user_agent">User agent</string>
     <string name="grp_sub_auto_update">Subscription auto update</string>
     <string name="grp_sub_auto_update_interval">Interval (minute, invalid if less than 30)</string>
-    <string name="grp_sub_clear">Clear servers before updating subscription</string>
+    <string name="grp_sub_clear">Clear profiles before updating subscription</string>
     <string name="grp_sub_show_change_popup">Show the changes window after a manual subscription update</string>
     <string name="grp_sub_show_change_popup_tip">When enabled, a window listing added / updated / deleted profiles is shown after a manual subscription update. The same information is always written to the log.</string>
     <string name="grp_sub_send_hwid">Enable sending HWID, device model, and OS version when updating subscription</string>
@@ -1159,7 +1164,7 @@
     <string name="grp_auto_update">Auto update</string>
     <string name="grp_no_subscription_url">The link did not contain a subscription URL.</string>
     <string name="grp_imported_count">Imported %1$d profile(s)</string>
-    <string name="grp_unknown_deeplink">Ignored deeplink with unknown command: %1$s</string>
+    <string name="grp_unknown_deeplink">Ignored deep link with unknown command: %1$s</string>
     <string name="grp_file_cannot_open">%1$s: cannot be opened</string>
     <string name="grp_file_too_large">%1$s: larger than 50 MB, skipped</string>
     <string name="grp_file_not_readable">%1$s: not a readable config file</string>
@@ -1241,13 +1246,13 @@
     <string name="profiles_sort_latency">Latency</string>
     <string name="profiles_sort_download">Download speed</string>
     <string name="profiles_sort_upload">Upload speed</string>
-    <string name="profiles_sort_ip_out">IP out</string>
+    <string name="profiles_sort_ip_out">Exit IP</string>
     <string name="profiles_sort_traffic">Traffic</string>
     <string name="profiles_sort_traffic_total">Total</string>
     <string name="profiles_sort_traffic_downloaded">Downloaded</string>
     <string name="profiles_sort_traffic_uploaded">Uploaded</string>
     <string name="profiles_show">Show</string>
-    <string name="profiles_show_out_ip">Out IP</string>
+    <string name="profiles_show_out_ip">Exit IP</string>
     <string name="profiles_show_speed">Speed</string>
 
     <!-- confirmations of destructive actions: the question as the title, what it affects below, Cancel and a verb -->
@@ -1291,7 +1296,7 @@
     <!-- group actions (desktop MainWindow texts) -->
     <string name="profiles_no_duplicates">No duplicate profiles found.</string>
     <string name="profiles_no_unavailable">No unavailable profiles found.</string>
-    <string name="profiles_no_insecure">No insecure configs found.</string>
+    <string name="profiles_no_insecure">No insecure profiles found.</string>
     <string name="profiles_running_kept">The running profile was kept.</string>
     <string name="profiles_delete_failed">The profiles could not be removed.</string>
     <string name="profiles_test_busy">The last test did not finish completely, please wait.</string>
@@ -1304,7 +1309,11 @@
     </plurals>
     <string name="profiles_select_all">Select all</string>
     <string name="profiles_move_to_group">Move to group</string>
-    <string name="profiles_move_no_target">There is no other basic group to move to.</string>
+    <string name="import_target_subscription">This group is a subscription: its next update removes profiles imported into it. Select another group, then import again.</string>
+    <string name="import_target_archived">This group is archived. Select another group, then import again.</string>
+    <string name="import_target_gone">This group no longer exists.</string>
+    <string name="profiles_move_target_subscription">A subscription group\'s next update removes profiles moved into it. Choose another group.</string>
+    <string name="profiles_move_source_updating">This group\'s subscription is being updated. Try again when it finishes.</string>
     <plurals name="profiles_moved">
         <item quantity="one">Moved %1$d profile to %2$s</item>
         <item quantity="other">Moved %1$d profiles to %2$s</item>
@@ -1382,9 +1391,7 @@
     <string name="test_panel_summary_none_working">none working</string>
     <string name="test_panel_summary_resolved">%1$d resolved in %2$d countries</string>
     <string name="test_panel_summary_none_resolved">none resolved</string>
-    <string name="test_panel_summary_working_countries">%1$d working in %2$d countries</string>
     <string name="test_panel_current_unavailable">Unavailable: %s</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
 
     <string name="test_panel_failure_empty">Nothing to test</string>
     <string name="test_panel_failure_busy">Another test is still running</string>
@@ -1420,7 +1427,7 @@
 
     <!-- test engine -->
     <string name="test_engine_kind_url">URL test</string>
-    <string name="test_engine_kind_ip">IP test</string>
+    <string name="test_engine_kind_ip">Exit IP test</string>
     <string name="test_engine_kind_speed">Speed test</string>
     <string name="test_engine_title">%1$s · %2$s</string>
     <string name="test_engine_scope_current">Current connection</string>
@@ -1435,7 +1442,7 @@
     <!-- Add menu and editor (edit_autoselector.ui / .cpp) -->
     <string name="action_auto_selector">Auto selector</string>
     <string name="autosel_title">Auto selector</string>
-    <string name="autosel_group">Servers from</string>
+    <string name="autosel_group">Profiles from</string>
     <string name="autosel_group_archived">%s (archived)</string>
     <string name="autosel_group_missing">Missing group (#%d)</string>
     <string name="autosel_groups_none">No group selected</string>
@@ -1460,7 +1467,6 @@
     <string name="autosel_plan_skipped">Skipped: %s.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_list_separator">", "</string>
-    <string name="autosel_plan_kept_unavailable">Every profile\'s last test failed, which usually means the network was down rather than the servers, so all %d are kept and will be re-checked.</string>
     <string name="autosel_plan_truncated">More than %d profiles match, so only the best-ranked ones are kept.</string>
     <string name="autosel_plan_reused">%d have a recent test result that will be reused.</string>
     <string name="autosel_plan_needs_ranking">The rest will be measured as the selector starts: it runs as soon as enough profiles work, and switches to the full ranking once all are measured.</string>
@@ -1477,7 +1483,6 @@
     <string name="autosel_skip_management">OpenVPN or OpenConnect profile</string>
     <string name="autosel_skip_name">filtered out by name</string>
     <string name="autosel_skip_country">filtered out by country</string>
-    <string name="autosel_skip_unavailable">last test failed</string>
     <string name="autosel_skip_xray_chained">Xray full config cannot be combined with the group\'s proxies</string>
     <string name="autosel_skip_unsupported">type this build cannot use</string>
     <string name="autosel_advanced">Advanced</string>
@@ -1489,40 +1494,21 @@
     <string name="autosel_country_filter_empty">Any country (e.g. DE,NL,FR or !RU)</string>
     <string name="autosel_build_limit">Run the best</string>
     <string name="autosel_build_limit_tip">How many profiles are loaded into the running config. The selector switches between these instantly, with no reconnect. Higher costs more memory and startup time.</string>
-    <string name="autosel_pool_cap">Rank at most</string>
-    <string name="autosel_pool_cap_tip">Hard ceiling on how many profiles are measured and kept in the ranked list. When every running profile dies, replacements are taken from this list.</string>
-    <string name="autosel_result_validity">Trust results for</string>
-    <string name="autosel_result_validity_tip">URL test results this recent are reused instead of being measured again — including tests you ran yourself on the group, so starting the selector right after one does not repeat the work. Older results are treated as if the profile had never been tested. Set to zero to always run a fresh test.</string>
-    <string name="autosel_always_retest">Always re-test</string>
-    <string name="autosel_exclude_unavailable">Skip failed profiles</string>
-    <string name="autosel_exclude_unavailable_tip">Keeps servers whose last test failed out of the pool, as long as that result is still within the trust window. Turn off if your tests are unreliable and you would rather let the selector decide for itself.</string>
     <string name="autosel_cat_health">Health checks</string>
     <string name="autosel_expected">Keep ready</string>
     <string name="autosel_expected_tip">How many profiles are kept confirmed working at all times, so a failure can be covered instantly. These are also the ones traffic is shared between when balancing is on.</string>
-    <string name="autosel_active_size">Check closely</string>
-    <string name="autosel_active_size_tip">The top-ranked profiles are re-checked every interval. The rest are still checked, just spread over the slower full sweep.</string>
     <string name="autosel_interval">Check interval</string>
-    <string name="autosel_interval_tip">How often the closely-checked profiles are measured again.</string>
-    <string name="autosel_bench_interval">Full sweep every</string>
-    <string name="autosel_bench_interval_tip">How long one pass over every running profile takes. Checks are spread evenly across it, so a large pool never causes a burst of traffic.</string>
-    <string name="autosel_watch_interval">Watch profile in use</string>
-    <string name="autosel_watch_interval_tip">How often the profile currently carrying your traffic is checked on its own. Keep this short: a server can stop working while still accepting connections, and nothing else would notice until the next full check.</string>
-    <string name="autosel_sampling">Samples kept</string>
-    <string name="autosel_sampling_tip">Ranking uses the average and the jitter over this many recent checks, so a single bad result cannot demote a good server.</string>
+    <string name="autosel_interval_tip">How often the top-ranked profiles are measured again.</string>
     <string name="autosel_cat_switching">Switching</string>
     <string name="autosel_tolerance">Switch tolerance</string>
     <string name="autosel_tolerance_tip">Another profile must be at least this much faster before the selector moves to it. Higher values mean fewer switches.</string>
     <string name="autosel_max_rtt">Maximum latency</string>
-    <string name="autosel_max_rtt_tip">Profiles slower than this are never selected, even if nothing better is available.</string>
+    <string name="autosel_max_rtt_tip">Profiles slower than this are used only when no faster one works.</string>
     <string name="autosel_no_limit">No limit</string>
-    <string name="autosel_dial_retries">Failover attempts</string>
-    <string name="autosel_dial_retries_tip">When the chosen profile fails to connect, how many others to try immediately before the app sees an error.</string>
-    <string name="autosel_interrupt">Drop connections on switch</string>
-    <string name="autosel_interrupt_tip">Applies when the selector switches because a profile got worse or failed. On: everything moves to the new profile at once. Off: current downloads finish on the old one. Balance rotations never drop connections either way.</string>
+    <string name="autosel_interrupt">Drop connections when a profile fails</string>
+    <string name="autosel_interrupt_tip">Open connections move at once instead of finishing on the failed profile. Moving to a faster profile and balance rotations never drop connections.</string>
     <string name="autosel_cat_balance">Load balancing</string>
     <string name="autosel_balance_mode">Mode</string>
-    <string name="autosel_balance_interval">Rotate every</string>
-    <string name="autosel_balance_interval_tip">How long the selector stays on one profile before moving to the next ready one.</string>
     <string name="autosel_balance_hint_off">The best profile carries all traffic; the other ready profiles are kept verified so one can take over instantly.</string>
     <string name="autosel_balance_hint_rotate">New connections move to another good profile on each rotation; open ones are left alone and finish where they started. Traffic is counted exactly.</string>
     <string name="autosel_balance_hint_connection">Every new connection may take a different profile. Widest spread, but your exit IP changes mid-session and per-profile traffic becomes approximate.</string>
@@ -1539,10 +1525,6 @@
     <plurals name="autosel_profiles">
         <item quantity="one">%d profile</item>
         <item quantity="other">%d profiles</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="one">%d min</item>
-        <item quantity="other">%d min</item>
     </plurals>
     <plurals name="autosel_seconds">
         <item quantity="one">%d s</item>
@@ -1628,7 +1610,6 @@
     <string name="autosel_last_ok_short">OK %s</string>
     <string name="autosel_row_state">Status: %s</string>
     <string name="autosel_row_latency">Latency: %1$d ms (best %2$d ms, worst %3$d ms)</string>
-    <string name="autosel_row_jitter">Jitter: %d ms</string>
     <string name="autosel_row_checks">Checks: %1$d / %2$d ok</string>
     <string name="autosel_row_connects">Connects: %1$d / %2$d ok</string>
     <string name="autosel_row_last_ok">Last OK: %s</string>
@@ -1637,13 +1618,20 @@
     <string name="autosel_row_untested">No URL test result yet.</string>
 
     <!-- WARP -->
-    <!-- Settings › Routing › WARP (the desktop Warp tab) -->
+    <!-- Settings › Routing › Exit (the desktop Exit tab) -->
     <string name="cag_warp">Cloudflare WARP</string>
-    <string name="warp_settings">WARP</string>
-    <string name="warp_state_on">On · %s</string>
-    <string name="warp_state_off">Off</string>
+    <string name="warp_settings">Exit</string>
+    <string name="exit_through">Exit through</string>
+    <string name="exit_server">Selected profile</string>
+    <string name="exit_server_hint">Traffic leaves through the profile you started.</string>
+    <string name="exit_psiphon_hint">Psiphon is a free network run by Psiphon Inc., which can see the sites you visit, like any VPN provider.</string>
+    <string name="exit_tor_hint">Tor is not available on Android, so traffic leaves through the selected profile.</string>
+    <string name="exit_unavailable">%s (not available on Android)</string>
+    <string name="psiphon_egress_region">Region</string>
+    <string name="psiphon_region_best">Best performance</string>
+    <string name="psiphon_egress_region_sum">The country of the Psiphon server; Best performance lets Psiphon choose.</string>
     <string name="warp_enable">Enable WARP</string>
-    <string name="warp_enable_sum">Enables the config below to be used as egress, useful for bypassing services restricting non-WARP VPNs</string>
+    <string name="warp_enable_sum">Enables the config below to be used as exit, useful for bypassing services restricting non-WARP VPNs</string>
     <string name="warp_mode">Mode</string>
     <string name="warp_mode_sum">%s\nWireGuard runs over UDP. AmneziaWG adds WARP-compatible junk and camouflage packets. MASQUE tunnels over HTTP/3 or HTTP/2.</string>
     <string name="warp_mode_wireguard" translatable="false">WireGuard</string>
@@ -1755,7 +1743,7 @@
     <string name="backup_part_profiles">Profiles (groups and proxies)</string>
     <string name="backup_part_routes">Routing profiles</string>
     <string name="backup_part_settings">Settings</string>
-    <string name="backup_part_otp">OTP profiles (not restored on Android)</string>
+    <string name="backup_part_otp">OTP entries (not restored on Android)</string>
     <string name="backup_local_summary">Backups use the Throne desktop format (.thrbackup): either app restores them. WebDAV credentials stay on this device.</string>
     <string name="backup_create">Create backup</string>
     <string name="backup_restore">Restore</string>
@@ -2074,9 +2062,9 @@
     <string name="grp_http_version">HTTP version</string>
     <string name="grp_http_version_tip">Auto uses HTTP/2 when the server offers it. \"Keep default\" follows Settings › Subscriptions.</string>
     <string name="grp_update_interval">Update interval (minutes)</string>
-    <string name="grp_update_interval_tip">Minutes between automatic updates of this subscription, at least 30. Empty follows Settings › Subscriptions, where automatic updates must be enabled.</string>
+    <string name="grp_update_interval_tip">Minutes between automatic updates of this subscription, at least 30, even while automatic updates are off in Settings › Subscriptions. Empty follows that setting.</string>
     <string name="grp_server_interval">Server interval</string>
-    <string name="grp_server_interval_tip">Use the update interval sent by the subscription server; the interval above applies when it sends none. \"Keep default\" follows Settings › Subscriptions.</string>
+    <string name="grp_server_interval_tip">Use the update interval sent by the subscription server, even while automatic updates are off in Settings › Subscriptions; the interval above applies when it sends none. \"Keep default\" follows that setting.</string>
     <string name="grp_server_interval_use">Use</string>
     <string name="grp_server_interval_ignore">Ignore</string>
     <string name="grp_server_interval_last">This server last sent %1$d h.</string>
@@ -2236,7 +2224,7 @@
     <string name="validation_server_missing">The server address is missing.</string>
     <string name="validation_server_port_missing">The server port is missing.</string>
     <string name="validation_refused_extracore">Refused to import an Extra Core profile: it would run a program on this device.</string>
-    <string name="validation_refused_chain">Refused to import a Chain Proxy profile: its hops are profiles of another installation.</string>
+    <string name="validation_refused_chain">Refused to import a Proxy Chain profile: its hops are profiles of another installation.</string>
     <string name="validation_refused_autoselector">Refused to import an Auto Selector profile: the group it tracks belongs to another installation.</string>
     <plurals name="validation_import_imported">
         <item quantity="one">Imported %1$d profile.</item>
@@ -2347,9 +2335,9 @@
     <string name="validation_tls_pem_private_key">Paste the private key as PEM text, starting with -----BEGIN PRIVATE KEY-----.</string>
     <string name="validation_tls_pin_base64">This is a hexadecimal SHA-256; write it in base64 (44 characters ending in =).</string>
     <string name="validation_tls_ech_config">Paste the ECH config list as base64, or as one -----BEGIN ECH CONFIGS----- block.</string>
-    <string name="validation_tls_reality_ech">Reality cannot be combined with ECH. Turn off ECH, or clear the Reality public key.</string>
-    <string name="validation_tls_reality_disable_sni">Reality cannot be used with Disable SNI. Turn off Disable SNI.</string>
-    <string name="validation_tls_reality_spoof">Reality cannot be combined with TLS spoof. Set TLS Spoof to Off.</string>
+    <string name="validation_tls_reality_ech">REALITY cannot be combined with ECH. Turn off ECH, or clear the REALITY public key.</string>
+    <string name="validation_tls_reality_disable_sni">REALITY cannot be used with Disable SNI. Turn off Disable SNI.</string>
+    <string name="validation_tls_reality_spoof">REALITY cannot be combined with TLS spoof. Set TLS Spoof to Off.</string>
     <string name="validation_tls_pins_with_certificate">A custom certificate cannot be combined with certificate pins; keep only one of them.</string>
     <string name="validation_tls_client_pair">Set the client certificate and the client key together.</string>
     <string name="validation_tls_spoof_needs_sni">TLS spoof needs an SNI. Turn off Disable SNI, or set TLS Spoof to Off.</string>
@@ -2361,7 +2349,7 @@
     <string name="validation_transport_headers_pairs">The headers must alternate names and values separated by |, for example User-Agent|curl, so they were ignored.</string>
     <string name="validation_transport_type">sing-box does not support the transport \"%1$s\". Use ws, httpupgrade, http, grpc or quic.</string>
     <string name="validation_transport_quic_tls">The QUIC transport needs TLS. Turn on Enable TLS.</string>
-    <string name="validation_transport_quic_reality">Reality does not work with the QUIC transport. Clear the Reality key, or choose another transport.</string>
+    <string name="validation_transport_quic_reality">REALITY does not work with the QUIC transport. Clear the REALITY key, or choose another transport.</string>
     <string name="validation_transport_quic_utls">uTLS is not used with the QUIC transport.</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal only works with a custom multiplex. Set Multiplex to Custom.</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal needs both speeds; a missing one is sent as 1 Mbps.</string>
@@ -2400,6 +2388,12 @@
     <string name="validation_xray_vless_encryption_mode">The part after mlkem768x25519plus must be native, xorpub or random.</string>
     <string name="validation_xray_vless_encryption_rtt">The part after the mode must be 1rtt or 0rtt.</string>
     <string name="validation_xray_vless_encryption_key">Each key in the string must be URL-safe base64 of 32 or 1184 bytes, without padding.</string>
+    <string name="validation_xray_vless_encryption_padding_order">Put the padding parts before the keys.</string>
+    <string name="validation_xray_vless_encryption_mlkem">A 1184-byte key in the string is not a valid ML-KEM-768 key: copy the string from the server again.</string>
+    <string name="validation_xray_vless_encryption_no_key">The string has no key: copy the whole string the server gives.</string>
+    <string name="validation_xray_vless_padding_format">Each padding part must be three numbers joined by dashes, like 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_first">The first padding part needs a chance of at least 100 and lengths of at least 35, like 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_total">The padding lengths can add up to more than 65553 bytes.</string>
     <string name="validation_xray_vless_vision">XTLS Vision needs the raw network with TLS or REALITY, or VLESS encryption: change the network or security, or clear the flow.</string>
     <string name="validation_xray_xdrive_no_link">XDRIVE has no share-link format. Import the server\'s JSON configuration instead.</string>
     <string name="validation_xray_xdrive_service">Must be google-drive, s3, template or local.</string>
@@ -2621,11 +2615,6 @@
     <string name="validation_custom_xray_geodata">Removed the geodata updater from the imported configuration: it would download files from addresses the sender chose and replace files in Throne\'s folder.</string>
     <string name="validation_custom_xray_webhook">Removed the webhook from this routing rule: it would send the details of every matching connection to an address the sender chose.</string>
     <string name="validation_autoselector_countries">Use two-letter country codes separated by commas, for example DE,NL,FR; put ! before a code to exclude that country, for example !RU.</string>
-    <string name="validation_autoselector_build_limit">Cannot run more profiles than are ranked (%1$s).</string>
-    <string name="validation_autoselector_bench_interval">The full sweep cannot run more often than the check interval (%1$s s).</string>
-    <string name="validation_autoselector_watch_interval">Watching the profile in use cannot be slower than the check interval (%1$s s).</string>
-    <string name="validation_autoselector_ready_count">Check closely at least as many profiles as are kept ready (%1$s).</string>
-    <string name="validation_autoselector_close_count">Cannot check closely more profiles than are run (%1$s).</string>
     <string name="validation_chain_empty">Add at least one profile to the chain.</string>
     <string name="validation_ss_plugin_opts_dangling">A backslash at the end has nothing to escape.</string>
     <string name="validation_ss_plugin_opts_name">Every option needs a name, as in obfs=http;obfs-host=example.com.</string>
@@ -2729,6 +2718,7 @@
     <string name="validation_route_no_drop_unused">Has no effect with the drop method.</string>
     <string name="validation_route_ignored_by_action">A %1$s rule ignores it; it applies only to these actions: %2$s.</string>
     <string name="validation_route_matches_all">This rule has no match conditions, so it matches all traffic.</string>
+    <string name="validation_route_catch_all">This rule has no conditions, so it would catch all traffic. Add a condition, or turn the rule off.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s (\"%2$s\"): %3$s</string>
     <string name="validation_route_rule_warning">Rule \"%1$s\": %2$s</string>
@@ -2778,6 +2768,7 @@
     <string name="validation_millis_or_default">Enter a whole number of milliseconds, for example %1$s (without a unit), or 0 for the default.</string>
     <string name="validation_group_update_interval">Must be at least 30 minutes, or empty to keep the default.</string>
     <string name="validation_port_used">Port %1$s is already used by: %2$s. Choose a different port.</string>
+    <string name="validation_port_reenabled">Turning on %1$s at port %2$s would clash with %3$s. Choose a different port.</string>
     <string name="validation_mtu_ipv6">IPv6 needs an MTU of at least %1$s; below that the system may drop IPv6 from the Tun.</string>
     <string name="validation_private_range_all">This covers every address, which would stop Tun from routing anything.</string>
     <string name="validation_dns_local_ip">Use an IP address, for example 223.5.5.5 or tls://1.1.1.1: this server resolves the names of the others.</string>
@@ -2799,9 +2790,15 @@
     <string name="validation_route_dns_final">The default DNS server must be remote or direct, not \"%1$s\".</string>
     <string name="validation_route_dns_dropped">The profile\'s own DNS settings were dropped, so it uses the global ones: %1$s</string>
     <string name="route_dns_global_servers">Remote %1$s, direct %2$s</string>
-    <string name="dns_server_suggestions">Recent and suggested servers</string>
     <string name="validation_dns_server_item">Server %1$s (\"%2$s\"): %3$s</string>
-    <string name="dns_server_list_hint">Separate several servers with commas: they are queried together and the first answer wins.</string>
+    <string name="dns_server_add">Add server</string>
+    <string name="dns_server_custom">Custom address</string>
+    <string name="dns_server_recent">Recent</string>
+    <string name="dns_server_address_hint">Address, e.g. tls://1.1.1.1</string>
+    <string name="dns_server_list_race">Queried together; the fastest answer wins.</string>
+    <string name="dns_server_list_primary">Also resolves proxy server addresses</string>
+    <string name="dns_server_list_empty">Add at least one server.</string>
+    <string name="dns_server_drag">Drag to reorder</string>
     <string name="juicity_pinned_certchain_sha256">Certificate chain SHA256</string>
     <string name="juicity_pinned_certchain_sha256_hint">Certificate chain hash printed by juicity-server; replaces CA verification, even with Allow insecure</string>
     <string name="validation_juicity_certchain">Use the 32-byte certificate chain hash in base64 (44 characters ending in =), as juicity-server prints it.</string>
@@ -2886,9 +2883,9 @@
 
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">Choose</string>
-    <string name="autosel_strategy_latency">Fastest and steadiest</string>
+    <string name="autosel_strategy_latency">Fastest</string>
     <string name="autosel_strategy_priority">In priority order</string>
-    <string name="autosel_strategy_latency_tip">Fastest and steadiest: always use the best measured profile out of all of them.</string>
+    <string name="autosel_strategy_latency_tip">Fastest: always use the best measured profile out of all of them.</string>
     <string name="autosel_strategy_priority_tip">In priority order: try the tiers below from the top. The selector stays on the highest tier that has a working profile, and moves back up once a higher tier works again.</string>
     <string name="autosel_tier_add">Add tier</string>
     <string name="autosel_tiers_hint">A profile belongs to the first tier it matches, and profiles that match none come last. The selector uses the highest tier that has a working profile and, inside it, the best measured one.</string>
@@ -2907,20 +2904,8 @@
     <string name="autosel_tier_any_profile">any profile</string>
     <string name="autosel_tier_fallback">tier %d</string>
     <string name="autosel_tier_short">T%d</string>
-    <string name="autosel_failback_checks">Move back up after</string>
-    <string name="autosel_failback_checks_tip">In priority order: once a profile from a higher tier works again, the selector moves back to it only after it passes this many checks in a row. Cannot be more than the samples kept.</string>
-    <plurals name="autosel_checks">
-        <item quantity="one">%d check</item>
-        <item quantity="other">%d checks</item>
-    </plurals>
-    <string name="autosel_failback_delay">Failure-free for</string>
-    <string name="autosel_failback_delay_tip">In priority order: a profile from a higher tier must also go this long without a failed check or connection before the selector moves back to it.</string>
-    <string name="autosel_failback_interrupt">Drop connections when moving back up</string>
-    <string name="autosel_failback_interrupt_tip">In priority order. Off: connections that are already open stay on their profile, and only new ones move up to the higher tier. On: everything moves up at once.</string>
     <string name="autosel_passive">Learn from real connections</string>
     <string name="autosel_passive_tip">Also judge profiles by the connections your apps make through them, not only by health checks. A connection counts as failed when it gets no reply at all or cannot connect. When recent connections through a profile fail at least as often as they succeed, three times or more, the profile is set aside even though its checks pass: for a minute, twice as long each time it happens again, up to 16 minutes. Each website also sticks with the profile that last worked for it and avoids one that just failed it. While real traffic flows, fewer health checks are sent.</string>
-    <string name="autosel_site_memory">Remember per-site choices for</string>
-    <string name="autosel_site_memory_tip">How long a website keeps using the profile that last worked for it, and keeps avoiding a profile that failed it.</string>
     <string name="autosel_balance_hint_priority">In priority order, traffic is only spread over the ready profiles of the tier in use.</string>
     <string name="autosel_plan_by_tier">By tier: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2931,7 +2916,6 @@
     <string name="autosel_plan_truncated_tiers">More than %d profiles match, so only the best-ranked ones of each tier are kept.</string>
     <string name="validation_autoselector_tier_match">Pick a group or enter a name pattern for this tier.</string>
     <string name="validation_autoselector_tier_count">Add at least one tier to choose in priority order.</string>
-    <string name="validation_autoselector_failback_checks">Cannot require more checks in a row than are kept (%1$s).</string>
     <string name="autosel_status_on_tier">Auto selector on %1$s, tier %2$d (%3$d of %4$d working)</string>
     <string name="autosel_detail_suspect">%d suspect</string>
     <string name="autosel_state_suspect">Suspect</string>
@@ -3001,6 +2985,17 @@
     <string name="service_ip_risk">risk %d</string>
     <string name="service_check_checked_now">Checked just now</string>
     <string name="service_check_checked_at">Checked %s</string>
+    <string name="service_check_services">Services</string>
+    <string name="service_check_services_all">All services</string>
+    <string name="service_check_services_count">%1$d of %2$d services</string>
+    <string name="service_check_none_selected">No services selected</string>
+    <string name="service_check_services_unknown">The list of services could not be loaded</string>
+    <string name="service_check_current">Service check current connection</string>
+    <string name="service_category_ai">AI</string>
+    <string name="service_category_streaming">Streaming</string>
+    <string name="service_category_social">Social</string>
+    <string name="service_category_reputation">IP reputation</string>
+    <string name="service_category_other">Other</string>
     <string name="validation_chain_selector_twice">A chain can hold only one auto selector.</string>
     <string name="validation_chain_selector_custom">An auto selector cannot share a chain with a custom config.</string>
     <string name="chain_step_selector">Chains with an auto selector cannot be tested hop by hop; test its members instead</string>
@@ -3008,6 +3003,8 @@
     <string name="autosel_notice_exhausted_upstream">Every running profile stopped working through the hops in front of it — rebuilding with the next candidates.</string>
     <string name="validation_route_outbound_chain_selector">Routing rules cannot use the chain \"%1$s\": it holds an auto selector, so it can only be started. Pick another outbound.</string>
     <string name="route_outbound_chain_selector">The routing profile sends traffic to %1$s, which holds an auto selector; such a chain can only be started, not used in routing rules</string>
+    <string name="xray_full_config_tag_clash">The custom Xray config uses the tag \"%1$s\", which Throne also generates for another Xray profile; rename it in the custom config</string>
+    <string name="xray_full_config_selector_clash">The custom Xray config\'s selector \"%1$s\" also matches \"%2$s\", which Throne generates for another Xray profile; make the selector more specific in the custom config</string>
     <string name="grp_filter_countries">Countries</string>
     <string name="grp_filter_countries_tip">Exit countries to keep, e.g. HK,JP, or to remove, e.g. !RU.</string>
     <string name="grp_filter_countries_hint">e.g. HK,JP or !RU</string>
@@ -3049,4 +3046,8 @@
     <string name="vpn_auth_submitting">Signing in…</string>
     <string name="vpn_auth_gone">This sign-in request is no longer pending.</string>
     <string name="vpn_auth_no_browser">No app can open this address.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">Use a two-letter country code, like US.</string>
+    <string name="validation_psiphon_ignored">Ignored %1$s: Psiphon profiles take only a region.</string>
+    <string name="exit_runs_over_itself">The selected profile already leaves through %1$s, so the %1$s exit cannot run over it. Choose another exit in Settings › Routing › Exit.</string>
 </resources>

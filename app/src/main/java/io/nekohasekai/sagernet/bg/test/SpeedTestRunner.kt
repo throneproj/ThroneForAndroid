@@ -24,19 +24,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Speed tests (runSpeedTests / runSpeedProbe, TestRunner.cpp:408-649): one profile per test build and probe, strictly
- * in order, except the country mode, which looks a batch up at once and streams its results. The profile in flight is
- * sampled every 100 ms and the bytes it moves are credited to it.
+ * Speed tests (runSpeedTests / runSpeedProbe): one profile per test build and probe, strictly in order. The profile in
+ * flight is sampled every 100 ms and the bytes it moves are credited to it.
  */
 internal class SpeedTestRunner(private val session: TestSession) {
 
     private val mode = session.options.speedMode
     private val modeName = SpeedTestSettings.modeName(mode)
-    private val countryOnly = mode == SpeedTestSettings.COUNTRY
     private val traffic = TrafficCredit(session.options.creditTraffic)
 
     suspend fun run(profiles: List<ProxyEntity>) {
-        for (slice in profiles.chunked(if (countryOnly) TEST_BATCH_SIZE else 1)) {
+        for (slice in profiles.chunked(1)) {
             if (session.cancelled) break
             val excluded = session.screenXrayFullConfigs(slice)
             for (entry in excluded) session.reportSpeedUnmeasured(entry.profileId, entry.reason)
@@ -93,22 +91,16 @@ internal class SpeedTestRunner(private val session: TestSession) {
             simpleDownload = mode == SpeedTestSettings.SIMPLE_DOWNLOAD
             simpleDownloadAddr = session.options.simpleDlUrl
             timeoutMs = session.options.speedTimeoutMs
-            onlyCountry = countryOnly
-            countryConcurrency = session.options.concurrency
         }
         traffic.reset()
         val results = Channel<SpeedTestResult>(Channel.UNLIMITED)
         val reported = HashSet<Long>()
-        // Country lookups stream their results; the other modes measure one profile and report it once it is done.
-        val streamer = if (countryOnly) launch { for (result in results) report(result, profileOf, names, reported) } else null
-        val poller = if (countryOnly) null else {
-            profileIds.singleOrNull()?.let {
-                session.speedProgress(SpeedTestSnapshot(it, names[it].orEmpty(), modeName, SpeedTestSnapshot.STAGE_DISCOVERY))
-            }
-            // The core keeps the previous test's last sample, flagged running for a moment once the next one starts.
-            val stale = Mobile.querySpeedTest()
-            launch { poll(stale, profileOf, names) }
+        profileIds.singleOrNull()?.let {
+            session.speedProgress(SpeedTestSnapshot(it, names[it].orEmpty(), modeName, SpeedTestSnapshot.STAGE_DISCOVERY))
         }
+        // The core keeps the previous test's last sample, flagged running for a moment once the next one starts.
+        val stale = Mobile.querySpeedTest()
+        val poller = launch { poll(stale, profileOf, names) }
         val failure = try {
             session.awaitCore { done ->
                 Mobile.startSpeedTest(current, CoreRuntime.platform, request, object : SpeedTestHandler {
@@ -121,14 +113,13 @@ internal class SpeedTestRunner(private val session: TestSession) {
             }
             null
         } catch (e: CancellationException) {
-            poller?.cancel()
+            poller.cancel()
             throw e
         } catch (e: Exception) {
             e
         }
         results.close()
-        poller?.cancelAndJoin()
-        streamer?.join()
+        poller.cancelAndJoin()
         if (failure != null) {
             Logs.w(failure)
             traffic.flush()
@@ -144,7 +135,7 @@ internal class SpeedTestRunner(private val session: TestSession) {
         }
     }
 
-    /** The result loop of runSpeedProbe (TestRunner.cpp:614-648) for one result; a profile's first result counts. */
+    /** The result loop of runSpeedProbe for one result; a profile's first result counts. */
     private fun report(
         result: SpeedTestResult,
         profileOf: (String?) -> Long?,
@@ -154,18 +145,11 @@ internal class SpeedTestRunner(private val session: TestSession) {
         val id = profileOf(result.tag) ?: return
         if (!reported.add(id)) return
         traffic.credit(id, result.tag, result.ulBytes, result.dlBytes)
-        if (!countryOnly) session.speedProgress(snapshot(id, names[id], result, done = true))
-        // A stopped country lookup comes back neither cancelled nor failed, just empty.
-        val stopped = countryOnly && session.cancelled && result.error.isNullOrEmpty() &&
-            result.serverCountry.isNullOrEmpty()
-        if (result.cancelled || stopped) {
-            session.reportSpeedUnmeasured(id, ERROR_ABORTED)
-        } else {
-            session.reportSpeed(id, result)
-        }
+        session.speedProgress(snapshot(id, names[id], result, done = true))
+        session.reportSpeed(id, result)
     }
 
-    /** pollSpeedTest (TestRunner.cpp:500-533). */
+    /** pollSpeedTest: the samples are shown only; nothing is stored before the result. */
     private suspend fun poll(stale: SpeedTestResult, profileOf: (String?) -> Long?, names: Map<Long, String>) {
         var fresh = false
         var flushedAt = SystemClock.elapsedRealtime()
@@ -194,7 +178,7 @@ internal class SpeedTestRunner(private val session: TestSession) {
             !done && result.dlBytes == 0L && result.ulBytes == 0L -> SpeedTestSnapshot.STAGE_LATENCY
             !done && result.ulBytes > 0L -> SpeedTestSnapshot.STAGE_UPLOAD
             !done -> SpeedTestSnapshot.STAGE_DOWNLOAD
-            result.cancelled -> SpeedTestSnapshot.STAGE_CANCELLED
+            result.cancelled || ProxyEntity.isTestAborted(error) -> SpeedTestSnapshot.STAGE_CANCELLED
             error.isNotEmpty() -> SpeedTestSnapshot.STAGE_ERROR
             else -> SpeedTestSnapshot.STAGE_COMPLETE
         }

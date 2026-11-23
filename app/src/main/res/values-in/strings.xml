@@ -28,8 +28,8 @@
     <string name="connection_test_available">HTTPS: %d ms</string>
     <string name="connection_test_testing">Mengetes…</string>
     <string name="speed">%s/s</string>
-    <string name="speed_detail">Proksi: %1$s↑ %2$s↓
-\nDirek: %3$s↑ %4$s↓</string>
+    <string name="speed_detail">Proksi: ↓%2$s ↑%1$s
+\nDirek: ↓%4$s ↑%3$s</string>
     <string name="allow_insecure_sum">Nonaktifkan pengecekan sertifikat. Saat diaktifkan, konfigurasi ini seaman teks biasa</string>
     <string name="allow_insecure">Izinkan Koneksi Tidak Aman</string>
     <string name="security_settings">Pengaturan Keamanan</string>
@@ -332,9 +332,9 @@
     <string name="tls_fragment_fallback_delay">Penundaan fallback fragmen</string>
     <string name="tls_record_fragment">Fragmen rekaman TLS</string>
     <string name="tls_tricks">Trik TLS</string>
-    <string name="enable_reality">Aktifkan Reality</string>
-    <string name="reality_public_key">Kunci publik Reality</string>
-    <string name="reality_short_id">ID pendek Reality</string>
+    <string name="enable_reality">Aktifkan REALITY</string>
+    <string name="reality_public_key">Kunci publik REALITY</string>
+    <string name="reality_short_id">ID pendek REALITY</string>
     <string name="vmess_global_padding">Padding global</string>
     <string name="vmess_authenticated_length">Panjang terautentikasi</string>
     <string name="transport_settings">Pengaturan transport</string>
@@ -425,7 +425,7 @@
     <string name="xray_xdns_resolvers_hint">Satu per baris. Menggantikan resolver di Finalmask; jika kosong, resolver tersebut dipertahankan.</string>
     <string name="xray_pinned_peer_cert_sha256">SHA256 sertifikat peer yang disematkan</string>
     <string name="xray_verify_peer_cert_by_name">Verifikasi sertifikat peer berdasarkan nama</string>
-    <string name="reality_settings">Pengaturan Reality</string>
+    <string name="reality_settings">Pengaturan REALITY</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="xray_mux_concurrency">Konkurensi</string>
     <string name="xray_mux_concurrency_hint">Aliran yang dibawa satu koneksi sebelum koneksi lain dibuka. 0 memakai nilai 8 dari Xray, dan -1 mengirim TCP di luar mux.</string>
@@ -696,7 +696,6 @@
     <string name="direct_test_url">URL tes langsung</string>
     <string name="direct_test_url_sum">Diambil tanpa proksi apa pun untuk membedakan koneksi mati dari server mati. Biarkan kosong untuk menggunakan status jaringan sistem.</string>
     <string name="direct_test_url_empty">status jaringan sistem</string>
-    <string name="speed_test_mode_country">Hanya negara</string>
     <string name="net_use_proxy">Gunakan proksi</string>
     <string name="net_use_proxy_sum">Kirim permintaan langganan dan pembaruan melalui proksi lokal</string>
     <string name="net_insecure">Abaikan galat TLS</string>
@@ -705,14 +704,14 @@
     <string name="log_buffer_size">Ukuran buffer log (kb)</string>
     <string name="enable_stats">Statistik koneksi</string>
     <string name="enable_stats_sum">Lacak koneksi dan prosesnya</string>
-    <string name="disable_traffic_stats">Nonaktifkan statistik lalu lintas</string>
+    <string name="disable_traffic_stats">Nonaktifkan penghitung lalu lintas</string>
     <string name="disable_traffic_stats_sum">Lalu lintas profil tidak dihitung</string>
     <string name="listen_port">Port dengar</string>
     <string name="listen_address">Alamat dengar</string>
     <string name="clash_api_secret">Rahasia</string>
     <string name="xray_vless_preference">Preferensi VLESS Xray</string>
     <string name="xray_vless_xhttp_only">Hanya XHTTP</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP dan Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP dan REALITY</string>
     <string name="xray_vless_all">Semua VLESS</string>
     <string name="skip_cert_sum">Lewati verifikasi sertifikat TLS secara default (allowInsecure)</string>
     <string name="use_mozilla_certs">Gunakan penyimpanan sertifikat Mozilla</string>
@@ -826,7 +825,7 @@
     <string name="route_profile_name">Nama</string>
     <string name="route_profile_default_outbound">Outbound default</string>
     <string name="route_profile_remote_source">Sumber remote</string>
-    <string name="route_profile_remote_rules_note">Setiap pembaruan mengganti aturan profil ini dengan aturan dari URL, jadi aturan yang Anda tambahkan atau ubah di sini akan hilang. Untuk mempertahankan aturan Anda sendiri, gunakan Kloning di daftar profil rute: hasil kloning adalah salinan lokal yang tidak pernah diperbarui.</string>
+    <string name="route_profile_remote_rules_note">Setiap pembaruan mengganti aturan yang berasal dari URL, jadi perubahan pada aturan tersebut hanya bertahan sampai pembaruan berikutnya. Aturan yang ditambahkan di sini tetap disimpan.</string>
     <string name="route_profile_url">URL</string>
     <string name="route_profile_url_hint">https://… (tautan throne://route, base64, atau JSON)</string>
     <string name="route_profile_auto_update">Pembaruan otomatis</string>
@@ -846,7 +845,7 @@
     </plurals>
     <string name="route_profile_invalid_url_title">URL tidak valid</string>
     <string name="route_profile_invalid_url">Masukkan URL http(s) yang valid terlebih dahulu.</string>
-    <string name="route_profile_fetch_confirm">Aturan saat ini diganti dengan yang diambil dari URL.</string>
+    <string name="route_profile_fetch_confirm">Aturan yang berasal dari URL, termasuk perubahan padanya, diganti dengan aturan yang diambil sekarang. Aturan yang ditambahkan di sini tetap disimpan.</string>
     <string name="route_profile_fetch_failed">Tidak dapat mengambil profil rute</string>
     <string name="route_profile_fetched_title">Diambil</string>
     <string name="route_profile_fetched_warnings_title">Diambil dengan peringatan</string>
@@ -863,6 +862,8 @@
     <string name="route_rule_action">Tindakan</string>
     <string name="route_rule_outbound">Outbound</string>
     <string name="route_rule_missing_server">Server hilang (#%d)</string>
+    <string name="route_outbound_no_exit">Proksi tanpa jalur keluar</string>
+    <string name="route_outbound_no_exit_hint">Hanya berbeda dari Proksi saat jalur keluar aktif (Pengaturan › Perutean › Jalur keluar): situs ini melewatinya dan keluar melalui profil terpilih.</string>
     <string name="route_rule_reject_method">Metode penolakan</string>
     <string name="route_rule_strategy">Strategi resolusi</string>
     <string name="route_rule_override_destination">Timpa tujuan</string>
@@ -913,8 +914,8 @@
     <string name="route_rule_any">Apa saja</string>
     <string name="route_rule_invalid_title">Aturan tidak valid</string>
     <string name="route_rule_unknown_rule_sets">Rule-set tidak dikenal: %s\n\nPilih nama dari daftar rule-set, atau gunakan URL berkas .srs.</string>
-    <string name="route_rule_catch_all_title">Tanpa kondisi</string>
-    <string name="route_rule_catch_all">Aturan ini tidak memiliki kondisi, jadi cocok dengan setiap koneksi. Tetap simpan?</string>
+    <string name="route_rule_default_name">Aturan %d</string>
+    <string name="route_rule_dns_queries">Kueri DNS</string>
     <string name="rule_set_picker_title">Rule-set</string>
     <string name="rule_set_search">Cari rule-set…</string>
     <string name="rule_set_add_url">Tambah URL</string>
@@ -954,7 +955,11 @@
     <string name="grp_front_proxy">Proksi depan</string>
     <string name="grp_landing_proxy">Proksi pendarat</string>
     <string name="grp_none">Tidak ada</string>
-    <string name="grp_missing_profile">Profil #%1$d (hilang)</string>
+    <string name="grp_missing_profile">Profil hilang (#%1$d)</string>
+    <string name="hop_refs_warning">Grup-grup ini menggunakan profil yang akan dihapus sebagai proksi depan atau proksi pendarat. Profil itu akan dilepas dari grup tersebut, sehingga grup akan terhubung tanpanya:</string>
+    <string name="hop_refs_cleared">Grup-grup ini menggunakan profil yang telah dihapus sebagai proksi depan atau proksi pendarat. Profil itu telah dilepas dari grup tersebut, sehingga grup kini terhubung tanpanya:</string>
+    <string name="hop_ref_front">%1$s (proksi depan)</string>
+    <string name="hop_ref_landing">%1$s (proksi pendarat)</string>
     <string name="grp_route_profile">Profil rute</string>
     <string name="grp_route_profile_default">Default (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (dari langganan ini)</string>
@@ -996,7 +1001,7 @@
     <string name="grp_settings_user_agent">User agent</string>
     <string name="grp_sub_auto_update">Pembaruan otomatis langganan</string>
     <string name="grp_sub_auto_update_interval">Interval (menit, tidak valid jika kurang dari 30)</string>
-    <string name="grp_sub_clear">Kosongkan server sebelum memperbarui langganan</string>
+    <string name="grp_sub_clear">Kosongkan profil sebelum memperbarui langganan</string>
     <string name="grp_sub_show_change_popup">Tampilkan jendela perubahan setelah pembaruan langganan manual</string>
     <string name="grp_sub_show_change_popup_tip">Saat diaktifkan, jendela yang mencantumkan profil ditambahkan / diperbarui / dihapus ditampilkan setelah pembaruan langganan manual. Informasi yang sama selalu ditulis ke log.</string>
     <string name="grp_sub_send_hwid">Aktifkan pengiriman HWID, model perangkat, dan versi OS saat memperbarui langganan</string>
@@ -1019,7 +1024,7 @@
     <string name="grp_auto_update">Pembaruan otomatis</string>
     <string name="grp_no_subscription_url">Tautan tidak memuat URL langganan.</string>
     <string name="grp_imported_count">Mengimpor %1$d profil</string>
-    <string name="grp_unknown_deeplink">Mengabaikan deeplink dengan perintah tidak dikenal: %1$s</string>
+    <string name="grp_unknown_deeplink">Mengabaikan deep link dengan perintah tidak dikenal: %1$s</string>
     <string name="grp_file_cannot_open">%1$s: tidak dapat dibuka</string>
     <string name="grp_file_too_large">%1$s: lebih besar dari 50 MB, dilewati</string>
     <string name="grp_file_not_readable">%1$s: bukan berkas konfigurasi yang dapat dibaca</string>
@@ -1135,7 +1140,7 @@
     <string name="confirm_auto_select_apps">Pilih otomatis aplikasi proksi?</string>
     <string name="profiles_no_duplicates">Tidak ditemukan profil duplikat.</string>
     <string name="profiles_no_unavailable">Tidak ditemukan profil yang tidak tersedia.</string>
-    <string name="profiles_no_insecure">Tidak ditemukan konfigurasi tidak aman.</string>
+    <string name="profiles_no_insecure">Tidak ditemukan profil tidak aman.</string>
     <string name="profiles_running_kept">Profil yang sedang berjalan dipertahankan.</string>
     <string name="profiles_delete_failed">Profil tidak dapat dihapus.</string>
     <string name="profiles_test_busy">Tes terakhir belum selesai sepenuhnya, silakan tunggu.</string>
@@ -1146,7 +1151,11 @@
     </plurals>
     <string name="profiles_select_all">Pilih semua</string>
     <string name="profiles_move_to_group">Pindahkan ke grup</string>
-    <string name="profiles_move_no_target">Tidak ada grup dasar lain untuk dipindahkan.</string>
+    <string name="import_target_subscription">Grup ini adalah langganan: pembaruan berikutnya menghapus profil yang diimpor ke dalamnya. Pilih grup lain, lalu impor lagi.</string>
+    <string name="import_target_archived">Grup ini diarsipkan. Pilih grup lain, lalu impor lagi.</string>
+    <string name="import_target_gone">Grup ini sudah tidak ada.</string>
+    <string name="profiles_move_target_subscription">Pembaruan berikutnya pada grup langganan menghapus profil yang dipindahkan ke dalamnya. Pilih grup lain.</string>
+    <string name="profiles_move_source_updating">Langganan grup ini sedang diperbarui. Coba lagi setelah selesai.</string>
     <plurals name="profiles_moved">
         <item quantity="one">Memindahkan %1$d profil ke %2$s</item>
         <item quantity="other">Memindahkan %1$d profil ke %2$s</item>
@@ -1216,9 +1225,7 @@
     <string name="test_panel_summary_none_working">tidak ada yang berfungsi</string>
     <string name="test_panel_summary_resolved">%1$d diselesaikan di %2$d negara</string>
     <string name="test_panel_summary_none_resolved">tidak ada yang diselesaikan</string>
-    <string name="test_panel_summary_working_countries">%1$d berfungsi di %2$d negara</string>
     <string name="test_panel_current_unavailable">Tidak tersedia: %s</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_failure_empty">Tidak ada yang diuji</string>
     <string name="test_panel_failure_busy">Tes lain masih berjalan</string>
     <string name="test_panel_failure_unreachable">Layanan tes tidak merespons</string>
@@ -1248,7 +1255,7 @@
     <string name="test_panel_select_description">Pilih %1$s, %2$s</string>
     <string name="test_panel_country_description">%1$s: %2$d</string>
     <string name="test_engine_kind_url">Tes URL</string>
-    <string name="test_engine_kind_ip">Tes IP</string>
+    <string name="test_engine_kind_ip">Tes IP keluar</string>
     <string name="test_engine_kind_speed">Tes kecepatan</string>
     <string name="test_engine_title">%1$s · %2$s</string>
     <string name="test_engine_scope_current">Koneksi saat ini</string>
@@ -1260,7 +1267,7 @@
     <string name="test_engine_fg_subscriptions">Memperbarui langganan…</string>
     <string name="action_auto_selector">Pemilih otomatis</string>
     <string name="autosel_title">Pemilih otomatis</string>
-    <string name="autosel_group">Server dari</string>
+    <string name="autosel_group">Profil dari</string>
     <string name="autosel_group_archived">%s (diarsipkan)</string>
     <string name="autosel_group_missing">Grup hilang (#%d)</string>
     <string name="autosel_name_filter">Hanya nama yang cocok</string>
@@ -1279,7 +1286,6 @@
     <string name="autosel_plan_skipped">Dilewati: %s.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_list_separator">", "</string>
-    <string name="autosel_plan_kept_unavailable">Tes terakhir setiap profil gagal, yang biasanya berarti jaringan sedang mati, bukan servernya, jadi semua %d dipertahankan dan akan diperiksa ulang.</string>
     <string name="autosel_plan_truncated">Lebih dari %d profil cocok, jadi hanya yang berperingkat terbaik yang dipertahankan.</string>
     <string name="autosel_plan_reused">%d memiliki hasil tes terkini yang akan digunakan ulang.</string>
     <string name="autosel_plan_needs_ranking">Sisanya akan diukur saat pemilih dimulai: pemilih berjalan begitu cukup profil berfungsi, lalu beralih ke peringkat lengkap setelah semuanya terukur.</string>
@@ -1295,7 +1301,6 @@
     <string name="autosel_skip_management">Profil OpenVPN atau OpenConnect</string>
     <string name="autosel_skip_name">disaring berdasarkan nama</string>
     <string name="autosel_skip_country">disaring berdasarkan negara</string>
-    <string name="autosel_skip_unavailable">tes terakhir gagal</string>
     <string name="autosel_skip_xray_chained">Konfigurasi penuh Xray tidak dapat digabungkan dengan proksi grup</string>
     <string name="autosel_skip_unsupported">jenis yang tidak dapat digunakan build ini</string>
     <string name="autosel_advanced">Lanjutan</string>
@@ -1307,40 +1312,21 @@
     <string name="autosel_country_filter_empty">Negara apa saja (mis. DE,NL,FR)</string>
     <string name="autosel_build_limit">Jalankan yang terbaik</string>
     <string name="autosel_build_limit_tip">Berapa banyak profil yang dimuat ke konfigurasi yang berjalan. Pemilih berpindah di antaranya secara instan, tanpa menyambung ulang. Lebih tinggi memakan lebih banyak memori dan waktu mulai.</string>
-    <string name="autosel_pool_cap">Peringkat maksimal</string>
-    <string name="autosel_pool_cap_tip">Batas atas berapa banyak profil yang diukur dan disimpan dalam daftar peringkat. Saat setiap profil yang berjalan mati, pengganti diambil dari daftar ini.</string>
-    <string name="autosel_result_validity">Percaya hasil selama</string>
-    <string name="autosel_result_validity_tip">Hasil tes URL yang sebaru ini digunakan ulang alih-alih diukur ulang — termasuk tes yang Anda jalankan sendiri pada grup, jadi memulai pemilih tepat setelahnya tidak mengulang pekerjaan. Hasil yang lebih lama diperlakukan seolah profil belum pernah diuji. Setel ke nol untuk selalu menjalankan tes baru.</string>
-    <string name="autosel_always_retest">Selalu uji ulang</string>
-    <string name="autosel_exclude_unavailable">Lewati profil yang gagal</string>
-    <string name="autosel_exclude_unavailable_tip">Menjaga server yang tes terakhirnya gagal keluar dari kumpulan, selama hasil tersebut masih dalam jendela kepercayaan. Nonaktifkan jika tes Anda tidak dapat diandalkan dan Anda lebih suka membiarkan pemilih memutuskan sendiri.</string>
     <string name="autosel_cat_health">Pemeriksaan kesehatan</string>
     <string name="autosel_expected">Siapkan</string>
     <string name="autosel_expected_tip">Berapa banyak profil yang selalu dipertahankan berfungsi, sehingga kegagalan dapat ditutupi secara instan. Ini juga yang menjadi sasaran pembagian lalu lintas saat penyeimbangan aktif.</string>
-    <string name="autosel_active_size">Periksa erat</string>
-    <string name="autosel_active_size_tip">Profil berperingkat teratas diperiksa ulang setiap interval. Sisanya tetap diperiksa, hanya tersebar di sapuan penuh yang lebih lambat.</string>
     <string name="autosel_interval">Interval pemeriksaan</string>
-    <string name="autosel_interval_tip">Seberapa sering profil yang diperiksa erat diukur ulang.</string>
-    <string name="autosel_bench_interval">Sapuan penuh setiap</string>
-    <string name="autosel_bench_interval_tip">Berapa lama satu putaran atas setiap profil yang berjalan. Pemeriksaan tersebar merata di dalamnya, jadi kumpulan besar tidak pernah menyebabkan ledakan lalu lintas.</string>
-    <string name="autosel_watch_interval">Pantau profil yang dipakai</string>
-    <string name="autosel_watch_interval_tip">Seberapa sering profil yang saat ini membawa lalu lintas Anda diperiksa sendiri. Jaga agar singkat: server dapat berhenti berfungsi sementara masih menerima koneksi, dan tidak ada yang menyadarinya sampai pemeriksaan penuh berikutnya.</string>
-    <string name="autosel_sampling">Sampel disimpan</string>
-    <string name="autosel_sampling_tip">Peringkat menggunakan rata-rata dan jitter atas sejumlah pemeriksaan terkini ini, jadi satu hasil buruk tidak dapat menurunkan peringkat server yang baik.</string>
+    <string name="autosel_interval_tip">Seberapa sering profil peringkat teratas diukur ulang.</string>
     <string name="autosel_cat_switching">Berpindah</string>
     <string name="autosel_tolerance">Toleransi berpindah</string>
     <string name="autosel_tolerance_tip">Profil lain harus setidaknya secepat ini sebelum pemilih berpindah kepadanya. Nilai lebih tinggi berarti lebih sedikit perpindahan.</string>
     <string name="autosel_max_rtt">Latensi maksimum</string>
-    <string name="autosel_max_rtt_tip">Profil yang lebih lambat dari ini tidak pernah dipilih, bahkan jika tidak ada yang lebih baik.</string>
+    <string name="autosel_max_rtt_tip">Profil yang lebih lambat dari ini hanya digunakan jika tidak ada yang lebih cepat yang berfungsi.</string>
     <string name="autosel_no_limit">Tanpa batas</string>
-    <string name="autosel_dial_retries">Percobaan failover</string>
-    <string name="autosel_dial_retries_tip">Saat profil yang dipilih gagal terhubung, berapa banyak lainnya untuk dicoba segera sebelum aplikasi melihat galat.</string>
-    <string name="autosel_interrupt">Putus koneksi saat berpindah</string>
-    <string name="autosel_interrupt_tip">Berlaku saat pemilih berpindah karena profil memburuk atau gagal. Aktif: semuanya pindah ke profil baru sekaligus. Nonaktif: unduhan yang sedang berjalan selesai di yang lama. Rotasi penyeimbangan tidak pernah memutus koneksi.</string>
+    <string name="autosel_interrupt">Putus koneksi saat profil gagal</string>
+    <string name="autosel_interrupt_tip">Koneksi yang terbuka langsung berpindah alih-alih selesai di profil yang gagal. Berpindah ke profil yang lebih cepat dan rotasi penyeimbangan tidak pernah memutus koneksi.</string>
     <string name="autosel_cat_balance">Penyeimbangan beban</string>
     <string name="autosel_balance_mode">Mode</string>
-    <string name="autosel_balance_interval">Rotasi setiap</string>
-    <string name="autosel_balance_interval_tip">Berapa lama pemilih bertahan di satu profil sebelum pindah ke yang siap berikutnya.</string>
     <string name="autosel_balance_hint_off">Profil terbaik membawa semua lalu lintas; profil siap lainnya dipertahankan terverifikasi sehingga satu dapat mengambil alih secara instan.</string>
     <string name="autosel_balance_hint_rotate">Koneksi baru berpindah ke profil baik lainnya setiap rotasi; yang terbuka dibiarkan dan selesai di tempatnya dimulai. Lalu lintas dihitung dengan tepat.</string>
     <string name="autosel_balance_hint_connection">Setiap koneksi baru dapat mengambil profil yang berbeda. Sebaran terluas, tetapi IP keluar Anda berubah di tengah sesi dan lalu lintas per profil menjadi perkiraan.</string>
@@ -1357,10 +1343,6 @@
     <plurals name="autosel_profiles">
         <item quantity="one">%d profil</item>
         <item quantity="other">%d profil</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="one">%d mnt</item>
-        <item quantity="other">%d mnt</item>
     </plurals>
     <plurals name="autosel_seconds">
         <item quantity="one">%d d</item>
@@ -1440,7 +1422,6 @@
     <string name="autosel_last_ok_short">OK %s</string>
     <string name="autosel_row_state">Status: %s</string>
     <string name="autosel_row_latency">Latensi: %1$d ms (terbaik %2$d ms, terburuk %3$d ms)</string>
-    <string name="autosel_row_jitter">Jitter: %d ms</string>
     <string name="autosel_row_checks">Pemeriksaan: %1$d / %2$d ok</string>
     <string name="autosel_row_connects">Koneksi: %1$d / %2$d ok</string>
     <string name="autosel_row_last_ok">OK terakhir: %s</string>
@@ -1448,9 +1429,16 @@
     <string name="autosel_row_tested">Tes URL terakhir: %1$s, %2$s</string>
     <string name="autosel_row_untested">Belum ada hasil tes URL.</string>
     <string name="cag_warp">Cloudflare WARP</string>
-    <string name="warp_settings">WARP</string>
-    <string name="warp_state_on">Aktif · %s</string>
-    <string name="warp_state_off">Nonaktif</string>
+    <string name="warp_settings">Jalur keluar</string>
+    <string name="exit_through">Keluar melalui</string>
+    <string name="exit_server">Profil terpilih</string>
+    <string name="exit_server_hint">Lalu lintas keluar melalui profil yang Anda jalankan.</string>
+    <string name="exit_psiphon_hint">Psiphon adalah jaringan gratis yang dikelola Psiphon Inc., yang dapat melihat situs yang Anda kunjungi, seperti penyedia VPN mana pun.</string>
+    <string name="exit_tor_hint">Tor tidak tersedia di Android, jadi lalu lintas keluar melalui profil terpilih.</string>
+    <string name="exit_unavailable">%s (tidak tersedia di Android)</string>
+    <string name="psiphon_egress_region">Wilayah</string>
+    <string name="psiphon_region_best">Performa terbaik</string>
+    <string name="psiphon_egress_region_sum">Negara server Psiphon; Performa terbaik membiarkan Psiphon memilih.</string>
     <string name="warp_enable">Aktifkan WARP</string>
     <string name="warp_enable_sum">Mengaktifkan konfigurasi di bawah untuk digunakan sebagai keluar, berguna untuk melewati layanan yang membatasi VPN non-WARP</string>
     <string name="warp_mode">Mode</string>
@@ -1541,7 +1529,7 @@
     <string name="backup_part_profiles">Profil (grup dan proksi)</string>
     <string name="backup_part_routes">Profil rute</string>
     <string name="backup_part_settings">Pengaturan</string>
-    <string name="backup_part_otp">Profil OTP (tidak dipulihkan di Android)</string>
+    <string name="backup_part_otp">Entri OTP (tidak dipulihkan di Android)</string>
     <string name="backup_local_summary">Cadangan menggunakan format desktop Throne (.thrbackup): kedua aplikasi dapat memulihkannya. Kredensial WebDAV tetap di perangkat ini.</string>
     <string name="backup_create">Buat cadangan</string>
     <string name="backup_restore">Pulihkan</string>
@@ -1857,9 +1845,9 @@
     <string name="grp_http_version">Versi HTTP</string>
     <string name="grp_http_version_tip">Otomatis menggunakan HTTP/2 bila server menawarkannya. \"Pertahankan default\" mengikuti Pengaturan › Langganan.</string>
     <string name="grp_update_interval">Interval pembaruan (menit)</string>
-    <string name="grp_update_interval_tip">Menit antara pembaruan otomatis langganan ini, minimal 30. Kosong berarti mengikuti Pengaturan › Langganan, di mana pembaruan otomatis harus diaktifkan.</string>
+    <string name="grp_update_interval_tip">Menit antara pembaruan otomatis langganan ini, minimal 30, bahkan saat pembaruan otomatis dimatikan di Pengaturan › Langganan. Kosong berarti mengikuti pengaturan tersebut.</string>
     <string name="grp_server_interval">Interval server</string>
-    <string name="grp_server_interval_tip">Gunakan interval pembaruan yang dikirim server langganan; interval di atas berlaku bila server tidak mengirimnya. \"Pertahankan default\" mengikuti Pengaturan › Langganan.</string>
+    <string name="grp_server_interval_tip">Gunakan interval pembaruan yang dikirim server langganan, bahkan saat pembaruan otomatis dimatikan di Pengaturan › Langganan; interval di atas berlaku bila server tidak mengirimnya. \"Pertahankan default\" mengikuti pengaturan tersebut.</string>
     <string name="grp_server_interval_use">Gunakan</string>
     <string name="grp_server_interval_ignore">Abaikan</string>
     <string name="grp_server_interval_last">Server ini terakhir mengirim %1$d jam.</string>
@@ -2118,9 +2106,9 @@
     <string name="validation_tls_pem_private_key">Tempel kunci privat sebagai teks PEM, diawali -----BEGIN PRIVATE KEY-----.</string>
     <string name="validation_tls_pin_base64">Ini SHA-256 heksadesimal; tulis dalam base64 (44 karakter berakhiran =).</string>
     <string name="validation_tls_ech_config">Tempel daftar konfigurasi ECH sebagai base64, atau sebagai satu blok -----BEGIN ECH CONFIGS-----.</string>
-    <string name="validation_tls_reality_ech">Reality tidak dapat digabungkan dengan ECH. Matikan ECH, atau kosongkan kunci publik Reality.</string>
-    <string name="validation_tls_reality_disable_sni">Reality tidak dapat digunakan dengan Nonaktifkan SNI. Matikan Nonaktifkan SNI.</string>
-    <string name="validation_tls_reality_spoof">Reality tidak dapat digabungkan dengan TLS spoof. Setel TLS Spoof ke Nonaktif.</string>
+    <string name="validation_tls_reality_ech">REALITY tidak dapat digabungkan dengan ECH. Matikan ECH, atau kosongkan kunci publik REALITY.</string>
+    <string name="validation_tls_reality_disable_sni">REALITY tidak dapat digunakan dengan Nonaktifkan SNI. Matikan Nonaktifkan SNI.</string>
+    <string name="validation_tls_reality_spoof">REALITY tidak dapat digabungkan dengan TLS spoof. Setel TLS Spoof ke Nonaktif.</string>
     <string name="validation_tls_pins_with_certificate">Sertifikat kustom tidak dapat digabungkan dengan pin sertifikat; pertahankan salah satunya saja.</string>
     <string name="validation_tls_client_pair">Setel sertifikat klien dan kunci klien bersamaan.</string>
     <string name="validation_tls_spoof_needs_sni">TLS spoof membutuhkan SNI. Matikan Nonaktifkan SNI, atau setel TLS Spoof ke Nonaktif.</string>
@@ -2132,7 +2120,7 @@
     <string name="validation_transport_headers_pairs">Header harus berganti-ganti antara nama dan nilai yang dipisahkan |, mis. User-Agent|curl, jadi diabaikan.</string>
     <string name="validation_transport_type">sing-box tidak mendukung transport \"%1$s\". Gunakan ws, httpupgrade, http, grpc atau quic.</string>
     <string name="validation_transport_quic_tls">Transport QUIC membutuhkan TLS. Nyalakan opsi Aktifkan TLS.</string>
-    <string name="validation_transport_quic_reality">Reality tidak berfungsi dengan transport QUIC. Kosongkan kunci Reality, atau pilih transport lain.</string>
+    <string name="validation_transport_quic_reality">REALITY tidak berfungsi dengan transport QUIC. Kosongkan kunci REALITY, atau pilih transport lain.</string>
     <string name="validation_transport_quic_utls">uTLS tidak digunakan dengan transport QUIC.</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal hanya berfungsi dengan multiplex kustom. Setel Multiplex ke Kustom.</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal membutuhkan kedua kecepatan; yang kosong dikirim sebagai 1 Mbps.</string>
@@ -2171,6 +2159,12 @@
     <string name="validation_xray_vless_encryption_mode">Bagian setelah mlkem768x25519plus harus native, xorpub atau random.</string>
     <string name="validation_xray_vless_encryption_rtt">Bagian setelah mode harus 1rtt atau 0rtt.</string>
     <string name="validation_xray_vless_encryption_key">Setiap kunci dalam string harus berupa base64 URL-safe sepanjang 32 atau 1184 byte, tanpa padding.</string>
+    <string name="validation_xray_vless_encryption_padding_order">Letakkan bagian padding sebelum kunci.</string>
+    <string name="validation_xray_vless_encryption_mlkem">Kunci 1184 byte dalam string bukan kunci ML-KEM-768 yang valid: salin ulang string dari server.</string>
+    <string name="validation_xray_vless_encryption_no_key">String tidak berisi kunci: salin seluruh string yang diberikan server.</string>
+    <string name="validation_xray_vless_padding_format">Setiap bagian padding harus berupa tiga angka yang digabung dengan tanda hubung, seperti 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_first">Bagian padding pertama memerlukan peluang minimal 100 dan panjang minimal 35, seperti 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_total">Total panjang padding bisa melebihi 65553 byte.</string>
     <string name="validation_xray_vless_vision">XTLS Vision membutuhkan jaringan raw dengan TLS atau REALITY, atau enkripsi VLESS: ubah jaringan atau security, atau kosongkan flow.</string>
     <string name="validation_xray_xdrive_no_link">XDRIVE tidak memiliki format tautan berbagi. Impor konfigurasi JSON server sebagai gantinya.</string>
     <string name="validation_xray_xdrive_service">Harus google-drive, s3, template atau local.</string>
@@ -2391,11 +2385,6 @@
     <string name="validation_custom_xray_geodata">Pembaru geodata dihapus dari konfigurasi yang diimpor: ini akan mengunduh berkas dari alamat yang dipilih pengirim dan mengganti berkas di folder Throne.</string>
     <string name="validation_custom_xray_webhook">Webhook dihapus dari aturan perutean ini: ini akan mengirim detail setiap koneksi yang cocok ke alamat yang dipilih pengirim.</string>
     <string name="validation_autoselector_countries">Gunakan kode negara dua huruf dipisahkan koma, mis. DE,NL,FR.</string>
-    <string name="validation_autoselector_build_limit">Tidak dapat menjalankan lebih banyak profil daripada yang diberi peringkat (%1$s).</string>
-    <string name="validation_autoselector_bench_interval">Sapuan penuh tidak dapat berjalan lebih sering daripada interval pemeriksaan (%1$s d).</string>
-    <string name="validation_autoselector_watch_interval">Memantau profil yang dipakai tidak dapat lebih lambat daripada interval pemeriksaan (%1$s d).</string>
-    <string name="validation_autoselector_ready_count">Periksa erat setidaknya sebanyak profil yang disiapkan (%1$s).</string>
-    <string name="validation_autoselector_close_count">Tidak dapat memeriksa erat lebih banyak profil daripada yang dijalankan (%1$s).</string>
     <string name="validation_chain_empty">Tambahkan setidaknya satu profil ke rantai.</string>
     <string name="validation_ss_plugin_opts_dangling">Garis miring terbalik di akhir tidak memiliki apa pun untuk di-escape.</string>
     <string name="validation_ss_plugin_opts_name">Setiap opsi membutuhkan nama, seperti obfs=http;obfs-host=example.com.</string>
@@ -2499,6 +2488,7 @@
     <string name="validation_route_no_drop_unused">Tidak berpengaruh dengan metode drop.</string>
     <string name="validation_route_ignored_by_action">Aturan %1$s mengabaikannya; hanya berlaku untuk tindakan ini: %2$s.</string>
     <string name="validation_route_matches_all">Aturan ini tidak memiliki kondisi pencocokan, jadi cocok dengan semua lalu lintas.</string>
+    <string name="validation_route_catch_all">Aturan ini tidak punya kondisi, jadi akan menangkap semua lalu lintas. Tambahkan kondisi, atau matikan aturan ini.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s (\"%2$s\"): %3$s</string>
     <string name="validation_route_rule_warning">Aturan \"%1$s\": %2$s</string>
@@ -2544,6 +2534,7 @@
     <string name="validation_millis_or_default">Masukkan bilangan bulat milidetik, mis. %1$s (tanpa satuan), atau 0 untuk default.</string>
     <string name="validation_group_update_interval">Minimal 30 menit, atau kosong untuk mempertahankan default.</string>
     <string name="validation_port_used">Port %1$s sudah digunakan oleh: %2$s. Pilih port lain.</string>
+    <string name="validation_port_reenabled">Mengaktifkan %1$s di port %2$s akan bentrok dengan %3$s. Pilih port lain.</string>
     <string name="validation_mtu_ipv6">IPv6 membutuhkan MTU minimal %1$s; di bawah itu sistem dapat membuang IPv6 dari tun.</string>
     <string name="validation_private_range_all">Ini mencakup setiap alamat, yang akan membuat tun tidak merutekan apa pun.</string>
     <string name="validation_dns_local_ip">Gunakan alamat IP, mis. 223.5.5.5 atau tls://1.1.1.1: server ini menyelesaikan nama server lainnya.</string>
@@ -2566,12 +2557,18 @@
     <string name="validation_route_dns_final">Server DNS default harus remot atau direk, bukan \"%1$s\".</string>
     <string name="validation_route_dns_dropped">Pengaturan DNS milik profil dibuang, jadi profil menggunakan pengaturan global: %1$s</string>
     <string name="route_dns_global_servers">Remot %1$s, direk %2$s</string>
-    <string name="dns_server_suggestions">Server terbaru dan yang disarankan</string>
     <string name="warp_api_tls_fragment_title">Fragmentasi TLS untuk registrasi WARP</string>
     <string name="warp_api_tls_fragment_note">Hanya berlaku saat registrasi terhubung langsung, bukan melalui profil yang sedang berjalan.</string>
     <string name="backup_warn_tor_egress">Cadangan mengirim lalu lintas keluar melalui Tor, yang tidak tersedia di Android; di sini lalu lintas keluar langsung melalui server yang dipilih.</string>
     <string name="validation_dns_server_item">Server %1$s (\"%2$s\"): %3$s</string>
-    <string name="dns_server_list_hint">Pisahkan beberapa server dengan koma: semuanya ditanyai bersamaan dan jawaban pertama yang dipakai.</string>
+    <string name="dns_server_add">Tambah server</string>
+    <string name="dns_server_custom">Alamat khusus</string>
+    <string name="dns_server_recent">Terbaru</string>
+    <string name="dns_server_address_hint">Alamat, mis. tls://1.1.1.1</string>
+    <string name="dns_server_list_race">Ditanyakan bersamaan; jawaban tercepat yang dipakai.</string>
+    <string name="dns_server_list_primary">Juga me-resolve alamat server proksi</string>
+    <string name="dns_server_list_empty">Tambahkan setidaknya satu server.</string>
+    <string name="dns_server_drag">Seret untuk mengubah urutan</string>
     <string name="juicity_pinned_certchain_sha256">SHA256 rantai sertifikat</string>
     <string name="juicity_pinned_certchain_sha256_hint">Hash rantai sertifikat yang dicetak juicity-server; menggantikan verifikasi CA, bahkan dengan Izinkan Koneksi Tidak Aman</string>
     <string name="validation_juicity_certchain">Gunakan hash rantai sertifikat 32 byte dalam base64 (44 karakter berakhiran =), seperti yang dicetak juicity-server.</string>
@@ -2683,9 +2680,9 @@
     <string name="route_tester_error">Galat: %1$s</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">Cara memilih</string>
-    <string name="autosel_strategy_latency">Tercepat dan paling stabil</string>
+    <string name="autosel_strategy_latency">Tercepat</string>
     <string name="autosel_strategy_priority">Sesuai urutan prioritas</string>
-    <string name="autosel_strategy_latency_tip">Tercepat dan paling stabil: selalu gunakan profil dengan hasil ukur terbaik dari semuanya.</string>
+    <string name="autosel_strategy_latency_tip">Tercepat: selalu gunakan profil dengan hasil ukur terbaik dari semuanya.</string>
     <string name="autosel_strategy_priority_tip">Sesuai urutan prioritas: coba tingkat di bawah mulai dari atas. Pemilih tetap di tingkat tertinggi yang memiliki profil berfungsi, dan naik kembali begitu tingkat yang lebih tinggi berfungsi lagi.</string>
     <string name="autosel_tier_add">Tambah tingkat</string>
     <string name="autosel_tiers_hint">Profil termasuk dalam tingkat pertama yang cocok dengannya, dan profil yang tidak cocok dengan tingkat mana pun berada di urutan terakhir. Pemilih menggunakan tingkat tertinggi yang memiliki profil berfungsi dan, di dalamnya, profil dengan hasil ukur terbaik.</string>
@@ -2704,20 +2701,8 @@
     <string name="autosel_tier_any_profile">profil apa saja</string>
     <string name="autosel_tier_fallback">tingkat %d</string>
     <string name="autosel_tier_short">T%d</string>
-    <string name="autosel_failback_checks">Naik kembali setelah</string>
-    <string name="autosel_failback_checks_tip">Sesuai urutan prioritas: begitu profil dari tingkat yang lebih tinggi berfungsi lagi, pemilih kembali ke profil itu hanya setelah profil tersebut lolos sejumlah pemeriksaan ini berturut-turut. Tidak boleh lebih dari jumlah sampel yang disimpan.</string>
-    <plurals name="autosel_checks">
-        <item quantity="one">%d pemeriksaan</item>
-        <item quantity="other">%d pemeriksaan</item>
-    </plurals>
-    <string name="autosel_failback_delay">Bebas gagal selama</string>
-    <string name="autosel_failback_delay_tip">Sesuai urutan prioritas: profil dari tingkat yang lebih tinggi juga harus melewati waktu selama ini tanpa pemeriksaan atau koneksi yang gagal sebelum pemilih kembali kepadanya.</string>
-    <string name="autosel_failback_interrupt">Putus koneksi saat naik kembali</string>
-    <string name="autosel_failback_interrupt_tip">Sesuai urutan prioritas. Nonaktif: koneksi yang sudah terbuka tetap di profilnya, dan hanya koneksi baru yang naik ke tingkat yang lebih tinggi. Aktif: semuanya naik sekaligus.</string>
     <string name="autosel_passive">Belajar dari koneksi nyata</string>
     <string name="autosel_passive_tip">Juga menilai profil dari koneksi yang dibuat aplikasi Anda melaluinya, bukan hanya dari pemeriksaan kesehatan. Koneksi dihitung gagal jika tidak mendapat balasan sama sekali atau tidak dapat terhubung. Jika koneksi terkini melalui suatu profil gagal setidaknya sesering yang berhasil, sebanyak tiga kali atau lebih, profil tersebut disisihkan meskipun pemeriksaannya lolos: selama satu menit, dua kali lebih lama setiap kali terulang, hingga 16 menit. Setiap situs web juga tetap memakai profil yang terakhir berhasil untuknya dan menghindari profil yang baru saja gagal untuknya. Selama lalu lintas nyata mengalir, lebih sedikit pemeriksaan kesehatan yang dikirim.</string>
-    <string name="autosel_site_memory">Ingat pilihan per situs selama</string>
-    <string name="autosel_site_memory_tip">Berapa lama sebuah situs web terus memakai profil yang terakhir berhasil untuknya, dan terus menghindari profil yang gagal untuknya.</string>
     <string name="autosel_balance_hint_priority">Dalam urutan prioritas, lalu lintas hanya disebar ke profil siap di tingkat yang sedang dipakai.</string>
     <string name="autosel_plan_by_tier">Per tingkat: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2728,7 +2713,6 @@
     <string name="autosel_plan_truncated_tiers">Lebih dari %d profil cocok, jadi hanya yang berperingkat terbaik dari setiap tingkat yang dipertahankan.</string>
     <string name="validation_autoselector_tier_match">Pilih grup atau masukkan pola nama untuk tingkat ini.</string>
     <string name="validation_autoselector_tier_count">Tambahkan setidaknya satu tingkat untuk memilih sesuai urutan prioritas.</string>
-    <string name="validation_autoselector_failback_checks">Tidak dapat mewajibkan lebih banyak pemeriksaan berturut-turut daripada sampel yang disimpan (%1$s).</string>
     <string name="autosel_status_on_tier">Pemilih otomatis pada %1$s, tingkat %2$d (%3$d dari %4$d berfungsi)</string>
     <string name="autosel_detail_suspect">%d dicurigai</string>
     <string name="autosel_state_suspect">Dicurigai</string>
@@ -2768,6 +2752,17 @@
     <string name="service_ip_risk">risiko %d</string>
     <string name="service_check_checked_now">Baru saja diperiksa</string>
     <string name="service_check_checked_at">Diperiksa %s</string>
+    <string name="service_check_services">Layanan</string>
+    <string name="service_check_services_all">Semua layanan</string>
+    <string name="service_check_services_count">%1$d dari %2$d layanan</string>
+    <string name="service_check_none_selected">Tidak ada layanan yang dipilih</string>
+    <string name="service_check_services_unknown">Daftar layanan tidak dapat dimuat</string>
+    <string name="service_check_current">Periksa layanan koneksi saat ini</string>
+    <string name="service_category_ai">AI</string>
+    <string name="service_category_streaming">Streaming</string>
+    <string name="service_category_social">Sosial</string>
+    <string name="service_category_reputation">Reputasi IP</string>
+    <string name="service_category_other">Lainnya</string>
     <string name="validation_chain_selector_twice">Sebuah rantai hanya dapat berisi satu pemilih otomatis.</string>
     <string name="validation_chain_selector_custom">Pemilih otomatis tidak dapat berada dalam satu rantai dengan konfigurasi kustom.</string>
     <string name="chain_step_selector">Rantai dengan pemilih otomatis tidak dapat dites hop demi hop; tes anggotanya saja</string>
@@ -2775,6 +2770,8 @@
     <string name="autosel_notice_exhausted_upstream">Setiap profil yang berjalan berhenti berfungsi melalui hop di depannya — membangun ulang dengan kandidat berikutnya.</string>
     <string name="validation_route_outbound_chain_selector">Aturan perutean tidak dapat menggunakan rantai \"%1$s\": rantai ini berisi pemilih otomatis, jadi hanya dapat dijalankan. Pilih outbound lain.</string>
     <string name="route_outbound_chain_selector">Profil perutean mengirim lalu lintas ke %1$s, yang berisi pemilih otomatis; rantai seperti itu hanya dapat dijalankan, tidak dapat digunakan dalam aturan perutean</string>
+    <string name="xray_full_config_tag_clash">Konfigurasi Xray kustom menggunakan tag \"%1$s\", yang juga dibuat Throne untuk profil Xray lain; ganti namanya di konfigurasi kustom</string>
+    <string name="xray_full_config_selector_clash">Selektor \"%1$s\" pada konfigurasi Xray kustom juga cocok dengan \"%2$s\", yang dibuat Throne untuk profil Xray lain; buat selektor lebih spesifik di konfigurasi kustom</string>
     <string name="grp_filter_countries">Negara</string>
     <string name="grp_filter_countries_tip">Negara keluar yang dipertahankan, mis. HK,JP, atau dihapus, mis. !RU.</string>
     <string name="grp_filter_countries_hint">mis. HK,JP atau !RU</string>
@@ -2815,4 +2812,8 @@
     <string name="vpn_auth_submitting">Sedang masuk…</string>
     <string name="vpn_auth_gone">Permintaan masuk ini tidak lagi tertunda.</string>
     <string name="vpn_auth_no_browser">Tidak ada aplikasi yang dapat membuka alamat ini.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">Gunakan kode negara dua huruf, seperti US.</string>
+    <string name="validation_psiphon_ignored">%1$s diabaikan: profil Psiphon hanya menerima wilayah.</string>
+    <string name="exit_runs_over_itself">Profil terpilih sudah keluar melalui %1$s, jadi jalur keluar %1$s tidak dapat berjalan di atasnya. Pilih jalur keluar lain di Pengaturan › Perutean › Jalur keluar.</string>
 </resources>

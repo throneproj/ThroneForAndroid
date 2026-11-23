@@ -40,6 +40,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.bg.test.TestSpec
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.GroupSort
 import io.nekohasekai.sagernet.database.GroupSortAction
 import io.nekohasekai.sagernet.database.GroupSortMethod
@@ -494,7 +495,7 @@ class TestPanelController(
 
     private fun renderLive(s: TestUiState) {
         val live = s.speed
-        val show = !expanded && s.running && s.kind == TestSpec.KIND_SPEED && !s.countryMode && live != null
+        val show = !expanded && s.running && s.kind == TestSpec.KIND_SPEED && live != null
         liveLine.isVisible = show
         if (!show || live == null) return
         val detail = if (live.dlBps <= 0 && live.ulBps <= 0) {
@@ -532,7 +533,7 @@ class TestPanelController(
         if (sortAction.isVisible) {
             sortAction.setTextIfChanged(
                 context.getString(
-                    if (s.kind == TestSpec.KIND_SPEED && !s.countryMode) R.string.test_panel_action_sort_speed
+                    if (s.kind == TestSpec.KIND_SPEED) R.string.test_panel_action_sort_speed
                     else R.string.test_panel_action_sort_latency
                 )
             )
@@ -554,12 +555,12 @@ class TestPanelController(
         pendingLabel.setTextIfChanged(
             context.getString(if (s.running) R.string.test_panel_pending else R.string.test_panel_skipped)
         )
-        val speed = s.kind == TestSpec.KIND_SPEED && !s.countryMode
+        val speed = s.kind == TestSpec.KIND_SPEED
 
         latencySection.isVisible = s.kind == TestSpec.KIND_URL && !s.testCurrent
         if (latencySection.isVisible) renderHistogram(s)
 
-        countrySection.isVisible = (s.kind == TestSpec.KIND_IP || s.countryMode) && s.countries.isNotEmpty()
+        countrySection.isVisible = s.kind == TestSpec.KIND_IP && s.countries.isNotEmpty()
         if (countrySection.isVisible) renderCountries(s)
 
         speedSection.isVisible = speed && s.running && s.speed != null
@@ -760,7 +761,6 @@ class TestPanelController(
             )
 
             s.ok == 0 -> context.getString(R.string.test_panel_summary_none_working)
-            s.countryMode -> context.getString(R.string.test_panel_summary_working_countries, s.ok, s.countries.size)
             else -> s.ranking.firstOrNull()?.let {
                 context.getString(R.string.test_panel_summary_working_fastest, s.ok, bestText(s, it))
             } ?: context.getString(R.string.test_panel_summary_working, s.ok)
@@ -776,14 +776,6 @@ class TestPanelController(
             s.kind == TestSpec.KIND_IP -> listOf(TestFormat.flag(row.country), row.ip).filter { it.isNotEmpty() }
                 .joinToString(" ")
 
-            s.countryMode && row.latency <= 0 -> TestFormat.countryName(row.country)
-
-            s.countryMode -> context.getString(
-                R.string.test_panel_current_country,
-                TestFormat.countryName(row.country),
-                TestFormat.latency(context, row.latency),
-            )
-
             s.kind == TestSpec.KIND_SPEED -> speedText(
                 GroupSort.bitrateToBps(row.dlSpeed).coerceAtLeast(0.0),
                 GroupSort.bitrateToBps(row.ulSpeed).coerceAtLeast(0.0),
@@ -791,13 +783,14 @@ class TestPanelController(
                 "  ",
             )
 
+            s.kind == TestSpec.KIND_SERVICE -> context.getString(R.string.service_check_summary_results)
             row.latency > 0 -> TestFormat.latency(context, row.latency)
             else -> context.getString(R.string.test_panel_band_connect_only)
         }
     }
 
     private fun bestText(s: TestUiState, best: RankedResult): String = when {
-        s.kind == TestSpec.KIND_SPEED && !s.countryMode ->
+        s.kind == TestSpec.KIND_SPEED ->
             TestFormat.rate(if (s.speedMode == TestUiState.SPEED_MODE_UPLOAD) best.ulBps else best.dlBps)
 
         else -> TestFormat.latency(context, best.latency)
@@ -852,7 +845,7 @@ class TestPanelController(
     private fun sort(s: TestUiState) {
         val groupId = s.groupId
         if (groupId <= 0) return
-        val bySpeed = s.kind == TestSpec.KIND_SPEED && !s.countryMode
+        val bySpeed = s.kind == TestSpec.KIND_SPEED
         val upload = s.speedMode == TestUiState.SPEED_MODE_UPLOAD
         val fastest = s.ranking.firstOrNull()?.profileId
         runOnDefaultDispatcher {
@@ -886,6 +879,7 @@ class TestPanelController(
             if (existing.isEmpty()) return@runOnDefaultDispatcher
             val names = existing.take(10).map { it.displayName() }
             val skipConfirmation = DataStore.skipDeleteConfirmation
+            val warning = if (skipConfirmation) "" else GroupRepo.hopWarning(existingIds)
             onMainDispatcher {
                 if (!fragment.isAdded) return@onMainDispatcher
                 if (skipConfirmation) {
@@ -895,7 +889,7 @@ class TestPanelController(
                         context.resources.getQuantityString(
                             R.plurals.confirm_remove_unavailable, existing.size, existing.size
                         ),
-                        context.nameList(names, total = existing.size),
+                        context.nameList(names, total = existing.size) + warning,
                         R.string.delete,
                     ) { deleteProfiles(existingIds) }
                 }

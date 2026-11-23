@@ -6,9 +6,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
-import android.widget.AutoCompleteTextView
 import android.widget.CompoundButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -49,7 +50,7 @@ import io.nekohasekai.sagernet.route.RuleEnv
 import io.nekohasekai.sagernet.route.RuleIssue
 import io.nekohasekai.sagernet.route.RuleSetCatalog
 import io.nekohasekai.sagernet.route.RuleType
-import io.nekohasekai.sagernet.ui.DnsServerSuggestions
+import io.nekohasekai.sagernet.ui.DnsServerListDialog
 import io.nekohasekai.sagernet.ui.FormIssue
 import io.nekohasekai.sagernet.ui.ThemedActivity
 import io.nekohasekai.sagernet.ui.ValidationForm
@@ -80,18 +81,15 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         const val EXTRA_PROFILE_JSON = "profile"
         const val EXTRA_SAVED_ID = "savedId"
 
-        private val RULE_NAME = Regex("rule_(\\d{1,6})")
-
         private const val DISABLED_ALPHA = 0.5f
+    }
 
-        fun nextRuleName(rules: List<RouteRule>): String {
-            val used = rules.mapTo(HashSet()) { it.name }
-            var n = rules.mapNotNull { RULE_NAME.matchEntire(it.name)?.groupValues?.get(1)?.toIntOrNull() }.maxOrNull() ?: 0
-            do {
-                n++
-            } while ("rule_$n" in used)
-            return "rule_$n"
-        }
+    /** RouteRulesPage::addRule: "Rule N", with the smallest N no rule is named after. */
+    private fun nextRuleName(rules: List<RouteRule>): String {
+        val taken = rules.mapTo(HashSet()) { it.name }
+        var n = 1
+        while (getString(R.string.route_rule_default_name, n) in taken) n++
+        return getString(R.string.route_rule_default_name, n)
     }
 
     class EditorModel : ViewModel() {
@@ -119,8 +117,8 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         var dnsOpened: RouteDns? = null
         var dnsGlobal: RouteDns? = null
         var dnsObject = false
-        var remoteSuggestions: List<String> = emptyList()
-        var directSuggestions: List<String> = emptyList()
+        var remoteRecent: List<String> = emptyList()
+        var directRecent: List<String> = emptyList()
         var remoteDnsError = ""
         var directDnsError = ""
     }
@@ -131,8 +129,8 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         val appLabels: Map<String, String>,
         val dnsGlobal: RouteDns,
         val dnsObject: Boolean,
-        val remoteSuggestions: List<String>,
-        val directSuggestions: List<String>,
+        val remoteRecent: List<String>,
+        val directRecent: List<String>,
     )
 
     private val model: EditorModel by viewModels()
@@ -195,7 +193,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
                         is_remote = remote
                         // RouteItem.cpp:61-67 seeds an empty profile with the DNS hijack rule.
                         if (!remote) rules.add(RouteRule().apply {
-                            name = "dns-hijack"
+                            name = getString(R.string.route_rule_dns_queries)
                             protocol = "dns"
                             action = "hijack-dns"
                         })
@@ -208,8 +206,8 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
                     appLabels(labelledPackages(p.rules)),
                     RouteDnsSettings.global(),
                     DataStore.useDnsObject,
-                    DnsServerHistory.remoteSuggestions(),
-                    DnsServerHistory.directSuggestions(),
+                    DataStore.remoteDnsHistory,
+                    DataStore.directDnsHistory,
                 )
             }
             if (loaded == null) {
@@ -223,8 +221,8 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
             model.appLabels = loaded.appLabels
             model.dnsGlobal = loaded.dnsGlobal
             model.dnsObject = loaded.dnsObject
-            model.remoteSuggestions = loaded.remoteSuggestions
-            model.directSuggestions = loaded.directSuggestions
+            model.remoteRecent = loaded.remoteRecent
+            model.directRecent = loaded.directRecent
             model.dnsCustom = p.custom_dns
             model.dnsDraft = p.dns ?: loaded.dnsGlobal
             model.dnsOpened = model.dnsDraft
@@ -264,7 +262,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
     private fun ruleIssues(rule: RouteRule): List<RuleIssue> = issueCache.getOrPut(rule) {
         val env = ruleEnv ?: RuleEnv(model.catalog, RuleEnv.storedProfiles()).also { ruleEnv = it }
         try {
-            rule.validate(env)
+            rule.editorIssues(env)
         } catch (e: Exception) {
             Logs.w(e)
             emptyList()
@@ -297,8 +295,23 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         list.scrollToPositionAnimated(position)
     }
 
+    /** routeItemNameRules(dedupe = true): unnamed custom rules become "Rule N", and a repeated name gets " (2)", " (3)". */
     private fun nameRules(p: RouteProfile) {
-        for (rule in p.rules) if (rule.name.isBlank()) rule.name = nextRuleName(p.rules)
+        val custom = RuleType.CUSTOM.id
+        val taken = p.rules.filter { it.type != custom }.mapTo(HashSet()) { it.name }
+        var next = 1
+        for (rule in p.rules) {
+            if (rule.type != custom) continue
+            if (rule.name.isBlank()) {
+                while (getString(R.string.route_rule_default_name, next) in taken) next++
+                rule.name = getString(R.string.route_rule_default_name, next)
+            } else {
+                val base = rule.name
+                var n = 2
+                while (rule.name in taken) rule.name = "$base (${n++})"
+            }
+            taken.add(rule.name)
+        }
     }
 
     private fun appLabels(packages: Collection<String>): Map<String, String> {
@@ -445,7 +458,8 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         }
         p.name = p.name.trim()
         if (p.is_remote) p.remote_url = p.remote_url.trim()
-        val kept = p.rules.filterNot { it.isEmpty() }
+        // A turned-off custom rule is kept even without conditions; on, the form refused it as catching all traffic.
+        val kept = p.rules.filterNot { it.isEmpty() && !(it.disabled && it.type == RuleType.CUSTOM.id) }
         if (!p.is_remote && kept.isEmpty()) {
             message(R.string.route_profile_empty_title, getString(R.string.route_profile_empty))
             return
@@ -555,7 +569,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
             message(R.string.route_profile_invalid_url_title, getString(R.string.route_profile_invalid_url))
             return
         }
-        if (p.isEmpty()) {
+        if (p.rules.none { it.remote }) {
             doFetch()
             return
         }
@@ -566,7 +580,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         ) { doFetch() }
     }
 
-    /** The editor's "Fetch" (RouteItem.cpp:263-346): the fetched rules replace the edited ones; the typed name stays. */
+    /** The editor's "Fetch" (RouteItem.cpp): the fetched rules replace the remote ones; local rules and the typed name stay. */
     private fun doFetch() {
         val p = model.profile ?: return
         undoManager.flush()
@@ -597,7 +611,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
                 model.fetching = false
                 markDirty()
                 refreshAll()
-                val loaded = getString(R.string.route_profile_fetched, p.rules.size)
+                val loaded = getString(R.string.route_profile_fetched, p.rules.count { it.remote })
                 if (warnings.isEmpty()) {
                     message(R.string.route_profile_fetched_title, loaded)
                 } else {
@@ -641,7 +655,8 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
             binding.outboundProxy.text = OutboundIds.toName(OutboundIds.PROXY)
             binding.outboundDirect.text = OutboundIds.toName(OutboundIds.DIRECT)
             binding.outboundBlock.text = OutboundIds.toName(OutboundIds.BLOCK)
-            binding.outboundWarp.text = RouteTexts.WARP_BYPASS
+            binding.outboundWarp.text = getString(R.string.route_outbound_no_exit)
+            TooltipCompat.setTooltipText(binding.outboundWarp, getString(R.string.route_outbound_no_exit_hint))
             // Validation::Form: typing clears a field's mark, leaving the field checks it again.
             binding.name.doAfterTextChanged {
                 if (updating) return@doAfterTextChanged
@@ -760,8 +775,8 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
             binding.mode.setOnCheckedChangeListener { _, id ->
                 if (!updating) setCustomDns(id == R.id.mode_custom)
             }
-            bindServer(binding.remoteDnsLayout, binding.remoteDns, model.remoteSuggestions, remote = true)
-            bindServer(binding.directDnsLayout, binding.directDns, model.directSuggestions, remote = false)
+            bindServer(binding.remoteDnsLayout, binding.remoteDns, remote = true)
+            bindServer(binding.directDnsLayout, binding.directDns, remote = false)
             binding.remoteDnsDisableIpv6.onToggle { dns, on -> dns.copy(remoteDnsDisableIpv6 = on) }
             binding.directDnsDisableIpv6.onToggle { dns, on -> dns.copy(directDnsDisableIpv6 = on) }
             binding.enableDnsRouting.onToggle { dns, on -> dns.copy(enableDnsRouting = on) }
@@ -780,21 +795,25 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
             TooltipCompat.setTooltipText(binding.fakeipDisableIpv6, getString(R.string.fakeip_disable_ipv6_sum))
         }
 
-        private fun bindServer(layout: TextInputLayout, field: AutoCompleteTextView, suggestions: List<String>, remote: Boolean) {
-            DnsServerSuggestions.attach(layout, field, suggestions)
-            field.doAfterTextChanged {
-                if (updating) return@doAfterTextChanged
-                val text = it?.toString().orEmpty()
-                editDns { dns -> if (remote) dns.copy(remoteDns = text) else dns.copy(directDns = text) }
-                if (remote) model.remoteDnsError = "" else model.directDnsError = ""
-                bindErrors()
+        /** RouteDnsEditor's DnsServerListEdit, opened from the read-only field; the direct list notes its first server. */
+        private fun bindServer(layout: TextInputLayout, field: TextView, remote: Boolean) {
+            val open = View.OnClickListener {
+                val draft = model.dnsDraft ?: return@OnClickListener
+                DnsServerListDialog(
+                    this@RouteProfileActivity,
+                    layout.hint,
+                    if (remote) draft.remoteDns else draft.directDns,
+                    if (remote) DnsServerHistory.REMOTE_PRESETS else DnsServerHistory.DIRECT_PRESETS,
+                    if (remote) model.remoteRecent else model.directRecent,
+                    primaryNote = !remote,
+                ) { value ->
+                    editDns { dns -> if (remote) dns.copy(remoteDns = value) else dns.copy(directDns = value) }
+                    markDns()
+                    bind()
+                }.show()
             }
-            field.setOnFocusChangeListener { _, focused ->
-                if (focused || !model.dnsCustom) return@setOnFocusChangeListener
-                val problem = dnsServerProblem(field.text.toString())
-                if (remote) model.remoteDnsError = problem else model.directDnsError = problem
-                bindErrors()
-            }
+            field.setOnClickListener(open)
+            layout.setEndIconOnClickListener(open)
         }
 
         private fun CompoundButton.onToggle(change: (RouteDns, Boolean) -> RouteDns) {
@@ -809,9 +828,9 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
             val draft = model.dnsDraft ?: return
             updating = true
             binding.mode.check(if (model.dnsCustom) R.id.mode_custom else R.id.mode_global)
-            if (binding.remoteDns.text.toString() != draft.remoteDns) binding.remoteDns.setText(draft.remoteDns, false)
+            if (binding.remoteDns.text.toString() != draft.remoteDns) binding.remoteDns.setText(draft.remoteDns)
             binding.remoteDnsDisableIpv6.isChecked = draft.remoteDnsDisableIpv6
-            if (binding.directDns.text.toString() != draft.directDns) binding.directDns.setText(draft.directDns, false)
+            if (binding.directDns.text.toString() != draft.directDns) binding.directDns.setText(draft.directDns)
             binding.directDnsDisableIpv6.isChecked = draft.directDnsDisableIpv6
             binding.finalOut.check(finalChips.entries.firstOrNull { it.value == draft.dnsFinalOut }?.key ?: R.id.final_remote)
             binding.enableDnsRouting.isChecked = draft.enableDnsRouting
@@ -918,6 +937,9 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
                 rule.disabled = !binding.ruleEnabled.isChecked
                 markDirty()
                 bindDisabled(rule)
+                // A disabled rule only warns.
+                issueCache.remove(rule)
+                bindIssues(ruleIssues(rule))
             }
         }
 

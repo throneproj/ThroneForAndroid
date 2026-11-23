@@ -167,19 +167,16 @@ data class ProxyEntity(
     }
 
     /**
-     * TestRunner::applyUrlResult (TestRunner.cpp:127-142): a result is [latencyMs]; an aborted test leaves the
-     * profile untested; a failed VPN profile whose tunnel is up ([connectOnly]) is [LATENCY_CONNECT_ONLY], a working
-     * result that keeps no error (the desktop logs none for it); else -1.
+     * TestRunner::applyUrlResult: a result is [latencyMs]; a failed VPN profile whose tunnel is up ([connectOnly]) is
+     * [LATENCY_CONNECT_ONLY], a working result that keeps no error (the desktop logs none for it); else -1. An aborted
+     * test changes nothing and returns false, so nothing is saved.
      */
-    fun applyUrlResult(latencyMs: Int, error: String, connectOnly: Boolean = false) {
+    fun applyUrlResult(latencyMs: Int, error: String, connectOnly: Boolean = false): Boolean {
         when {
+            isTestAborted(error) -> return false
+
             error.isEmpty() -> {
                 recordLatency(latencyMs)
-                testError = null
-            }
-
-            isTestAborted(error) -> {
-                recordLatency(0)
                 testError = null
             }
 
@@ -193,10 +190,15 @@ data class ProxyEntity(
                 testError = error
             }
         }
+        return true
     }
 
-    /** TestRunner::applyIpResult (TestRunner.cpp:144-157): an error clears the egress IP and country. */
-    fun applyIpResult(ip: String, country: String, error: String) {
+    /**
+     * TestRunner::applyIpResult: an error clears the egress IP and country; an aborted test changes nothing and
+     * returns false.
+     */
+    fun applyIpResult(ip: String, country: String, error: String): Boolean {
+        if (isTestAborted(error)) return false
         if (error.isEmpty()) {
             ipOut = ip
             testCountry = country
@@ -204,28 +206,27 @@ data class ProxyEntity(
         } else {
             ipOut = null
             testCountry = null
-            testError = if (isTestAborted(error)) null else error
+            testError = error
         }
+        return true
     }
 
     /**
-     * The speed-test result of TestRunner.cpp:614-648: the core's rate strings, the ping only for a profile without
-     * a latency, [country] (ISO code) when known; an error is "N/A", latency -1 and no country.
+     * The speed-test result of TestRunner::runSpeedProbe: the core's rate strings, "N/A" for an error; latency and
+     * country are the URL and IP tests'. An aborted or never-measured result changes nothing and returns false.
      */
-    fun applySpeedResult(dl: String, ul: String, latencyMs: Int, country: String, error: String) {
+    fun applySpeedResult(dl: String, ul: String, error: String): Boolean {
+        if (!isSpeedMeasured(dl, ul, error)) return false
         if (error.isEmpty()) {
             dlSpeed = dl
             ulSpeed = ul
-            if (latency <= 0 && latencyMs > 0) recordLatency(latencyMs)
-            if (country.isNotEmpty()) testCountry = country
             testError = null
         } else {
             dlSpeed = SPEED_NA
             ulSpeed = SPEED_NA
-            recordLatency(-1)
-            testCountry = null
             testError = error
         }
+        return true
     }
 
     /** Profile::DisplayLatencyColor; 0 = no colour (untested). */
@@ -266,6 +267,14 @@ data class ProxyEntity(
         @JvmStatic
         fun isTestAborted(error: String): Boolean =
             error.contains("test aborted") || error.contains("context canceled")
+
+        /**
+         * Whether a speed result has anything to store: a stop during the server lookup comes back with neither an
+         * error nor a speed.
+         */
+        @JvmStatic
+        fun isSpeedMeasured(dl: String, ul: String, error: String): Boolean =
+            !isTestAborted(error) && (error.isNotEmpty() || dl.isNotEmpty() || ul.isNotEmpty())
 
         /** CountryCodeToFlag: each letter shifted to its regional indicator symbol. */
         @JvmStatic

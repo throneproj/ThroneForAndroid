@@ -47,11 +47,12 @@ internal object GroupActions {
             val seen = HashSet<String>()
             val duplicates = ProfileManager.members(groupId).filter { !seen.add(it.dedupKey()) }
             val names = shownNames(duplicates)
+            val warning = if (skip) "" else GroupRepo.hopWarning(duplicates.map { it.id })
             host.onUi {
                 if (duplicates.isEmpty()) {
                     snackbar(R.string.profiles_no_duplicates).show()
                 } else {
-                    confirmRemoval(this, skip, R.plurals.confirm_remove_duplicates, duplicates.size, names) {
+                    confirmRemoval(this, skip, R.plurals.confirm_remove_duplicates, duplicates.size, names, warning) {
                         deleteProfiles(this, duplicates.map { it.id }, stopRunning = true)
                     }
                 }
@@ -70,11 +71,12 @@ internal object GroupActions {
                 .map { it.id }
             val shown = unavailable.take(NAMES_SHOWN)
             val names = shownNames(ProfileManager.getProfiles(shown).sortedBy { shown.indexOf(it.id) })
+            val warning = if (skip) "" else GroupRepo.hopWarning(unavailable)
             host.onUi {
                 if (unavailable.isEmpty()) {
                     snackbar(R.string.profiles_no_unavailable).show()
                 } else {
-                    confirmRemoval(this, skip, R.plurals.confirm_remove_unavailable, unavailable.size, names) {
+                    confirmRemoval(this, skip, R.plurals.confirm_remove_unavailable, unavailable.size, names, warning) {
                         deleteProfiles(this, unavailable, stopRunning = false)
                     }
                 }
@@ -89,11 +91,12 @@ internal object GroupActions {
             val skipCert = DataStore.skipCert
             val insecure = ProfileManager.members(groupId).filter { it.outbound.effectiveSecurity(skipCert).isInsecure }
             val names = shownNames(insecure)
+            val warning = if (skip) "" else GroupRepo.hopWarning(insecure.map { it.id })
             host.onUi {
                 if (insecure.isEmpty()) {
                     snackbar(R.string.profiles_no_insecure).show()
                 } else {
-                    confirmRemoval(this, skip, R.plurals.confirm_remove_insecure, insecure.size, names) {
+                    confirmRemoval(this, skip, R.plurals.confirm_remove_insecure, insecure.size, names, warning) {
                         deleteProfiles(this, insecure.map { it.id }, stopRunning = true)
                     }
                 }
@@ -152,20 +155,21 @@ internal object GroupActions {
     /** The names a confirmation lists, worked out off the main thread for the shown ones only. */
     private fun shownNames(profiles: List<ProxyEntity>): List<String> = profiles.take(NAMES_SHOWN).map { it.displayName() }
 
-    /** [names] are those of the first of [count] profiles; the rest are only counted. */
+    /** [names] are those of the first of [count] profiles; the rest are only counted. [warning]: [GroupRepo.hopWarning]. */
     private fun confirmRemoval(
         host: ConfigurationFragment,
         skip: Boolean,
         @PluralsRes question: Int,
         count: Int,
         names: List<String>,
+        warning: String,
         remove: () -> Unit,
     ) {
         if (skip) return remove()
         val context = host.requireContext()
         context.confirmAction(
             context.resources.getQuantityString(question, count, count),
-            context.nameList(names, total = count),
+            context.nameList(names, total = count) + warning,
             R.string.delete,
             remove,
         )

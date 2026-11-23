@@ -34,8 +34,8 @@
     <string name="connection_test_available">HTTPS: %d мс</string>
     <string name="connection_test_testing">Тэставанне…</string>
     <string name="speed">%s/s</string>
-    <string name="speed_detail">Проксі: %1$s↑ %2$s↓
-\nПрамая: %3$s↑ %4$s↓</string>
+    <string name="speed_detail">Проксі: ↓%2$s ↑%1$s
+\nПрамая: ↓%4$s ↑%3$s</string>
     <string name="allow_insecure_sum">Адключыць праверку сертыфікатаў. Калі ўключана, гэтая канфігурацыя такая ж бяспечная, як і адкрыты тэкст</string>
     <string name="allow_insecure">Дазволіць небяспечна</string>
     <string name="security_settings">Налады бяспекі</string>
@@ -191,8 +191,6 @@
     <string name="auto_select_proxy_apps_message">Ваш бягучы выбар будзе заменены.</string>
     <string name="auto_update_interval">Інтэрвал абнаўлення</string>
     <string name="auto_update_interval_sum">%d хвілін</string>
-    <string name="autosel_active_size">Правяраць блізка</string>
-    <string name="autosel_active_size_tip">Профілі з найвышэйшым рэйтынгам правяраюцца зноў кожны інтэрвал. Астатнія таксама правяраюцца, але размеркаваны па больш павольным поўным праходзе.</string>
     <string name="autosel_advanced">Пашыраныя</string>
     <string name="autosel_advanced_hide">Схаваць пашыраныя опцыі</string>
     <string name="autosel_advanced_show">Тут усё мае працоўнае значэнне па змаўчанні. Адкрывайце толькі калі хочаце наладзіць, як выбар мерае і пераключае.</string>
@@ -200,18 +198,13 @@
     <string name="autosel_ago_hours">%d гадзін таму</string>
     <string name="autosel_ago_minutes">%d хвілін таму</string>
     <string name="autosel_ago_seconds">%d секунд таму</string>
-    <string name="autosel_always_retest">Заўсёды тэставаць зноў</string>
     <string name="autosel_back_to_automatic">Вярнуцца да аўтаматычнага</string>
     <string name="autosel_balance">Падзяляць трафік паміж лепшымі профілямі</string>
     <string name="autosel_balance_hint_connection">Кожнае новае злучэнне можа ўзяць іншы профіль. Найшырэйшае размеркаванне, але ваш IP-адрас выхаду змяняецца пасярэдзіне сеанса, і трафік кожнага профілю становіцца прыблізным.</string>
     <string name="autosel_balance_hint_off">Лепшы профіль нясе ўвесь трафік; астатнія гатовыя профілі захоўваюцца праверанымі, каб адзін мог узяць на сябе імгненна.</string>
     <string name="autosel_balance_hint_rotate">Новыя злучэнні пераходзяць на іншы добры профіль пры кожным павароце; адкрытыя пакідаюцца ў спакоі і завяршаюцца там, дзе пачаліся. Трафік падлічваецца дакладна.</string>
-    <string name="autosel_balance_interval">Паварот кожныя</string>
-    <string name="autosel_balance_interval_tip">Колькі часу выбар застаецца на адным профілі, перш чым перайсці на наступны гатовы.</string>
     <string name="autosel_balance_mode">Рэжым</string>
     <string name="autosel_balance_tip">Па змаўчанні выключана: адзін профіль нясе ўсё, астатнія ў рэзерве. Уключыце, каб размеркаваць трафік па профілях, пацверджаных як працоўныя.</string>
-    <string name="autosel_bench_interval">Поўны праход кожныя</string>
-    <string name="autosel_bench_interval_tip">Колькі часу займае адзін праход па ўсіх профілях у запуску. Праверкі размеркаваны раўнамерна, таму вялікі пул ніколі не выклікае ўсплёску трафіку.</string>
     <string name="autosel_build_limit">Запускаць лепшыя</string>
     <string name="autosel_build_limit_tip">Колькі профіляў загружаецца ў бягучую канфігурацыю. Выбар пераключаецца паміж імі імгненна, без перападлучэння. Больш каштуе больш памяці і часу запуску.</string>
     <string name="autosel_cat_balance">Балансаванне нагрузкі</string>
@@ -233,13 +226,9 @@
     <string name="autosel_detail_health">%1$d профіляў: %2$s</string>
     <string name="autosel_detail_untested">%d яшчэ не правераны</string>
     <string name="autosel_detail_working">%d працуюць</string>
-    <string name="autosel_dial_retries">Спроб пераключэння</string>
-    <string name="autosel_dial_retries_tip">Калі выбраны профіль не можа падлучыцца, колькі іншых паспрабаваць неадкладна, перш чым праграма ўбачыць памылку.</string>
     <string name="autosel_edit">Рэдагаваць аўтаматычны выбар</string>
     <string name="autosel_error_no_group">Аўтаматычны выбар паказвае на групу, якой больш няма</string>
     <string name="autosel_error_no_members">У аўтаматычнага выбару няма прыдатных удзельнікаў</string>
-    <string name="autosel_exclude_unavailable">Прапускаць няўдалыя профілі</string>
-    <string name="autosel_exclude_unavailable_tip">Трымае серверы, чый апошні тэст прайграў, па-за пулам, пакуль вынік яшчэ ў межах акна даверу. Выключыце, калі вашы тэсты ненадзейныя і вы аддаеце перавагу, каб выбар вырашаў сам.</string>
     <string name="autosel_expected">Трымаць гатовымі</string>
     <string name="autosel_expected_tip">Колькі профіляў захоўваецца пацверджанымі як працоўныя заўсёды, каб адмова магла быць пакрыта імгненна. Гэта таксама тыя, паміж якімі падзяляецца трафік пры ўключаным балансаванні.</string>
     <string name="autosel_footer_exhausted">Зараз нічога не працуе — калі гэта працягнецца, выбар адновіцца з наступных лепшых профіляў.</string>
@@ -249,18 +238,18 @@
     <string name="autosel_footer_pinned_other">Вы выбралі %s, але ён зараз не працуе, таму выбар узяў іншы. Ён вернецца да вашага, калі той адновіцца.</string>
     <string name="autosel_footer_pinned_using">Выкарыстоўваецца %s, бо вы яго выбралі.</string>
     <string name="autosel_footer_suspended">Праверкі прыпынены, бо ў гэтай прылады няма сеткавага злучэння. Ніводны профіль не вінаваты ў гэтым, і рэйтынг замарожаны да вяртання злучэння.</string>
-    <string name="autosel_group">Серверы з</string>
+    <string name="autosel_group">Профілі з</string>
     <string name="autosel_group_archived">%s (архівавана)</string>
     <string name="autosel_group_missing">Група адсутнічае (#%d)</string>
-    <string name="autosel_interrupt">Рываць злучэнні пры пераключэнні</string>
-    <string name="autosel_interrupt_tip">Ужываецца, калі выбар пераключаецца з-за таго, што профіль пагоршыўся або выйшаў з ладу. Уключана: усё пераходзіць на новы профіль адначасова. Выключана: бягучыя загрузкі завяршаюцца на старым. Павароты балансавання ніколі не рвуць злучэнні ў любым выпадку.</string>
+    <string name="autosel_interrupt">Рваць злучэнні пры збоі профілю</string>
+    <string name="autosel_interrupt_tip">Адкрытыя злучэнні адразу пераходзяць, а не завяршаюцца на профілі са збоем. Пераход на хутчэйшы профіль і ратацыі балансавання ніколі не рвуць злучэнні.</string>
     <string name="autosel_interval">Інтэрвал праверкі</string>
-    <string name="autosel_interval_tip">Як часта профілі, што правяраюцца блізка, мераюцца зноў.</string>
+    <string name="autosel_interval_tip">Як часта профілі з верху рэйтынгу мераюцца зноў.</string>
     <string name="autosel_just_now">Толькі што</string>
     <string name="autosel_last_ok_short">ОК %s</string>
     <string name="autosel_list_separator">", "</string>
     <string name="autosel_max_rtt">Максімальная затрымка</string>
-    <string name="autosel_max_rtt_tip">Профілі павольнейшыя за гэта ніколі не выбіраюцца, нават калі няма лепшага.</string>
+    <string name="autosel_max_rtt_tip">Профілі павольнейшыя за гэта выкарыстоўваюцца, толькі калі не працуе ніводзін хутчэйшы.</string>
     <string name="autosel_ms">%d мс</string>
     <string name="autosel_name_empty">Назва не можа быць пустой.</string>
     <string name="autosel_name_filter">Толькі адпаведныя назвы</string>
@@ -297,27 +286,19 @@
     <string name="autosel_plan">Профілі</string>
     <string name="autosel_plan_calculating">Праверка групы…</string>
     <string name="autosel_plan_counts">%1$d з %2$d профіляў у групе могуць быць выкарыстаны; %3$d запусцяцца.</string>
-    <string name="autosel_plan_kept_unavailable">Апошні тэст кожнага профілю прайграў, што звычайна значыць, што сетка была адключана, а не серверы, таму ўсе %d захоўваюцца і будуць правераны зноў.</string>
     <string name="autosel_plan_needs_ranking">Астатнія будуць вымераны пры запуску выбару: ён пачне працаваць, як толькі набярэцца дастаткова працоўных профіляў, і пяройдзе на поўны рэйтынг, калі вымераны ўсе.</string>
     <string name="autosel_plan_reused">%d маюць нядаўні вынік тэсту, які будзе выкарыстаны паўторна.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">Прапушчана: %s.</string>
     <string name="autosel_plan_truncated">Больш за %d профіляў адпавядаюць, таму захоўваюцца толькі найлепшыя па рэйтынгу.</string>
-    <string name="autosel_pool_cap">Рэйтынгаваць не больш</string>
-    <string name="autosel_pool_cap_tip">Жорсткая верхняя мяжа для колькасці профіляў, якія мераюцца і захоўваюцца ў спісе рэйтынгу. Калі кожны профіль у запуску выходзіць з ладу, замены бяруцца з гэтага спіса.</string>
-    <string name="autosel_result_validity">Давяраць вынікам на</string>
-    <string name="autosel_result_validity_tip">Вынікі тэсту URL такой даўніны выкарыстоўваюцца паўторна замест паўторнага вымярэння — уключаючы тэсты, якія вы праводзілі самі на групе, таму запуск выбару адразу пасля гэтага не паўтарае працу. Старэйшыя вынікі лічацца так, нібы профіль ніколі не тэсціраваўся. Усталюйце ў нуль, каб заўсёды запускаць свежы тэст.</string>
     <string name="autosel_row_checks">Праверкі: %1$d / %2$d ОК</string>
     <string name="autosel_row_connects">Падлучэнні: %1$d / %2$d ОК</string>
     <string name="autosel_row_error">Апошняя памылка: %s</string>
-    <string name="autosel_row_jitter">Джытэр: %d мс</string>
     <string name="autosel_row_last_ok">Апошні ОК: %s</string>
     <string name="autosel_row_latency">Затрымка: %1$d мс (лепшы %2$d мс, горшы %3$d мс)</string>
     <string name="autosel_row_state">Стан: %s</string>
     <string name="autosel_row_tested">Апошні тэст URL: %1$s, %2$s</string>
     <string name="autosel_row_untested">Яшчэ няма выніку тэсту URL.</string>
-    <string name="autosel_sampling">Захаваных узораў</string>
-    <string name="autosel_sampling_tip">Рэйтынг выкарыстоўвае сярэдняе і джытэр па гэтай колькасці нядаўніх праверак, таму адзін дрэнны вынік не можа панізіць добры сервер.</string>
     <string name="autosel_select_group">Выберыце групу, за якой гэты аўтаматычны выбар павінен сачыць.</string>
     <string name="autosel_skip_core_transitions">Патрабуе занадта шмат пераключэнняў ядра</string>
     <string name="autosel_skip_country">Адфільтравана па краіне</string>
@@ -329,7 +310,6 @@
     <string name="autosel_skip_missing">профіль адсутнічае</string>
     <string name="autosel_skip_name">адфільтравана па назве</string>
     <string name="autosel_skip_tailscale">Профіль Tailscale</string>
-    <string name="autosel_skip_unavailable">апошні тэст прайграў</string>
     <string name="autosel_skip_unsupported">тып, які гэта зборка не можа выкарыстоўваць</string>
     <string name="autosel_skip_xray_chained">Поўную канфігурацыю Xray нельга спалучаць з проксі групы</string>
     <string name="autosel_state_cooldown">Прыпынены</string>
@@ -361,8 +341,6 @@
     <string name="autosel_use_automatic_tip">Спыніць перавагу гэтага профілю і дазволіць выбару выбіраць па вымярэннях зноў.</string>
     <string name="autosel_use_this">Выкарыстоўваць гэты профіль</string>
     <string name="autosel_use_this_tip">Трымае гэты профіль у выкарыстанні замест таго, каб дазволіць рэйтынгу выбіраць. Ён застаецца перавагай, не замкам: калі профіль перастане працаваць, выбар усё роўна пераходзіць далей, і вяртаецца да вашага выбару, калі той адновіцца.</string>
-    <string name="autosel_watch_interval">Сачыць за профілем у выкарыстанні</string>
-    <string name="autosel_watch_interval_tip">Як часта профіль, які зараз нясе ваш трафік, правяраецца самастойна. Трымайце гэта кароткім: сервер можа перастаць працаваць, усё яшчэ прымаючы злучэнні, і нічога не заўважыць гэтага да наступнай поўнай праверкі.</string>
     <string name="backup">Рэзервовае капіяванне</string>
     <string name="backup_create">Стварыць рэзервовую копію</string>
     <string name="backup_created">Рэзервовая копія створана. Уключана: %s</string>
@@ -380,7 +358,7 @@
     <string name="backup_local">Лакальнае рэзервовае капіяванне</string>
     <string name="backup_local_summary">Рэзервовыя копіі выкарыстоўваюць фармат Throne для працоўнага стала (.thrbackup): любое з прыкладанняў можа іх аднавіць. Уліковыя дадзеныя WebDAV застаюцца на гэтай прыладзе.</string>
     <string name="backup_open_label">Аднавіць рэзервовую копію Throne</string>
-    <string name="backup_part_otp">Профілі OTP (не аднаўляюцца на Android)</string>
+    <string name="backup_part_otp">Запісы OTP (не аднаўляюцца на Android)</string>
     <string name="backup_part_profiles">Профілі (групы і проксі)</string>
     <string name="backup_part_routes">Профілі маршрутызацыі</string>
     <string name="backup_part_settings">Налады</string>
@@ -510,7 +488,7 @@
     <string name="direct_test_url_empty">стан сеткі сістэмы</string>
     <string name="direct_test_url_sum">Атрымліваецца без любога проксі, каб адрозніць мёртвае злучэнне ад мёртвых сервераў. Пакіньце пустым, каб выкарыстоўваць стан сеткі сістэмы.</string>
     <string name="disable">Адключыць</string>
-    <string name="disable_traffic_stats">Адключыць статыстыку трафіку</string>
+    <string name="disable_traffic_stats">Адключыць лічыльнікі трафіку</string>
     <string name="disable_traffic_stats_sum">Трафік профілю не падлічваецца</string>
     <string name="dns_address_dialog_message">Прыклады: https://8.8.8.8/dns-query, tls://1.1.1.1, 8.8.8.8, localhost</string>
     <string name="dns_advanced">Пашыраныя налады</string>
@@ -547,7 +525,7 @@
     <string name="enable_mux">Уключыць мультыплексар</string>
     <string name="enable_ntp">Кліент NTP</string>
     <string name="enable_ntp_sum">Сінхранізаваць гадзіннік ядра з серверам NTP</string>
-    <string name="enable_reality">Уключыць Reality</string>
+    <string name="enable_reality">Уключыць REALITY</string>
     <string name="enable_stats">Статыстыка злучэнняў</string>
     <string name="enable_stats_sum">Адсочваць злучэнні і іх працэсы</string>
     <string name="enable_tls">Уключыць TLS</string>
@@ -603,7 +581,11 @@
     <string name="grp_keep_working_tip">Профілі, чый апошні тэст быў паспяховым, захоўваюцца, калі падпіска больш іх не пералічвае.</string>
     <string name="grp_landing_proxy">Прызямляльны проксі</string>
     <string name="grp_last_update">Апошняе абнаўленне: %1$s</string>
-    <string name="grp_missing_profile">Профіль #%1$d (адсутнічае)</string>
+    <string name="grp_missing_profile">Адсутны профіль (#%1$d)</string>
+    <string name="hop_refs_warning">Гэтыя групы выкарыстоўваюць профіль, які выдаляецца, як пярэдні або прызямляльны проксі. Ён будзе з іх прыбраны, і яны будуць падключацца без яго:</string>
+    <string name="hop_refs_cleared">Гэтыя групы выкарыстоўвалі выдалены профіль як пярэдні або прызямляльны проксі. Ён быў з іх прыбраны, і цяпер яны падключаюцца без яго:</string>
+    <string name="hop_ref_front">%1$s (пярэдні проксі)</string>
+    <string name="hop_ref_landing">%1$s (прызямляльны проксі)</string>
     <string name="grp_route_profile">Профіль маршрутызацыі</string>
     <string name="grp_route_profile_default">Прадвызначаны (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (з гэтай падпіскі)</string>
@@ -640,7 +622,7 @@
     <string name="grp_state_running">Абнаўленне…</string>
     <string name="grp_sub_auto_update">Аўтаматычнае абнаўленне падпіскі</string>
     <string name="grp_sub_auto_update_interval">Інтэрвал (хвілін, несапраўдна калі менш за 30)</string>
-    <string name="grp_sub_clear">Ачышчаць серверы перад абнаўленнем падпіскі</string>
+    <string name="grp_sub_clear">Ачышчаць профілі перад абнаўленнем падпіскі</string>
     <string name="grp_sub_custom_hwid_params">Карыстальніцкія параметры HWID (неабавязкова)</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
     <string name="grp_sub_custom_hwid_params_tip">Фармат: hwid=value,os=value,osVersion=value,model=value\nПакіньце пустым для выкарыстання значэнняў па змаўчанні. Пазначце толькі тыя параметры, якія хочаце перавызначыць.</string>
@@ -864,11 +846,15 @@
     <string name="profiles_empty_subscription_hint">Абнавіце падпіску, каб спампаваць яе профілі.</string>
     <string name="profiles_more_options">Больш опцый</string>
     <string name="profiles_move_down">Перамясціць уніз</string>
-    <string name="profiles_move_no_target">Няма іншай базавай групы для пераносу.</string>
     <string name="profiles_move_to_group">Перамясціць у групу</string>
+    <string name="import_target_subscription">Гэтая група — падпіска: пры наступным абнаўленні імпартаваныя ў яе профілі будуць выдалены. Выберыце іншую групу і імпартуйце зноў.</string>
+    <string name="import_target_archived">Гэтая група ў архіве. Выберыце іншую групу і імпартуйце зноў.</string>
+    <string name="import_target_gone">Гэтай групы больш не існуе.</string>
+    <string name="profiles_move_target_subscription">Пры наступным абнаўленні групы-падпіскі перанесеныя ў яе профілі будуць выдалены. Выберыце іншую групу.</string>
+    <string name="profiles_move_source_updating">Падпіска гэтай групы абнаўляецца. Паспрабуйце зноў, калі абнаўленне скончыцца.</string>
     <string name="profiles_move_up">Перамясціць уверх</string>
     <string name="profiles_no_duplicates">Дублікатаў профіляў не знойдзена.</string>
-    <string name="profiles_no_insecure">Небяспечных канфігурацый не знойдзена.</string>
+    <string name="profiles_no_insecure">Небяспечных профіляў не знойдзена.</string>
     <string name="profiles_no_unavailable">Недаступных профіляў не знойдзена.</string>
     <string name="profiles_remove">Выдаліць</string>
     <string name="profiles_remove_duplicates">Дублікаты</string>
@@ -926,9 +912,9 @@
     <string name="raw_json">Сыры JSON</string>
     <string name="raw_json_invalid">JSON не з\'яўляецца сапраўдным профілем гэтага тыпу</string>
     <string name="raw_json_summary">Рэдагаваць кожнае поле гэтага профілю як JSON</string>
-    <string name="reality_public_key">Публічны ключ Reality</string>
-    <string name="reality_settings">Налады Reality</string>
-    <string name="reality_short_id">Кароткі ідэнтыфікатар Reality</string>
+    <string name="reality_public_key">Публічны ключ REALITY</string>
+    <string name="reality_settings">Налады REALITY</string>
+    <string name="reality_short_id">Кароткі ідэнтыфікатар REALITY</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="reboot_required">Не атрымалася запусціць сэрвіс VPN. Магчыма, вам трэба перазагрузіць прыладу.</string>
     <string name="remote_dns_disable_ipv6">Аддалены DNS: адключыць IPv6</string>
@@ -986,7 +972,7 @@
     <string name="route_profile_empty">У профілі няма сапраўдных правіл</string>
     <string name="route_profile_empty_title">Пусты профіль маршрута</string>
     <string name="route_profile_fetch">Атрымаць зараз</string>
-    <string name="route_profile_fetch_confirm">Бягучыя правілы замяняюцца атрыманымі з URL.</string>
+    <string name="route_profile_fetch_confirm">Правілы, атрыманыя з URL, разам з праўкамі ў іх, замяняюцца атрыманымі зараз. Правілы, дададзеныя тут, захоўваюцца.</string>
     <string name="route_profile_fetch_failed">Не атрымалася атрымаць профіль маршрутызацыі</string>
     <string name="route_profile_fetched">Загружана %d правіл з аддаленага URL.</string>
     <string name="route_profile_fetched_title">Атрымана</string>
@@ -1000,7 +986,7 @@
     <string name="route_profile_never_updated">Яшчэ не абноўлены</string>
     <string name="route_profile_quick_switch">Профіль маршрутызацыі</string>
     <string name="route_profile_remote_source">Аддаленая крыніца</string>
-    <string name="route_profile_remote_rules_note">Кожнае абнаўленне замяняе правілы гэтага профілю правіламі з URL, таму правілы, дададзеныя або змененыя тут, губляюцца. Каб захаваць свае правілы, выкарыстоўвайце «Кланаваць» у спісе прафіляў маршрутызацыі: клон — гэта лакальная копія, якая ніколі не абнаўляецца.</string>
+    <string name="route_profile_remote_rules_note">Кожнае абнаўленне замяняе правілы, атрыманыя з URL, таму праўкі ў іх захоўваюцца толькі да наступнага. Правілы, дададзеныя тут, захоўваюцца.</string>
     <string name="route_profile_rules">Правілы (%d)</string>
     <string name="route_profile_title">Профіль маршрута</string>
     <string name="route_profile_url">URL</string>
@@ -1027,8 +1013,8 @@
     <string name="route_rule_advanced_show">Паказаць іншыя ўмовы і опцыі</string>
     <string name="route_rule_any">Любы</string>
     <string name="route_rule_apps">Праграмы</string>
-    <string name="route_rule_catch_all">Гэта правіла не мае ўмоў, таму яно адпавядае кожнаму злучэнню. Захаваць яго ўсё роўна?</string>
-    <string name="route_rule_catch_all_title">Без умоў</string>
+    <string name="route_rule_default_name">Правіла %d</string>
+    <string name="route_rule_dns_queries">DNS-запыты</string>
     <string name="route_rule_category_match">Супадзенне</string>
     <string name="route_rule_category_rule">Правіла</string>
     <string name="route_rule_domain">Дамен</string>
@@ -1049,6 +1035,8 @@
     <string name="route_rule_ip_version">Версія IP</string>
     <string name="route_rule_lines_hint">Адзін запіс на радок</string>
     <string name="route_rule_missing_server">Сервер адсутнічае (#%d)</string>
+    <string name="route_outbound_no_exit">Проксі без выхаду</string>
+    <string name="route_outbound_no_exit_hint">Адрозніваецца ад «Проксі» толькі пры ўключаным выхадзе (Налады › Маршрутызацыя › Выхад): гэтыя сайты абыходзяць яго і выходзяць праз выбраны профіль.</string>
     <string name="route_rule_name">Назва</string>
     <string name="route_rule_network">Сетка</string>
     <string name="route_rule_no_drop">Без скіду</string>
@@ -1166,7 +1154,6 @@
     <string name="snell_userkey">Ключ карыстальніка</string>
     <string name="snell_version">Версія</string>
     <string name="sni">Індыкацыя імя сервера</string>
-    <string name="speed_test_mode_country">Толькі краіна</string>
     <string name="ss_plugin">Убудова SIP003</string>
     <string name="ss_plugin_opts">Опцыі убудовы</string>
     <string name="ssh_auth_type_none">Няма</string>
@@ -1227,7 +1214,7 @@
     <string name="test_engine_fg_busy">Праца ў фоне…</string>
     <string name="test_engine_fg_subscriptions">Абнаўленне падпісак…</string>
     <string name="test_engine_ip_current_unsupported">Тэст IP бягучага злучэння не падтрымліваецца</string>
-    <string name="test_engine_kind_ip">Тэст IP</string>
+    <string name="test_engine_kind_ip">Тэст IP выхаду</string>
     <string name="test_engine_kind_speed">Тэст хуткасці</string>
     <string name="test_engine_kind_url">Тэст URL</string>
     <string name="test_engine_progress">%1$d / %2$d</string>
@@ -1252,7 +1239,6 @@
     <string name="test_panel_completed">Завершана</string>
     <string name="test_panel_countries">Краіны</string>
     <string name="test_panel_country_description">%1$s: %2$d</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_current_unavailable">Недаступна: %s</string>
     <string name="test_panel_dismiss">Адхіліць вынікі тэсту</string>
     <string name="test_panel_distinct_ips">%d розных IP выхаду</string>
@@ -1305,7 +1291,6 @@
     <string name="test_panel_summary_stopped">Спынена · %1$d з %2$d вымерана за %3$s</string>
     <string name="test_panel_summary_tested">Вымерана %1$d за %2$s</string>
     <string name="test_panel_summary_working">Працуе %d</string>
-    <string name="test_panel_summary_working_countries">Працуе %1$d у %2$d краінах</string>
     <string name="test_panel_summary_working_fastest">Працуе %1$d, найхутчэйшы %2$s</string>
     <string name="test_panel_title">%1$s · %2$s</string>
     <string name="test_panel_unnamed">Профіль %d</string>
@@ -1456,8 +1441,6 @@
     <string name="warp_public_key">Публічны ключ</string>
     <string name="warp_registration">Рэгістрацыя</string>
     <string name="warp_reserved">Зарэзервавана</string>
-    <string name="warp_state_off">Выключаны</string>
-    <string name="warp_state_on">Уключаны · %s</string>
     <string name="warp_tos_message"><![CDATA[Генерацыя ідэнтычнасці WARP рэгіструе новую прыладу ў Cloudflare.<br><br>Ці прымаеце вы <a href="%1$s">умовы паслуг Cloudflare WARP</a>?]]></string>
     <string name="warp_wireguard_note">WARP ідзе на вашым проксі: WireGuard патрабуе проксі, які перадае UDP.</string>
     <string name="webdav_auth_error">Аўтэнтыфікацыя прайграў: несапраўднае імя карыстальніка або пароль</string>
@@ -1606,7 +1589,7 @@
     <string name="xray_verify_peer_cert_by_name">Правяраць сертыфікат равесніка па назве</string>
     <string name="xray_vless_all">Усе VLESS</string>
     <string name="xray_vless_preference">Перавага VLESS Xray</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP і Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP і REALITY</string>
     <string name="xray_vless_xhttp_only">Толькі XHTTP</string>
     <string name="xtls_flow">Паток (падпратакол VLESS)</string>
     <string name="yes">Так</string>
@@ -1622,12 +1605,6 @@
         <item quantity="few">%d мс</item>
         <item quantity="many">%d мс</item>
         <item quantity="other">%d мс</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="one">%d хв</item>
-        <item quantity="few">%d хв</item>
-        <item quantity="many">%d хв</item>
-        <item quantity="other">%d хв</item>
     </plurals>
     <plurals name="autosel_profiles">
         <item quantity="one">%d профіль</item>
@@ -1765,7 +1742,16 @@
     <string name="invalid_port">Не сапраўдны порт: %s</string>
     <string name="invalid_predefined_dns">Не сапраўдны запіс загадзя вызначанага адказу: %s</string>
     <string name="route_profile">Профіль маршрута</string>
-    <string name="warp_settings">WARP</string>
+    <string name="warp_settings">Выхад</string>
+    <string name="exit_through">Выхад праз</string>
+    <string name="exit_server">Выбраны профіль</string>
+    <string name="exit_server_hint">Трафік выходзіць праз запушчаны профіль.</string>
+    <string name="exit_psiphon_hint">Psiphon — бясплатная сетка пад кіраваннем Psiphon Inc.; як і любы VPN-правайдар, яна можа бачыць сайты, якія вы наведваеце.</string>
+    <string name="exit_tor_hint">Tor недаступны на Android, таму трафік выходзіць праз выбраны профіль.</string>
+    <string name="exit_unavailable">%s (недаступна на Android)</string>
+    <string name="psiphon_egress_region">Рэгіён</string>
+    <string name="psiphon_region_best">Найлепшая прадукцыйнасць</string>
+    <string name="psiphon_egress_region_sum">Краіна сервера Psiphon; «Найлепшая прадукцыйнасць» пакідае выбар Psiphon.</string>
 
     <string name="ech_query_target_hint">Дамен або дамен+рэзальвер (напр. cloudflare-ech.com+https://1.1.1.1/dns-query)</string>
     <string name="certificate_sha256">SHA256 сертыфіката</string>
@@ -1906,9 +1892,9 @@
     <string name="grp_http_version">Версія HTTP</string>
     <string name="grp_http_version_tip">Аўто выкарыстоўвае HTTP/2, калі сервер яго падтрымлівае. Пры «Пакінуць прадвызначанае» ўжываецца значэнне з Налады › Падпіскі.</string>
     <string name="grp_update_interval">Інтэрвал абнаўлення (хвіліны)</string>
-    <string name="grp_update_interval_tip">Колькасць хвілін паміж аўтаматычнымі абнаўленнямі гэтай падпіскі, не менш за 30. Пуста — значэнне з Налады › Падпіскі, дзе павінна быць уключана аўтаматычнае абнаўленне.</string>
+    <string name="grp_update_interval_tip">Колькасць хвілін паміж аўтаматычнымі абнаўленнямі гэтай падпіскі, не менш за 30, нават калі аўтаматычнае абнаўленне выключана ў Налады › Падпіскі. Пуста — значэнне адтуль.</string>
     <string name="grp_server_interval">Інтэрвал сервера</string>
-    <string name="grp_server_interval_tip">Выкарыстоўваць інтэрвал абнаўлення, які прысылае сервер падпіскі; калі ён нічога не прысылае, дзейнічае інтэрвал вышэй. Пры «Пакінуць прадвызначанае» ўжываецца значэнне з Налады › Падпіскі.</string>
+    <string name="grp_server_interval_tip">Выкарыстоўваць інтэрвал абнаўлення, які прысылае сервер падпіскі, нават калі аўтаматычнае абнаўленне выключана ў Налады › Падпіскі; калі ён нічога не прысылае, дзейнічае інтэрвал вышэй. Пры «Пакінуць прадвызначанае» ўжываецца значэнне адтуль.</string>
     <string name="grp_server_interval_use">Выкарыстоўваць</string>
     <string name="grp_server_interval_ignore">Ігнараваць</string>
     <string name="grp_server_interval_last">Апошні раз гэты сервер прыслаў %1$d г.</string>
@@ -2191,9 +2177,9 @@
     <string name="validation_tls_pem_private_key">Устаўце прыватны ключ як тэкст PEM, які пачынаецца з -----BEGIN PRIVATE KEY-----.</string>
     <string name="validation_tls_pin_base64">Гэта SHA-256 у шаснаццатковым выглядзе; запішыце яго ў base64 (44 сімвалы, што заканчваюцца на =).</string>
     <string name="validation_tls_ech_config">Устаўце спіс канфігурацый ECH у base64 або адным блокам -----BEGIN ECH CONFIGS-----.</string>
-    <string name="validation_tls_reality_ech">Reality нельга спалучаць з ECH. Выключыце ECH або ачысціце публічны ключ Reality.</string>
-    <string name="validation_tls_reality_disable_sni">Reality нельга выкарыстоўваць з «Адключыць SNI». Выключыце «Адключыць SNI».</string>
-    <string name="validation_tls_reality_spoof">Reality нельга спалучаць з TLS spoof. Задайце для TLS Spoof значэнне «Выкл.».</string>
+    <string name="validation_tls_reality_ech">REALITY нельга спалучаць з ECH. Выключыце ECH або ачысціце публічны ключ REALITY.</string>
+    <string name="validation_tls_reality_disable_sni">REALITY нельга выкарыстоўваць з «Адключыць SNI». Выключыце «Адключыць SNI».</string>
+    <string name="validation_tls_reality_spoof">REALITY нельга спалучаць з TLS spoof. Задайце для TLS Spoof значэнне «Выкл.».</string>
     <string name="validation_tls_pins_with_certificate">Уласны сертыфікат нельга спалучаць з закрэпленнямі сертыфікатаў; пакіньце толькі адно з іх.</string>
     <string name="validation_tls_client_pair">Задайце сертыфікат кліента і ключ кліента разам.</string>
     <string name="validation_tls_spoof_needs_sni">TLS spoof патрабуе SNI. Выключыце «Адключыць SNI» або задайце для TLS Spoof значэнне «Выкл.».</string>
@@ -2205,7 +2191,7 @@
     <string name="validation_transport_headers_pairs">Загалоўкі павінны чаргаваць назвы і значэнні, падзеленыя |, напрыклад User-Agent|curl, таму яны праігнараваны.</string>
     <string name="validation_transport_type">sing-box не падтрымлівае транспарт «%1$s». Выкарыстоўвайце ws, httpupgrade, http, grpc або quic.</string>
     <string name="validation_transport_quic_tls">Транспарт QUIC патрабуе TLS. Уключыце «Уключыць TLS».</string>
-    <string name="validation_transport_quic_reality">Reality не працуе з транспартам QUIC. Ачысціце ключ Reality або абярыце іншы транспарт.</string>
+    <string name="validation_transport_quic_reality">REALITY не працуе з транспартам QUIC. Ачысціце ключ REALITY або абярыце іншы транспарт.</string>
     <string name="validation_transport_quic_utls">uTLS не выкарыстоўваецца з транспартам QUIC.</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal працуе толькі з карыстальніцкім мультыплексам. Усталюйце для мультыплексу значэнне «Карыстальніцкі».</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal патрабуе абедзвюх хуткасцей; адсутная адпраўляецца як 1 Мбіт/с.</string>
@@ -2244,6 +2230,12 @@
     <string name="validation_xray_vless_encryption_mode">Частка пасля mlkem768x25519plus павінна быць native, xorpub або random.</string>
     <string name="validation_xray_vless_encryption_rtt">Частка пасля рэжыму павінна быць 1rtt або 0rtt.</string>
     <string name="validation_xray_vless_encryption_key">Кожны ключ у радку павінен быць base64, бяспечным для URL, на 32 або 1184 байты, без запаўнення.</string>
+    <string name="validation_xray_vless_encryption_padding_order">Размясціце часткі запаўнення перад ключамі.</string>
+    <string name="validation_xray_vless_encryption_mlkem">Ключ даўжынёй 1184 байты ў радку не сапраўдны ключ ML-KEM-768: скапіруйце радок з сервера яшчэ раз.</string>
+    <string name="validation_xray_vless_encryption_no_key">У радку няма ключа: скапіруйце ўвесь радок, які выдае сервер.</string>
+    <string name="validation_xray_vless_padding_format">Кожная частка запаўнення павінна складацца з трох лікаў праз злучок, напрыклад 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_first">Першая частка запаўнення павінна мець імавернасць не менш за 100 і даўжыні не менш за 35, напрыклад 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_total">Сума даўжынь запаўнення можа перавысіць 65553 байты.</string>
     <string name="validation_xray_vless_vision">XTLS Vision патрабуе сеткі raw з TLS або REALITY, або шыфравання VLESS: змяніце сетку ці бяспеку або ачысціце flow.</string>
     <string name="validation_xray_xdrive_no_link">XDRIVE не мае фармату спасылкі для абагульвання. Замест гэтага імпартуйце канфігурацыю JSON сервера.</string>
     <string name="validation_xray_xdrive_service">Павінна быць google-drive, s3, template або local.</string>
@@ -2467,11 +2459,6 @@
     <string name="validation_custom_xray_geodata">Абнаўляльнік геаданых выдалены з імпартаванай канфігурацыі: ён спампоўваў бы файлы з адрасоў, абраных адпраўшчыкам, і замяняў бы файлы ў тэчцы Throne.</string>
     <string name="validation_custom_xray_webhook">Вэбхук выдалены з гэтага правіла маршрутызацыі: ён адпраўляў бы звесткі пра кожнае адпаведнае злучэнне на адрас, абраны адпраўшчыкам.</string>
     <string name="validation_autoselector_countries">Выкарыстоўвайце двухлітарныя коды краін, падзеленыя коскамі, напрыклад DE,NL,FR.</string>
-    <string name="validation_autoselector_build_limit">Нельга запускаць больш профіляў, чым ранжыравана (%1$s).</string>
-    <string name="validation_autoselector_bench_interval">Поўная праверка не можа выконвацца часцей, чым інтэрвал праверкі (%1$s с).</string>
-    <string name="validation_autoselector_watch_interval">Назіранне за профілем, які выкарыстоўваецца, не можа быць павольнейшым за інтэрвал праверкі (%1$s с).</string>
-    <string name="validation_autoselector_ready_count">Дбайна правярайце не менш профіляў, чым трымаецца гатовымі (%1$s).</string>
-    <string name="validation_autoselector_close_count">Нельга дбайна правяраць больш профіляў, чым запушчана (%1$s).</string>
     <string name="validation_chain_empty">Дадайце ў ланцуг хаця б адзін профіль.</string>
     <string name="validation_ss_plugin_opts_dangling">Адваротны слэш у канцы нічога не экранюе.</string>
     <string name="validation_ss_plugin_opts_name">Кожны параметр патрабуе назву, як у obfs=http;obfs-host=example.com.</string>
@@ -2575,6 +2562,7 @@
     <string name="validation_route_no_drop_unused">Не дзейнічае з метадам drop.</string>
     <string name="validation_route_ignored_by_action">Правіла %1$s ігнаруе гэта; яно ўжываецца толькі да гэтых дзеянняў: %2$s.</string>
     <string name="validation_route_matches_all">У гэтага правіла няма ўмоў адпаведнасці, таму яно адпавядае ўсяму трафіку.</string>
+    <string name="validation_route_catch_all">У гэтага правіла няма ўмоў, таму яно перахопіць увесь трафік. Дадайце ўмову або адключыце правіла.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s («%2$s»): %3$s</string>
     <string name="validation_route_rule_warning">Правіла «%1$s»: %2$s</string>
@@ -2626,6 +2614,7 @@
     <string name="validation_millis_or_default">Увядзіце цэлы лік мілісекунд, напрыклад %1$s (без адзінкі), або 0 для прадвызначанага.</string>
     <string name="validation_group_update_interval">Павінна быць не менш за 30 хвілін або пуста, каб захаваць прадвызначанае.</string>
     <string name="validation_port_used">Порт %1$s ужо выкарыстоўваецца: %2$s. Абярыце іншы порт.</string>
+    <string name="validation_port_reenabled">Уключэнне %1$s на порце %2$s канфліктуе з %3$s. Абярыце іншы порт.</string>
     <string name="validation_mtu_ipv6">Для IPv6 патрэбны MTU не менш за %1$s; пры меншым значэнні сістэма можа адключыць IPv6 у Tun.</string>
     <string name="validation_private_range_all">Гэта ахоплівае ўсе адрасы, і Tun перастаў бы маршрутызаваць што-небудзь.</string>
     <string name="validation_dns_local_ip">Выкарыстоўвайце IP-адрас, напрыклад 223.5.5.5 або tls://1.1.1.1: гэты сервер развязвае імёны астатніх.</string>
@@ -2648,12 +2637,18 @@
     <string name="validation_route_dns_final">Прадвызначаны сервер DNS павінен быць аддаленым або прамым, а не «%1$s».</string>
     <string name="validation_route_dns_dropped">Уласныя налады DNS профілю адкінуты, таму ён выкарыстоўвае глабальныя: %1$s</string>
     <string name="route_dns_global_servers">Аддалены %1$s, прамы %2$s</string>
-    <string name="dns_server_suggestions">Нядаўнія і прапанаваныя серверы</string>
     <string name="warp_api_tls_fragment_title">Фрагментацыя TLS пры рэгістрацыі WARP</string>
     <string name="warp_api_tls_fragment_note">Дзейнічае толькі пры прамой рэгістрацыі, а не праз запушчаны профіль.</string>
     <string name="backup_warn_tor_egress">Рэзервовая копія накіроўвае трафік праз Tor, які недаступны на Android; тут ён выходзіць напрамую праз выбраны сервер.</string>
     <string name="validation_dns_server_item">Сервер %1$s («%2$s»): %3$s</string>
-    <string name="dns_server_list_hint">Падзяляйце некалькі сервераў коскамі: запыт ідзе да ўсіх разам, і перамагае першы адказ.</string>
+    <string name="dns_server_add">Дадаць сервер</string>
+    <string name="dns_server_custom">Свой адрас</string>
+    <string name="dns_server_recent">Нядаўнія</string>
+    <string name="dns_server_address_hint">Адрас, напр. tls://1.1.1.1</string>
+    <string name="dns_server_list_race">Запытваюцца разам; перамагае самы хуткі адказ.</string>
+    <string name="dns_server_list_primary">Таксама вызначае адрасы проксі-сервераў</string>
+    <string name="dns_server_list_empty">Дадайце хаця б адзін сервер.</string>
+    <string name="dns_server_drag">Перацягніце, каб змяніць парадак</string>
     <string name="juicity_pinned_certchain_sha256">SHA256 ланцужка сертыфікатаў</string>
     <string name="juicity_pinned_certchain_sha256_hint">Хэш ланцужка сертыфікатаў, які выводзіць juicity-server; замяняе праверку праз CA, нават з «Дазволіць небяспечна»</string>
     <string name="validation_juicity_certchain">Укажыце 32-байтавы хэш ланцужка сертыфікатаў у base64 (44 сімвалы, што заканчваюцца на =), як яго выводзіць juicity-server.</string>
@@ -2765,9 +2760,9 @@
     <string name="chain_step_untestable">Ланцугі са звяном з уласнай канфігурацыяй Xray нельга праверыць</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">Спосаб выбару</string>
-    <string name="autosel_strategy_latency">Найхутчэйшы і найстабільнейшы</string>
+    <string name="autosel_strategy_latency">Найхутчэйшы</string>
     <string name="autosel_strategy_priority">У парадку прыярытэту</string>
-    <string name="autosel_strategy_latency_tip">Найхутчэйшы і найстабільнейшы: заўсёды выкарыстоўваць профіль з найлепшымі вымярэннямі сярод усіх.</string>
+    <string name="autosel_strategy_latency_tip">Найхутчэйшы: заўсёды выкарыстоўваць профіль з найлепшымі вымярэннямі сярод усіх.</string>
     <string name="autosel_strategy_priority_tip">У парадку прыярытэту: узроўні ніжэй перабіраюцца зверху ўніз. Выбар застаецца на найвышэйшым узроўні, дзе ёсць працоўны профіль, і вяртаецца вышэй, як толькі вышэйшы ўзровень зноў запрацуе.</string>
     <string name="autosel_tier_add">Дадаць узровень</string>
     <string name="autosel_tiers_hint">Профіль належыць да першага ўзроўню, якому адпавядае, а профілі, што не адпавядаюць ніводнаму, ідуць апошнімі. Выбар выкарыстоўвае найвышэйшы ўзровень з працоўным профілем, а ўнутры яго — профіль з найлепшымі вымярэннямі.</string>
@@ -2786,22 +2781,8 @@
     <string name="autosel_tier_any_profile">любы профіль</string>
     <string name="autosel_tier_fallback">узровень %d</string>
     <string name="autosel_tier_short">У%d</string>
-    <string name="autosel_failback_checks">Вяртацца вышэй пасля</string>
-    <string name="autosel_failback_checks_tip">У парадку прыярытэту: калі профіль з вышэйшага ўзроўню зноў працуе, выбар вяртаецца да яго толькі пасля таго, як той пройдзе столькі праверак запар. Не можа быць больш, чым захаваных узораў.</string>
-    <plurals name="autosel_checks">
-        <item quantity="one">%d праверка</item>
-        <item quantity="few">%d праверкі</item>
-        <item quantity="many">%d праверак</item>
-        <item quantity="other">%d праверак</item>
-    </plurals>
-    <string name="autosel_failback_delay">Без збояў на працягу</string>
-    <string name="autosel_failback_delay_tip">У парадку прыярытэту: профіль з вышэйшага ўзроўню таксама павінен пратрымацца столькі часу без няўдалых праверак і злучэнняў, перш чым выбар вернецца да яго.</string>
-    <string name="autosel_failback_interrupt">Рваць злучэнні пры вяртанні вышэй</string>
-    <string name="autosel_failback_interrupt_tip">У парадку прыярытэту. Выключана: ужо адкрытыя злучэнні застаюцца на сваім профілі, і толькі новыя пераходзяць на вышэйшы ўзровень. Уключана: усё пераходзіць вышэй адначасова.</string>
     <string name="autosel_passive">Вучыцца на рэальных злучэннях</string>
     <string name="autosel_passive_tip">Ацэньваць профілі таксама па злучэннях, якія вашы праграмы ўсталёўваюць праз іх, а не толькі па праверках здароўя. Злучэнне лічыцца няўдалым, калі яно не атрымала ніводнага адказу або не змагло падлучыцца. Калі нядаўнія злучэнні праз профіль не ўдаюцца хаця б тры разы і не радзей, чым удаюцца, профіль часова адхіляецца, нават калі яго праверкі праходзяць: на хвіліну, пры кожным паўторы ўдвая даўжэй, але не больш за 16 хвілін. Кожны сайт таксама застаецца на профілі, які апошнім спрацаваў для яго, і пазбягае таго, які толькі што яго падвёў. Пакуль ідзе рэальны трафік, праверак здароўя адпраўляецца менш.</string>
-    <string name="autosel_site_memory">Памятаць выбар для сайтаў на</string>
-    <string name="autosel_site_memory_tip">Як доўга сайт працягвае выкарыстоўваць профіль, які апошнім спрацаваў для яго, і працягвае пазбягаць профілю, які яго падвёў.</string>
     <string name="autosel_balance_hint_priority">У рэжыме «У парадку прыярытэту» трафік размяркоўваецца толькі паміж гатовымі профілямі бягучага ўзроўню.</string>
     <string name="autosel_plan_by_tier">Па ўзроўнях: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2812,7 +2793,6 @@
     <string name="autosel_plan_truncated_tiers">Больш за %d профіляў адпавядаюць, таму на кожным узроўні захоўваюцца толькі найлепшыя па рэйтынгу.</string>
     <string name="validation_autoselector_tier_match">Выберыце групу або ўвядзіце шаблон назвы для гэтага ўзроўню.</string>
     <string name="validation_autoselector_tier_count">Дадайце хаця б адзін узровень, каб выбіраць у парадку прыярытэту.</string>
-    <string name="validation_autoselector_failback_checks">Нельга патрабаваць больш праверак запар, чым захоўваецца (%1$s).</string>
     <string name="autosel_status_on_tier">Аўтаматычны выбар на %1$s, узровень %2$d (%3$d з %4$d працуюць)</string>
     <string name="autosel_detail_suspect">%d пад падазрэннем</string>
     <string name="autosel_state_suspect">Пад падазрэннем</string>
@@ -2854,6 +2834,17 @@
     <string name="service_ip_risk">рызыка %d</string>
     <string name="service_check_checked_now">Праверана толькі што</string>
     <string name="service_check_checked_at">Праверана %s</string>
+    <string name="service_check_services">Сэрвісы</string>
+    <string name="service_check_services_all">Усе сэрвісы</string>
+    <string name="service_check_services_count">%1$d з %2$d сэрвісаў</string>
+    <string name="service_check_none_selected">Сэрвісы не выбраны</string>
+    <string name="service_check_services_unknown">Не ўдалося загрузіць спіс сэрвісаў</string>
+    <string name="service_check_current">Праверка сэрвісаў бягучага злучэння</string>
+    <string name="service_category_ai">ШІ</string>
+    <string name="service_category_streaming">Стрымінг</string>
+    <string name="service_category_social">Сацсеткі</string>
+    <string name="service_category_reputation">Рэпутацыя IP</string>
+    <string name="service_category_other">Іншае</string>
     <string name="validation_chain_selector_twice">У ланцугу можа быць толькі адзін аўтаматычны выбар.</string>
     <string name="validation_chain_selector_custom">Аўтаматычны выбар не можа быць у адным ланцугу з карыстальніцкай канфігурацыяй.</string>
     <string name="chain_step_selector">Ланцугі з аўтаматычным выбарам нельга праверыць па звёнах; праверце замест гэтага яго ўдзельнікаў</string>
@@ -2861,6 +2852,8 @@
     <string name="autosel_notice_exhausted_upstream">Кожны профіль у запуску перастаў працаваць праз звёны перад ім — аднаўленне з наступнымі кандыдатамі.</string>
     <string name="validation_route_outbound_chain_selector">Правілы маршрутызацыі не могуць выкарыстоўваць ланцуг «%1$s»: у ім ёсць аўтаматычны выбар, таму яго можна толькі запусціць. Абярыце іншы выхад.</string>
     <string name="route_outbound_chain_selector">Профіль маршрутызацыі накіроўвае трафік у %1$s, дзе ёсць аўтаматычны выбар; такі ланцуг можна толькі запусціць, але не выкарыстоўваць у правілах маршрутызацыі</string>
+    <string name="xray_full_config_tag_clash">Уласная канфігурацыя Xray выкарыстоўвае тэг «%1$s», які Throne таксама стварае для іншага профілю Xray; перайменуйце яго ва ўласнай канфігурацыі</string>
+    <string name="xray_full_config_selector_clash">Селектар «%1$s» уласнай канфігурацыі Xray таксама адпавядае «%2$s», які Throne стварае для іншага профілю Xray; зрабіце селектар больш дакладным ва ўласнай канфігурацыі</string>
     <string name="grp_filter_countries">Краіны</string>
     <string name="grp_filter_countries_tip">Краіны выхаду, якія трэба пакінуць (напрыклад, HK,JP) або выдаліць (напрыклад, !RU).</string>
     <string name="grp_filter_countries_hint">напрыклад, HK,JP або !RU</string>
@@ -2904,4 +2897,8 @@
     <string name="vpn_auth_submitting">Выконваецца ўваход…</string>
     <string name="vpn_auth_gone">Гэты запыт уваходу больш не чакае адказу.</string>
     <string name="vpn_auth_no_browser">Няма праграмы, якая можа адкрыць гэты адрас.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">Выкарыстоўвайце двухлітарны код краіны, напрыклад US.</string>
+    <string name="validation_psiphon_ignored">Праігнаравана %1$s: профілі Psiphon прымаюць толькі рэгіён.</string>
+    <string name="exit_runs_over_itself">Выбраны профіль ужо выходзіць праз %1$s, таму выхад %1$s не можа працаваць паверх яго. Выберыце іншы выхад у раздзеле «Налады › Маршрутызацыя › Выхад».</string>
 </resources>

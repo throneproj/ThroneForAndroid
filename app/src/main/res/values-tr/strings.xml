@@ -13,8 +13,8 @@
     <string name="connection_test_available">HTTPS: %d ms</string>
     <string name="connection_test_testing">Test ediliyor…</string>
     <string name="speed">%s/s</string>
-    <string name="speed_detail">Vekil Sunucu: %1$s↑ %2$s↓
-\nDirekt: %3$s↑ %4$s↓</string>
+    <string name="speed_detail">Vekil Sunucu: ↓%2$s ↑%1$s
+\nDirekt: ↓%4$s ↑%3$s</string>
     <string name="allow_insecure_sum">Sertifika doğrulamasını devre dışı bırakır, Etkinleştirildikten sonra yapılandırma düz metin olarak korunur</string>
     <string name="allow_insecure">Güvenliksiz Bağlantıyı Etkinleştir</string>
     <string name="security_settings">Güvenlik Ayarları</string>
@@ -346,9 +346,9 @@
     <string name="tls_fragment_fallback_delay">Parça geri dönüş gecikmesi</string>
     <string name="tls_record_fragment">TLS kayıt parçası</string>
     <string name="tls_tricks">TLS hileleri</string>
-    <string name="enable_reality">Reality\'yi etkinleştir</string>
-    <string name="reality_public_key">Reality açık anahtarı</string>
-    <string name="reality_short_id">Reality kısa kimliği</string>
+    <string name="enable_reality">REALITY\'yi etkinleştir</string>
+    <string name="reality_public_key">REALITY açık anahtarı</string>
+    <string name="reality_short_id">REALITY kısa kimliği</string>
     <string name="vmess_global_padding">Genel dolgu</string>
     <string name="vmess_authenticated_length">Kimliği doğrulanmış uzunluk</string>
     <string name="transport_settings">Taşıma ayarları</string>
@@ -439,7 +439,7 @@
     <string name="xray_xdns_resolvers_hint">Satır başına bir tane. Finalmask içindeki çözümleyicilerin yerini alır; boşsa onlar korunur.</string>
     <string name="xray_pinned_peer_cert_sha256">Sabitlenmiş eş sertifikası SHA256</string>
     <string name="xray_verify_peer_cert_by_name">Eş sertifikasını ada göre doğrula</string>
-    <string name="reality_settings">Reality ayarları</string>
+    <string name="reality_settings">REALITY ayarları</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="xray_mux_concurrency">Eşzamanlılık</string>
     <string name="xray_mux_concurrency_hint">Bir bağlantının, başka bir bağlantı açılmadan önce taşıdığı akış sayısı. 0, Xray\'in varsayılanı olan 8\'i kullanır; -1 ise TCP\'yi mux dışından gönderir.</string>
@@ -700,7 +700,6 @@
     <string name="direct_test_url">Doğrudan test URL\'si</string>
     <string name="direct_test_url_sum">Ölü bir bağlantıyı ölü sunuculardan ayırt etmek için herhangi bir vekil sunucu olmadan getirilir. Sistem ağ durumunu kullanmak için boş bırakın.</string>
     <string name="direct_test_url_empty">sistem ağ durumu</string>
-    <string name="speed_test_mode_country">Yalnızca ülke</string>
     <string name="net_use_proxy">Vekil sunucu kullan</string>
     <string name="net_use_proxy_sum">Abonelik ve güncelleme isteklerini yerel vekil sunucu üzerinden gönder</string>
     <string name="net_insecure">TLS hatalarını yoksay</string>
@@ -709,14 +708,14 @@
     <string name="log_buffer_size">Günlük tampon boyutu (kb)</string>
     <string name="enable_stats">Bağlantı istatistikleri</string>
     <string name="enable_stats_sum">Bağlantıları ve işlemlerini izle</string>
-    <string name="disable_traffic_stats">Trafik istatistiklerini devre dışı bırak</string>
+    <string name="disable_traffic_stats">Trafik sayaçlarını devre dışı bırak</string>
     <string name="disable_traffic_stats_sum">Profil trafiği sayılmaz</string>
     <string name="listen_port">Dinleme portu</string>
     <string name="listen_address">Dinleme adresi</string>
     <string name="clash_api_secret">Gizli anahtar</string>
     <string name="xray_vless_preference">Xray VLESS tercihi</string>
     <string name="xray_vless_xhttp_only">Yalnızca XHTTP</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP ve Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP ve REALITY</string>
     <string name="xray_vless_all">Tüm VLESS</string>
     <string name="skip_cert_sum">Varsayılan olarak TLS sertifika doğrulamasını atla (allowInsecure)</string>
     <string name="use_mozilla_certs">Mozilla sertifika deposunu kullan</string>
@@ -830,7 +829,7 @@
     <string name="route_profile_name">Ad</string>
     <string name="route_profile_default_outbound">Varsayılan giden</string>
     <string name="route_profile_remote_source">Uzak kaynak</string>
-    <string name="route_profile_remote_rules_note">Her güncelleme bu profilin kurallarını URL\'deki kurallarla değiştirir, bu yüzden burada eklediğiniz veya değiştirdiğiniz kurallar kaybolur. Kendi kurallarınızı korumak için rota profilleri listesinde Çoğalt\'ı kullanın: çoğaltılan profil, hiçbir zaman güncellenmeyen yerel bir kopyadır.</string>
+    <string name="route_profile_remote_rules_note">Her güncelleme URL\'den gelen kuralları değiştirir, bu yüzden bunlarda yaptığınız düzenlemeler bir sonrakine kadar kalır. Burada eklenen kurallar korunur.</string>
     <string name="route_profile_url">URL</string>
     <string name="route_profile_url_hint">https://… (throne://route bağlantısı, base64 veya JSON)</string>
     <string name="route_profile_auto_update">Otomatik güncelleme</string>
@@ -850,7 +849,7 @@
     </plurals>
     <string name="route_profile_invalid_url_title">Geçersiz URL</string>
     <string name="route_profile_invalid_url">Önce geçerli bir http(s) URL\'si girin.</string>
-    <string name="route_profile_fetch_confirm">Geçerli kurallar URL\'den getirilenlerle değiştirilir.</string>
+    <string name="route_profile_fetch_confirm">URL\'den gelen kurallar, onlarda yaptığınız düzenlemeler dahil, şimdi getirilenlerle değiştirilir. Burada eklenen kurallar korunur.</string>
     <string name="route_profile_fetch_failed">Rota profili getirilemedi</string>
     <string name="route_profile_fetched_title">Getirildi</string>
     <string name="route_profile_fetched_warnings_title">Uyarılarla getirildi</string>
@@ -867,6 +866,8 @@
     <string name="route_rule_action">Eylem</string>
     <string name="route_rule_outbound">Giden</string>
     <string name="route_rule_missing_server">Eksik sunucu (#%d)</string>
+    <string name="route_outbound_no_exit">Çıkışsız vekil</string>
+    <string name="route_outbound_no_exit_hint">Yalnızca bir çıkış açıkken Vekil\'den farklıdır (Ayarlar › Yönlendirme › Çıkış): bu siteler onu atlar ve seçili profil üzerinden çıkar.</string>
     <string name="route_rule_reject_method">Ret yöntemi</string>
     <string name="route_rule_strategy">Çözümleme stratejisi</string>
     <string name="route_rule_override_destination">Hedefi geçersiz kıl</string>
@@ -917,8 +918,8 @@
     <string name="route_rule_any">Herhangi</string>
     <string name="route_rule_invalid_title">Geçersiz kural</string>
     <string name="route_rule_unknown_rule_sets">Bilinmeyen kural setleri: %s\n\nKural seti listesinden ad seçin veya bir .srs dosyasının URL\'sini kullanın.</string>
-    <string name="route_rule_catch_all_title">Koşul yok</string>
-    <string name="route_rule_catch_all">Bu kuralın koşulu yok, bu yüzden her bağlantıya uyar. Yine de kaydedilsin mi?</string>
+    <string name="route_rule_default_name">Kural %d</string>
+    <string name="route_rule_dns_queries">DNS sorguları</string>
     <string name="rule_set_picker_title">Kural setleri</string>
     <string name="rule_set_search">Kural seti ara…</string>
     <string name="rule_set_add_url">URL ekle</string>
@@ -958,7 +959,11 @@
     <string name="grp_front_proxy">Ön vekil sunucu</string>
     <string name="grp_landing_proxy">İniş vekil sunucusu</string>
     <string name="grp_none">Hiçbiri</string>
-    <string name="grp_missing_profile">Profil #%1$d (eksik)</string>
+    <string name="grp_missing_profile">Eksik profil (#%1$d)</string>
+    <string name="hop_refs_warning">Bu gruplar silinen bir profili ön veya iniş vekil sunucusu olarak kullanıyor. Profil bu gruplardan kaldırılacak, bu yüzden gruplar onsuz bağlanacak:</string>
+    <string name="hop_refs_cleared">Bu gruplar silinmiş bir profili ön veya iniş vekil sunucusu olarak kullanıyordu. Profil bu gruplardan kaldırıldı, bu yüzden gruplar artık onsuz bağlanıyor:</string>
+    <string name="hop_ref_front">%1$s (ön vekil sunucu)</string>
+    <string name="hop_ref_landing">%1$s (iniş vekil sunucusu)</string>
     <string name="grp_route_profile">Rota profili</string>
     <string name="grp_route_profile_default">Varsayılan (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (bu abonelikten)</string>
@@ -1000,7 +1005,7 @@
     <string name="grp_settings_user_agent">Kullanıcı aracısı</string>
     <string name="grp_sub_auto_update">Abonelik otomatik güncellemesi</string>
     <string name="grp_sub_auto_update_interval">Aralık (dakika, 30\'dan azsa geçersiz)</string>
-    <string name="grp_sub_clear">Aboneliği güncellemeden önce sunucuları temizle</string>
+    <string name="grp_sub_clear">Aboneliği güncellemeden önce profilleri temizle</string>
     <string name="grp_sub_show_change_popup">Manuel abonelik güncellemesinden sonra değişiklikler penceresini göster</string>
     <string name="grp_sub_show_change_popup_tip">Etkinleştirildiğinde, manuel abonelik güncellemesinden sonra eklenen / güncellenen / silinen profilleri listeleyen bir pencere gösterilir. Aynı bilgi her zaman günlüğe yazılır.</string>
     <string name="grp_sub_send_hwid">Abonelik güncellenirken HWID, cihaz modeli ve OS sürümü göndermeyi etkinleştir</string>
@@ -1139,7 +1144,7 @@
     <string name="confirm_auto_select_apps">Vekil sunucu uygulamaları otomatik seçilsin mi?</string>
     <string name="profiles_no_duplicates">Yinelenen profil bulunamadı.</string>
     <string name="profiles_no_unavailable">Kullanılamayan profil bulunamadı.</string>
-    <string name="profiles_no_insecure">Güvenliksiz yapılandırma bulunamadı.</string>
+    <string name="profiles_no_insecure">Güvenliksiz profil bulunamadı.</string>
     <string name="profiles_running_kept">Çalışan profil korundu.</string>
     <string name="profiles_delete_failed">Profiller kaldırılamadı.</string>
     <string name="profiles_test_busy">Son test tam olarak bitmedi, lütfen bekleyin.</string>
@@ -1150,7 +1155,11 @@
     </plurals>
     <string name="profiles_select_all">Tümünü seç</string>
     <string name="profiles_move_to_group">Gruba taşı</string>
-    <string name="profiles_move_no_target">Taşınacak başka bir temel grup yok.</string>
+    <string name="import_target_subscription">Bu grup bir abonelik: sonraki güncellemesi içine aktarılan profilleri kaldırır. Başka bir grup seçin, ardından yeniden içe aktarın.</string>
+    <string name="import_target_archived">Bu grup arşivlenmiş. Başka bir grup seçin, ardından yeniden içe aktarın.</string>
+    <string name="import_target_gone">Bu grup artık yok.</string>
+    <string name="profiles_move_target_subscription">Bir abonelik grubunun sonraki güncellemesi içine taşınan profilleri kaldırır. Başka bir grup seçin.</string>
+    <string name="profiles_move_source_updating">Bu grubun aboneliği güncelleniyor. Bittiğinde yeniden deneyin.</string>
     <plurals name="profiles_moved">
         <item quantity="one">%1$d profil %2$s grubuna taşındı</item>
         <item quantity="other">%1$d profil %2$s grubuna taşındı</item>
@@ -1220,9 +1229,7 @@
     <string name="test_panel_summary_none_working">hiçbiri çalışmıyor</string>
     <string name="test_panel_summary_resolved">%2$d ülkede %1$d çözümlendi</string>
     <string name="test_panel_summary_none_resolved">hiçbiri çözümlenmedi</string>
-    <string name="test_panel_summary_working_countries">%2$d ülkede %1$d çalışıyor</string>
     <string name="test_panel_current_unavailable">Kullanılamıyor: %s</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_failure_empty">Test edilecek bir şey yok</string>
     <string name="test_panel_failure_busy">Başka bir test hâlâ çalışıyor</string>
     <string name="test_panel_failure_unreachable">Test servisi yanıt vermedi</string>
@@ -1252,7 +1259,7 @@
     <string name="test_panel_select_description">Seç %1$s, %2$s</string>
     <string name="test_panel_country_description">%1$s: %2$d</string>
     <string name="test_engine_kind_url">URL testi</string>
-    <string name="test_engine_kind_ip">IP testi</string>
+    <string name="test_engine_kind_ip">Çıkış IP testi</string>
     <string name="test_engine_kind_speed">Hız testi</string>
     <string name="test_engine_title">%1$s · %2$s</string>
     <string name="test_engine_scope_current">Mevcut bağlantı</string>
@@ -1264,7 +1271,7 @@
     <string name="test_engine_fg_subscriptions">Abonelikler güncelleniyor…</string>
     <string name="action_auto_selector">Otomatik seçici</string>
     <string name="autosel_title">Otomatik seçici</string>
-    <string name="autosel_group">Sunucular şuradan</string>
+    <string name="autosel_group">Profiller şuradan</string>
     <string name="autosel_group_archived">%s (arşivlenmiş)</string>
     <string name="autosel_group_missing">Eksik grup (#%d)</string>
     <string name="autosel_name_filter">Yalnızca eşleşen adlar</string>
@@ -1283,7 +1290,6 @@
     <string name="autosel_plan_skipped">Atlandı: %s.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_list_separator">", "</string>
-    <string name="autosel_plan_kept_unavailable">Her profilin son testi başarısız oldu, bu genellikle sunucular yerine ağın kapalı olduğu anlamına gelir, bu yüzden %d tanesinin tamamı korunur ve yeniden denetlenecektir.</string>
     <string name="autosel_plan_truncated">%d profilden fazlası eşleşiyor, bu yüzden yalnızca en iyi sıralamakiler korunur.</string>
     <string name="autosel_plan_reused">%d tanesinde yeniden kullanılacak yakın tarihli bir test sonucu var.</string>
     <string name="autosel_plan_needs_ranking">Kalanlar seçici başlarken ölçülecektir: yeterli sayıda profil çalışır çalışmaz seçici devreye girer ve tümü ölçüldüğünde tam sıralamaya geçer.</string>
@@ -1299,7 +1305,6 @@
     <string name="autosel_skip_management">OpenVPN veya OpenConnect profili</string>
     <string name="autosel_skip_name">ada göre filtrelendi</string>
     <string name="autosel_skip_country">ülkeye göre filtrelendi</string>
-    <string name="autosel_skip_unavailable">son test başarısız oldu</string>
     <string name="autosel_skip_xray_chained">Xray tam yapılandırması grubun vekil sunucularıyla birleştirilemez</string>
     <string name="autosel_skip_unsupported">bu derlemenin kullanamayacağı tür</string>
     <string name="autosel_advanced">Gelişmiş</string>
@@ -1311,40 +1316,21 @@
     <string name="autosel_country_filter_empty">Herhangi bir ülke (örn. DE,NL,FR)</string>
     <string name="autosel_build_limit">En iyileri çalıştır</string>
     <string name="autosel_build_limit_tip">Çalışan yapılandırmaya kaç profilin yükleneceği. Seçici bunlar arasında yeniden bağlantı olmadan anında geçiş yapar. Yüksek değer daha fazla bellek ve başlangıç süresi demektir.</string>
-    <string name="autosel_pool_cap">En fazla sırala</string>
-    <string name="autosel_pool_cap_tip">Kaç profilin ölçülüp sıralama listesinde tutulacağına dair sert sınır. Çalışan her profil öldüğünde, yedekler bu listeden alınır.</string>
-    <string name="autosel_result_validity">Sonuçlara güvenme süresi</string>
-    <string name="autosel_result_validity_tip">Bu kadar yeni URL testi sonuçları yeniden ölçülmek yerine yeniden kullanılır — grupta kendinizin çalıştırdığı testler dahil, bu yüzden seçiciyi hemen ardından başlatmak işi tekrarlamaz. Daha eski sonuçlar profil hiç test edilmemiş gibi değerlendirilir. Her zaman yeni bir test çalıştırmak için sıfır yapın.</string>
-    <string name="autosel_always_retest">Her zaman yeniden test et</string>
-    <string name="autosel_exclude_unavailable">Başarısız profilleri atla</string>
-    <string name="autosel_exclude_unavailable_tip">Son testi başarısız olan sunucular, sonuç hâlâ güven penceresi içinde olduğu sürece havuzun dışında tutulur. Testleriniz güvenilir değilse ve kararı seçiciye bırakmak istiyorsanız kapatın.</string>
     <string name="autosel_cat_health">Sağlık denetimleri</string>
     <string name="autosel_expected">Hazır tut</string>
     <string name="autosel_expected_tip">Her an çalıştığı doğrulanan kaç profilin tutulacağı, böylece bir arıza anında kapatılabilir. Bunlar dengeleme açıkken trafiğin paylaşıldığı profillerdir de.</string>
-    <string name="autosel_active_size">Yakından denetle</string>
-    <string name="autosel_active_size_tip">En yüksek sıralamalı profiller her aralıkta yeniden denetlenir. Diğerleri de denetlenir, sadece daha yavaş tam taramaya yayılır.</string>
     <string name="autosel_interval">Denetim aralığı</string>
-    <string name="autosel_interval_tip">Yakından denetlenen profillerin ne sıklıkla yeniden ölçüleceği.</string>
-    <string name="autosel_bench_interval">Tam tarama periyodu</string>
-    <string name="autosel_bench_interval_tip">Çalışan her profil üzerinde bir turun ne kadar sürdüğü. Denetimler buna eşit şekilde yayılır, böylece büyük bir havuz asla trafik patlamasına neden olmaz.</string>
-    <string name="autosel_watch_interval">Kullanımdaki profili izle</string>
-    <string name="autosel_watch_interval_tip">Şu anda trafiğinizi taşıyan profilin kendi başına ne sıklıkla denetleneceği. Bunu kısa tutun: bir sunucu bağlantı kabul ederken çalışmayı durdurabilir ve bir sonraki tam denetime kadar kimse fark etmeyebilir.</string>
-    <string name="autosel_sampling">Tutulan örnekler</string>
-    <string name="autosel_sampling_tip">Sıralama, bu kadar son denetimin ortalamasını ve gecikme değişkenliğini kullanır, böylece tek bir kötü sonuç iyi bir sunucuyu geriletemez.</string>
+    <string name="autosel_interval_tip">En üst sıradaki profillerin ne sıklıkla yeniden ölçüleceği.</string>
     <string name="autosel_cat_switching">Geçiş</string>
     <string name="autosel_tolerance">Geçiş toleransı</string>
     <string name="autosel_tolerance_tip">Başka bir profil, seçici ona geçmeden önce en az bu kadar hızlı olmalıdır. Daha yüksek değerler daha az geçiş demektir.</string>
     <string name="autosel_max_rtt">En fazla gecikme</string>
-    <string name="autosel_max_rtt_tip">Bundan yavaş profiller, daha iyisi olmasa bile asla seçilmez.</string>
+    <string name="autosel_max_rtt_tip">Bundan yavaş profiller yalnızca daha hızlı hiçbiri çalışmadığında kullanılır.</string>
     <string name="autosel_no_limit">Sınır yok</string>
-    <string name="autosel_dial_retries">Devralma denemesi</string>
-    <string name="autosel_dial_retries_tip">Seçilen profil bağlanamadığında, uygulama bir hata görmeden önce hemen kaç tane diğerinin deneneceği.</string>
-    <string name="autosel_interrupt">Geçişte bağlantıları kes</string>
-    <string name="autosel_interrupt_tip">Seçici bir profil kötüleştiği veya başarısız olduğu için geçtiğinde uygulanır. Açık: her şey aynı anda yeni profile geçer. Kapalı: devam eden indirmeler eskisinde biter. Dengeleme rotasyonları her durumda bağlantıları asla kesmez.</string>
+    <string name="autosel_interrupt">Bir profil başarısız olduğunda bağlantıları kes</string>
+    <string name="autosel_interrupt_tip">Açık bağlantılar başarısız profilde bitmek yerine hemen taşınır. Daha hızlı bir profile geçiş ve dengeleme rotasyonları bağlantıları asla kesmez.</string>
     <string name="autosel_cat_balance">Yük dengeleme</string>
     <string name="autosel_balance_mode">Mod</string>
-    <string name="autosel_balance_interval">Döndürme periyodu</string>
-    <string name="autosel_balance_interval_tip">Seçicinin bir sonraki hazır profile geçmeden önce bir profilde ne kadar kaldığı.</string>
     <string name="autosel_balance_hint_off">En iyi profil tüm trafiği taşır; diğer hazır profiller doğrulanmış halde tutulur, böylece biri anında devralabilir.</string>
     <string name="autosel_balance_hint_rotate">Yeni bağlantılar her döndürmede başka iyi bir profile geçer; açık olanlara dokunulmaz ve başladıkları yerde biter. Trafik tam olarak sayılır.</string>
     <string name="autosel_balance_hint_connection">Her yeni bağlantı farklı bir profil alabilir. En geniş dağılım, ancak çıkış IP\'niz oturum ortasında değişir ve profil başına trafik yaklaşık hale gelir.</string>
@@ -1361,10 +1347,6 @@
     <plurals name="autosel_profiles">
         <item quantity="one">%d profil</item>
         <item quantity="other">%d profil</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="one">%d dk</item>
-        <item quantity="other">%d dk</item>
     </plurals>
     <plurals name="autosel_seconds">
         <item quantity="one">%d sn</item>
@@ -1444,7 +1426,6 @@
     <string name="autosel_last_ok_short">Tamam %s</string>
     <string name="autosel_row_state">Durum: %s</string>
     <string name="autosel_row_latency">Gecikme: %1$d ms (en iyi %2$d ms, en kötü %3$d ms)</string>
-    <string name="autosel_row_jitter">Titreme: %d ms</string>
     <string name="autosel_row_checks">Denetimler: %1$d / %2$d tamam</string>
     <string name="autosel_row_connects">Bağlantılar: %1$d / %2$d tamam</string>
     <string name="autosel_row_last_ok">Son tamam: %s</string>
@@ -1452,9 +1433,16 @@
     <string name="autosel_row_tested">Son URL testi: %1$s, %2$s</string>
     <string name="autosel_row_untested">Henüz URL test sonucu yok.</string>
     <string name="cag_warp">Cloudflare WARP</string>
-    <string name="warp_settings">WARP</string>
-    <string name="warp_state_on">Açık · %s</string>
-    <string name="warp_state_off">Kapalı</string>
+    <string name="warp_settings">Çıkış</string>
+    <string name="exit_through">Çıkış yolu</string>
+    <string name="exit_server">Seçili profil</string>
+    <string name="exit_server_hint">Trafik, başlattığınız profil üzerinden çıkar.</string>
+    <string name="exit_psiphon_hint">Psiphon, Psiphon Inc. tarafından işletilen ücretsiz bir ağdır ve her VPN sağlayıcısı gibi ziyaret ettiğiniz siteleri görebilir.</string>
+    <string name="exit_tor_hint">Tor Android\'de kullanılamaz, bu yüzden trafik seçili profil üzerinden çıkar.</string>
+    <string name="exit_unavailable">%s (Android\'de kullanılamaz)</string>
+    <string name="psiphon_egress_region">Bölge</string>
+    <string name="psiphon_region_best">En iyi performans</string>
+    <string name="psiphon_egress_region_sum">Psiphon sunucusunun ülkesi; En iyi performans seçimi Psiphon\'a bırakır.</string>
     <string name="warp_enable">WARP\'ı etkinleştir</string>
     <string name="warp_enable_sum">Aşağıdaki yapılandırmanın çıkış olarak kullanılmasını sağlar, WARP dışı VPN\'leri kısıtlayan hizmetleri atlamak için kullanışlıdır</string>
     <string name="warp_mode">Mod</string>
@@ -1543,7 +1531,7 @@
     <string name="backup_part_profiles">Profiller (gruplar ve vekil sunucular)</string>
     <string name="backup_part_routes">Rota profilleri</string>
     <string name="backup_part_settings">Ayarlar</string>
-    <string name="backup_part_otp">OTP profilleri (Android\'de geri yüklenmez)</string>
+    <string name="backup_part_otp">OTP girdileri (Android\'de geri yüklenmez)</string>
     <string name="backup_local_summary">Yedekler Throne masaüstü biçimini (.thrbackup) kullanır: her iki uygulama da geri yükleyebilir. WebDAV bilgileri bu cihazda kalır.</string>
     <string name="backup_create">Yedek oluştur</string>
     <string name="backup_restore">Geri yükle</string>
@@ -1859,9 +1847,9 @@
     <string name="grp_http_version">HTTP sürümü</string>
     <string name="grp_http_version_tip">Otomatik, sunucu sunuyorsa HTTP/2 kullanır. \"Varsayılanı koru\" Ayarlar › Abonelikler\'i izler.</string>
     <string name="grp_update_interval">Güncelleme aralığı (dakika)</string>
-    <string name="grp_update_interval_tip">Bu aboneliğin otomatik güncellemeleri arasındaki dakika, en az 30. Boş bırakmak Ayarlar › Abonelikler\'i izler; orada otomatik güncellemelerin etkin olması gerekir.</string>
+    <string name="grp_update_interval_tip">Bu aboneliğin otomatik güncellemeleri arasındaki dakika, en az 30; Ayarlar › Abonelikler\'de otomatik güncellemeler kapalıyken bile geçerlidir. Boş bırakmak o ayarı izler.</string>
     <string name="grp_server_interval">Sunucu aralığı</string>
-    <string name="grp_server_interval_tip">Abonelik sunucusunun gönderdiği güncelleme aralığını kullan; sunucu göndermiyorsa yukarıdaki aralık geçerlidir. \"Varsayılanı koru\" Ayarlar › Abonelikler\'i izler.</string>
+    <string name="grp_server_interval_tip">Abonelik sunucusunun gönderdiği güncelleme aralığını kullan; Ayarlar › Abonelikler\'de otomatik güncellemeler kapalıyken bile geçerlidir. Sunucu göndermiyorsa yukarıdaki aralık geçerlidir. \"Varsayılanı koru\" o ayarı izler.</string>
     <string name="grp_server_interval_use">Kullan</string>
     <string name="grp_server_interval_ignore">Yok say</string>
     <string name="grp_server_interval_last">Bu sunucu en son %1$d sa gönderdi.</string>
@@ -2128,9 +2116,9 @@
     <string name="validation_tls_pem_private_key">Gizli anahtarı PEM metni olarak yapıştırın, -----BEGIN PRIVATE KEY----- ile başlayarak.</string>
     <string name="validation_tls_pin_base64">Bu onaltılık bir SHA-256; base64 olarak yazın (= ile biten 44 karakter).</string>
     <string name="validation_tls_ech_config">ECH yapılandırma listesini base64 olarak veya tek bir -----BEGIN ECH CONFIGS----- bloğu olarak yapıştırın.</string>
-    <string name="validation_tls_reality_ech">Reality, ECH ile birlikte kullanılamaz. ECH\'yi kapatın veya Reality açık anahtarını temizleyin.</string>
-    <string name="validation_tls_reality_disable_sni">Reality, SNI devre dışı bırakma ile kullanılamaz. SNI devre dışı bırakmayı kapatın.</string>
-    <string name="validation_tls_reality_spoof">Reality, TLS spoof ile birlikte kullanılamaz. TLS Spoof\'u Kapalı yapın.</string>
+    <string name="validation_tls_reality_ech">REALITY, ECH ile birlikte kullanılamaz. ECH\'yi kapatın veya REALITY açık anahtarını temizleyin.</string>
+    <string name="validation_tls_reality_disable_sni">REALITY, SNI devre dışı bırakma ile kullanılamaz. SNI devre dışı bırakmayı kapatın.</string>
+    <string name="validation_tls_reality_spoof">REALITY, TLS spoof ile birlikte kullanılamaz. TLS Spoof\'u Kapalı yapın.</string>
     <string name="validation_tls_pins_with_certificate">Özel bir sertifika, sertifika pinleriyle birlikte kullanılamaz; yalnızca birini bırakın.</string>
     <string name="validation_tls_client_pair">İstemci sertifikasını ve istemci anahtarını birlikte ayarlayın.</string>
     <string name="validation_tls_spoof_needs_sni">TLS spoof için bir SNI gerekir. SNI devre dışı bırakmayı kapatın veya TLS Spoof\'u Kapalı yapın.</string>
@@ -2142,7 +2130,7 @@
     <string name="validation_transport_headers_pairs">Başlıklar sırayla ad ve değer olmalı, | ile ayrılmalıdır, örneğin User-Agent|curl; bu yüzden yok sayıldı.</string>
     <string name="validation_transport_type">sing-box \"%1$s\" taşımasını desteklemez. ws, httpupgrade, http, grpc veya quic kullanın.</string>
     <string name="validation_transport_quic_tls">QUIC taşıması TLS gerektirir. TLS\'yi etkinleştir seçeneğini açın.</string>
-    <string name="validation_transport_quic_reality">Reality, QUIC taşıması ile çalışmaz. Reality anahtarını temizleyin veya başka bir taşıma seçin.</string>
+    <string name="validation_transport_quic_reality">REALITY, QUIC taşıması ile çalışmaz. REALITY anahtarını temizleyin veya başka bir taşıma seçin.</string>
     <string name="validation_transport_quic_utls">uTLS, QUIC taşıması ile kullanılmaz.</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal yalnızca özel çoklama ile çalışır. Çoklama\'yı Özel yapın.</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal için iki hız da gerekir; eksik olan 1 Mbps olarak gönderilir.</string>
@@ -2181,6 +2169,12 @@
     <string name="validation_xray_vless_encryption_mode">mlkem768x25519plus sonrasındaki kısım native, xorpub veya random olmalıdır.</string>
     <string name="validation_xray_vless_encryption_rtt">Moddan sonraki kısım 1rtt veya 0rtt olmalıdır.</string>
     <string name="validation_xray_vless_encryption_key">Dizedeki her anahtar, dolgusuz 32 veya 1184 baytlık URL-safe base64 olmalıdır.</string>
+    <string name="validation_xray_vless_encryption_padding_order">Dolgu bölümlerini anahtarlardan önce koyun.</string>
+    <string name="validation_xray_vless_encryption_mlkem">Dizedeki 1184 baytlık bir anahtar geçerli bir ML-KEM-768 anahtarı değil: dizeyi sunucudan yeniden kopyalayın.</string>
+    <string name="validation_xray_vless_encryption_no_key">Dizede anahtar yok: sunucunun verdiği dizenin tamamını kopyalayın.</string>
+    <string name="validation_xray_vless_padding_format">Her dolgu bölümü, 100-111-1111 gibi tirelerle birleştirilmiş üç sayı olmalıdır.</string>
+    <string name="validation_xray_vless_padding_first">İlk dolgu bölümü, 100-111-1111 gibi en az 100 olasılık ve en az 35 uzunluk gerektirir.</string>
+    <string name="validation_xray_vless_padding_total">Dolgu uzunluklarının toplamı 65553 baytı aşabilir.</string>
     <string name="validation_xray_vless_vision">XTLS Vision, TLS veya REALITY ile raw ağı ya da VLESS şifrelemesi gerektirir: ağı veya güvenliği değiştirin ya da flow\'u temizleyin.</string>
     <string name="validation_xray_xdrive_no_link">XDRIVE\'ın paylaşma bağlantısı biçimi yoktur. Bunun yerine sunucunun JSON yapılandırmasını içe aktarın.</string>
     <string name="validation_xray_xdrive_service">google-drive, s3, template veya local olmalıdır.</string>
@@ -2402,11 +2396,6 @@
     <string name="validation_custom_xray_geodata">Geodata güncelleyicisi içe aktarılan yapılandırmadan kaldırıldı: göndericinin seçtiği adreslerden dosya indirir ve Throne\'un klasöründeki dosyaları değiştirirdi.</string>
     <string name="validation_custom_xray_webhook">Webhook bu yönlendirme kuralından kaldırıldı: eşleşen her bağlantının ayrıntılarını göndericinin seçtiği bir adrese gönderirdi.</string>
     <string name="validation_autoselector_countries">Virgülle ayrılmış iki harfli ülke kodları kullanın, örneğin DE,NL,FR.</string>
-    <string name="validation_autoselector_build_limit">Sıralanandan (%1$s) fazla profil çalıştırılamaz.</string>
-    <string name="validation_autoselector_bench_interval">Tam tarama, denetim aralığından (%1$s sn) daha sık çalışamaz.</string>
-    <string name="validation_autoselector_watch_interval">Kullanılan profili izleme, denetim aralığından (%1$s sn) daha yavaş olamaz.</string>
-    <string name="validation_autoselector_ready_count">Hazır tutulan profil sayısı (%1$s) kadar veya daha fazlasını yakından denetleyin.</string>
-    <string name="validation_autoselector_close_count">Çalıştırılandan (%1$s) fazla profil yakından denetlenemez.</string>
     <string name="validation_chain_empty">Zincire en az bir profil ekleyin.</string>
     <string name="validation_ss_plugin_opts_dangling">Sondaki ters eğik çizginin kaçıracağı bir şey yok.</string>
     <string name="validation_ss_plugin_opts_name">Her seçeneğin bir adı olmalıdır, obfs=http;obfs-host=example.com örneğindeki gibi.</string>
@@ -2510,6 +2499,7 @@
     <string name="validation_route_no_drop_unused">drop yöntemiyle etkisi yoktur.</string>
     <string name="validation_route_ignored_by_action">%1$s kuralı bunu yok sayar; yalnızca şu eylemlere uygulanır: %2$s.</string>
     <string name="validation_route_matches_all">Bu kuralın eşleşme koşulu yok, bu yüzden tüm trafikle eşleşir.</string>
+    <string name="validation_route_catch_all">Bu kuralın koşulu yok, bu yüzden tüm trafiği yakalar. Bir koşul ekleyin ya da kuralı kapatın.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s (\"%2$s\"): %3$s</string>
     <string name="validation_route_rule_warning">Kural \"%1$s\": %2$s</string>
@@ -2557,6 +2547,7 @@
     <string name="validation_millis_or_default">Milisaniye cinsinden tam sayı girin, örneğin %1$s (birimsiz) veya varsayılan için 0.</string>
     <string name="validation_group_update_interval">En az 30 dakika olmalıdır veya varsayılanı korumak için boş bırakın.</string>
     <string name="validation_port_used">%1$s portu zaten şu tarafından kullanılıyor: %2$s. Farklı bir port seçin.</string>
+    <string name="validation_port_reenabled">%1$s, %2$s portunda açılırsa %3$s ile çakışır. Farklı bir port seçin.</string>
     <string name="validation_mtu_ipv6">IPv6 için en az %1$s MTU gerekir; bunun altında sistem IPv6\'yı Tun\'dan çıkarabilir.</string>
     <string name="validation_private_range_all">Bu her adresi kapsar ve Tun\'un hiçbir şeyi yönlendirmemesine yol açar.</string>
     <string name="validation_dns_local_ip">Bir IP adresi kullanın, örneğin 223.5.5.5 veya tls://1.1.1.1: bu sunucu diğerlerinin adlarını çözümler.</string>
@@ -2579,12 +2570,18 @@
     <string name="validation_route_dns_final">Varsayılan DNS sunucusu uzak veya direkt olmalıdır, \"%1$s\" olamaz.</string>
     <string name="validation_route_dns_dropped">Profilin kendi DNS ayarları atıldı, bu yüzden genel ayarları kullanıyor: %1$s</string>
     <string name="route_dns_global_servers">Uzak %1$s, direkt %2$s</string>
-    <string name="dns_server_suggestions">Son kullanılan ve önerilen sunucular</string>
     <string name="warp_api_tls_fragment_title">WARP kaydı için TLS parçalama</string>
     <string name="warp_api_tls_fragment_note">Yalnızca kayıt çalışan bir profil üzerinden değil, doğrudan bağlandığında uygulanır.</string>
     <string name="backup_warn_tor_egress">Yedek, trafiği Android\'de bulunmayan Tor üzerinden çıkarıyor; burada trafik doğrudan seçili sunucu üzerinden çıkar.</string>
     <string name="validation_dns_server_item">Sunucu %1$s (\"%2$s\"): %3$s</string>
-    <string name="dns_server_list_hint">Birden fazla sunucuyu virgülle ayırın: birlikte sorgulanırlar ve ilk yanıt kazanır.</string>
+    <string name="dns_server_add">Sunucu ekle</string>
+    <string name="dns_server_custom">Özel adres</string>
+    <string name="dns_server_recent">Son kullanılanlar</string>
+    <string name="dns_server_address_hint">Adres, ör. tls://1.1.1.1</string>
+    <string name="dns_server_list_race">Birlikte sorgulanır; en hızlı yanıt kazanır.</string>
+    <string name="dns_server_list_primary">Vekil sunucu adreslerini de çözümler</string>
+    <string name="dns_server_list_empty">En az bir sunucu ekleyin.</string>
+    <string name="dns_server_drag">Yeniden sıralamak için sürükleyin</string>
     <string name="juicity_pinned_certchain_sha256">Sertifika zinciri SHA256</string>
     <string name="juicity_pinned_certchain_sha256_hint">juicity-server\'ın yazdırdığı sertifika zinciri karması; Güvenliksiz Bağlantıyı Etkinleştir açıkken bile CA doğrulamasının yerini alır</string>
     <string name="validation_juicity_certchain">Sertifika zincirinin 32 baytlık karmasını juicity-server\'ın yazdırdığı gibi base64 olarak kullanın (= ile biten 44 karakter).</string>
@@ -2636,9 +2633,9 @@
     <string name="chain_step_untestable">Özel Xray yapılandırması atlaması olan zincirler test edilemez</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">Seçim yöntemi</string>
-    <string name="autosel_strategy_latency">En hızlı ve en kararlı</string>
+    <string name="autosel_strategy_latency">En hızlı</string>
     <string name="autosel_strategy_priority">Öncelik sırasıyla</string>
-    <string name="autosel_strategy_latency_tip">En hızlı ve en kararlı: her zaman tümü arasından en iyi ölçülen profil kullanılır.</string>
+    <string name="autosel_strategy_latency_tip">En hızlı: her zaman tümü arasından en iyi ölçülen profil kullanılır.</string>
     <string name="autosel_strategy_priority_tip">Öncelik sırasıyla: aşağıdaki kademeler yukarıdan başlayarak denenir. Seçici, çalışan bir profili olan en yüksek kademede kalır ve daha yüksek bir kademe yeniden çalışınca yukarı geri döner.</string>
     <string name="autosel_tier_add">Kademe ekle</string>
     <string name="autosel_tiers_hint">Bir profil eşleştiği ilk kademeye aittir; hiçbiriyle eşleşmeyen profiller en sona gelir. Seçici, çalışan bir profili olan en yüksek kademeyi ve onun içinde en iyi ölçülen profili kullanır.</string>
@@ -2657,20 +2654,8 @@
     <string name="autosel_tier_any_profile">herhangi bir profil</string>
     <string name="autosel_tier_fallback">kademe %d</string>
     <string name="autosel_tier_short">K%d</string>
-    <string name="autosel_failback_checks">Yukarı dönmek için gereken</string>
-    <string name="autosel_failback_checks_tip">Öncelik sırasıyla: daha yüksek bir kademeden bir profil yeniden çalışınca, seçici ona ancak profil bu sayıda denetimi art arda geçtikten sonra döner. Tutulan örnek sayısından fazla olamaz.</string>
-    <plurals name="autosel_checks">
-        <item quantity="one">%d denetim</item>
-        <item quantity="other">%d denetim</item>
-    </plurals>
-    <string name="autosel_failback_delay">Hatasız geçmesi gereken süre</string>
-    <string name="autosel_failback_delay_tip">Öncelik sırasıyla: seçici ona geri dönmeden önce, daha yüksek kademedeki bir profilin bu süre boyunca başarısız bir denetim ya da bağlantı yaşamaması da gerekir.</string>
-    <string name="autosel_failback_interrupt">Yukarı dönerken bağlantıları kes</string>
-    <string name="autosel_failback_interrupt_tip">Öncelik sırasıyla. Kapalı: zaten açık olan bağlantılar kendi profillerinde kalır, yalnızca yenileri daha yüksek kademeye geçer. Açık: her şey aynı anda yukarı geçer.</string>
     <string name="autosel_passive">Gerçek bağlantılardan öğren</string>
     <string name="autosel_passive_tip">Profilleri yalnızca sağlık denetimleriyle değil, uygulamalarınızın onlar üzerinden kurduğu bağlantılarla da değerlendirir. Hiç yanıt alamayan ya da bağlanamayan bir bağlantı başarısız sayılır. Bir profil üzerinden yapılan son bağlantılar en az başarılı oldukları kadar sık ve üç ya da daha fazla kez başarısız olursa, denetimleri geçse bile profil kenara alınır: bir dakikalığına, her tekrarında iki katı süreyle, en fazla 16 dakikaya kadar. Her web sitesi de kendisi için en son çalışan profile bağlı kalır ve az önce kendisinde başarısız olan profilden kaçınır. Gerçek trafik akarken daha az sağlık denetimi gönderilir.</string>
-    <string name="autosel_site_memory">Site başına seçimleri hatırlama süresi</string>
-    <string name="autosel_site_memory_tip">Bir web sitesinin kendisi için en son çalışan profili ne kadar süre kullanmaya devam edeceği ve kendisinde başarısız olan bir profilden ne kadar süre kaçınacağı.</string>
     <string name="autosel_balance_hint_priority">Öncelik sırasıyla seçimde trafik yalnızca kullanılan kademenin hazır profillerine yayılır.</string>
     <string name="autosel_plan_by_tier">Kademeye göre: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2681,7 +2666,6 @@
     <string name="autosel_plan_truncated_tiers">%d profilden fazlası eşleşiyor, bu yüzden her kademeden yalnızca en iyi sıralamadakiler korunur.</string>
     <string name="validation_autoselector_tier_match">Bu kademe için bir grup seçin veya bir ad deseni girin.</string>
     <string name="validation_autoselector_tier_count">Öncelik sırasıyla seçmek için en az bir kademe ekleyin.</string>
-    <string name="validation_autoselector_failback_checks">Art arda gereken denetim sayısı tutulan örnek sayısından (%1$s) fazla olamaz.</string>
     <string name="autosel_status_on_tier">Otomatik seçici %1$s üzerinde, kademe %2$d (%4$d taneden %3$d çalışıyor)</string>
     <string name="autosel_detail_suspect">%d şüpheli</string>
     <string name="autosel_state_suspect">Şüpheli</string>
@@ -2781,6 +2765,17 @@
     <string name="service_ip_risk">risk %d</string>
     <string name="service_check_checked_now">Az önce denetlendi</string>
     <string name="service_check_checked_at">%s denetlendi</string>
+    <string name="service_check_services">Hizmetler</string>
+    <string name="service_check_services_all">Tüm hizmetler</string>
+    <string name="service_check_services_count">%2$d hizmetten %1$d tanesi</string>
+    <string name="service_check_none_selected">Hiçbir hizmet seçilmedi</string>
+    <string name="service_check_services_unknown">Hizmet listesi yüklenemedi</string>
+    <string name="service_check_current">Mevcut bağlantının hizmet denetimi</string>
+    <string name="service_category_ai">Yapay zekâ</string>
+    <string name="service_category_streaming">Yayın</string>
+    <string name="service_category_social">Sosyal</string>
+    <string name="service_category_reputation">IP itibarı</string>
+    <string name="service_category_other">Diğer</string>
     <string name="validation_chain_selector_twice">Bir zincirde yalnızca bir otomatik seçici olabilir.</string>
     <string name="validation_chain_selector_custom">Otomatik seçici, özel bir yapılandırmayla aynı zincirde olamaz.</string>
     <string name="chain_step_selector">Otomatik seçici içeren zincirler atlama atlama test edilemez; bunun yerine üyelerini test edin</string>
@@ -2788,6 +2783,8 @@
     <string name="autosel_notice_exhausted_upstream">Çalışan her profil önündeki atlamalar üzerinden çalışmayı durdurdu — sonraki adaylarla yeniden oluşturuluyor.</string>
     <string name="validation_route_outbound_chain_selector">\"%1$s\" zinciri yönlendirme kurallarında kullanılamaz: otomatik seçici içerdiği için yalnızca başlatılabilir. Başka bir giden bağlantı seçin.</string>
     <string name="route_outbound_chain_selector">Yönlendirme profili trafiği %1$s öğesine gönderiyor ve bu öğe bir otomatik seçici içeriyor; böyle bir zincir yalnızca başlatılabilir, yönlendirme kurallarında kullanılamaz</string>
+    <string name="xray_full_config_tag_clash">Özel Xray yapılandırması \"%1$s\" etiketini kullanıyor; Throne bu etiketi başka bir Xray profili için de oluşturuyor. Özel yapılandırmada yeniden adlandırın</string>
+    <string name="xray_full_config_selector_clash">Özel Xray yapılandırmasının \"%1$s\" seçicisi, Throne\'un başka bir Xray profili için oluşturduğu \"%2$s\" ile de eşleşiyor; seçiciyi özel yapılandırmada daha belirgin hale getirin</string>
     <string name="grp_filter_countries">Ülkeler</string>
     <string name="grp_filter_countries_tip">Tutulacak çıkış ülkeleri (ör. HK,JP) veya kaldırılacaklar (ör. !RU).</string>
     <string name="grp_filter_countries_hint">ör. HK,JP veya !RU</string>
@@ -2829,4 +2826,8 @@
     <string name="vpn_auth_submitting">Oturum açılıyor…</string>
     <string name="vpn_auth_gone">Bu oturum açma isteği artık beklemede değil.</string>
     <string name="vpn_auth_no_browser">Bu adresi açabilecek uygulama yok.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">US gibi iki harfli bir ülke kodu kullanın.</string>
+    <string name="validation_psiphon_ignored">%1$s yok sayıldı: Psiphon profilleri yalnızca bir bölge alır.</string>
+    <string name="exit_runs_over_itself">Seçili profil zaten %1$s üzerinden çıkıyor, bu yüzden %1$s çıkışı onun üzerinden çalışamaz. Ayarlar › Yönlendirme › Çıkış bölümünden başka bir çıkış seçin.</string>
 </resources>

@@ -34,7 +34,7 @@ object LogExport {
         SettingsRegistry.LOG_LEVEL, SettingsRegistry.XRAY_LOG_LEVEL, SettingsRegistry.MUX_DEFAULT_ON,
         SettingsRegistry.XRAY_MUX_DEFAULT_ON, SettingsRegistry.FRAGMENT_DEFAULT_ON,
         SettingsRegistry.FRAGMENT_IMPLEMENTATION, SettingsRegistry.TLS_TRICKS_DEFAULT_ON,
-        SettingsRegistry.UTLS_FINGERPRINT, SettingsRegistry.NET_USE_PROXY, SettingsRegistry.ENABLE_WARP,
+        SettingsRegistry.UTLS_FINGERPRINT, SettingsRegistry.NET_USE_PROXY, SettingsRegistry.EXIT_THROUGH,
         SettingsRegistry.CURRENT_ROUTE_ID,
     ).map { it.key } + listOf(Key.PROXY_APPS, Key.BYPASS_MODE, Key.METERED_NETWORK, Key.ALLOW_BYPASS)
 

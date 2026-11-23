@@ -35,7 +35,7 @@
     <string name="security_settings">TLS 보안 설정</string>
     <string name="allow_insecure">안전하지 않은 연결 허용</string>
     <string name="allow_insecure_sum">인증서 확인을 비활성화합니다. 활성화하면 이 구성은 평문만큼만 안전합니다</string>
-    <string name="speed_detail">프록시: %1$s↑ %2$s↓\n직접: %3$s↑ %4$s↓</string>
+    <string name="speed_detail">프록시: ↓%2$s ↑%1$s\n직접: ↓%4$s ↑%3$s</string>
     <string name="speed">%s/s</string>
     <string name="connection_test_testing">테스트 중…</string>
     <string name="connection_test_available">HTTPS: %d ms</string>
@@ -393,8 +393,6 @@
     <string name="auto_connect_superseded">상시 VPN이 우선함</string>
     <string name="auto_update_interval">업데이트 간격</string>
     <string name="auto_update_interval_sum">%d분</string>
-    <string name="autosel_active_size">집중 확인</string>
-    <string name="autosel_active_size_tip">상위 프로필은 간격마다 다시 확인됩니다. 나머지도 확인되지만 더 느린 전체 스캔에 분산됩니다.</string>
     <string name="autosel_advanced">고급</string>
     <string name="autosel_advanced_hide">고급 옵션 숨기기</string>
     <string name="autosel_advanced_show">여기에는 모두 작동하는 기본값이 있습니다. 선택기가 측정하고 전환하는 방식을 조정하고 싶을 때만 열으세요.</string>
@@ -402,18 +400,13 @@
     <string name="autosel_ago_hours">%d시간 전</string>
     <string name="autosel_ago_minutes">%d분 전</string>
     <string name="autosel_ago_seconds">%d초 전</string>
-    <string name="autosel_always_retest">항상 재테스트</string>
     <string name="autosel_back_to_automatic">자동으로 돌아가기</string>
     <string name="autosel_balance">최상위 프로필 간 트래픽 분산</string>
     <string name="autosel_balance_hint_connection">새 연결마다 다른 프로필이 사용될 수 있습니다. 분산은 가장 넓지만 세션 중간에 나가는 IP가 바뀌고 프로필별 트래픽은 근사치가 됩니다.</string>
     <string name="autosel_balance_hint_off">최상위 프로필이 모든 트래픽을 처리하고, 다른 준비된 프로필은 검증된 상태로 유지되어 즉시 인계할 수 있습니다.</string>
     <string name="autosel_balance_hint_rotate">회전할 때 새 연결은 다른 양호한 프로필로 이동합니다. 열려 있는 연결은 그대로 두고 시작한 프로필에서 완료됩니다. 트래픽은 정확하게 집계됩니다.</string>
-    <string name="autosel_balance_interval">회전 간격</string>
-    <string name="autosel_balance_interval_tip">선택기가 다음 준비된 프로필로 이동하기 전까지 한 프로필에 머무는 시간.</string>
     <string name="autosel_balance_mode">모드</string>
     <string name="autosel_balance_tip">기본값은 꺼짐: 한 프로필이 모두를 처리하고 나머지는 대기합니다. 켜면 확인된 프로필에 트래픽을 분산합니다.</string>
-    <string name="autosel_bench_interval">전체 스캔 간격</string>
-    <string name="autosel_bench_interval_tip">실행 중인 모든 프로필을 한 번 순회하는 데 걸리는 시간. 확인은 이 시간에 고르게 분산되어 큰 풀에서도 트래픽 급증이 없습니다.</string>
     <string name="autosel_build_limit">실행 프로필</string>
     <string name="autosel_build_limit_tip">실행 구성에 로드할 프로필 수. 선택기는 재연결 없이 이들 사이를 즉시 전환합니다. 높을수록 메모리와 시작 시간이 늘어납니다.</string>
     <string name="autosel_cat_balance">로드 밸런싱</string>
@@ -435,13 +428,9 @@
     <string name="autosel_detail_health">%1$d 프로필: %2$s</string>
     <string name="autosel_detail_untested">%d개 미확인</string>
     <string name="autosel_detail_working">%d개 작동</string>
-    <string name="autosel_dial_retries">장애 극복 시도</string>
-    <string name="autosel_dial_retries_tip">선택한 프로필 연결이 실패할 때, 앱이 오류를 보기 전에 즉시 다른 프로필을 몇 개 더 시도할지.</string>
     <string name="autosel_edit">자동 선택 편집</string>
     <string name="autosel_error_no_group">자동 선택이 존재하지 않는 그룹을 가리키고 있습니다</string>
     <string name="autosel_error_no_members">자동 선택에 사용 가능한 구성원이 없습니다</string>
-    <string name="autosel_exclude_unavailable">실패한 프로필 제외</string>
-    <string name="autosel_exclude_unavailable_tip">마지막 테스트가 실패한 서버를 신뢰 윈도우 내에 있는 한 풀에서 제외합니다. 테스트가 불안정하고 선택기가 스스로 판단하게 하려면 끄세요.</string>
     <string name="autosel_expected">준비 유지 수</string>
     <string name="autosel_expected_tip">항상 작동 확인된 상태로 유지할 프로필 수. 장애 시 즉시 대체할 수 있습니다. 분산이 켜져 있을 때 트래픽을 나누는 대상도 이 프로필입니다.</string>
     <string name="autosel_footer_exhausted">현재 아무것도 작동하지 않습니다 — 계속되면 선택기가 차상위 프로필로 재구성합니다.</string>
@@ -451,18 +440,18 @@
     <string name="autosel_footer_pinned_other">%s을(를) 선택했지만 지금 작동하지 않아 선택기가 다른 프로필을 골랐습니다. 복구되면 선택한 프로필로 돌아갑니다.</string>
     <string name="autosel_footer_pinned_using">당신이 선택했으므로 %s을(를) 사용 중입니다.</string>
     <string name="autosel_footer_suspended">이 기기에 네트워크 연결이 없어 확인이 중지되었습니다. 특정 프로필 탓이 아니며, 연결이 돌아올 때까지 순위는 동결됩니다.</string>
-    <string name="autosel_group">서버 출처</string>
+    <string name="autosel_group">프로필 출처</string>
     <string name="autosel_group_archived">%s (보관됨)</string>
     <string name="autosel_group_missing">그룹 없음 (#%d)</string>
-    <string name="autosel_interrupt">전환 시 연결 끊기</string>
-    <string name="autosel_interrupt_tip">프로필 악화나 실패로 선택기가 전환할 때 적용. 켜짐: 모두 즉시 새 프로필로 이동. 꺼짐: 진행 중인 다운로드는 구 프로필에서 완료. 분산 회전은 어느 쪽이든 연결을 끊지 않습니다.</string>
+    <string name="autosel_interrupt">프로필 장애 시 연결 끊기</string>
+    <string name="autosel_interrupt_tip">열린 연결은 장애가 난 프로필에서 끝나기를 기다리지 않고 즉시 이동합니다. 더 빠른 프로필로의 전환과 부하 분산 순환은 연결을 끊지 않습니다.</string>
     <string name="autosel_interval">확인 간격</string>
-    <string name="autosel_interval_tip">집중 확인 대상 프로필을 다시 측정하는 빈도.</string>
+    <string name="autosel_interval_tip">상위 프로필을 다시 측정하는 빈도.</string>
     <string name="autosel_just_now">방금</string>
     <string name="autosel_last_ok_short">정상 %s</string>
     <string name="autosel_list_separator">", "</string>
     <string name="autosel_max_rtt">최대 지연</string>
-    <string name="autosel_max_rtt_tip">이것보다 느린 프로필은 더 좋은 게 없어도 선택되지 않습니다.</string>
+    <string name="autosel_max_rtt_tip">이것보다 느린 프로필은 더 빠른 프로필이 작동하지 않을 때만 사용됩니다.</string>
     <string name="autosel_ms">%d ms</string>
     <string name="autosel_name_empty">이름은 비울 수 없습니다.</string>
     <string name="autosel_name_filter">이름이 일치하는 것만</string>
@@ -499,27 +488,19 @@
     <string name="autosel_plan">프로필</string>
     <string name="autosel_plan_calculating">그룹 확인 중…</string>
     <string name="autosel_plan_counts">그룹의 %2$d개 중 %1$d개를 사용할 수 있고, %3$d개가 실행됩니다.</string>
-    <string name="autosel_plan_kept_unavailable">모든 프로필의 마지막 테스트가 실패했습니다. 보통 서버가 아니라 네트워크 문제이므로 %d개 모두 유지하고 다시 확인합니다.</string>
     <string name="autosel_plan_needs_ranking">나머지는 선택기가 시작될 때 측정됩니다. 충분한 프로필이 작동하면 바로 실행되고, 모두 측정되면 전체 순위로 전환됩니다.</string>
     <string name="autosel_plan_reused">%d개에 최근 테스트 결과가 있어 재사용됩니다.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">건너뜀: %s.</string>
     <string name="autosel_plan_truncated">%d개가 넘는 프로필이 일치하므로 상위만 유지합니다.</string>
-    <string name="autosel_pool_cap">순위 상한</string>
-    <string name="autosel_pool_cap_tip">측정해 순위 목록에 유지할 프로필 수의 절대 상한. 실행 중인 프로필이 모두 죽으면 이 목록에서 대체자를 가져옵니다.</string>
-    <string name="autosel_result_validity">결과 신뢰 기간</string>
-    <string name="autosel_result_validity_tip">이 기간 내의 URL 테스트 결과는 다시 측정하지 않고 재사용합니다 — 그룹에서 직접 실행한 테스트도 포함되므로 직후에 선택기를 시작해도 작업이 중복되지 않습니다. 더 오래된 결과는 테스트하지 않은 것으로 봅니다. 항상 새 테스트를 실행하려면 0으로 설정하세요.</string>
     <string name="autosel_row_checks">확인: %1$d / %2$d 정상</string>
     <string name="autosel_row_connects">연결: %1$d / %2$d 성공</string>
     <string name="autosel_row_error">마지막 오류: %s</string>
-    <string name="autosel_row_jitter">지터: %d ms</string>
     <string name="autosel_row_last_ok">마지막 정상: %s</string>
     <string name="autosel_row_latency">지연: %1$d ms (최저 %2$d ms, 최고 %3$d ms)</string>
     <string name="autosel_row_state">상태: %s</string>
     <string name="autosel_row_tested">마지막 URL 테스트: %1$s, %2$s</string>
     <string name="autosel_row_untested">아직 URL 테스트 결과가 없습니다.</string>
-    <string name="autosel_sampling">유지 샘플 수</string>
-    <string name="autosel_sampling_tip">순위는 최근 이 수만큼의 확인에 대한 평균과 지터를 사용하므로, 한 번의 나쁜 결과로 좋은 서버가 강등되지 않습니다.</string>
     <string name="autosel_select_group">이 자동 선택이 추적할 그룹을 선택하세요.</string>
     <string name="autosel_skip_core_transitions">코어 전환이 너무 많음</string>
     <string name="autosel_skip_country">국가로 제외됨</string>
@@ -531,7 +512,6 @@
     <string name="autosel_skip_missing">프로필 없음</string>
     <string name="autosel_skip_name">이름으로 제외됨</string>
     <string name="autosel_skip_tailscale">Tailscale 프로필</string>
-    <string name="autosel_skip_unavailable">마지막 테스트 실패</string>
     <string name="autosel_skip_unsupported">이 빌드에서 사용할 수 없는 유형</string>
     <string name="autosel_skip_xray_chained">Xray 전체 구성은 그룹의 프록시와 결합할 수 없음</string>
     <string name="autosel_state_cooldown">일시 중지</string>
@@ -563,8 +543,6 @@
     <string name="autosel_use_automatic_tip">이 프로필 우선을 멈추고 선택기가 측정 결과로 선택하게 합니다.</string>
     <string name="autosel_use_this">이 프로필 사용</string>
     <string name="autosel_use_this_tip">순위가 고르지 못하게 이 프로필을 계속 사용합니다. 이는 선호일 뿐 잠금이 아닙니다: 프로필이 멈춰도 선택기는 전환하고, 복구되면 당신의 선택으로 돌아옵니다.</string>
-    <string name="autosel_watch_interval">사용 중 프로필 감시</string>
-    <string name="autosel_watch_interval_tip">현재 트래픽을 처리 중인 프로필을 따로 확인하는 빈도. 짧게 두세요: 서버는 연결을 받으면서 멈출 수 있고, 다른 확인은 다음 전체 확인까지 알아차리지 못합니다.</string>
     <string name="backup_create">백업 만들기</string>
     <string name="backup_created">백업을 만들었습니다. 포함됨: %s</string>
     <string name="backup_creating">백업 만드는 중…</string>
@@ -579,7 +557,7 @@
     <string name="backup_failed">백업 만들기 실패: %s</string>
     <string name="backup_local_summary">백업은 Throne 데스크톱 형식(.thrbackup)을 사용합니다: 양쪽 앱에서 복원할 수 있습니다. WebDAV 자격 증명은 이 기기에 남습니다.</string>
     <string name="backup_open_label">Throne 백업 복원</string>
-    <string name="backup_part_otp">OTP 프로필 (Android에서는 복원되지 않음)</string>
+    <string name="backup_part_otp">OTP 항목 (Android에서는 복원되지 않음)</string>
     <string name="backup_part_profiles">프로필 (그룹과 프록시)</string>
     <string name="backup_part_routes">라우팅 프로필</string>
     <string name="backup_part_settings">설정</string>
@@ -687,7 +665,7 @@
     <string name="direct_test_url">직접 테스트 URL</string>
     <string name="direct_test_url_empty">시스템 네트워크 상태</string>
     <string name="direct_test_url_sum">프록시를 전혀 거치지 않고 가져와 회선 단절과 서버 장애를 구분합니다. 비워 두면 시스템 네트워크 상태를 사용합니다.</string>
-    <string name="disable_traffic_stats">트래픽 통계 사용 안 함</string>
+    <string name="disable_traffic_stats">트래픽 카운터 사용 안 함</string>
     <string name="disable_traffic_stats_sum">프로필 트래픽을 집계하지 않음</string>
     <string name="dns_address_dialog_message">예: https://8.8.8.8/dns-query, tls://1.1.1.1, 8.8.8.8, localhost</string>
     <string name="dns_advanced">고급 설정</string>
@@ -716,7 +694,7 @@
     <string name="enable_clash_api_summary">외부 컨트롤러와 대시보드에 Clash API 제공</string>
     <string name="enable_ntp">NTP 클라이언트</string>
     <string name="enable_ntp_sum">NTP 서버와 코어 시계 동기화</string>
-    <string name="enable_reality">Reality 사용</string>
+    <string name="enable_reality">REALITY 사용</string>
     <string name="enable_stats">연결 통계</string>
     <string name="enable_stats_sum">연결과 그 프로세스 추적</string>
     <string name="enable_tls">TLS 사용</string>
@@ -763,7 +741,11 @@
     <string name="grp_keep_working_tip">구독이 더 이상 나열하지 않아도 마지막 테스트에 성공한 프로필은 유지됩니다.</string>
     <string name="grp_landing_proxy">랜딩 프록시</string>
     <string name="grp_last_update">마지막 업데이트: %1$s</string>
-    <string name="grp_missing_profile">프로필 #%1$d (없음)</string>
+    <string name="grp_missing_profile">없는 프로필 (#%1$d)</string>
+    <string name="hop_refs_warning">다음 그룹은 삭제할 프로필을 프런트 프록시 또는 랜딩 프록시로 사용합니다. 해당 프로필이 그룹에서 제거되어 그룹은 이를 거치지 않고 연결됩니다:</string>
+    <string name="hop_refs_cleared">다음 그룹은 삭제된 프로필을 프런트 프록시 또는 랜딩 프록시로 사용했습니다. 해당 프로필이 그룹에서 제거되어 이제 이를 거치지 않고 연결됩니다:</string>
+    <string name="hop_ref_front">%1$s (프런트 프록시)</string>
+    <string name="hop_ref_landing">%1$s (랜딩 프록시)</string>
     <string name="grp_route_profile">라우팅 프로필</string>
     <string name="grp_route_profile_default">기본 (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (이 구독에서)</string>
@@ -800,7 +782,7 @@
     <string name="grp_state_running">업데이트 중…</string>
     <string name="grp_sub_auto_update">구독 자동 업데이트</string>
     <string name="grp_sub_auto_update_interval">간격 (분, 30 미만은 무효)</string>
-    <string name="grp_sub_clear">구독 업데이트 전에 서버 삭제</string>
+    <string name="grp_sub_clear">구독 업데이트 전에 프로필 삭제</string>
     <string name="grp_sub_custom_hwid_params">사용자 지정 HWID 매개변수 (선택)</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
     <string name="grp_sub_custom_hwid_params_tip">형식: hwid=value,os=value,osVersion=value,model=value\n비워 두면 기본값 사용. 덮어쓸 매개변수만 지정하세요.</string>
@@ -957,11 +939,15 @@
     <string name="profiles_empty_subscription_hint">구독을 업데이트하여 프로필을 내려받으세요.</string>
     <string name="profiles_more_options">추가 옵션</string>
     <string name="profiles_move_down">아래로</string>
-    <string name="profiles_move_no_target">이동할 다른 기본 그룹이 없습니다.</string>
     <string name="profiles_move_to_group">그룹으로 이동</string>
+    <string name="import_target_subscription">이 그룹은 구독입니다. 다음 업데이트 시 가져온 프로필이 제거됩니다. 다른 그룹을 선택한 후 다시 가져오세요.</string>
+    <string name="import_target_archived">이 그룹은 보관되었습니다. 다른 그룹을 선택한 후 다시 가져오세요.</string>
+    <string name="import_target_gone">이 그룹은 더 이상 존재하지 않습니다.</string>
+    <string name="profiles_move_target_subscription">구독 그룹의 다음 업데이트 시 그룹으로 이동한 프로필이 제거됩니다. 다른 그룹을 선택하세요.</string>
+    <string name="profiles_move_source_updating">이 그룹의 구독을 업데이트하는 중입니다. 완료된 후 다시 시도하세요.</string>
     <string name="profiles_move_up">위로</string>
     <string name="profiles_no_duplicates">중복 프로필이 없습니다.</string>
-    <string name="profiles_no_insecure">안전하지 않은 구성을 찾지 못했습니다.</string>
+    <string name="profiles_no_insecure">안전하지 않은 프로필을 찾지 못했습니다.</string>
     <string name="profiles_no_unavailable">사용 불가 프로필이 없습니다.</string>
     <string name="profiles_remove">삭제</string>
     <string name="profiles_remove_duplicates">중복</string>
@@ -973,14 +959,14 @@
     <string name="profiles_running_kept">실행 중인 프로필은 유지되었습니다.</string>
     <string name="profiles_select_all">모두 선택</string>
     <string name="profiles_show">표시</string>
-    <string name="profiles_show_out_ip">나가는 IP</string>
+    <string name="profiles_show_out_ip">출구 IP</string>
     <string name="profiles_show_speed">속도</string>
     <string name="profiles_sort">정렬</string>
     <string name="profiles_sort_address">주소</string>
     <string name="profiles_sort_ascending">오름차순</string>
     <string name="profiles_sort_descending">내림차순</string>
     <string name="profiles_sort_download">다운로드 속도</string>
-    <string name="profiles_sort_ip_out">나가는 IP</string>
+    <string name="profiles_sort_ip_out">출구 IP</string>
     <string name="profiles_sort_latency">지연</string>
     <string name="profiles_sort_name">이름</string>
     <string name="profiles_sort_security">보안</string>
@@ -1014,9 +1000,9 @@
     <string name="raw_json">원시 JSON</string>
     <string name="raw_json_invalid">이 JSON은 이 유형의 유효한 프로필이 아닙니다</string>
     <string name="raw_json_summary">이 프로필의 모든 필드를 JSON으로 편집</string>
-    <string name="reality_public_key">Reality 공개키</string>
-    <string name="reality_settings">Reality 설정</string>
-    <string name="reality_short_id">Reality 짧은 ID</string>
+    <string name="reality_public_key">REALITY 공개키</string>
+    <string name="reality_settings">REALITY 설정</string>
+    <string name="reality_short_id">REALITY 짧은 ID</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="remote_dns_disable_ipv6">원격 DNS: IPv6 사용 안 함</string>
     <string name="reserved_hint">세 개의 숫자, 한 줄에 하나</string>
@@ -1068,7 +1054,7 @@
     <string name="route_profile_empty">프로필에 유효한 규칙이 없습니다</string>
     <string name="route_profile_empty_title">빈 라우트 프로필</string>
     <string name="route_profile_fetch">지금 가져오기</string>
-    <string name="route_profile_fetch_confirm">현재 규칙을 URL에서 가져온 규칙으로 대체합니다.</string>
+    <string name="route_profile_fetch_confirm">URL에서 가져온 규칙을 수정 사항을 포함해 지금 가져온 규칙으로 대체합니다. 여기서 추가한 규칙은 유지됩니다.</string>
     <string name="route_profile_fetch_failed">라우팅 프로필을 가져오지 못했습니다</string>
     <string name="route_profile_fetched">원격 URL에서 규칙 %d개를 불러왔습니다.</string>
     <string name="route_profile_fetched_title">가져옴</string>
@@ -1082,7 +1068,7 @@
     <string name="route_profile_never_updated">아직 업데이트 안 됨</string>
     <string name="route_profile_quick_switch">라우팅 프로필</string>
     <string name="route_profile_remote_source">원격 소스</string>
-    <string name="route_profile_remote_rules_note">업데이트할 때마다 이 프로필의 규칙이 URL의 규칙으로 대체되므로 여기서 추가하거나 변경한 규칙은 사라집니다. 직접 만든 규칙을 유지하려면 라우팅 프로필 목록에서 복제를 사용하세요. 복제본은 업데이트되지 않는 로컬 사본입니다.</string>
+    <string name="route_profile_remote_rules_note">업데이트할 때마다 URL에서 가져온 규칙이 대체되므로 해당 규칙의 수정 사항은 다음 업데이트까지만 유지됩니다. 여기서 추가한 규칙은 유지됩니다.</string>
     <string name="route_profile_rules">규칙 (%d)</string>
     <string name="route_profile_title">라우트 프로필</string>
     <string name="route_profile_url">URL</string>
@@ -1108,8 +1094,8 @@
     <string name="route_rule_advanced_show">다른 조건 및 옵션 표시</string>
     <string name="route_rule_any">모두</string>
     <string name="route_rule_apps">앱</string>
-    <string name="route_rule_catch_all">이 규칙에는 조건이 없어 모든 연결에 일치합니다. 그래도 저장하시겠습니까?</string>
-    <string name="route_rule_catch_all_title">조건 없음</string>
+    <string name="route_rule_default_name">규칙 %d</string>
+    <string name="route_rule_dns_queries">DNS 쿼리</string>
     <string name="route_rule_category_match">일치</string>
     <string name="route_rule_category_rule">규칙</string>
     <string name="route_rule_domain">도메인</string>
@@ -1130,6 +1116,8 @@
     <string name="route_rule_ip_version">IP 버전</string>
     <string name="route_rule_lines_hint">한 줄에 항목 하나</string>
     <string name="route_rule_missing_server">서버 없음 (#%d)</string>
+    <string name="route_outbound_no_exit">출구 없는 프록시</string>
+    <string name="route_outbound_no_exit_hint">출구가 켜져 있을 때만 프록시와 다릅니다(설정 › 라우팅 › 출구). 이 사이트들은 출구를 건너뛰고 선택한 프로필을 통해 나갑니다.</string>
     <string name="route_rule_name">이름</string>
     <string name="route_rule_network">네트워크</string>
     <string name="route_rule_no_drop">드롭 안 함</string>
@@ -1223,7 +1211,6 @@
     <string name="skip_cert_sum">기본으로 TLS 인증서 검증 건너뛰기 (allowInsecure)</string>
     <string name="skip_delete_confirmation">삭제 확인 건너뛰기</string>
     <string name="skip_delete_confirmation_sum">확인 없이 프로필 삭제</string>
-    <string name="speed_test_mode_country">국가만</string>
     <string name="ss_plugin">SIP003 플러그인</string>
     <string name="ss_plugin_opts">플러그인 옵션</string>
     <string name="ssh_client_version">클라이언트 버전</string>
@@ -1274,7 +1261,7 @@
     <string name="test_engine_fg_busy">백그라운드에서 작업 중…</string>
     <string name="test_engine_fg_subscriptions">구독 업데이트 중…</string>
     <string name="test_engine_ip_current_unsupported">실행 중인 연결의 IP 테스트는 지원되지 않습니다</string>
-    <string name="test_engine_kind_ip">IP 테스트</string>
+    <string name="test_engine_kind_ip">출구 IP 테스트</string>
     <string name="test_engine_kind_speed">속도 테스트</string>
     <string name="test_engine_kind_url">URL 테스트</string>
     <string name="test_engine_progress">%1$d / %2$d</string>
@@ -1299,7 +1286,6 @@
     <string name="test_panel_completed">완료</string>
     <string name="test_panel_countries">국가</string>
     <string name="test_panel_country_description">%1$s: %2$d</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_current_unavailable">사용 불가: %s</string>
     <string name="test_panel_dismiss">테스트 결과 닫기</string>
     <string name="test_panel_distinct_ips">서로 다른 나가는 IP %d개</string>
@@ -1352,7 +1338,6 @@
     <string name="test_panel_summary_stopped">중지됨 · %3$s 동안 %2$d개 중 %1$d개 테스트</string>
     <string name="test_panel_summary_tested">%2$s 동안 %1$d개 테스트</string>
     <string name="test_panel_summary_working">%d개 작동</string>
-    <string name="test_panel_summary_working_countries">%2$d개국에서 %1$d개 작동</string>
     <string name="test_panel_summary_working_fastest">%1$d개 작동, 가장 빠른 %2$s</string>
     <string name="test_panel_title">%1$s · %2$s</string>
     <string name="test_panel_unnamed">프로필 %d</string>
@@ -1485,9 +1470,16 @@
     <string name="warp_public_key">공개키</string>
     <string name="warp_registration">등록</string>
     <string name="warp_reserved">예약됨</string>
-    <string name="warp_settings">WARP</string>
-    <string name="warp_state_off">꺼짐</string>
-    <string name="warp_state_on">켜짐 · %s</string>
+    <string name="warp_settings">출구</string>
+    <string name="exit_through">출구 경로</string>
+    <string name="exit_server">선택한 프로필</string>
+    <string name="exit_server_hint">트래픽이 시작한 프로필을 통해 나갑니다.</string>
+    <string name="exit_psiphon_hint">Psiphon은 Psiphon Inc.가 운영하는 무료 네트워크로, 다른 VPN 제공업체처럼 방문하는 사이트를 볼 수 있습니다.</string>
+    <string name="exit_tor_hint">Android에서는 Tor를 사용할 수 없으므로 트래픽이 선택한 프로필을 통해 나갑니다.</string>
+    <string name="exit_unavailable">%s (Android에서 사용 불가)</string>
+    <string name="psiphon_egress_region">지역</string>
+    <string name="psiphon_region_best">최고 성능</string>
+    <string name="psiphon_egress_region_sum">Psiphon 서버의 국가입니다. 최고 성능을 고르면 Psiphon이 선택합니다.</string>
     <string name="warp_tos_message"><![CDATA[WARP 신원을 생성하면 Cloudflare에 새 기기가 등록됩니다.<br><br><a href="%1$s">Cloudflare WARP 이용약관</a>에 동의하시겠습니까?]]></string>
     <string name="warp_wireguard_note">WARP는 프록시 위를 달립니다: WireGuard는 UDP를 전달하는 프록시가 필요합니다.</string>
     <string name="webdav_choose_backup">백업 선택</string>
@@ -1612,7 +1604,7 @@
     <string name="xray_verify_peer_cert_by_name">이름으로 피어 인증서 검증</string>
     <string name="xray_vless_all">모든 VLESS</string>
     <string name="xray_vless_preference">Xray VLESS 환경설정</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP 및 Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP 및 REALITY</string>
     <string name="xray_vless_xhttp_only">XHTTP만</string>
     <plurals name="added">
         <item quantity="one">추가됨</item>
@@ -1620,9 +1612,6 @@
     </plurals>
     <plurals name="autosel_milliseconds">
         <item quantity="other">%d ms</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="other">%d분</item>
     </plurals>
     <plurals name="autosel_profiles">
         <item quantity="other">프로필 %d개</item>
@@ -1831,9 +1820,9 @@
     <string name="grp_http_version">HTTP 버전</string>
     <string name="grp_http_version_tip">자동은 서버가 지원하면 HTTP/2를 사용합니다. \"기본 유지\"는 설정 › 구독을 따릅니다.</string>
     <string name="grp_update_interval">업데이트 간격 (분)</string>
-    <string name="grp_update_interval_tip">이 구독을 자동으로 업데이트하는 간격(분)으로, 최소 30입니다. 비워 두면 설정 › 구독을 따르며, 거기서 자동 업데이트가 켜져 있어야 합니다.</string>
+    <string name="grp_update_interval_tip">이 구독을 자동으로 업데이트하는 간격(분)으로, 최소 30입니다. 설정 › 구독에서 자동 업데이트가 꺼져 있어도 적용됩니다. 비워 두면 그 설정을 따릅니다.</string>
     <string name="grp_server_interval">서버 간격</string>
-    <string name="grp_server_interval_tip">구독 서버가 보낸 업데이트 간격을 사용합니다. 서버가 보내지 않으면 위의 간격이 적용됩니다. \"기본 유지\"는 설정 › 구독을 따릅니다.</string>
+    <string name="grp_server_interval_tip">구독 서버가 보낸 업데이트 간격을 사용합니다. 설정 › 구독에서 자동 업데이트가 꺼져 있어도 적용됩니다. 서버가 보내지 않으면 위의 간격이 적용됩니다. \"기본 유지\"는 그 설정을 따릅니다.</string>
     <string name="grp_server_interval_use">사용</string>
     <string name="grp_server_interval_ignore">무시</string>
     <string name="grp_server_interval_last">이 서버가 마지막으로 보낸 값: %1$d시간.</string>
@@ -2092,9 +2081,9 @@
     <string name="validation_tls_pem_private_key">개인키를 PEM 텍스트로 붙여넣으세요. -----BEGIN PRIVATE KEY-----로 시작합니다.</string>
     <string name="validation_tls_pin_base64">16진수 SHA-256입니다. base64로 쓰세요(=로 끝나는 44자).</string>
     <string name="validation_tls_ech_config">ECH 구성 목록을 base64로, 또는 -----BEGIN ECH CONFIGS----- 블록 하나로 붙여넣으세요.</string>
-    <string name="validation_tls_reality_ech">Reality는 ECH와 함께 사용할 수 없습니다. ECH를 끄거나 Reality 공개키를 지우세요.</string>
-    <string name="validation_tls_reality_disable_sni">Reality는 SNI 비활성화와 함께 사용할 수 없습니다. SNI 비활성화를 끄세요.</string>
-    <string name="validation_tls_reality_spoof">Reality는 TLS 스푸핑과 함께 사용할 수 없습니다. TLS 스푸핑을 끔으로 설정하세요.</string>
+    <string name="validation_tls_reality_ech">REALITY는 ECH와 함께 사용할 수 없습니다. ECH를 끄거나 REALITY 공개키를 지우세요.</string>
+    <string name="validation_tls_reality_disable_sni">REALITY는 SNI 비활성화와 함께 사용할 수 없습니다. SNI 비활성화를 끄세요.</string>
+    <string name="validation_tls_reality_spoof">REALITY는 TLS 스푸핑과 함께 사용할 수 없습니다. TLS 스푸핑을 끔으로 설정하세요.</string>
     <string name="validation_tls_pins_with_certificate">사용자 지정 인증서는 인증서 핀과 함께 사용할 수 없습니다. 둘 중 하나만 유지하세요.</string>
     <string name="validation_tls_client_pair">클라이언트 인증서와 클라이언트 키를 함께 설정하세요.</string>
     <string name="validation_tls_spoof_needs_sni">TLS 스푸핑에는 SNI가 필요합니다. SNI 비활성화를 끄거나 TLS 스푸핑을 끔으로 설정하세요.</string>
@@ -2106,7 +2095,7 @@
     <string name="validation_transport_headers_pairs">헤더는 |로 구분한 이름과 값이 번갈아 나와야 합니다. 예: User-Agent|curl. 그래서 무시했습니다.</string>
     <string name="validation_transport_type">sing-box는 전송 \"%1$s\"을(를) 지원하지 않습니다. ws, httpupgrade, http, grpc 또는 quic을 사용하세요.</string>
     <string name="validation_transport_quic_tls">QUIC 전송에는 TLS가 필요합니다. TLS 사용을 켜세요.</string>
-    <string name="validation_transport_quic_reality">Reality는 QUIC 전송에서 작동하지 않습니다. Reality 키를 지우거나 다른 전송을 선택하세요.</string>
+    <string name="validation_transport_quic_reality">REALITY는 QUIC 전송에서 작동하지 않습니다. REALITY 키를 지우거나 다른 전송을 선택하세요.</string>
     <string name="validation_transport_quic_utls">uTLS는 QUIC 전송에서 사용되지 않습니다.</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal은 사용자 지정 멀티플렉스에서만 작동합니다. 멀티플렉스를 사용자 지정으로 설정하세요.</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal에는 두 속도가 모두 필요하며, 없는 값은 1 Mbps로 전송됩니다.</string>
@@ -2145,6 +2134,12 @@
     <string name="validation_xray_vless_encryption_mode">mlkem768x25519plus 뒤의 부분은 native, xorpub 또는 random이어야 합니다.</string>
     <string name="validation_xray_vless_encryption_rtt">모드 뒤의 부분은 1rtt 또는 0rtt여야 합니다.</string>
     <string name="validation_xray_vless_encryption_key">문자열의 각 키는 패딩 없는 URL-safe base64 형식의 32 또는 1184바이트여야 합니다.</string>
+    <string name="validation_xray_vless_encryption_padding_order">패딩 부분을 키보다 앞에 두세요.</string>
+    <string name="validation_xray_vless_encryption_mlkem">문자열의 1184바이트 키가 유효한 ML-KEM-768 키가 아닙니다. 서버에서 문자열을 다시 복사하세요.</string>
+    <string name="validation_xray_vless_encryption_no_key">문자열에 키가 없습니다. 서버가 제공한 문자열 전체를 복사하세요.</string>
+    <string name="validation_xray_vless_padding_format">각 패딩 부분은 100-111-1111처럼 대시로 연결된 세 개의 숫자여야 합니다.</string>
+    <string name="validation_xray_vless_padding_first">첫 번째 패딩 부분은 100-111-1111처럼 확률이 100 이상이고 길이가 35 이상이어야 합니다.</string>
+    <string name="validation_xray_vless_padding_total">패딩 길이의 합이 65553바이트를 넘을 수 있습니다.</string>
     <string name="validation_xray_vless_vision">XTLS Vision에는 TLS 또는 REALITY가 있는 raw 네트워크, 또는 VLESS 암호화가 필요합니다. 네트워크나 보안을 변경하거나 flow를 지우세요.</string>
     <string name="validation_xray_xdrive_no_link">XDRIVE에는 공유 링크 형식이 없습니다. 대신 서버의 JSON 구성을 가져오세요.</string>
     <string name="validation_xray_xdrive_service">google-drive, s3, template 또는 local이어야 합니다.</string>
@@ -2365,11 +2360,6 @@
     <string name="validation_custom_xray_geodata">가져온 구성에서 geodata 업데이터를 제거했습니다. 보낸 사람이 정한 주소에서 파일을 내려받고 Throne 폴더의 파일을 교체하게 됩니다.</string>
     <string name="validation_custom_xray_webhook">이 라우팅 규칙에서 웹훅을 제거했습니다. 일치하는 모든 연결의 세부 정보를 보낸 사람이 정한 주소로 보내게 됩니다.</string>
     <string name="validation_autoselector_countries">쉼표로 구분한 두 글자 국가 코드를 사용하세요. 예: DE,NL,FR.</string>
-    <string name="validation_autoselector_build_limit">순위가 매겨진 프로필 수(%1$s)보다 많이 실행할 수 없습니다.</string>
-    <string name="validation_autoselector_bench_interval">전체 점검은 확인 간격(%1$s초)보다 자주 실행할 수 없습니다.</string>
-    <string name="validation_autoselector_watch_interval">사용 중인 프로필 감시는 확인 간격(%1$s초)보다 느릴 수 없습니다.</string>
-    <string name="validation_autoselector_ready_count">준비 상태로 유지하는 프로필 수(%1$s) 이상을 정밀 확인하세요.</string>
-    <string name="validation_autoselector_close_count">실행하는 프로필 수(%1$s)보다 많이 정밀 확인할 수 없습니다.</string>
     <string name="validation_chain_empty">체인에 프로필을 하나 이상 추가하세요.</string>
     <string name="validation_ss_plugin_opts_dangling">끝의 백슬래시가 이스케이프할 대상이 없습니다.</string>
     <string name="validation_ss_plugin_opts_name">모든 옵션에는 이름이 필요합니다. 예: obfs=http;obfs-host=example.com.</string>
@@ -2473,6 +2463,7 @@
     <string name="validation_route_no_drop_unused">drop 방식에서는 효과가 없습니다.</string>
     <string name="validation_route_ignored_by_action">%1$s 규칙은 이를 무시합니다. 다음 동작에서만 적용됩니다: %2$s.</string>
     <string name="validation_route_matches_all">이 규칙에는 일치 조건이 없어 모든 트래픽과 일치합니다.</string>
+    <string name="validation_route_catch_all">이 규칙에는 조건이 없어 모든 트래픽을 잡게 됩니다. 조건을 추가하거나 규칙을 끄세요.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s (\"%2$s\"): %3$s</string>
     <string name="validation_route_rule_warning">규칙 \"%1$s\": %2$s</string>
@@ -2518,6 +2509,7 @@
     <string name="validation_millis_or_default">밀리초 단위 정수를 입력하세요. 예: %1$s (단위 없이). 기본값은 0입니다.</string>
     <string name="validation_group_update_interval">30분 이상이어야 하며, 비워 두면 기본값을 유지합니다.</string>
     <string name="validation_port_used">포트 %1$s은(는) 이미 %2$s에서 사용 중입니다. 다른 포트를 선택하세요.</string>
+    <string name="validation_port_reenabled">포트 %2$s에서 %1$s을(를) 켜면 %3$s과(와) 충돌합니다. 다른 포트를 선택하세요.</string>
     <string name="validation_mtu_ipv6">IPv6에는 MTU %1$s 이상이 필요합니다. 그보다 작으면 시스템이 Tun에서 IPv6를 제외할 수 있습니다.</string>
     <string name="validation_private_range_all">모든 주소를 포함하므로 Tun이 아무것도 라우팅하지 못하게 됩니다.</string>
     <string name="validation_dns_local_ip">IP 주소를 사용하세요. 예: 223.5.5.5 또는 tls://1.1.1.1. 이 서버가 다른 서버들의 이름을 해석합니다.</string>
@@ -2540,12 +2532,18 @@
     <string name="validation_route_dns_final">기본 DNS 서버는 원격 또는 직접이어야 하며 \"%1$s\"일 수 없습니다.</string>
     <string name="validation_route_dns_dropped">프로필 자체 DNS 설정을 제외했으므로 전역 설정을 사용합니다: %1$s</string>
     <string name="route_dns_global_servers">원격 %1$s, 직접 %2$s</string>
-    <string name="dns_server_suggestions">최근 및 추천 서버</string>
     <string name="warp_api_tls_fragment_title">WARP 등록용 TLS 조각화</string>
     <string name="warp_api_tls_fragment_note">등록이 실행 중인 프로필을 거치지 않고 직접 연결할 때만 적용됩니다.</string>
     <string name="backup_warn_tor_egress">백업은 트래픽을 Tor로 내보내지만 Android에서는 Tor를 사용할 수 없습니다. 여기서는 선택한 서버로 바로 나갑니다.</string>
     <string name="validation_dns_server_item">서버 %1$s (\"%2$s\"): %3$s</string>
-    <string name="dns_server_list_hint">여러 서버는 쉼표로 구분하세요. 함께 질의하며 가장 먼저 온 응답을 사용합니다.</string>
+    <string name="dns_server_add">서버 추가</string>
+    <string name="dns_server_custom">사용자 지정 주소</string>
+    <string name="dns_server_recent">최근</string>
+    <string name="dns_server_address_hint">주소 (예: tls://1.1.1.1)</string>
+    <string name="dns_server_list_race">함께 질의하며 가장 빠른 응답을 사용합니다.</string>
+    <string name="dns_server_list_primary">프록시 서버 주소도 확인합니다</string>
+    <string name="dns_server_list_empty">서버를 하나 이상 추가하세요.</string>
+    <string name="dns_server_drag">드래그하여 순서 변경</string>
     <string name="juicity_pinned_certchain_sha256">인증서 체인 SHA256</string>
     <string name="juicity_pinned_certchain_sha256_hint">juicity-server가 출력하는 인증서 체인 해시입니다. 안전하지 않은 연결 허용을 켜도 CA 검증을 대신합니다</string>
     <string name="validation_juicity_certchain">juicity-server가 출력하는 대로 32바이트 인증서 체인 해시를 base64(=로 끝나는 44자)로 입력하세요.</string>
@@ -2597,9 +2595,9 @@
     <string name="chain_step_untestable">사용자 지정 Xray 구성 홉이 있는 체인은 테스트할 수 없습니다</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">선택 방식</string>
-    <string name="autosel_strategy_latency">가장 빠르고 안정적</string>
+    <string name="autosel_strategy_latency">가장 빠름</string>
     <string name="autosel_strategy_priority">우선순위 순서</string>
-    <string name="autosel_strategy_latency_tip">가장 빠르고 안정적: 전체 중 측정 결과가 가장 좋은 프로필을 항상 사용합니다.</string>
+    <string name="autosel_strategy_latency_tip">가장 빠름: 전체 중 측정 결과가 가장 좋은 프로필을 항상 사용합니다.</string>
     <string name="autosel_strategy_priority_tip">우선순위 순서: 아래 티어를 위에서부터 시도합니다. 선택기는 작동하는 프로필이 있는 가장 높은 티어에 머물고, 상위 티어가 다시 작동하면 위로 돌아갑니다.</string>
     <string name="autosel_tier_add">티어 추가</string>
     <string name="autosel_tiers_hint">프로필은 처음 일치하는 티어에 속하며, 어느 티어에도 일치하지 않는 프로필은 마지막에 옵니다. 선택기는 작동하는 프로필이 있는 가장 높은 티어를 사용하고, 그 안에서 측정 결과가 가장 좋은 프로필을 사용합니다.</string>
@@ -2618,19 +2616,8 @@
     <string name="autosel_tier_any_profile">모든 프로필</string>
     <string name="autosel_tier_fallback">티어 %d</string>
     <string name="autosel_tier_short">T%d</string>
-    <string name="autosel_failback_checks">상위 복귀 조건</string>
-    <string name="autosel_failback_checks_tip">우선순위 순서: 상위 티어의 프로필이 다시 작동해도, 선택기는 그 프로필이 이 횟수만큼 연속으로 확인을 통과한 뒤에만 돌아갑니다. 유지 샘플 수보다 클 수 없습니다.</string>
-    <plurals name="autosel_checks">
-        <item quantity="other">확인 %d회</item>
-    </plurals>
-    <string name="autosel_failback_delay">무실패 유지 시간</string>
-    <string name="autosel_failback_delay_tip">우선순위 순서: 상위 티어의 프로필은 선택기가 돌아가기 전에 이 시간 동안 확인이나 연결 실패도 없어야 합니다.</string>
-    <string name="autosel_failback_interrupt">상위로 돌아갈 때 연결 끊기</string>
-    <string name="autosel_failback_interrupt_tip">우선순위 순서에서 적용. 꺼짐: 이미 열린 연결은 원래 프로필에 남고 새 연결만 상위 티어로 이동합니다. 켜짐: 모두 즉시 이동합니다.</string>
     <string name="autosel_passive">실제 연결에서 학습</string>
     <string name="autosel_passive_tip">헬스 체크뿐 아니라 앱이 프로필을 통해 맺는 연결로도 프로필을 판단합니다. 응답이 전혀 없거나 연결할 수 없으면 실패로 집계됩니다. 프로필을 통한 최근 연결의 실패가 3회 이상이고 성공 횟수 이상이면, 확인을 통과하더라도 그 프로필은 잠시 제외됩니다: 처음 1분, 다시 발생할 때마다 두 배, 최대 16분. 각 웹사이트는 마지막으로 작동한 프로필을 계속 사용하고 방금 실패한 프로필은 피합니다. 실제 트래픽이 흐르는 동안에는 헬스 체크를 덜 보냅니다.</string>
-    <string name="autosel_site_memory">사이트별 선택 기억 기간</string>
-    <string name="autosel_site_memory_tip">웹사이트가 마지막으로 작동한 프로필을 계속 사용하고, 실패한 프로필을 계속 피하는 기간.</string>
     <string name="autosel_balance_hint_priority">우선순위 순서에서는 사용 중인 티어의 준비된 프로필 사이에서만 트래픽이 분산됩니다.</string>
     <string name="autosel_plan_by_tier">티어별: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2641,7 +2628,6 @@
     <string name="autosel_plan_truncated_tiers">%d개가 넘는 프로필이 일치하므로 각 티어의 상위만 유지합니다.</string>
     <string name="validation_autoselector_tier_match">이 티어의 그룹을 선택하거나 이름 패턴을 입력하세요.</string>
     <string name="validation_autoselector_tier_count">우선순위 순서로 선택하려면 티어를 하나 이상 추가하세요.</string>
-    <string name="validation_autoselector_failback_checks">연속 확인 횟수는 유지 샘플 수(%1$s)보다 클 수 없습니다.</string>
     <string name="autosel_status_on_tier">자동 선택 %1$s 사용 중, 티어 %2$d (%4$d개 중 %3$d개 작동)</string>
     <string name="autosel_detail_suspect">%d개 의심됨</string>
     <string name="autosel_state_suspect">의심됨</string>
@@ -2740,6 +2726,17 @@
     <string name="service_ip_risk">위험도 %d</string>
     <string name="service_check_checked_now">방금 확인함</string>
     <string name="service_check_checked_at">%s 확인함</string>
+    <string name="service_check_services">서비스</string>
+    <string name="service_check_services_all">모든 서비스</string>
+    <string name="service_check_services_count">서비스 %2$d개 중 %1$d개</string>
+    <string name="service_check_none_selected">선택한 서비스 없음</string>
+    <string name="service_check_services_unknown">서비스 목록을 불러올 수 없습니다</string>
+    <string name="service_check_current">현재 연결 서비스 확인</string>
+    <string name="service_category_ai">AI</string>
+    <string name="service_category_streaming">스트리밍</string>
+    <string name="service_category_social">소셜</string>
+    <string name="service_category_reputation">IP 평판</string>
+    <string name="service_category_other">기타</string>
     <string name="validation_chain_selector_twice">체인에는 자동 선택을 하나만 넣을 수 있습니다.</string>
     <string name="validation_chain_selector_custom">자동 선택은 사용자 지정 구성과 같은 체인에 있을 수 없습니다.</string>
     <string name="chain_step_selector">자동 선택이 있는 체인은 홉별로 테스트할 수 없습니다. 대신 그 구성원을 테스트하세요</string>
@@ -2747,6 +2744,8 @@
     <string name="autosel_notice_exhausted_upstream">실행 중인 모든 프로필이 앞쪽 홉을 거쳐 중지 — 다음 후보로 재구성합니다.</string>
     <string name="validation_route_outbound_chain_selector">라우팅 규칙에서 체인 \"%1$s\"을(를) 사용할 수 없습니다. 자동 선택이 있어 시작만 할 수 있습니다. 다른 아웃바운드를 선택하세요.</string>
     <string name="route_outbound_chain_selector">라우팅 프로필이 자동 선택이 있는 %1$s(으)로 트래픽을 보냅니다. 이런 체인은 시작만 할 수 있고 라우팅 규칙에는 사용할 수 없습니다</string>
+    <string name="xray_full_config_tag_clash">사용자 지정 Xray 구성이 태그 \"%1$s\"을(를) 사용하는데, Throne도 다른 Xray 프로필용으로 이 태그를 생성합니다. 사용자 지정 구성에서 이름을 바꾸세요</string>
+    <string name="xray_full_config_selector_clash">사용자 지정 Xray 구성의 선택자 \"%1$s\"이(가) Throne이 다른 Xray 프로필용으로 생성하는 \"%2$s\"와(과)도 일치합니다. 사용자 지정 구성에서 선택자를 더 구체적으로 지정하세요</string>
     <string name="grp_filter_countries">국가</string>
     <string name="grp_filter_countries_tip">유지할 출구 국가(예: HK,JP) 또는 제거할 국가(예: !RU).</string>
     <string name="grp_filter_countries_hint">예: HK,JP 또는 !RU</string>
@@ -2787,4 +2786,8 @@
     <string name="vpn_auth_submitting">로그인 중…</string>
     <string name="vpn_auth_gone">이 로그인 요청은 더 이상 대기 중이 아닙니다.</string>
     <string name="vpn_auth_no_browser">이 주소를 열 수 있는 앱이 없습니다.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">US처럼 두 글자 국가 코드를 사용하세요.</string>
+    <string name="validation_psiphon_ignored">%1$s 무시됨: Psiphon 프로필은 지역만 받습니다.</string>
+    <string name="exit_runs_over_itself">선택한 프로필은 이미 %1$s을(를) 통해 나가므로 %1$s 출구를 그 위에서 실행할 수 없습니다. 설정 › 라우팅 › 출구에서 다른 출구를 선택하세요.</string>
 </resources>

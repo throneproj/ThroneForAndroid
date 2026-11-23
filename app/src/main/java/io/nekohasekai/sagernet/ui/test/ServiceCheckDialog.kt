@@ -9,37 +9,36 @@ import android.text.format.DateUtils
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TableLayout
-import android.widget.TableRow
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.StyleRes
-import androidx.core.view.updatePadding
-import androidx.core.view.updatePaddingRelative
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.dp2px
-import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 
 /**
- * A profile's stored service check (ServiceCheckHtml::details): one section per category with each service's status,
- * region and note, then the exit IP's kind and every lookup's answer. Names, notes and answers come from downloaded
- * definitions and third parties; they are only ever shown as plain text.
+ * A profile's stored service check: one section per category with each shown service's logo, status, region and
+ * note, then the exit IP's kind and every lookup's answer (the desktop's strip tooltips and summary line). Names,
+ * notes and answers come from downloaded definitions and third parties; they are only ever shown as plain text.
  */
 internal object ServiceCheckDialog {
 
+    private const val ICON_DP = 20
+
     /** [document] is the profile's `service_checks` column; nothing is shown for an empty or unreadable one. */
     fun show(context: Context, profileName: String, document: String) {
-        val root = JsonInput.parseObjectOrNull(document)?.takeIf { it.isNotEmpty() } ?: return
-        val content = Builder(context).build(profileName, root)
+        val result = ServiceResults.parse(document) ?: return
+        val content = Builder(context).build(profileName, result)
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.service_check_results)
             .setView(NestedScrollView(context).apply { addView(content) })
             .setPositiveButton(android.R.string.ok, null)
+            .setNeutralButton(R.string.service_check_services) { _, _ -> ServiceCheckSelector.show(context) }
             .show()
     }
 
@@ -62,76 +61,65 @@ internal object ServiceCheckDialog {
             setPadding(dp2px(24), dp2px(8), dp2px(24), dp2px(8))
         }
 
-        fun build(profileName: String, root: JsonObject): LinearLayout {
-            val checked = checkedText(root.integer("at"))
+        fun build(profileName: String, result: ServiceResults.Document): LinearLayout {
+            val checked = checkedText(result.checkedAt)
             add(text(if (profileName.isEmpty()) checked else "$profileName · $checked", BODY).apply { setTextColor(muted) })
-            val error = root.string("error")
-            if (error.isNotEmpty()) {
-                add(text(error, BODY).apply { setTextColor(danger) }, top = 8)
+            if (result.error.isNotEmpty()) {
+                add(text(result.error, BODY).apply { setTextColor(danger) }, top = 8)
                 return layout
             }
-            val checks = root.array("checks").mapNotNull { it as? JsonObject }
-            for (category in root.array("cats").mapNotNull { it as? JsonObject }) {
-                val id = category.string("id")
-                add(text(category.string("name"), HEADING), top = 12)
-                val table = TableLayout(context).apply {
-                    setColumnShrinkable(0, true)
-                    setColumnShrinkable(2, true)
-                }
-                for (check in checks) {
-                    if (check.string("cat") != id) continue
-                    table.addView(checkRow(check))
-                }
-                add(table, top = 2)
+            val disabled = ServiceResults.disabled
+            val checks = result.checks.filter { it.id !in disabled }
+            for (category in result.categories) {
+                val members = checks.filter { it.category == category.id }
+                if (members.isEmpty()) continue
+                add(text(ServiceResults.categoryName(context, category.id, category.name), HEADING), top = 12)
+                for (check in members) add(checkRow(check), top = 6)
             }
-            val ip = root.array("ip").mapNotNull { it as? JsonObject }
-            if (ip.isNotEmpty()) {
+            if (result.ip.isNotEmpty()) {
                 add(text(context.getString(R.string.service_check_ip), HEADING), top = 12)
-                val kind = ipKind(ip)
+                val kind = ipKind(result.ip)
                 if (kind.isNotEmpty()) add(text(kind, BODY), top = 2)
-                for (entry in ip) add(text(ipLine(entry), BODY), top = 2)
+                for (entry in result.ip) add(text(ipLine(entry), BODY), top = 2)
             }
             return layout
         }
 
-        private fun checkRow(check: JsonObject): TableRow {
-            val status = check.string("status")
-            val color = statusColor(status)
-            val name = text(check.string("name"), BODY).apply {
-                setTextColor(color)
-                setTypeface(typeface, Typeface.BOLD)
-                updatePaddingRelative(end = dp2px(12))
+        /** The logo, then the name and status with the region and note under them; every text wraps (#150). */
+        private fun checkRow(check: ServiceResults.Check): View {
+            val size = dp2px(ICON_DP)
+            val icon = ImageView(context).apply {
+                setImageBitmap(ServiceIcons.bitmap(context, check.id, check.name, ServiceIcons.stateOf(check.status), size))
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             }
-            val state = text(statusText(status), BODY).apply {
-                setTextColor(color)
-                updatePaddingRelative(end = dp2px(12))
+            val headline = SpannableStringBuilder()
+            headline.append(check.name, StyleSpan(Typeface.BOLD), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            headline.append("  ")
+            headline.append(
+                ServiceResults.statusText(context, check.status),
+                ForegroundColorSpan(statusColor(check.status)),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
+            val texts = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                addView(text(headline, BODY))
+                val extra = listOf(check.region, check.note).filter { it.isNotEmpty() }
+                if (extra.isNotEmpty()) addView(text(extra.joinToString(" — "), BODY).apply { setTextColor(muted) })
             }
-            val extra = listOf(check.string("region"), check.string("note")).filter { it.isNotEmpty() }
-            return TableRow(context).apply {
-                updatePadding(top = dp2px(2), bottom = dp2px(2))
-                addView(name)
-                addView(state)
-                addView(text(extra.joinToString(" — "), BODY))
+            return LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                addView(icon, LinearLayout.LayoutParams(size, size).apply { marginEnd = dp2px(12) })
+                addView(texts, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
             }
         }
 
         /** Unknown and failed checks are muted. */
         @ColorInt
         private fun statusColor(status: String): Int = when (status) {
-            STATUS_AVAILABLE -> success
-            STATUS_PARTIAL -> warning
-            STATUS_RESTRICTED, STATUS_BLOCKED -> danger
+            ServiceResults.STATUS_AVAILABLE -> success
+            ServiceResults.STATUS_PARTIAL -> warning
+            ServiceResults.STATUS_RESTRICTED, ServiceResults.STATUS_BLOCKED -> danger
             else -> muted
-        }
-
-        private fun statusText(status: String): String = when (status) {
-            STATUS_AVAILABLE -> context.getString(R.string.service_status_available)
-            STATUS_PARTIAL -> context.getString(R.string.service_status_partial)
-            STATUS_RESTRICTED -> context.getString(R.string.service_status_restricted)
-            STATUS_BLOCKED -> context.getString(R.string.service_status_blocked)
-            STATUS_UNKNOWN -> context.getString(R.string.service_status_unknown)
-            STATUS_FAILED -> context.getString(R.string.service_status_failed)
-            else -> status
         }
 
         /** Every provider's answer merged: the network kind, then the anonymizing or abuse flags any of them saw. */
@@ -200,13 +188,6 @@ internal object ServiceCheckDialog {
             ).apply { topMargin = dp2px(top) })
         }
     }
-
-    private const val STATUS_AVAILABLE = "available"
-    private const val STATUS_PARTIAL = "partial"
-    private const val STATUS_RESTRICTED = "restricted"
-    private const val STATUS_BLOCKED = "blocked"
-    private const val STATUS_UNKNOWN = "unknown"
-    private const val STATUS_FAILED = "failed"
 
     private val RISK_FLAGS = listOf("vpn", "proxy", "tor", "abuser", "anonymous")
 

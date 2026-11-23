@@ -8,6 +8,7 @@ import io.nekohasekai.sagernet.bg.proto.CoreConfig
 import io.nekohasekai.sagernet.bg.proto.CoreConfigs
 import io.nekohasekai.sagernet.bg.proto.applyTo
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
@@ -87,11 +88,13 @@ internal object ChainStepRunner {
                 }
                 if (stopped) return ChainStepReport(invalidHops = invalidHops, hasLanding = step.hasLanding, aborted = true)
 
+                // testRunnerConcurrency: probes over a slow-start hop each bootstrap their own network.
+                val slowStart = SlowStart.split(ProfileManager.getProfiles(hops)).first.isNotEmpty()
                 val request = TestRequest().apply {
                     CoreConfig.from(build).applyTo(this)
                     url = DataStore.testUrl
                     timeoutMs = DataStore.urlTestTimeoutMs
-                    maxConcurrency = DataStore.testConcurrent
+                    maxConcurrency = if (slowStart) minOf(DataStore.testConcurrent, SlowStart.BATCH_SIZE) else DataStore.testConcurrent
                     step.vpnEndpointTags.forEach { addVPNEndpointTag(it) }
                 }
                 val outcomes = ConcurrentHashMap<String, Outcome>()

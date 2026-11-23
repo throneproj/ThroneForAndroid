@@ -40,20 +40,11 @@
         <item>3</item>
     </string-array>
 
-    <string-array name="int_array_5">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-    </string-array>
-
     <string-array name="speed_test_modes">
         <item>@string/speed_test_mode_download_upload</item>
         <item>@string/speed_test_mode_download</item>
         <item>@string/speed_test_mode_upload</item>
         <item>@string/speed_test_mode_simple_download</item>
-        <item>@string/speed_test_mode_country</item>
     </string-array>
 
     <string-array name="exit_lookup_provider_entries">
@@ -804,8 +795,8 @@
 
     <!-- auto selector -->
     <string-array name="autosel_balance_modes">
-        <item>Rotate on a timer (keeps sessions stable)</item>
-        <item>Per connection (widest spread)</item>
+        <item>Rotate every 30 s</item>
+        <item>Per connection</item>
     </string-array>
     <string-array name="autosel_balance_mode_values" translatable="false">
         <item>rotate</item>

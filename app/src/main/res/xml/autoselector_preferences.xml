@@ -76,21 +76,6 @@
             app:key="buildLimit"
             app:title="@string/autosel_build_limit" />
 
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_pool_cap_tip"
-            app:key="poolCap"
-            app:title="@string/autosel_pool_cap" />
-
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_result_validity_tip"
-            app:key="resultValidityMins"
-            app:title="@string/autosel_result_validity" />
-
-        <SwitchPreference
-            app:key="excludeUnavailable"
-            app:summary="@string/autosel_exclude_unavailable_tip"
-            app:title="@string/autosel_exclude_unavailable" />
-
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -104,29 +89,9 @@
             app:title="@string/autosel_expected" />
 
         <EditTextPreference
-            app:dialogMessage="@string/autosel_active_size_tip"
-            app:key="activeSize"
-            app:title="@string/autosel_active_size" />
-
-        <EditTextPreference
             app:dialogMessage="@string/autosel_interval_tip"
             app:key="intervalSec"
             app:title="@string/autosel_interval" />
-
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_bench_interval_tip"
-            app:key="benchIntervalSec"
-            app:title="@string/autosel_bench_interval" />
-
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_watch_interval_tip"
-            app:key="watchIntervalSec"
-            app:title="@string/autosel_watch_interval" />
-
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_sampling_tip"
-            app:key="sampling"
-            app:title="@string/autosel_sampling" />
 
     </PreferenceCategory>
 
@@ -145,40 +110,15 @@
             app:key="maxRTTms"
             app:title="@string/autosel_max_rtt" />
 
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_dial_retries_tip"
-            app:key="dialRetries"
-            app:title="@string/autosel_dial_retries" />
-
         <SwitchPreference
             app:key="interruptOnSwitch"
             app:summary="@string/autosel_interrupt_tip"
             app:title="@string/autosel_interrupt" />
 
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_failback_checks_tip"
-            app:key="failbackChecks"
-            app:title="@string/autosel_failback_checks" />
-
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_failback_delay_tip"
-            app:key="failbackDelaySec"
-            app:title="@string/autosel_failback_delay" />
-
-        <SwitchPreference
-            app:key="failbackInterrupt"
-            app:summary="@string/autosel_failback_interrupt_tip"
-            app:title="@string/autosel_failback_interrupt" />
-
         <SwitchPreference
             app:key="passive"
             app:summary="@string/autosel_passive_tip"
             app:title="@string/autosel_passive" />
-
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_site_memory_tip"
-            app:key="siteMemoryMins"
-            app:title="@string/autosel_site_memory" />
 
     </PreferenceCategory>
 
@@ -193,11 +133,6 @@
             app:key="balanceMode"
             app:title="@string/autosel_balance_mode"
             app:useSimpleSummaryProvider="true" />
-
-        <EditTextPreference
-            app:dialogMessage="@string/autosel_balance_interval_tip"
-            app:key="balanceIntervalSec"
-            app:title="@string/autosel_balance_interval" />
 
         <Preference
             app:key="autoselBalanceHint"

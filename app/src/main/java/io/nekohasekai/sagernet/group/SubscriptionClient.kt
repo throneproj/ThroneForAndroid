@@ -1,9 +1,11 @@
 package io.nekohasekai.sagernet.group
 
+import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.aidl.ICoreService
 import io.nekohasekai.sagernet.aidl.ISubscriptionCallback
 import io.nekohasekai.sagernet.bg.CoreServiceClient
 import io.nekohasekai.sagernet.database.GroupRepo
+import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.readableMessage
@@ -26,6 +28,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -47,6 +50,9 @@ object SubscriptionClient {
 
     /** The registration outlives the last collector by this much (configuration changes). */
     private const val STOP_DELAY_MS = 5_000L
+
+    /** A reload hint raised while no window shows the reports waits this long for one, e.g. a profile editor closing. */
+    private const val PENDING_RELOAD_MS = 10_000L
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -70,12 +76,57 @@ object SubscriptionClient {
     private var listener: Job? = null
     private var stopper: Job? = null
 
+    /** When [reloadNeeded] last raised a hint no collector took yet, 0 = none; and its group. */
+    private val pendingReload = AtomicLong(0L)
+    @Volatile
+    private var pendingReloadGid = -1L
+
     init {
         scope.launch {
             combine(mutableStates.subscriptionCount, mutableReports.subscriptionCount) { a, b -> a + b }
                 .collect { subscribersChanged(it) }
         }
+        scope.launch {
+            mutableReports.subscriptionCount.collect { if (it > 0) deliverReload() }
+        }
     }
+
+    /**
+     * ProfileService's noteRestartNeeded for a change made in this process: the reload hint reaches the window showing
+     * the reports now, or the next one within [PENDING_RELOAD_MS].
+     */
+    fun reloadNeeded(gid: Long) {
+        pendingReloadGid = gid
+        pendingReload.set(System.currentTimeMillis())
+        deliverReload()
+    }
+
+    private fun deliverReload() {
+        if (mutableReports.subscriptionCount.value == 0) return
+        val raised = pendingReload.getAndSet(0L)
+        if (raised <= 0L || System.currentTimeMillis() - raised > PENDING_RELOAD_MS) return
+        mutableReports.tryEmit(Report(pendingReloadGid, "", "", popup = false, error = false, reload = true))
+    }
+
+    /**
+     * ImportTargetRefusalText: why profiles cannot be imported into group [gid] (the current group when not positive),
+     * null when they can (ImportService::CheckTarget).
+     */
+    fun importRefusal(gid: Long): String? {
+        val target = if (gid > 0) gid else GroupRepo.currentId()
+        return ProfileManager.checkTarget(target)?.let { refusalText(it, move = false) }
+    }
+
+    /** The text of a [ProfileManager.TargetRefusal]; a [move] says so where the desktop's move menu does. */
+    fun refusalText(refusal: ProfileManager.TargetRefusal, move: Boolean): String = app.getString(
+        when (refusal) {
+            ProfileManager.TargetRefusal.NOT_FOUND -> R.string.import_target_gone
+            ProfileManager.TargetRefusal.ARCHIVED -> R.string.import_target_archived
+            ProfileManager.TargetRefusal.SUBSCRIPTION ->
+                if (move) R.string.profiles_move_target_subscription else R.string.import_target_subscription
+            ProfileManager.TargetRefusal.BUSY -> R.string.profiles_move_source_updating
+        }
+    )
 
     /** Desktop group actions that need the core: "remove_invalid", "resolve_domains"; returns the report text. */
     suspend fun groupAction(gid: Long, action: String): String = withContext(Dispatchers.IO) {
@@ -118,19 +169,37 @@ object SubscriptionClient {
         }
     }
 
-    /** ImportUrl: one fetch with the global identity into group [gid] (the current group when not positive). */
-    fun importUrl(url: String, gid: Long) = launchCall(gid) { it.importUrl(url, gid) }
+    /**
+     * ImportUrl: one fetch with the global identity into group [gid] (the current group when not positive); refused
+     * with an error report for a group [importRefusal] names.
+     */
+    fun importUrl(url: String, gid: Long) {
+        scope.launch {
+            val refusal = importRefusal(gid)
+            if (refusal != null) {
+                mutableReports.tryEmit(Report(gid, "", refusal, popup = false, error = true))
+                return@launch
+            }
+            try {
+                CoreServiceClient.call { it.importUrl(url, gid) }
+            } catch (e: Exception) {
+                failed(gid, e)
+            }
+        }
+    }
 
-    /** What [importText] stored, and whether the import box (a popup report) already said so. */
-    class TextImport(val count: Int, val reported: Boolean)
+    /** What [importText] stored, and whether the import box (a popup report) already said so; or why it [refused]. */
+    class TextImport(val count: Int, val reported: Boolean, val refused: String? = null)
 
     /**
      * ImportText: the profiles of [text] appended to group [gid] (the current group when not positive), through a
-     * file under cacheDir/import (binder transactions are capped); returns the outcome once imported.
+     * file under cacheDir/import (binder transactions are capped); returns the outcome once imported. Nothing is
+     * imported into a group [importRefusal] names.
      */
     suspend fun importText(text: String, gid: Long = -1L): TextImport = withContext(Dispatchers.IO) {
         if (text.isBlank()) return@withContext TextImport(0, false)
         val target = if (gid > 0) gid else GroupRepo.currentId()
+        importRefusal(target)?.let { return@withContext TextImport(0, false, refused = it) }
         val dir = File(app.cacheDir, SubscriptionQueue.IMPORT_DIR)
         val file = File(dir, UUID.randomUUID().toString() + ".txt")
         val countFile = File(file.path + SubscriptionQueue.IMPORT_COUNT_SUFFIX)

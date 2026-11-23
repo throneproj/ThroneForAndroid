@@ -43,9 +43,9 @@ object RemoteRouteUpdater {
     private const val WORK_NAME = "RemoteRouteUpdater"
 
     /**
-     * RouteUpdate::UpdateProfile (RouteUpdater.cpp:12-51) without saving: fetches [p]'s URL through the rule-set
-     * mirror and replaces its rules and default outbound, keeping a non-empty local name. [p] is left unchanged on
-     * error, which is returned.
+     * RouteUpdate::UpdateProfile (RouteUpdater.cpp) without saving: fetches [p]'s URL through the rule-set mirror and
+     * replaces its remote rules and default outbound, keeping its local rules and a non-empty local name. [p] is left
+     * unchanged on error, which is returned.
      */
     fun fetchInto(p: RouteProfile, warnings: MutableList<String>? = null): String? {
         if (!p.is_remote) return "not a remote routing profile"
@@ -77,19 +77,33 @@ object RemoteRouteUpdater {
         }
     }
 
-    /** [fetchInto] and save; returns the error, or null. A saved profile deleted meanwhile is not recreated. */
+    /** What [fetchAndCommit] did: the fetch [error], else whether the fetched [copy] was [saved]. */
+    private class Commit(val copy: RouteProfile, val error: String?, val saved: Boolean)
+
+    /**
+     * Fetches into a copy of [p], a profile as stored, and saves the copy only while the stored profile is still [p]
+     * (UI_update_all_remote_routes): a profile edited or deleted during the fetch keeps that change.
+     */
+    private fun fetchAndCommit(p: RouteProfile, warnings: MutableList<String>): Commit {
+        val copy = p.copy()
+        fetchInto(copy, warnings)?.let { return Commit(copy, it, false) }
+        return Commit(copy, null, RouteManager.saveIfUnchanged(p, copy))
+    }
+
+    /** [fetchInto] a copy of [p], a profile as stored, and save it; returns the error, or null. */
     fun update(p: RouteProfile): String? {
         val warnings = ArrayList<String>()
-        fetchInto(p, warnings)?.let { return it }
-        if (p.id > 0L && RouteManager.get(p.id) == null) return "the routing profile no longer exists"
-        RouteManager.save(p)
+        val commit = fetchAndCommit(p, warnings)
+        commit.error?.let { return it }
+        if (!commit.saved) return "the routing profile was changed or deleted during the update"
         if (warnings.isNotEmpty()) Logs.w("Remote routing profile ${p.name}: ${warnings.joinToString("; ")}")
         return null
     }
 
     /**
-     * UI_update_all_remote_routes (RouteUpdater.cpp:54-78): (updated count, "name: error" failures). An update that
-     * changed the running routing profile asks for a reload.
+     * UI_update_all_remote_routes (RouteUpdater.cpp): (updated count, "name: error" failures). A profile changed or
+     * deleted during its fetch is skipped, and the next run updates it. An update that changed the running routing
+     * profile asks for a reload.
      */
     fun updateAll(onlyAutoUpdate: Boolean): Pair<Int, List<String>> {
         var updated = 0
@@ -99,15 +113,19 @@ object RemoteRouteUpdater {
             if (!p.is_remote || p.remote_url.isBlank()) continue
             if (onlyAutoUpdate && !p.auto_update) continue
             Logs.i("Updating remote routing profile: ${p.name}")
-            val before = if (p.id == RouteManager.runningRouteId()) routeFingerprint(p) else null
-            val error = update(p)
-            if (error != null) {
-                failures.add("${p.name}: $error")
-                Logs.w("Remote routing profile ${p.name} failed: $error")
+            val warnings = ArrayList<String>()
+            val commit = fetchAndCommit(p, warnings)
+            if (commit.error != null) {
+                failures.add("${p.name}: ${commit.error}")
+                Logs.w("Remote routing profile ${p.name} failed: ${commit.error}")
                 continue
             }
+            if (!commit.saved) continue
             updated++
-            if (before != null && routeFingerprint(p) != before) SubscriptionQueue.reloadNeeded(-1L)
+            if (warnings.isNotEmpty()) Logs.w("Remote routing profile ${p.name}: ${warnings.joinToString("; ")}")
+            if (p.id == RouteManager.runningRouteId() && routeFingerprint(commit.copy) != routeFingerprint(p)) {
+                SubscriptionQueue.reloadNeeded(-1L)
+            }
         }
         Logs.i("Remote routing profiles: $updated updated, ${failures.size} failed")
         return updated to failures
@@ -142,25 +160,37 @@ object RemoteRouteUpdater {
     }
 
     /**
-     * replaceRules (RouteUpdater.cpp:29-51): [p] takes [fetched]'s rules and default outbound and stops being raw.
-     * Endpoint rules belong to the local profile, so they stay at their index; rules switched off locally stay off,
-     * matched by name. [fetched] is left as it is.
+     * replaceRules (RouteUpdater.cpp): [fetched]'s rules become [p]'s remote ones, [p] takes its default outbound and
+     * stops being raw. Local rules (endpoint rules included) stay put; the fetched rules take the old remote slots in
+     * order, extras follow the last slot (the top when there was none: remote takes precedence), and slots left over
+     * close up. Rules switched off locally stay off, matched by name. [fetched] is left as it is.
      */
     internal fun replaceRules(p: RouteProfile, fetched: RouteProfile) {
-        val endpointRules = ArrayList<Pair<Int, RouteRule>>()
+        val remoteAt = ArrayList<Int>()
         val disabledNames = HashSet<String>()
+        val rules = ArrayList<RouteRule>()
         p.rules.forEachIndexed { i, rule ->
-            if (rule.type == RuleType.ENDPOINT_PREFERRED_BY.id) endpointRules.add(i to rule)
-            else if (rule.disabled) disabledNames.add(rule.name)
+            if (!rule.remote) {
+                rules.add(rule)
+            } else {
+                remoteAt.add(i)
+                if (rule.disabled) disabledNames.add(rule.name)
+            }
         }
         p.is_raw = false
         p.raw_route = ""
-        val rules = ArrayList<RouteRule>()
+        var next = if (remoteAt.isEmpty()) 0 else remoteAt.last() + 1
+        var placed = 0
         for (rule in fetched.rules) {
             if (rule.type == RuleType.ENDPOINT_PREFERRED_BY.id) continue
-            rules.add(rule.copy().also { if (it.name in disabledNames) it.disabled = true })
+            val copy = rule.copy().also {
+                if (it.name in disabledNames) it.disabled = true
+                it.remote = true
+            }
+            val at = if (placed < remoteAt.size) remoteAt[placed] else next++
+            rules.add(minOf(at, rules.size), copy)
+            placed++
         }
-        for ((index, rule) in endpointRules) rules.add(minOf(index, rules.size), rule)
         p.rules = rules
         p.default_outbound_id = fetched.default_outbound_id
     }

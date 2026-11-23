@@ -21,11 +21,10 @@ import io.nekohasekai.sagernet.route.RuleSets
 /** Display texts shared by the routing screens. Action and field tokens are the sing-box / desktop names. */
 internal object RouteTexts {
 
-    const val WARP_BYPASS = "warp-bypass"
-
-    /** proxy, direct, block, warp-bypass, the server's name from [servers], or "missing server". */
+    /** proxy, direct, block, "Proxy without exit" for warp-bypass, the server's name from [servers], or "missing server". */
     fun outboundName(context: Context, id: Long, servers: Map<Long, String>): String = when (id) {
-        OutboundIds.PROXY, OutboundIds.DIRECT, OutboundIds.BLOCK, OutboundIds.WARP_BYPASS -> OutboundIds.toName(id)
+        OutboundIds.PROXY, OutboundIds.DIRECT, OutboundIds.BLOCK -> OutboundIds.toName(id)
+        OutboundIds.WARP_BYPASS -> context.getString(R.string.route_outbound_no_exit)
         OutboundIds.HIJACK_DNS -> "hijack-dns"
         else -> servers[id] ?: context.getString(R.string.route_rule_missing_server, id)
     }

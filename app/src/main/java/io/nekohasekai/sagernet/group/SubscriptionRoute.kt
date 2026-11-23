@@ -24,7 +24,8 @@ import io.nekohasekai.sagernet.validation.Validation
  * The routing profile a subscription provides (RouteUpdater.cpp ParseSubscriptionRoute / ImportSubscriptionRoute):
  * a Happ routing profile (`happ://routing/add|onadd/<base64 or JSON>`, bare base64 or JSON) or a throne://route
  * share, from the `routing` header or a routing link in the body. It becomes the group's own routing profile, and each
- * refresh overwrites that profile's rules. DNS settings from the subscription are never used.
+ * refresh replaces the rules it provided, keeping the ones added locally. DNS settings from the subscription are never
+ * used.
  */
 internal object SubscriptionRoute {
 
@@ -57,8 +58,8 @@ internal object SubscriptionRoute {
 
     /**
      * ImportSubscriptionRoute: saves [value]'s profile as the routing profile group [gid] owns, created on the first
-     * import (and made the group's routing profile when it has none), else with its rules replaced; asks for a reload
-     * when that changes the running config's routing profile.
+     * import (and made the group's routing profile when it has none), else with its remote rules replaced; asks for a
+     * reload when that changes the running config's routing profile.
      */
     fun importRoute(gid: Long, value: String) {
         val parsed = parse(value)
@@ -75,6 +76,7 @@ internal object SubscriptionRoute {
         if (current == null) {
             fetched.id = 0L
             fetched.source_gid = gid
+            for (rule in fetched.rules) rule.remote = true
             if (fetched.name.isBlank()) fetched.name = app.getString(R.string.route_subscription_profile_name, groupName)
             RouteManager.save(fetched)
             if (group.routeId <= 0L || RouteManager.get(group.routeId) == null) SagerDatabase.groupDao.setRouteId(gid, fetched.id)

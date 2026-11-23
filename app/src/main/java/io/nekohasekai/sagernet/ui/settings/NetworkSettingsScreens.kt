@@ -55,10 +55,10 @@ class InboundSettingsFragment : SettingsScreenFragment(R.xml.settings_inbound) {
         val dnsInPort = pref<EditTextPreference>(SettingsRegistry.CORE_DNS_IN_PORT.key)
 
         // The four local listeners need distinct ports; the Clash and sing-box API ports are on the Core screen.
-        gateText(port.key, SettingChecks.listenPort(SettingChecks.Listener.MIXED), invalid = R.string.invalid_port, valid = SettingValidators::isPort)
+        gateText(port.key, SettingChecks.listenPort(SettingsRegistry.Listener.MIXED), invalid = R.string.invalid_port, valid = SettingValidators::isPort)
         port.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         // dialog_basic_settings.cpp:255-256.
-        gateText(dnsInPort.key, SettingChecks.listenPort(SettingChecks.Listener.DNS), invalid = R.string.invalid_port, valid = SettingValidators::isPort)
+        gateText(dnsInPort.key, SettingChecks.listenPort(SettingsRegistry.Listener.DNS_IN), invalid = R.string.invalid_port, valid = SettingValidators::isPort)
         dnsInPort.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         // The address itself has no field: the LAN switch writes it, so a restored one that is not an IP marks the switch.
         validation.bind(KEY_ALLOW_LAN) {
@@ -104,8 +104,12 @@ class InboundSettingsFragment : SettingsScreenFragment(R.xml.settings_inbound) {
             updateHttpProxyState()
         }
         updateMixedState(mixedDisabled)
-        pref<SwitchPreference>(SettingsRegistry.DISABLE_MIXED_INBOUND.key).setOnPreferenceChangeListener { _, newValue ->
+        val disableMixed = pref<SwitchPreference>(SettingsRegistry.DISABLE_MIXED_INBOUND.key)
+        disableMixed.setOnPreferenceChangeListener { _, newValue ->
             val disabled = newValue as Boolean
+            if (!disabled && refusedByPorts(disableMixed, SettingsRegistry.DISABLE_MIXED_INBOUND.key to "false")) {
+                return@setOnPreferenceChangeListener false
+            }
             if (disabled && DataStore.serviceMode == Key.MODE_PROXY) {
                 Toast.makeText(
                     requireContext(),
@@ -134,7 +138,15 @@ class InboundSettingsFragment : SettingsScreenFragment(R.xml.settings_inbound) {
             appendHttpProxy.isVisible = false
             httpProxyBypass.isVisible = false
         }
-        reloadOn(randomPort.key, user.key, pass.key, httpProxyBypass.key)
+        randomPort.setOnPreferenceChangeListener { _, newValue ->
+            // Off again, the mixed inbound comes back on its fixed port.
+            if (newValue == false && refusedByPorts(randomPort, SettingsRegistry.RANDOM_INBOUND_PORT.key to "false")) {
+                return@setOnPreferenceChangeListener false
+            }
+            needReload()
+            true
+        }
+        reloadOn(user.key, pass.key, httpProxyBypass.key)
     }
 
     private companion object {

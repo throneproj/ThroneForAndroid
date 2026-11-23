@@ -200,8 +200,8 @@
 <string name="show_system_apps">Показать системные приложения</string>
 <string name="sni">SNI (индикация имени сервера)</string>
 <string name="speed">%s/с</string>
-<string name="speed_detail">Прокси: %1$s↑ %2$s↓ 
-\nПрямой: %3$s↑%4$s↓</string>
+<string name="speed_detail">Прокси: ↓%2$s ↑%1$s 
+\nПрямой: ↓%4$s ↑%3$s</string>
 <string name="ssh_auth_type_none">Без аутентификации</string>
 <string name="ssh_private_key">Закрытый ключ</string>
 <string name="ssh_private_key_passphrase">Парольная фраза закрытого ключа</string>
@@ -396,8 +396,6 @@
     <string name="auto_connect_superseded">Переопределяется всегда активным VPN</string>
     <string name="auto_update_interval">Интервал обновления</string>
     <string name="auto_update_interval_sum">%d мин</string>
-    <string name="autosel_active_size">Проверять часто</string>
-    <string name="autosel_active_size_tip">Профили с высоким рейтингом перепроверяются каждые интервал. Остальные тоже проверяются, но растягиваются на более медленный полный проход.</string>
     <string name="autosel_advanced">Дополнительно</string>
     <string name="autosel_advanced_hide">Скрыть дополнительные параметры</string>
     <string name="autosel_advanced_show">Здесь у всего есть рабочие значения по умолчанию. Открывайте, только если хотите настроить измерение и переключение селектора.</string>
@@ -405,18 +403,13 @@
     <string name="autosel_ago_hours">%d ч. назад</string>
     <string name="autosel_ago_minutes">%d мин назад</string>
     <string name="autosel_ago_seconds">%d с назад</string>
-    <string name="autosel_always_retest">Всегда перепроверять</string>
     <string name="autosel_back_to_automatic">Вернуть к автоматическому</string>
     <string name="autosel_balance">Распределять трафик между лучшими профилями</string>
     <string name="autosel_balance_hint_connection">Каждое новое соединение может использовать другой профиль. Максимальное распределение, но выходной IP меняется посреди сессии, а трафик по профилям становится приблизительным.</string>
     <string name="autosel_balance_hint_off">Лучший профиль несёт весь трафик; остальные готовые профили остаются проверенными и могут мгновенно взять на себя работу.</string>
     <string name="autosel_balance_hint_rotate">При каждой ротации новые соединения переходят на другой хороший профиль; открытые не трогаются и завершаются там, где начались. Трафик считается точно.</string>
-    <string name="autosel_balance_interval">Ротация каждые</string>
-    <string name="autosel_balance_interval_tip">Как долго селектор остаётся на одном профиле перед переходом к следующему готовому.</string>
     <string name="autosel_balance_mode">Режим</string>
     <string name="autosel_balance_tip">По умолчанию выкл.: один профиль несёт всё, остальные в резерве. Включите, чтобы распределять трафик между подтверждённо рабочими профилями.</string>
-    <string name="autosel_bench_interval">Полный проход каждые</string>
-    <string name="autosel_bench_interval_tip">Сколько занимает один проход по всем работающим профилям. Проверки распределяются равномерно, поэтому большой пул никогда не вызывает всплеск трафика.</string>
     <string name="autosel_build_limit">Запускать лучших</string>
     <string name="autosel_build_limit_tip">Сколько профилей загружается в рабочую конфигурацию. Селектор переключается между ними мгновенно, без переподключения. Больше — больше памяти и времени запуска.</string>
     <string name="autosel_cat_balance">Балансировка нагрузки</string>
@@ -438,13 +431,9 @@
     <string name="autosel_detail_health">%1$d проф.: %2$s</string>
     <string name="autosel_detail_untested">%d ещё не проверено</string>
     <string name="autosel_detail_working">%d работает</string>
-    <string name="autosel_dial_retries">Попытки failover</string>
-    <string name="autosel_dial_retries_tip">Когда выбранный профиль не может подключиться, сколько других попробовать сразу, прежде чем приложение увидит ошибку.</string>
     <string name="autosel_edit">Редактировать автовыбор</string>
     <string name="autosel_error_no_group">Автовыбор указывает на несуществующую группу</string>
     <string name="autosel_error_no_members">У автовыбор нет пригодных участников</string>
-    <string name="autosel_exclude_unavailable">Пропускать неудачные профили</string>
-    <string name="autosel_exclude_unavailable_tip">Держит серверы с неудачным последним тестом вне пула, пока результат ещё в окне доверия. Выключите, если тесты ненадёжны и вы предпочитаете, чтобы селектор решал сам.</string>
     <string name="autosel_expected">Держать готовыми</string>
     <string name="autosel_expected_tip">Сколько профилей постоянно подтверждены как рабочие, чтобы сбой был покрыт мгновенно. При включённой балансировке между этими профилями и распределяется трафик.</string>
     <string name="autosel_footer_exhausted">Сейчас ничего не работает — если это продолжится, селектор перестроится из следующих по рейтингу профилей.</string>
@@ -454,18 +443,18 @@
     <string name="autosel_footer_pinned_other">Вы выбрали %s, но сейчас он не работает, поэтому селектор выбрал другой. После восстановления вернётся к вашему выбору.</string>
     <string name="autosel_footer_pinned_using">Используется %s, потому что вы его выбрали.</string>
     <string name="autosel_footer_suspended">Проверки приостановлены: у устройства нет сетевого соединения. Ни один профиль не виноват, рейтинг заморожен до восстановления связи.</string>
-    <string name="autosel_group">Серверы из</string>
+    <string name="autosel_group">Профили из</string>
     <string name="autosel_group_archived">%s (в архиве)</string>
     <string name="autosel_group_missing">Группа отсутствует (#%d)</string>
-    <string name="autosel_interrupt">Разрывать соединения при переключении</string>
-    <string name="autosel_interrupt_tip">Применяется, когда селектор переключается из-за ухудшения или сбоя профиля. Вкл.: всё сразу переходит на новый профиль. Выкл.: текущие загрузки завершаются на старом. Ротации при балансировке в любом случае не разрывают соединения.</string>
+    <string name="autosel_interrupt">Разрывать соединения при сбое профиля</string>
+    <string name="autosel_interrupt_tip">Открытые соединения сразу переходят, а не завершаются на сбойном профиле. Переход на более быстрый профиль и ротации при балансировке никогда не разрывают соединения.</string>
     <string name="autosel_interval">Интервал проверки</string>
-    <string name="autosel_interval_tip">Как часто плотно проверяемые профили измеряются повторно.</string>
+    <string name="autosel_interval_tip">Как часто профили из верхней части рейтинга измеряются повторно.</string>
     <string name="autosel_just_now">только что</string>
     <string name="autosel_last_ok_short">ОК %s</string>
     <string name="autosel_list_separator">", "</string>
     <string name="autosel_max_rtt">Максимальная задержка</string>
-    <string name="autosel_max_rtt_tip">Более медленные профили никогда не выбираются, даже если лучше нет.</string>
+    <string name="autosel_max_rtt_tip">Более медленные профили используются, только когда не работает ни один более быстрый.</string>
     <string name="autosel_ms">%d мс</string>
     <string name="autosel_name_empty">Имя не может быть пустым.</string>
     <string name="autosel_name_filter">Только совпадающие имена</string>
@@ -502,27 +491,19 @@
     <string name="autosel_plan">Профили</string>
     <string name="autosel_plan_calculating">Проверяем группу…</string>
     <string name="autosel_plan_counts">%1$d из %2$d профилей группы можно использовать; будет запущено %3$d.</string>
-    <string name="autosel_plan_kept_unavailable">Последний тест всех профилей неудачен, что обычно означает проблему сети, а не серверов, поэтому все %d сохранены и будут перепроверены.</string>
     <string name="autosel_plan_needs_ranking">Остальные будут измерены при запуске селектора: он заработает, как только наберётся достаточно рабочих профилей, и перейдёт на полный рейтинг, когда будут измерены все.</string>
     <string name="autosel_plan_reused">%d имеют недавний результат теста, который будет переиспользован.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_plan_skipped">Пропущено: %s.</string>
     <string name="autosel_plan_truncated">Совпадает более %d профилей, поэтому сохранены только лучшие по рейтингу.</string>
-    <string name="autosel_pool_cap">Максимум в рейтинге</string>
-    <string name="autosel_pool_cap_tip">Жёсткий предел того, сколько профилей измеряется и хранится в рейтинге. Когда все работающие профили умирают, замены берутся из этого списка.</string>
-    <string name="autosel_result_validity">Доверять результатам</string>
-    <string name="autosel_result_validity_tip">Недавние результаты URL-теста переиспользуются вместо повторного измерения — включая тесты, которые вы сами запускали на группе, поэтому немедленный запуск селектора после них не повторяет работу. Более старые результаты считаются так, будто профиль никогда не тестировался. Установите 0, чтобы всегда запускать новый тест.</string>
     <string name="autosel_row_checks">Проверки: %1$d / %2$d ОК</string>
     <string name="autosel_row_connects">Подключения: %1$d / %2$d ОК</string>
     <string name="autosel_row_error">Последняя ошибка: %s</string>
-    <string name="autosel_row_jitter">Джиттер: %d мс</string>
     <string name="autosel_row_last_ok">Последний ОК: %s</string>
     <string name="autosel_row_latency">Задержка: %1$d мс (лучш. %2$d мс, худш. %3$d мс)</string>
     <string name="autosel_row_state">Статус: %s</string>
     <string name="autosel_row_tested">Последний URL-тест: %1$s, %2$s</string>
     <string name="autosel_row_untested">Результатов URL-теста пока нет.</string>
-    <string name="autosel_sampling">Хранимых выборок</string>
-    <string name="autosel_sampling_tip">Рейтинг использует среднее и джиттер за последние столько проверок, поэтому один плохой результат не может понизить хороший сервер.</string>
     <string name="autosel_select_group">Выберите группу, за которой будет следить этот автовыбор.</string>
     <string name="autosel_skip_core_transitions">слишком много переключений ядра</string>
     <string name="autosel_skip_country">отфильтровано по стране</string>
@@ -534,7 +515,6 @@
     <string name="autosel_skip_missing">профиль отсутствует</string>
     <string name="autosel_skip_name">отфильтровано по имени</string>
     <string name="autosel_skip_tailscale">профиль Tailscale</string>
-    <string name="autosel_skip_unavailable">последний тест неудачен</string>
     <string name="autosel_skip_unsupported">тип, недоступный в этой сборке</string>
     <string name="autosel_skip_xray_chained">полную конфигурацию Xray нельзя сочетать с прокси группы</string>
     <string name="autosel_state_cooldown">Пауза</string>
@@ -566,8 +546,6 @@
     <string name="autosel_use_automatic_tip">Перестать предпочитать этот профиль и снова позволить селектору выбирать по измерениям.</string>
     <string name="autosel_use_this">Использовать этот профиль</string>
     <string name="autosel_use_this_tip">Держать этот профиль в работе вместо выбора по рейтингу. Это остаётся предпочтением, а не блокировкой: если профиль перестанет работать, селектор всё равно переключится и вернётся к вашему выбору после восстановления.</string>
-    <string name="autosel_watch_interval">Следить за активным профилем</string>
-    <string name="autosel_watch_interval_tip">Как часто отдельно проверяется профиль, который сейчас несёт ваш трафик. Держите коротким: сервер может перать работать, принимая подключения, и ничто другое не заметит до следующей полной проверки.</string>
     <string name="backup_create">Создать резервную копию</string>
     <string name="backup_created">Резервная копия создана. Включено: %s</string>
     <string name="backup_creating">Создание резервной копии…</string>
@@ -582,7 +560,7 @@
     <string name="backup_failed">Не удалось создать резервную копию: %s</string>
     <string name="backup_local_summary">Резервные копии используют формат Throne desktop (.thrbackup): их восстанавливает любое из приложений. Учётные данные WebDAV остаются на этом устройстве.</string>
     <string name="backup_open_label">Восстановить резервную копию Throne</string>
-    <string name="backup_part_otp">OTP-профили (на Android не восстанавливаются)</string>
+    <string name="backup_part_otp">Записи OTP (на Android не восстанавливаются)</string>
     <string name="backup_part_profiles">Профили (группы и прокси)</string>
     <string name="backup_part_routes">Маршрутизирующие профили</string>
     <string name="backup_part_settings">Настройки</string>
@@ -690,7 +668,7 @@
     <string name="direct_test_url">URL прямого теста</string>
     <string name="direct_test_url_empty">состояние сети системы</string>
     <string name="direct_test_url_sum">Запрашивается без какого-либо прокси, чтобы отличать обрыв связи от отказа серверов. Пусто — используется состояние сети системы.</string>
-    <string name="disable_traffic_stats">Отключить статистику трафика</string>
+    <string name="disable_traffic_stats">Отключить счётчики трафика</string>
     <string name="disable_traffic_stats_sum">Трафик профилей не считается</string>
     <string name="dns_address_dialog_message">Примеры: https://8.8.8.8/dns-query, tls://1.1.1.1, 8.8.8.8, localhost</string>
     <string name="dns_advanced">Дополнительные настройки</string>
@@ -719,7 +697,7 @@
     <string name="enable_clash_api_summary">Предоставлять Clash API внешним контроллерам и панели</string>
     <string name="enable_ntp">Клиент NTP</string>
     <string name="enable_ntp_sum">Синхронизировать часы ядра с NTP-сервером</string>
-    <string name="enable_reality">Включить Reality</string>
+    <string name="enable_reality">Включить REALITY</string>
     <string name="enable_stats">Статистика соединений</string>
     <string name="enable_stats_sum">Отслеживать соединения и их процессы</string>
     <string name="enable_tls">Включить TLS</string>
@@ -766,7 +744,11 @@
     <string name="grp_keep_working_tip">Профили с успешным последним тестом сохраняются, даже если подписка их больше не содержит.</string>
     <string name="grp_landing_proxy">Посадочный прокси</string>
     <string name="grp_last_update">Последнее обновление: %1$s</string>
-    <string name="grp_missing_profile">Профиль #%1$d (отсутствует)</string>
+    <string name="grp_missing_profile">Отсутствующий профиль (#%1$d)</string>
+    <string name="hop_refs_warning">Эти группы используют удаляемый профиль как фронтовый или посадочный прокси. Он будет из них убран, и они будут подключаться без него:</string>
+    <string name="hop_refs_cleared">Эти группы использовали удалённый профиль как фронтовый или посадочный прокси. Он был из них убран, и теперь они подключаются без него:</string>
+    <string name="hop_ref_front">%1$s (фронтовый прокси)</string>
+    <string name="hop_ref_landing">%1$s (посадочный прокси)</string>
     <string name="grp_route_profile">Маршрутизирующий профиль</string>
     <string name="grp_route_profile_default">По умолчанию (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (из этой подписки)</string>
@@ -803,7 +785,7 @@
     <string name="grp_state_running">Обновление…</string>
     <string name="grp_sub_auto_update">Автообновление подписки</string>
     <string name="grp_sub_auto_update_interval">Интервал (минуты, менее 30 недопустимо)</string>
-    <string name="grp_sub_clear">Очистить серверы перед обновлением подписки</string>
+    <string name="grp_sub_clear">Очищать профили перед обновлением подписки</string>
     <string name="grp_sub_custom_hwid_params">Пользовательские параметры HWID (необязательно)</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
     <string name="grp_sub_custom_hwid_params_tip">Формат: hwid=value,os=value,osVersion=value,model=value\nПусто — значения по умолчанию. Указывайте только параметры, которые хотите переопределить.</string>
@@ -960,11 +942,15 @@
     <string name="profiles_empty_subscription_hint">Обновите подписку, чтобы загрузить её профили.</string>
     <string name="profiles_more_options">Другие параметры</string>
     <string name="profiles_move_down">Переместить вниз</string>
-    <string name="profiles_move_no_target">Нет другой базовой группы для перемещения.</string>
     <string name="profiles_move_to_group">Переместить в группу</string>
+    <string name="import_target_subscription">Эта группа — подписка: при следующем обновлении импортированные в неё профили будут удалены. Выберите другую группу и импортируйте снова.</string>
+    <string name="import_target_archived">Эта группа в архиве. Выберите другую группу и импортируйте снова.</string>
+    <string name="import_target_gone">Этой группы больше не существует.</string>
+    <string name="profiles_move_target_subscription">При следующем обновлении группы-подписки перемещённые в неё профили будут удалены. Выберите другую группу.</string>
+    <string name="profiles_move_source_updating">Подписка этой группы обновляется. Повторите попытку, когда обновление завершится.</string>
     <string name="profiles_move_up">Переместить вверх</string>
     <string name="profiles_no_duplicates">Дублирующиеся профили не найдены.</string>
-    <string name="profiles_no_insecure">Небезопасные конфигурации не найдены.</string>
+    <string name="profiles_no_insecure">Небезопасных профилей не обнаружено.</string>
     <string name="profiles_no_unavailable">Недоступные профили не найдены.</string>
     <string name="profiles_remove">Удалить</string>
     <string name="profiles_remove_duplicates">Дубликаты</string>
@@ -976,14 +962,14 @@
     <string name="profiles_running_kept">Работающий профиль сохранён.</string>
     <string name="profiles_select_all">Выбрать все</string>
     <string name="profiles_show">Показать</string>
-    <string name="profiles_show_out_ip">Внешний IP</string>
+    <string name="profiles_show_out_ip">Выходной IP</string>
     <string name="profiles_show_speed">Скорость</string>
     <string name="profiles_sort">Сортировка</string>
     <string name="profiles_sort_address">Адрес</string>
     <string name="profiles_sort_ascending">По возрастанию</string>
     <string name="profiles_sort_descending">По убыванию</string>
     <string name="profiles_sort_download">Скорость загрузки</string>
-    <string name="profiles_sort_ip_out">Внешний IP</string>
+    <string name="profiles_sort_ip_out">Выходной IP</string>
     <string name="profiles_sort_latency">Задержка</string>
     <string name="profiles_sort_name">Имя</string>
     <string name="profiles_sort_security">Безопасность</string>
@@ -1017,9 +1003,9 @@
     <string name="raw_json">Исходный JSON</string>
     <string name="raw_json_invalid">Этот JSON не является допустимым профилем данного типа</string>
     <string name="raw_json_summary">Редактировать каждое поле профиля как JSON</string>
-    <string name="reality_public_key">Открытый ключ Reality</string>
-    <string name="reality_settings">Настройки Reality</string>
-    <string name="reality_short_id">Короткий ID Reality</string>
+    <string name="reality_public_key">Открытый ключ REALITY</string>
+    <string name="reality_settings">Настройки REALITY</string>
+    <string name="reality_short_id">Короткий ID REALITY</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="remote_dns_disable_ipv6">Удалённый DNS: отключить IPv6</string>
     <string name="reserved_hint">Три числа, по одному в строке</string>
@@ -1071,7 +1057,7 @@
     <string name="route_profile_empty">В профиле нет допустимых правил</string>
     <string name="route_profile_empty_title">Пустой маршрутный профиль</string>
     <string name="route_profile_fetch">Загрузить сейчас</string>
-    <string name="route_profile_fetch_confirm">Текущие правила будут заменены загруженными по URL.</string>
+    <string name="route_profile_fetch_confirm">Правила, полученные по URL, будут заменены загруженными сейчас, вместе с вашими правками в них. Добавленные здесь правила сохранятся.</string>
     <string name="route_profile_fetch_failed">Не удалось загрузить маршрутизирующий профиль</string>
     <string name="route_profile_fetched">Загружено правил из удалённого URL: %d.</string>
     <string name="route_profile_fetched_title">Загружено</string>
@@ -1085,7 +1071,7 @@
     <string name="route_profile_never_updated">Ещё не обновлялся</string>
     <string name="route_profile_quick_switch">Маршрутизирующий профиль</string>
     <string name="route_profile_remote_source">Удалённый источник</string>
-    <string name="route_profile_remote_rules_note">Каждое обновление заменяет правила этого профиля правилами из URL, поэтому добавленные или изменённые здесь правила теряются. Чтобы сохранить свои правила, используйте «Клонировать» в списке маршрутизирующих профилей: клон — локальная копия, которая никогда не обновляется.</string>
+    <string name="route_profile_remote_rules_note">Каждое обновление заменяет правила, полученные по URL, поэтому правки в них сохранятся только до следующего. Добавленные здесь правила сохраняются.</string>
     <string name="route_profile_rules">Правила (%d)</string>
     <string name="route_profile_title">Маршрутный профиль</string>
     <string name="route_profile_url">URL</string>
@@ -1111,8 +1097,8 @@
     <string name="route_rule_advanced_show">Показать остальные условия и параметры</string>
     <string name="route_rule_any">Любые</string>
     <string name="route_rule_apps">Приложения</string>
-    <string name="route_rule_catch_all">У этого правила нет условий, поэтому оно совпадает с любым соединением. Всё равно сохранить?</string>
-    <string name="route_rule_catch_all_title">Без условий</string>
+    <string name="route_rule_default_name">Правило %d</string>
+    <string name="route_rule_dns_queries">DNS-запросы</string>
     <string name="route_rule_category_match">Совпадение</string>
     <string name="route_rule_category_rule">Правило</string>
     <string name="route_rule_domain">Домен</string>
@@ -1133,6 +1119,8 @@
     <string name="route_rule_ip_version">Версия IP</string>
     <string name="route_rule_lines_hint">По одной записи в строке</string>
     <string name="route_rule_missing_server">Сервер отсутствует (#%d)</string>
+    <string name="route_outbound_no_exit">Прокси без выхода</string>
+    <string name="route_outbound_no_exit_hint">Отличается от «Прокси» только при включённом выходе (Настройки › Маршрутизация › Выход): эти сайты идут в обход него и выходят через выбранный профиль.</string>
     <string name="route_rule_name">Имя</string>
     <string name="route_rule_network">Сеть</string>
     <string name="route_rule_no_drop">Без drop</string>
@@ -1226,7 +1214,6 @@
     <string name="skip_cert_sum">По умолчанию пропускать проверку сертификатов TLS (allowInsecure)</string>
     <string name="skip_delete_confirmation">Пропускать подтверждение удаления</string>
     <string name="skip_delete_confirmation_sum">Удалять профили без предварительного вопроса</string>
-    <string name="speed_test_mode_country">Только страна</string>
     <string name="ss_plugin">Плагин SIP003</string>
     <string name="ss_plugin_opts">Параметры плагина</string>
     <string name="ssh_client_version">Версия клиента</string>
@@ -1277,7 +1264,7 @@
     <string name="test_engine_fg_busy">Работаем в фоне…</string>
     <string name="test_engine_fg_subscriptions">Обновление подписок…</string>
     <string name="test_engine_ip_current_unsupported">IP-тест текущего соединения не поддерживается</string>
-    <string name="test_engine_kind_ip">IP-тест</string>
+    <string name="test_engine_kind_ip">Тест выходного IP</string>
     <string name="test_engine_kind_speed">Тест скорости</string>
     <string name="test_engine_kind_url">URL-тест</string>
     <string name="test_engine_progress">%1$d / %2$d</string>
@@ -1302,7 +1289,6 @@
     <string name="test_panel_completed">Завершено</string>
     <string name="test_panel_countries">Страны</string>
     <string name="test_panel_country_description">%1$s: %2$d</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_current_unavailable">Недоступно: %s</string>
     <string name="test_panel_dismiss">Скрыть результаты теста</string>
     <string name="test_panel_distinct_ips">%d различных внешних IP</string>
@@ -1355,7 +1341,6 @@
     <string name="test_panel_summary_stopped">Остановлено · протестировано %1$d из %2$d за %3$s</string>
     <string name="test_panel_summary_tested">протестировано %1$d за %2$s</string>
     <string name="test_panel_summary_working">работает: %d</string>
-    <string name="test_panel_summary_working_countries">работает %1$d в %2$d странах</string>
     <string name="test_panel_summary_working_fastest">работает %1$d, быстрейший %2$s</string>
     <string name="test_panel_title">%1$s · %2$s</string>
     <string name="test_panel_unnamed">Профиль %d</string>
@@ -1488,9 +1473,16 @@
     <string name="warp_public_key">Открытый ключ</string>
     <string name="warp_registration">Регистрация</string>
     <string name="warp_reserved">Зарезервировано</string>
-    <string name="warp_settings">WARP</string>
-    <string name="warp_state_off">Выкл.</string>
-    <string name="warp_state_on">Вкл. · %s</string>
+    <string name="warp_settings">Выход</string>
+    <string name="exit_through">Выход через</string>
+    <string name="exit_server">Выбранный профиль</string>
+    <string name="exit_server_hint">Трафик выходит через запущенный профиль.</string>
+    <string name="exit_psiphon_hint">Psiphon — бесплатная сеть под управлением Psiphon Inc.; как и любой VPN-провайдер, она может видеть, какие сайты вы посещаете.</string>
+    <string name="exit_tor_hint">Tor недоступен на Android, поэтому трафик выходит через выбранный профиль.</string>
+    <string name="exit_unavailable">%s (недоступно на Android)</string>
+    <string name="psiphon_egress_region">Регион</string>
+    <string name="psiphon_region_best">Лучшая производительность</string>
+    <string name="psiphon_egress_region_sum">Страна сервера Psiphon; «Лучшая производительность» оставляет выбор за Psiphon.</string>
     <string name="warp_tos_message"><![CDATA[Создание идентификатора WARP регистрирует новое устройство в Cloudflare.<br><br>Принимаете ли вы <a href="%1$s">условия использования Cloudflare WARP</a>?]]></string>
     <string name="warp_wireguard_note">WARP едет поверх вашего прокси: WireGuard требует прокси, пересылающего UDP.</string>
     <string name="webdav_choose_backup">Выбрать резервную копию</string>
@@ -1615,7 +1607,7 @@
     <string name="xray_verify_peer_cert_by_name">Проверять сертификат пары по имени</string>
     <string name="xray_vless_all">Все VLESS</string>
     <string name="xray_vless_preference">Настройки VLESS для Xray</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP и Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP и REALITY</string>
     <string name="xray_vless_xhttp_only">Только XHTTP</string>
     <plurals name="added">
         <item quantity="one">Добавлен</item>
@@ -1628,12 +1620,6 @@
         <item quantity="few">%d мс</item>
         <item quantity="many">%d мс</item>
         <item quantity="other">%d мс</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="one">%d мин</item>
-        <item quantity="few">%d мин</item>
-        <item quantity="many">%d мин</item>
-        <item quantity="other">%d мин</item>
     </plurals>
     <plurals name="autosel_profiles">
         <item quantity="one">%d профиль</item>
@@ -1907,9 +1893,9 @@
     <string name="grp_http_version">Версия HTTP</string>
     <string name="grp_http_version_tip">Авто использует HTTP/2, если сервер его предлагает. «Оставить по умолчанию» следует значению из Настройки › Подписки.</string>
     <string name="grp_update_interval">Интервал обновления (минуты)</string>
-    <string name="grp_update_interval_tip">Минут между автоматическими обновлениями этой подписки, не менее 30. Пусто — используется значение из Настройки › Подписки, где должно быть включено автообновление.</string>
+    <string name="grp_update_interval_tip">Минут между автоматическими обновлениями этой подписки, не менее 30, даже если автообновление выключено в Настройки › Подписки. Пусто — используется значение оттуда.</string>
     <string name="grp_server_interval">Интервал от сервера</string>
-    <string name="grp_server_interval_tip">Использовать интервал обновления, присланный сервером подписки; если сервер его не присылает, действует интервал выше. «Оставить по умолчанию» следует значению из Настройки › Подписки.</string>
+    <string name="grp_server_interval_tip">Использовать интервал обновления, присланный сервером подписки, даже если автообновление выключено в Настройки › Подписки; если сервер его не присылает, действует интервал выше. «Оставить по умолчанию» следует значению оттуда.</string>
     <string name="grp_server_interval_use">Использовать</string>
     <string name="grp_server_interval_ignore">Игнорировать</string>
     <string name="grp_server_interval_last">Последнее значение от сервера: %1$d ч.</string>
@@ -2192,9 +2178,9 @@
     <string name="validation_tls_pem_private_key">Вставьте закрытый ключ в виде текста PEM, начинающегося с -----BEGIN PRIVATE KEY-----.</string>
     <string name="validation_tls_pin_base64">Это SHA-256 в шестнадцатеричном виде; запишите его в base64 (44 символа, заканчивается на =).</string>
     <string name="validation_tls_ech_config">Вставьте список конфигураций ECH в base64 или одним блоком -----BEGIN ECH CONFIGS-----.</string>
-    <string name="validation_tls_reality_ech">Reality нельзя сочетать с ECH. Выключите ECH или очистите открытый ключ Reality.</string>
-    <string name="validation_tls_reality_disable_sni">Reality нельзя использовать с «Отключить SNI». Выключите «Отключить SNI».</string>
-    <string name="validation_tls_reality_spoof">Reality нельзя сочетать с подменой TLS. Установите «Подмена TLS» в «Выкл.».</string>
+    <string name="validation_tls_reality_ech">REALITY нельзя сочетать с ECH. Выключите ECH или очистите открытый ключ REALITY.</string>
+    <string name="validation_tls_reality_disable_sni">REALITY нельзя использовать с «Отключить SNI». Выключите «Отключить SNI».</string>
+    <string name="validation_tls_reality_spoof">REALITY нельзя сочетать с подменой TLS. Установите «Подмена TLS» в «Выкл.».</string>
     <string name="validation_tls_pins_with_certificate">Пользовательский сертификат нельзя сочетать с пинами сертификатов; оставьте что-то одно.</string>
     <string name="validation_tls_client_pair">Задайте сертификат клиента и ключ клиента вместе.</string>
     <string name="validation_tls_spoof_needs_sni">Подмене TLS нужен SNI. Выключите «Отключить SNI» или установите «Подмена TLS» в «Выкл.».</string>
@@ -2206,7 +2192,7 @@
     <string name="validation_transport_headers_pairs">Заголовки должны чередовать имена и значения, разделённые знаком |, например User-Agent|curl, поэтому они проигнорированы.</string>
     <string name="validation_transport_type">sing-box не поддерживает транспорт «%1$s». Используйте ws, httpupgrade, http, grpc или quic.</string>
     <string name="validation_transport_quic_tls">Транспорту QUIC нужен TLS. Включите параметр «Включить TLS».</string>
-    <string name="validation_transport_quic_reality">Reality не работает с транспортом QUIC. Очистите ключ Reality или выберите другой транспорт.</string>
+    <string name="validation_transport_quic_reality">REALITY не работает с транспортом QUIC. Очистите ключ REALITY или выберите другой транспорт.</string>
     <string name="validation_transport_quic_utls">uTLS не используется с транспортом QUIC.</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal работает только с пользовательским мультиплексированием. Установите «Мультиплекс» в «Пользовательский».</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal нужны обе скорости; отсутствующая отправляется как 1 Мбит/с.</string>
@@ -2245,6 +2231,12 @@
     <string name="validation_xray_vless_encryption_mode">Часть после mlkem768x25519plus должна быть native, xorpub или random.</string>
     <string name="validation_xray_vless_encryption_rtt">Часть после режима должна быть 1rtt или 0rtt.</string>
     <string name="validation_xray_vless_encryption_key">Каждый ключ в строке должен быть URL-safe base64 из 32 или 1184 байт, без заполнения.</string>
+    <string name="validation_xray_vless_encryption_padding_order">Поместите части padding перед ключами.</string>
+    <string name="validation_xray_vless_encryption_mlkem">Ключ длиной 1184 байта в строке не является корректным ключом ML-KEM-768: скопируйте строку с сервера заново.</string>
+    <string name="validation_xray_vless_encryption_no_key">В строке нет ключа: скопируйте всю строку, которую выдаёт сервер.</string>
+    <string name="validation_xray_vless_padding_format">Каждая часть padding должна состоять из трёх чисел через дефис, например 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_first">Первая часть padding должна иметь вероятность не меньше 100 и длины не меньше 35, например 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_total">Сумма длин padding может превысить 65553 байта.</string>
     <string name="validation_xray_vless_vision">XTLS Vision требует сеть raw с TLS или REALITY либо шифрование VLESS: измените сеть или защиту, либо очистите flow.</string>
     <string name="validation_xray_xdrive_no_link">У XDRIVE нет формата ссылки для обмена. Вместо этого импортируйте JSON-конфигурацию сервера.</string>
     <string name="validation_xray_xdrive_service">Должно быть google-drive, s3, template или local.</string>
@@ -2468,11 +2460,6 @@
     <string name="validation_custom_xray_geodata">Загрузчик геоданных удалён из импортированной конфигурации: он загружал бы файлы с адресов, выбранных отправителем, и заменял бы файлы в папке Throne.</string>
     <string name="validation_custom_xray_webhook">Вебхук удалён из этого правила маршрутизации: он отправлял бы сведения о каждом подходящем соединении на адрес, выбранный отправителем.</string>
     <string name="validation_autoselector_countries">Используйте двухбуквенные коды стран через запятую, например DE,NL,FR.</string>
-    <string name="validation_autoselector_build_limit">Нельзя запустить больше профилей, чем ранжировано (%1$s).</string>
-    <string name="validation_autoselector_bench_interval">Полный обход не может выполняться чаще интервала проверки (%1$s с).</string>
-    <string name="validation_autoselector_watch_interval">Наблюдение за используемым профилем не может быть медленнее интервала проверки (%1$s с).</string>
-    <string name="validation_autoselector_ready_count">Тщательно проверяйте не меньше профилей, чем держится наготове (%1$s).</string>
-    <string name="validation_autoselector_close_count">Нельзя тщательно проверять больше профилей, чем запущено (%1$s).</string>
     <string name="validation_chain_empty">Добавьте в цепочку хотя бы один профиль.</string>
     <string name="validation_ss_plugin_opts_dangling">Обратной косой черте в конце нечего экранировать.</string>
     <string name="validation_ss_plugin_opts_name">У каждого параметра должно быть имя, как в obfs=http;obfs-host=example.com.</string>
@@ -2576,6 +2563,7 @@
     <string name="validation_route_no_drop_unused">Не действует со способом drop.</string>
     <string name="validation_route_ignored_by_action">Правило %1$s его игнорирует; оно применяется только к этим действиям: %2$s.</string>
     <string name="validation_route_matches_all">У этого правила нет условий, поэтому оно совпадает со всем трафиком.</string>
+    <string name="validation_route_catch_all">У этого правила нет условий, поэтому оно перехватит весь трафик. Добавьте условие или отключите правило.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s («%2$s»): %3$s</string>
     <string name="validation_route_rule_warning">Правило «%1$s»: %2$s</string>
@@ -2627,6 +2615,7 @@
     <string name="validation_millis_or_default">Введите целое число миллисекунд, например %1$s (без единицы), или 0 для значения по умолчанию.</string>
     <string name="validation_group_update_interval">Должно быть не менее 30 минут или пусто, чтобы оставить значение по умолчанию.</string>
     <string name="validation_port_used">Порт %1$s уже используется: %2$s. Выберите другой порт.</string>
+    <string name="validation_port_reenabled">Включение %1$s на порту %2$s приведёт к конфликту с %3$s. Выберите другой порт.</string>
     <string name="validation_mtu_ipv6">Для IPv6 нужен MTU не менее %1$s; при меньшем значении система может убрать IPv6 из Tun.</string>
     <string name="validation_private_range_all">Это охватывает все адреса, из-за чего Tun перестал бы что-либо маршрутизировать.</string>
     <string name="validation_dns_local_ip">Используйте IP-адрес, например 223.5.5.5 или tls://1.1.1.1: этот сервер разрешает имена остальных.</string>
@@ -2649,12 +2638,18 @@
     <string name="validation_route_dns_final">DNS-сервер по умолчанию должен быть удаленным или прямым, а не «%1$s».</string>
     <string name="validation_route_dns_dropped">Собственные настройки DNS профиля отброшены, поэтому он использует глобальные: %1$s</string>
     <string name="route_dns_global_servers">Удаленный %1$s, прямой %2$s</string>
-    <string name="dns_server_suggestions">Недавние и предлагаемые серверы</string>
     <string name="warp_api_tls_fragment_title">Фрагментация TLS при регистрации WARP</string>
     <string name="warp_api_tls_fragment_note">Действует только при прямой регистрации, а не через запущенный профиль.</string>
     <string name="backup_warn_tor_egress">Резервная копия направляет трафик через Tor, который недоступен на Android; здесь он выходит напрямую через выбранный сервер.</string>
     <string name="validation_dns_server_item">Сервер %1$s («%2$s»): %3$s</string>
-    <string name="dns_server_list_hint">Разделяйте несколько серверов запятыми: запрос отправляется всем сразу, и побеждает первый ответ.</string>
+    <string name="dns_server_add">Добавить сервер</string>
+    <string name="dns_server_custom">Свой адрес</string>
+    <string name="dns_server_recent">Недавние</string>
+    <string name="dns_server_address_hint">Адрес, например tls://1.1.1.1</string>
+    <string name="dns_server_list_race">Запрашиваются одновременно; используется самый быстрый ответ.</string>
+    <string name="dns_server_list_primary">Также преобразует адреса прокси-серверов в IP</string>
+    <string name="dns_server_list_empty">Добавьте хотя бы один сервер.</string>
+    <string name="dns_server_drag">Перетащите, чтобы изменить порядок</string>
     <string name="juicity_pinned_certchain_sha256">SHA256 цепочки сертификатов</string>
     <string name="juicity_pinned_certchain_sha256_hint">Хеш цепочки сертификатов, который выводит juicity-server; заменяет проверку по CA, даже при «Разрешить небезопасное подключение»</string>
     <string name="validation_juicity_certchain">Укажите 32-байтовый хеш цепочки сертификатов в base64 (44 символа, в конце =), как его выводит juicity-server.</string>
@@ -2677,9 +2672,9 @@
     <string name="subs_running_updated_reconnect">%1$s изменён при обновлении; переподключение с новыми настройками.</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">Способ выбора</string>
-    <string name="autosel_strategy_latency">Самый быстрый и стабильный</string>
+    <string name="autosel_strategy_latency">Самый быстрый</string>
     <string name="autosel_strategy_priority">По порядку приоритета</string>
-    <string name="autosel_strategy_latency_tip">Самый быстрый и стабильный: всегда использовать профиль с лучшими измерениями среди всех.</string>
+    <string name="autosel_strategy_latency_tip">Самый быстрый: всегда использовать профиль с лучшими измерениями среди всех.</string>
     <string name="autosel_strategy_priority_tip">По порядку приоритета: уровни ниже перебираются сверху вниз. Селектор остаётся на самом высоком уровне, где есть рабочий профиль, и возвращается выше, как только более высокий уровень снова заработает.</string>
     <string name="autosel_tier_add">Добавить уровень</string>
     <string name="autosel_tiers_hint">Профиль относится к первому подходящему уровню, а профили, не подходящие ни к одному, идут последними. Селектор использует самый высокий уровень с рабочим профилем, а внутри него — профиль с лучшими измерениями.</string>
@@ -2698,22 +2693,8 @@
     <string name="autosel_tier_any_profile">любой профиль</string>
     <string name="autosel_tier_fallback">уровень %d</string>
     <string name="autosel_tier_short">У%d</string>
-    <string name="autosel_failback_checks">Возвращаться выше после</string>
-    <string name="autosel_failback_checks_tip">По порядку приоритета: когда профиль с более высокого уровня снова работает, селектор возвращается к нему, только если тот пройдёт столько проверок подряд. Не может быть больше числа хранимых выборок.</string>
-    <plurals name="autosel_checks">
-        <item quantity="one">%d проверка</item>
-        <item quantity="few">%d проверки</item>
-        <item quantity="many">%d проверок</item>
-        <item quantity="other">%d проверки</item>
-    </plurals>
-    <string name="autosel_failback_delay">Без сбоев в течение</string>
-    <string name="autosel_failback_delay_tip">По порядку приоритета: профиль с более высокого уровня должен также проработать столько времени без неудачных проверок и соединений, прежде чем селектор вернётся к нему.</string>
-    <string name="autosel_failback_interrupt">Разрывать соединения при возврате выше</string>
-    <string name="autosel_failback_interrupt_tip">По порядку приоритета. Выкл.: уже открытые соединения остаются на своём профиле, и только новые переходят на более высокий уровень. Вкл.: всё переходит выше сразу.</string>
     <string name="autosel_passive">Учиться на реальных соединениях</string>
     <string name="autosel_passive_tip">Оценивать профили также по соединениям, которые ваши приложения устанавливают через них, а не только по проверкам работоспособности. Соединение считается неудачным, если оно не получило ни одного ответа или не смогло подключиться. Когда недавние соединения через профиль не удаются хотя бы три раза и не реже, чем удаются, профиль временно отстраняется, даже если его проверки проходят: на минуту, при каждом повторе вдвое дольше, но не более 16 минут. Каждый сайт также остаётся на профиле, который последним сработал для него, и избегает того, который только что его подвёл. Пока идёт реальный трафик, проверок работоспособности отправляется меньше.</string>
-    <string name="autosel_site_memory">Помнить выбор для каждого сайта</string>
-    <string name="autosel_site_memory_tip">Как долго сайт продолжает использовать профиль, который последним сработал для него, и продолжает избегать профиля, который его подвёл.</string>
     <string name="autosel_balance_hint_priority">В режиме «По порядку приоритета» трафик распределяется только между готовыми профилями текущего уровня.</string>
     <string name="autosel_plan_by_tier">По уровням: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2724,7 +2705,6 @@
     <string name="autosel_plan_truncated_tiers">Совпадает более %d профилей, поэтому на каждом уровне сохранены только лучшие по рейтингу.</string>
     <string name="validation_autoselector_tier_match">Выберите группу или введите шаблон имени для этого уровня.</string>
     <string name="validation_autoselector_tier_count">Добавьте хотя бы один уровень, чтобы выбирать по порядку приоритета.</string>
-    <string name="validation_autoselector_failback_checks">Нельзя требовать больше проверок подряд, чем хранится (%1$s).</string>
     <string name="autosel_status_on_tier">Автовыбор на %1$s, уровень %2$d (%3$d из %4$d работает)</string>
     <string name="autosel_detail_suspect">%d под подозрением</string>
     <string name="autosel_state_suspect">Под подозрением</string>
@@ -2855,6 +2835,17 @@
     <string name="service_ip_risk">риск %d</string>
     <string name="service_check_checked_now">Проверено только что</string>
     <string name="service_check_checked_at">Проверено %s</string>
+    <string name="service_check_services">Сервисы</string>
+    <string name="service_check_services_all">Все сервисы</string>
+    <string name="service_check_services_count">%1$d из %2$d сервисов</string>
+    <string name="service_check_none_selected">Сервисы не выбраны</string>
+    <string name="service_check_services_unknown">Не удалось загрузить список сервисов</string>
+    <string name="service_check_current">Проверка сервисов текущего соединения</string>
+    <string name="service_category_ai">ИИ</string>
+    <string name="service_category_streaming">Стриминг</string>
+    <string name="service_category_social">Соцсети</string>
+    <string name="service_category_reputation">Репутация IP</string>
+    <string name="service_category_other">Другое</string>
     <string name="validation_chain_selector_twice">В цепочке может быть только один автовыбор.</string>
     <string name="validation_chain_selector_custom">Автовыбор не может находиться в одной цепочке с пользовательской конфигурацией.</string>
     <string name="chain_step_selector">Цепочки с автовыбором нельзя проверить по звеньям; проверьте вместо этого его участников</string>
@@ -2862,6 +2853,8 @@
     <string name="autosel_notice_exhausted_upstream">Все запущенные профили перестали работать через звенья перед ним — пересборка со следующими кандидатами.</string>
     <string name="validation_route_outbound_chain_selector">Правила маршрутизации не могут использовать цепочку «%1$s»: в ней есть автовыбор, поэтому её можно только запустить. Выберите другой исходящий.</string>
     <string name="route_outbound_chain_selector">Профиль маршрутизации направляет трафик в %1$s, где есть автовыбор; такую цепочку можно только запустить, но не использовать в правилах маршрутизации</string>
+    <string name="xray_full_config_tag_clash">Пользовательская конфигурация Xray использует тег «%1$s», который Throne также создаёт для другого профиля Xray; переименуйте его в пользовательской конфигурации</string>
+    <string name="xray_full_config_selector_clash">Селектор «%1$s» пользовательской конфигурации Xray также совпадает с «%2$s», который Throne создаёт для другого профиля Xray; уточните селектор в пользовательской конфигурации</string>
     <string name="grp_filter_countries">Страны</string>
     <string name="grp_filter_countries_tip">Страны выхода, которые нужно оставить (например, HK,JP) или убрать (например, !RU).</string>
     <string name="grp_filter_countries_hint">например, HK,JP или !RU</string>
@@ -2905,4 +2898,8 @@
     <string name="vpn_auth_submitting">Выполняется вход…</string>
     <string name="vpn_auth_gone">Этот запрос входа больше не ожидает ответа.</string>
     <string name="vpn_auth_no_browser">Нет приложения, которое может открыть этот адрес.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">Укажите двухбуквенный код страны, например US.</string>
+    <string name="validation_psiphon_ignored">Проигнорировано %1$s: в профилях Psiphon задается только регион.</string>
+    <string name="exit_runs_over_itself">Выбранный профиль уже выходит через %1$s, поэтому выход %1$s не может работать поверх него. Выберите другой выход в разделе «Настройки › Маршрутизация › Выход».</string>
 </resources>

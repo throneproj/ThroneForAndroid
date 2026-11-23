@@ -21,7 +21,9 @@ object WarpClient {
     const val TUNNEL_MASQUE = "masque"
     /** The warp_mode that runs the WireGuard identity as AmneziaWG; it registers as [TUNNEL_WIREGUARD]. */
     const val MODE_AMNEZIA = "amnezia"
-    const val DEFAULT_API_HOST = "api.cloudflareclient.com"
+    /** The core's warp defaultAPIHosts, tried in order while warp_api_hosts is empty. */
+    @JvmField
+    val DEFAULT_API_HOSTS: List<String> = listOf("api.cloudflareclient.com", "api.devices.cloudflare.com")
     const val TERMS_URL = "https://www.cloudflare.com/application/terms/"
 
     /** One registration of the requested tunnel type; device id, token and license are not stored (as on the desktop). */

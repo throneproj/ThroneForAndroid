@@ -162,8 +162,8 @@
     <string name="connection_test_available_http">HTTP: %d ms</string>
     <string name="connection_test_available">HTTPS: %d ms</string>
     <string name="connection_test_testing">Tester…</string>
-    <string name="speed_detail">Proxy: %1$s↑ %2$s↓
-\nDirekte: %3$s↑ %4$s↓</string>
+    <string name="speed_detail">Proxy: ↓%2$s ↑%1$s
+\nDirekte: ↓%4$s ↑%3$s</string>
     <string name="allow_insecure_sum">Deaktiver sertifikatkontroll. Når den er aktivert, er denne konfigurasjonen like sikker som ren tekst</string>
     <string name="allow_insecure">Tillat usikker</string>
     <string name="security_settings">Sikkerhetsinnstillinger</string>
@@ -342,9 +342,9 @@
     <string name="tls_fragment_fallback_delay">Tilbakefallsforsinkelse for fragment</string>
     <string name="tls_record_fragment">TLS postfragment</string>
     <string name="tls_tricks">TLS-triks</string>
-    <string name="enable_reality">Aktiver Reality</string>
-    <string name="reality_public_key">Reality offentlig nøkkel</string>
-    <string name="reality_short_id">Reality kort-ID</string>
+    <string name="enable_reality">Aktiver REALITY</string>
+    <string name="reality_public_key">REALITY offentlig nøkkel</string>
+    <string name="reality_short_id">REALITY kort-ID</string>
     <string name="vmess_global_padding">Global utfylling</string>
     <string name="vmess_authenticated_length">Autentisert lengde</string>
     <string name="transport_settings">Transportinnstillinger</string>
@@ -435,7 +435,7 @@
     <string name="xray_xdns_resolvers_hint">Én per linje. Erstatter resolverne i Finalmask; tom beholder dem.</string>
     <string name="xray_pinned_peer_cert_sha256">Festet peersertifikat SHA256</string>
     <string name="xray_verify_peer_cert_by_name">Verifiser peersertifikat etter navn</string>
-    <string name="reality_settings">Reality-innstillinger</string>
+    <string name="reality_settings">REALITY-innstillinger</string>
     <string name="reality_spider_x">SpiderX</string>
     <string name="xray_mux_concurrency">Samtidighet</string>
     <string name="xray_mux_concurrency_hint">Strømmer én tilkobling bærer før en ny åpnes. 0 bruker Xrays 8, og -1 sender TCP utenfor mux.</string>
@@ -696,7 +696,6 @@
     <string name="direct_test_url">Direkte test-URL</string>
     <string name="direct_test_url_sum">Hentes uten noen mellomtjener for å skille en død forbindelse fra døde tjenere. La stå tomt for å bruke systemets nettverkstilstand.</string>
     <string name="direct_test_url_empty">systemets nettverkstilstand</string>
-    <string name="speed_test_mode_country">Kun land</string>
     <string name="net_use_proxy">Bruk mellomtjener</string>
     <string name="net_use_proxy_sum">Send abonnements- og oppdateringsforespørsler gjennom den lokale mellomtjeneren</string>
     <string name="net_insecure">Ignorer TLS-feil</string>
@@ -705,14 +704,14 @@
     <string name="log_buffer_size">Loggbufferstørrelse (kb)</string>
     <string name="enable_stats">Tilkoblingsstatistikk</string>
     <string name="enable_stats_sum">Spor tilkoblinger og prosessene deres</string>
-    <string name="disable_traffic_stats">Deaktiver trafikkstatistikk</string>
+    <string name="disable_traffic_stats">Deaktiver trafikktellere</string>
     <string name="disable_traffic_stats_sum">Profiltrafikk telles ikke</string>
     <string name="listen_port">Lytteport</string>
     <string name="listen_address">Lytteadresse</string>
     <string name="clash_api_secret">Hemmelighet</string>
     <string name="xray_vless_preference">Xray VLESS-preferanse</string>
     <string name="xray_vless_xhttp_only">Kun XHTTP</string>
-    <string name="xray_vless_xhttp_and_reality">XHTTP og Reality</string>
+    <string name="xray_vless_xhttp_and_reality">XHTTP og REALITY</string>
     <string name="xray_vless_all">Alle VLESS</string>
     <string name="skip_cert_sum">Hopp over TLS-sertifikatverifisering som standard (allowInsecure)</string>
     <string name="use_mozilla_certs">Bruk Mozillas sertifikatbutikk</string>
@@ -826,7 +825,7 @@
     <string name="route_profile_name">Navn</string>
     <string name="route_profile_default_outbound">Standard utgående</string>
     <string name="route_profile_remote_source">Ekstern kilde</string>
-    <string name="route_profile_remote_rules_note">Hver oppdatering erstatter denne profilens regler med reglene fra URL-en, så regler du legger til eller endrer her, går tapt. For å beholde dine egne regler, bruk Klon i listen over ruteprofiler: klonen er en lokal kopi som aldri oppdateres.</string>
+    <string name="route_profile_remote_rules_note">Hver oppdatering erstatter reglene som kom fra URL-en, så endringer i dem varer til neste oppdatering. Regler lagt til her beholdes.</string>
     <string name="route_profile_url">URL</string>
     <string name="route_profile_url_hint">https://… (throne://route-lenke, base64 eller JSON)</string>
     <string name="route_profile_auto_update">Automatisk oppdatering</string>
@@ -846,7 +845,7 @@
     </plurals>
     <string name="route_profile_invalid_url_title">Ugyldig URL</string>
     <string name="route_profile_invalid_url">Skriv inn en gyldig http(s)-URL først.</string>
-    <string name="route_profile_fetch_confirm">De gjeldende reglene erstattes med de som hentes fra URL-en.</string>
+    <string name="route_profile_fetch_confirm">Reglene som kom fra URL-en, inkludert endringer i dem, erstattes med de som hentes nå. Regler lagt til her beholdes.</string>
     <string name="route_profile_fetch_failed">Kunne ikke hente ruteprofil</string>
     <string name="route_profile_fetched_title">Hentet</string>
     <string name="route_profile_fetched_warnings_title">Hentet med advarsler</string>
@@ -863,6 +862,8 @@
     <string name="route_rule_action">Handling</string>
     <string name="route_rule_outbound">Utgående</string>
     <string name="route_rule_missing_server">Manglende tjener (#%d)</string>
+    <string name="route_outbound_no_exit">Proxy uten utgang</string>
+    <string name="route_outbound_no_exit_hint">Skiller seg bare fra Proxy når en utgang er på (Innstillinger › Ruting › Utgang): disse nettstedene hopper over den og går ut gjennom den valgte profilen.</string>
     <string name="route_rule_reject_method">Avvisningsmetode</string>
     <string name="route_rule_strategy">Løsningsstrategi</string>
     <string name="route_rule_override_destination">Overstyr destinasjon</string>
@@ -913,8 +914,8 @@
     <string name="route_rule_any">Enhver</string>
     <string name="route_rule_invalid_title">Ugyldig regel</string>
     <string name="route_rule_unknown_rule_sets">Ukjente regelsett: %s\n\nVelg navn fra regelsettlisten, eller bruk URL-en til en .srs-fil.</string>
-    <string name="route_rule_catch_all_title">Ingen betingelser</string>
-    <string name="route_rule_catch_all">Denne regelen har ingen betingelser, så den matcher alle tilkoblinger. Lagre den likevel?</string>
+    <string name="route_rule_default_name">Regel %d</string>
+    <string name="route_rule_dns_queries">DNS-spørringer</string>
     <string name="rule_set_picker_title">Regelsett</string>
     <string name="rule_set_search">Søk i regelsett …</string>
     <string name="rule_set_add_url">Legg til URL</string>
@@ -954,7 +955,11 @@
     <string name="grp_front_proxy">Frontmellomtjener</string>
     <string name="grp_landing_proxy">Landingsmellomtjener</string>
     <string name="grp_none">Ingen</string>
-    <string name="grp_missing_profile">Profil #%1$d (mangler)</string>
+    <string name="grp_missing_profile">Manglende profil (#%1$d)</string>
+    <string name="hop_refs_warning">Disse gruppene bruker en profil som slettes, som front- eller landingsmellomtjener. Den fjernes fra dem, så de kobler til uten den:</string>
+    <string name="hop_refs_cleared">Disse gruppene brukte en slettet profil som front- eller landingsmellomtjener. Den ble fjernet fra dem, så de kobler nå til uten den:</string>
+    <string name="hop_ref_front">%1$s (frontmellomtjener)</string>
+    <string name="hop_ref_landing">%1$s (landingsmellomtjener)</string>
     <string name="grp_route_profile">Ruteprofil</string>
     <string name="grp_route_profile_default">Standard (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (fra dette abonnementet)</string>
@@ -996,7 +1001,7 @@
     <string name="grp_settings_user_agent">Brukeragent</string>
     <string name="grp_sub_auto_update">Automatisk abonnementsoppdatering</string>
     <string name="grp_sub_auto_update_interval">Intervall (minutt, ugyldig hvis mindre enn 30)</string>
-    <string name="grp_sub_clear">Tøm tjenerne før abonnementoppdatering</string>
+    <string name="grp_sub_clear">Tøm profilene før abonnementoppdatering</string>
     <string name="grp_sub_show_change_popup">Vis endringsvinduet etter en manuell abonnementsoppdatering</string>
     <string name="grp_sub_show_change_popup_tip">Når aktivert, vises et vindu som lister lagt til / oppdatert / slettede profiler etter en manuell abonnementsoppdatering. Den samme informasjonen skrives alltid til loggen.</string>
     <string name="grp_sub_send_hwid">Aktiver sending av HWID, enhetsmodell og OS-versjon ved abonnementsoppdatering</string>
@@ -1089,13 +1094,13 @@
     <string name="profiles_sort_latency">Forsinkelse</string>
     <string name="profiles_sort_download">Nedlastingshastighet</string>
     <string name="profiles_sort_upload">Opplastingshastighet</string>
-    <string name="profiles_sort_ip_out">Utgående IP</string>
+    <string name="profiles_sort_ip_out">Utgangs-IP</string>
     <string name="profiles_sort_traffic">Trafikk</string>
     <string name="profiles_sort_traffic_total">Totalt</string>
     <string name="profiles_sort_traffic_downloaded">Lastet ned</string>
     <string name="profiles_sort_traffic_uploaded">Lastet opp</string>
     <string name="profiles_show">Vis</string>
-    <string name="profiles_show_out_ip">Utgående IP</string>
+    <string name="profiles_show_out_ip">Utgangs-IP</string>
     <string name="profiles_show_speed">Hastighet</string>
     <string name="confirm_clear">Tøm</string>
     <string name="confirm_restore">Gjenopprett</string>
@@ -1135,7 +1140,7 @@
     <string name="confirm_auto_select_apps">Velg mellomtjenerapper automatisk?</string>
     <string name="profiles_no_duplicates">Ingen duplikate profiler funnet.</string>
     <string name="profiles_no_unavailable">Ingen utilgjengelige profiler funnet.</string>
-    <string name="profiles_no_insecure">Ingen usikre konfigurasjoner funnet.</string>
+    <string name="profiles_no_insecure">Ingen usikre profiler funnet.</string>
     <string name="profiles_running_kept">Den kjørende profilen ble beholdt.</string>
     <string name="profiles_delete_failed">Profilene kunne ikke fjernes.</string>
     <string name="profiles_test_busy">Den siste testen ble ikke fullført, vent litt.</string>
@@ -1146,7 +1151,11 @@
     </plurals>
     <string name="profiles_select_all">Velg alle</string>
     <string name="profiles_move_to_group">Flytt til gruppe</string>
-    <string name="profiles_move_no_target">Det er ingen annen grunnleggende gruppe å flytte til.</string>
+    <string name="import_target_subscription">Denne gruppen er et abonnement: neste oppdatering fjerner profiler som er importert til den. Velg en annen gruppe, og importer på nytt.</string>
+    <string name="import_target_archived">Denne gruppen er arkivert. Velg en annen gruppe, og importer på nytt.</string>
+    <string name="import_target_gone">Denne gruppen finnes ikke lenger.</string>
+    <string name="profiles_move_target_subscription">Neste oppdatering av en abonnementsgruppe fjerner profiler som er flyttet til den. Velg en annen gruppe.</string>
+    <string name="profiles_move_source_updating">Abonnementet til denne gruppen oppdateres. Prøv igjen når det er ferdig.</string>
     <plurals name="profiles_moved">
         <item quantity="one">Flyttet %1$d profil til %2$s</item>
         <item quantity="other">Flyttet %1$d profiler til %2$s</item>
@@ -1216,9 +1225,7 @@
     <string name="test_panel_summary_none_working">ingen fungerer</string>
     <string name="test_panel_summary_resolved">%1$d løst i %2$d land</string>
     <string name="test_panel_summary_none_resolved">ingen løst</string>
-    <string name="test_panel_summary_working_countries">%1$d fungerer i %2$d land</string>
     <string name="test_panel_current_unavailable">Utilgjengelig: %s</string>
-    <string name="test_panel_current_country">%1$s · %2$s</string>
     <string name="test_panel_failure_empty">Ingenting å teste</string>
     <string name="test_panel_failure_busy">En annen test kjører fortsatt</string>
     <string name="test_panel_failure_unreachable">Testtjenesten svarte ikke</string>
@@ -1248,7 +1255,7 @@
     <string name="test_panel_select_description">Velg %1$s, %2$s</string>
     <string name="test_panel_country_description">%1$s: %2$d</string>
     <string name="test_engine_kind_url">URL-test</string>
-    <string name="test_engine_kind_ip">IP-test</string>
+    <string name="test_engine_kind_ip">Utgangs-IP-test</string>
     <string name="test_engine_kind_speed">Hastighetstest</string>
     <string name="test_engine_title">%1$s · %2$s</string>
     <string name="test_engine_scope_current">Gjeldende tilkobling</string>
@@ -1260,7 +1267,7 @@
     <string name="test_engine_fg_subscriptions">Oppdaterer abonnementer …</string>
     <string name="action_auto_selector">Automatisk velger</string>
     <string name="autosel_title">Automatisk velger</string>
-    <string name="autosel_group">Tjenere fra</string>
+    <string name="autosel_group">Profiler fra</string>
     <string name="autosel_group_archived">%s (arkivert)</string>
     <string name="autosel_group_missing">Manglende gruppe (#%d)</string>
     <string name="autosel_name_filter">Bare matchende navn</string>
@@ -1279,7 +1286,6 @@
     <string name="autosel_plan_skipped">Hoppet over: %s.</string>
     <string name="autosel_plan_skip_item">%1$d %2$s</string>
     <string name="autosel_list_separator">", "</string>
-    <string name="autosel_plan_kept_unavailable">Siste test for hver profil mislyktes, noe som vanligvis betyr at nettverket var nede heller enn tjenerne, så alle %d beholdes og vil bli sjekket på nytt.</string>
     <string name="autosel_plan_truncated">Flere enn %d profiler matcher, så bare de best rangerte beholdes.</string>
     <string name="autosel_plan_reused">%d har et nylig testresultat som vil bli gjenbrukt.</string>
     <string name="autosel_plan_needs_ranking">Resten måles når velgeren starter: den kjører så snart nok profiler fungerer, og bytter til full rangering når alle er målt.</string>
@@ -1295,7 +1301,6 @@
     <string name="autosel_skip_management">OpenVPN- eller OpenConnect-profil</string>
     <string name="autosel_skip_name">filtrert bort etter navn</string>
     <string name="autosel_skip_country">filtrert bort etter land</string>
-    <string name="autosel_skip_unavailable">siste test mislyktes</string>
     <string name="autosel_skip_xray_chained">Xray full konfigurasjon kan ikke kombineres med gruppens mellomtjenere</string>
     <string name="autosel_skip_unsupported">type dette bygget ikke kan bruke</string>
     <string name="autosel_advanced">Avansert</string>
@@ -1307,40 +1312,21 @@
     <string name="autosel_country_filter_empty">Hvilket som helst land (f.eks. DE,NL,FR)</string>
     <string name="autosel_build_limit">Kjør de beste</string>
     <string name="autosel_build_limit_tip">Hvor mange profiler som lastes inn i den kjørende konfigurasjonen. Velgeren bytter mellom disse umiddelbart, uten ny tilkobling. Høyere koster mer minne og oppstartstid.</string>
-    <string name="autosel_pool_cap">Ranger maksimalt</string>
-    <string name="autosel_pool_cap_tip">Hard grense for hvor mange profiler som måles og beholdes i rangeringslisten. Når hver kjørende profil dør, tas erstattere fra denne listen.</string>
-    <string name="autosel_result_validity">Stol på resultater i</string>
-    <string name="autosel_result_validity_tip">URL-testresultater så nye gjenbrukes i stedet for å måles på nytt — inkludert tester du kjørte selv på gruppen, så å starte velgeren rett etterpå ikke gjentar arbeidet. Eldre resultater behandles som om profilen aldri var testet. Sett til null for alltid å kjøre en ny test.</string>
-    <string name="autosel_always_retest">Test alltid på nytt</string>
-    <string name="autosel_exclude_unavailable">Hopp over mislykkede profiler</string>
-    <string name="autosel_exclude_unavailable_tip">Holder tjenere hvis siste test mislyktes ute av bassenget, så lenge resultatet fortsatt er innenfor tillitsvinduet. Slå av hvis testene dine er upålitelige og du heller vil la velgeren bestemme selv.</string>
     <string name="autosel_cat_health">Helsekontroller</string>
     <string name="autosel_expected">Hold klare</string>
     <string name="autosel_expected_tip">Hvor mange profiler som til enhver tid holdes bekreftet fungerende, slik at et dekningsfall kan dekkes umiddelbart. Dette er også de trafikken deles mellom når balansering er på.</string>
-    <string name="autosel_active_size">Sjekk tett</string>
-    <string name="autosel_active_size_tip">De øverst rangerte profilene sjekkes på nytt hvert intervall. Resten sjekkes fortsatt, bare spredt over det langsommere fulle gjennomløpet.</string>
     <string name="autosel_interval">Sjekkintervall</string>
-    <string name="autosel_interval_tip">Hvor ofte de tett sjekkede profilene måles på nytt.</string>
-    <string name="autosel_bench_interval">Fullt gjennomløp hver</string>
-    <string name="autosel_bench_interval_tip">Hvor lenge én runde over hver kjørende profil tar. Sjekker spres jevnt over den, slik at et stort bassenget aldri forårsaker en trafikkburst.</string>
-    <string name="autosel_watch_interval">Overvåk profilen i bruk</string>
-    <string name="autosel_watch_interval_tip">Hvor ofte profilen som for tiden bærer trafikken din sjekkes på egen hånd. Hold dette kort: en tjener kan slutte å fungere mens den fortsatt aksepterer tilkoblinger, og ingenting ville merke det før neste fulle sjekk.</string>
-    <string name="autosel_sampling">Prøver beholdt</string>
-    <string name="autosel_sampling_tip">Rangering bruker gjennomsnittet og jitteren over så mange nylige sjekker, slik at ett dårlig resultat ikke kan degradere en god tjener.</string>
+    <string name="autosel_interval_tip">Hvor ofte de høyest rangerte profilene måles på nytt.</string>
     <string name="autosel_cat_switching">Bytting</string>
     <string name="autosel_tolerance">Byttetoleranse</string>
     <string name="autosel_tolerance_tip">En annen profil må være minst så mye raskere før velgeren flytter til den. Høyere verdier betyr færre bytter.</string>
     <string name="autosel_max_rtt">Maksimal forsinkelse</string>
-    <string name="autosel_max_rtt_tip">Profiler tregere enn dette velges aldri, selv om ingenting bedre er tilgjengelig.</string>
+    <string name="autosel_max_rtt_tip">Profiler tregere enn dette brukes bare når ingen raskere fungerer.</string>
     <string name="autosel_no_limit">Ingen grense</string>
-    <string name="autosel_dial_retries">Overbytingsforsøk</string>
-    <string name="autosel_dial_retries_tip">Når den valgte profilen mislyktes i å koble til, hvor mange andre som skal prøves umiddelbart før appen ser en feil.</string>
-    <string name="autosel_interrupt">Bryt tilkoblinger ved bytte</string>
-    <string name="autosel_interrupt_tip">Gjelder når velgeren bytter fordi en profil ble verre eller mislyktes. På: alt flytter til den nye profilen samtidig. Av: pågående nedlastinger fullføres på den gamle. Balanseringsrotasjoner bryter aldri tilkoblinger uansett.</string>
+    <string name="autosel_interrupt">Bryt tilkoblinger når en profil feiler</string>
+    <string name="autosel_interrupt_tip">Åpne tilkoblinger flyttes straks i stedet for å fullføres på den feilende profilen. Bytte til en raskere profil og lastbalanseringsrotasjoner bryter aldri tilkoblinger.</string>
     <string name="autosel_cat_balance">Lastbalansering</string>
     <string name="autosel_balance_mode">Modus</string>
-    <string name="autosel_balance_interval">Roter hver</string>
-    <string name="autosel_balance_interval_tip">Hvor lenge velgeren blir på én profil før den flytter til den neste klare.</string>
     <string name="autosel_balance_hint_off">Den beste profilen bærer all trafikk; de andre klare profilene holdes verifiserte slik at én kan overta umiddelbart.</string>
     <string name="autosel_balance_hint_rotate">Nye tilkoblinger flytter til en annen god profil ved hver rotasjon; åpne får være i fred og fullfører der de startet. Trafikk telles nøyaktig.</string>
     <string name="autosel_balance_hint_connection">Hver nye tilkobling kan ta en annen profil. Bred spredning, men utgående IP endres midt i økten og per-profiltrafikk blir omtrentlig.</string>
@@ -1357,10 +1343,6 @@
     <plurals name="autosel_profiles">
         <item quantity="one">%d profil</item>
         <item quantity="other">%d profiler</item>
-    </plurals>
-    <plurals name="autosel_minutes">
-        <item quantity="one">%d min</item>
-        <item quantity="other">%d min</item>
     </plurals>
     <plurals name="autosel_seconds">
         <item quantity="one">%d s</item>
@@ -1440,7 +1422,6 @@
     <string name="autosel_last_ok_short">OK %s</string>
     <string name="autosel_row_state">Status: %s</string>
     <string name="autosel_row_latency">Forsinkelse: %1$d ms (best %2$d ms, verst %3$d ms)</string>
-    <string name="autosel_row_jitter">Jitter: %d ms</string>
     <string name="autosel_row_checks">Sjekker: %1$d / %2$d ok</string>
     <string name="autosel_row_connects">Tilkoblinger: %1$d / %2$d ok</string>
     <string name="autosel_row_last_ok">Siste OK: %s</string>
@@ -1448,9 +1429,16 @@
     <string name="autosel_row_tested">Siste URL-test: %1$s, %2$s</string>
     <string name="autosel_row_untested">Ingen URL-testresultater ennå.</string>
     <string name="cag_warp">Cloudflare WARP</string>
-    <string name="warp_settings">WARP</string>
-    <string name="warp_state_on">På · %s</string>
-    <string name="warp_state_off">Av</string>
+    <string name="warp_settings">Utgang</string>
+    <string name="exit_through">Utgang via</string>
+    <string name="exit_server">Valgt profil</string>
+    <string name="exit_server_hint">Trafikken går ut gjennom profilen du startet.</string>
+    <string name="exit_psiphon_hint">Psiphon er et gratis nettverk drevet av Psiphon Inc., som kan se nettstedene du besøker, som enhver VPN-leverandør.</string>
+    <string name="exit_tor_hint">Tor er ikke tilgjengelig på Android, så trafikken går ut gjennom den valgte profilen.</string>
+    <string name="exit_unavailable">%s (ikke tilgjengelig på Android)</string>
+    <string name="psiphon_egress_region">Region</string>
+    <string name="psiphon_region_best">Best ytelse</string>
+    <string name="psiphon_egress_region_sum">Landet til Psiphon-tjeneren; Best ytelse lar Psiphon velge.</string>
     <string name="warp_enable">Aktiver WARP</string>
     <string name="warp_enable_sum">Aktiverer konfigurasjonen nedenfor for bruk som utgang, nyttig for å omgå tjenester som begrenser ikke-WARP VPN-er</string>
     <string name="warp_mode">Modus</string>
@@ -1541,7 +1529,7 @@
     <string name="backup_part_profiles">Profiler (grupper og mellomtjenere)</string>
     <string name="backup_part_routes">Ruteprofiler</string>
     <string name="backup_part_settings">Innstillinger</string>
-    <string name="backup_part_otp">OTP-profiler (gjenopprettes ikke på Android)</string>
+    <string name="backup_part_otp">OTP-oppføringer (gjenopprettes ikke på Android)</string>
     <string name="backup_local_summary">Sikkerhetskopier bruker Throne desktop-formatet (.thrbackup): begge apper kan gjenopprette dem. WebDAV-opplysninger blir på denne enheten.</string>
     <string name="backup_create">Opprett sikkerhetskopi</string>
     <string name="backup_restore">Gjenopprett</string>
@@ -1857,9 +1845,9 @@
     <string name="grp_http_version">HTTP-versjon</string>
     <string name="grp_http_version_tip">Auto bruker HTTP/2 når tjeneren tilbyr det. \"Behold standard\" følger Innstillinger › Abonnementer.</string>
     <string name="grp_update_interval">Oppdateringsintervall (minutter)</string>
-    <string name="grp_update_interval_tip">Minutter mellom automatiske oppdateringer av dette abonnementet, minst 30. Tomt følger Innstillinger › Abonnementer, der automatiske oppdateringer må være aktivert.</string>
+    <string name="grp_update_interval_tip">Minutter mellom automatiske oppdateringer av dette abonnementet, minst 30, også når automatiske oppdateringer er av i Innstillinger › Abonnementer. Tomt følger den innstillingen.</string>
     <string name="grp_server_interval">Tjenerintervall</string>
-    <string name="grp_server_interval_tip">Bruk oppdateringsintervallet abonnementstjeneren sender; intervallet ovenfor gjelder når den ikke sender noe. \"Behold standard\" følger Innstillinger › Abonnementer.</string>
+    <string name="grp_server_interval_tip">Bruk oppdateringsintervallet abonnementstjeneren sender, også når automatiske oppdateringer er av i Innstillinger › Abonnementer; intervallet ovenfor gjelder når den ikke sender noe. \"Behold standard\" følger den innstillingen.</string>
     <string name="grp_server_interval_use">Bruk</string>
     <string name="grp_server_interval_ignore">Ignorer</string>
     <string name="grp_server_interval_last">Denne tjeneren sendte sist %1$d t.</string>
@@ -2126,9 +2114,9 @@
     <string name="validation_tls_pem_private_key">Lim inn den private nøkkelen som PEM-tekst, som starter med -----BEGIN PRIVATE KEY-----.</string>
     <string name="validation_tls_pin_base64">Dette er en heksadesimal SHA-256; skriv den i base64 (44 tegn som slutter med =).</string>
     <string name="validation_tls_ech_config">Lim inn ECH-konfigurasjonslisten som base64, eller som én blokk som starter med -----BEGIN ECH CONFIGS-----.</string>
-    <string name="validation_tls_reality_ech">Reality kan ikke kombineres med ECH. Slå av ECH, eller tøm den offentlige Reality-nøkkelen.</string>
-    <string name="validation_tls_reality_disable_sni">Reality kan ikke brukes med Deaktiver SNI. Slå av Deaktiver SNI.</string>
-    <string name="validation_tls_reality_spoof">Reality kan ikke kombineres med TLS-spoof. Sett TLS Spoof til Av.</string>
+    <string name="validation_tls_reality_ech">REALITY kan ikke kombineres med ECH. Slå av ECH, eller tøm den offentlige REALITY-nøkkelen.</string>
+    <string name="validation_tls_reality_disable_sni">REALITY kan ikke brukes med Deaktiver SNI. Slå av Deaktiver SNI.</string>
+    <string name="validation_tls_reality_spoof">REALITY kan ikke kombineres med TLS-spoof. Sett TLS Spoof til Av.</string>
     <string name="validation_tls_pins_with_certificate">Et egendefinert sertifikat kan ikke kombineres med sertifikat-pins; behold bare én av dem.</string>
     <string name="validation_tls_client_pair">Sett klientsertifikatet og klientnøkkelen sammen.</string>
     <string name="validation_tls_spoof_needs_sni">TLS-spoof trenger en SNI. Slå av Deaktiver SNI, eller sett TLS Spoof til Av.</string>
@@ -2140,7 +2128,7 @@
     <string name="validation_transport_headers_pairs">Hodene må veksle mellom navn og verdier atskilt med |, for eksempel User-Agent|curl, så de ble ignorert.</string>
     <string name="validation_transport_type">sing-box støtter ikke transporten \"%1$s\". Bruk ws, httpupgrade, http, grpc eller quic.</string>
     <string name="validation_transport_quic_tls">QUIC-transporten trenger TLS. Slå på Aktiver TLS.</string>
-    <string name="validation_transport_quic_reality">Reality fungerer ikke med QUIC-transporten. Tøm Reality-nøkkelen, eller velg en annen transport.</string>
+    <string name="validation_transport_quic_reality">REALITY fungerer ikke med QUIC-transporten. Tøm REALITY-nøkkelen, eller velg en annen transport.</string>
     <string name="validation_transport_quic_utls">uTLS brukes ikke med QUIC-transporten.</string>
     <string name="validation_mux_brutal_needs_custom">TCP Brutal fungerer bare med egendefinert multipleks. Sett Multipleks til Egendefinert.</string>
     <string name="validation_mux_brutal_both_speeds">TCP Brutal trenger begge hastighetene; en manglende sendes som 1 Mbps.</string>
@@ -2179,6 +2167,12 @@
     <string name="validation_xray_vless_encryption_mode">Delen etter mlkem768x25519plus må være native, xorpub eller random.</string>
     <string name="validation_xray_vless_encryption_rtt">Delen etter modusen må være 1rtt eller 0rtt.</string>
     <string name="validation_xray_vless_encryption_key">Hver nøkkel i strengen må være URL-sikker base64 av 32 eller 1184 byte, uten utfylling.</string>
+    <string name="validation_xray_vless_encryption_padding_order">Plasser utfyllingsdelene før nøklene.</string>
+    <string name="validation_xray_vless_encryption_mlkem">En nøkkel på 1184 byte i strengen er ikke en gyldig ML-KEM-768-nøkkel: kopier strengen fra tjeneren på nytt.</string>
+    <string name="validation_xray_vless_encryption_no_key">Strengen har ingen nøkkel: kopier hele strengen tjeneren gir.</string>
+    <string name="validation_xray_vless_padding_format">Hver utfyllingsdel må være tre tall satt sammen med bindestreker, som 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_first">Den første utfyllingsdelen trenger en sjanse på minst 100 og lengder på minst 35, som 100-111-1111.</string>
+    <string name="validation_xray_vless_padding_total">Utfyllingslengdene kan til sammen bli mer enn 65553 byte.</string>
     <string name="validation_xray_vless_vision">XTLS Vision trenger raw-nettverket med TLS eller REALITY, eller VLESS-kryptering: endre nettverket eller sikkerheten, eller tøm flow.</string>
     <string name="validation_xray_xdrive_no_link">XDRIVE har ikke noe delingslenkeformat. Importer tjenerens JSON-konfigurasjon i stedet.</string>
     <string name="validation_xray_xdrive_service">Må være google-drive, s3, template eller local.</string>
@@ -2400,11 +2394,6 @@
     <string name="validation_custom_xray_geodata">Fjernet geodata-oppdateringen fra den importerte konfigurasjonen: den ville lastet ned filer fra adresser avsenderen valgte og erstattet filer i Thrones mappe.</string>
     <string name="validation_custom_xray_webhook">Fjernet webhooken fra denne rutingsregelen: den ville sendt detaljene om hver samsvarende tilkobling til en adresse avsenderen valgte.</string>
     <string name="validation_autoselector_countries">Bruk landskoder på to bokstaver atskilt med komma, for eksempel DE,NL,FR.</string>
-    <string name="validation_autoselector_build_limit">Kan ikke kjøre flere profiler enn det er rangert (%1$s).</string>
-    <string name="validation_autoselector_bench_interval">Hele gjennomkjøringen kan ikke kjøre oftere enn sjekkintervallet (%1$s s).</string>
-    <string name="validation_autoselector_watch_interval">Overvåking av profilen i bruk kan ikke gå tregere enn sjekkintervallet (%1$s s).</string>
-    <string name="validation_autoselector_ready_count">Sjekk minst like mange profiler nøye som det holdes klare (%1$s).</string>
-    <string name="validation_autoselector_close_count">Kan ikke sjekke flere profiler nøye enn det kjøres (%1$s).</string>
     <string name="validation_chain_empty">Legg til minst én profil i kjeden.</string>
     <string name="validation_ss_plugin_opts_dangling">En omvendt skråstrek på slutten har ingenting å escape.</string>
     <string name="validation_ss_plugin_opts_name">Hvert alternativ trenger et navn, som i obfs=http;obfs-host=example.com.</string>
@@ -2508,6 +2497,7 @@
     <string name="validation_route_no_drop_unused">Har ingen effekt med drop-metoden.</string>
     <string name="validation_route_ignored_by_action">En %1$s-regel ignorerer det; det gjelder bare for disse handlingene: %2$s.</string>
     <string name="validation_route_matches_all">Denne regelen har ingen matchbetingelser, så den matcher all trafikk.</string>
+    <string name="validation_route_catch_all">Denne regelen har ingen betingelser, så den ville fanget all trafikk. Legg til en betingelse, eller slå av regelen.</string>
     <string name="validation_route_issue">%1$s: %2$s</string>
     <string name="validation_route_issue_value">%1$s (\"%2$s\"): %3$s</string>
     <string name="validation_route_rule_warning">Regel \"%1$s\": %2$s</string>
@@ -2555,6 +2545,7 @@
     <string name="validation_millis_or_default">Skriv inn et heltall i millisekunder, for eksempel %1$s (uten enhet), eller 0 for standard.</string>
     <string name="validation_group_update_interval">Må være minst 30 minutter, eller tom for å beholde standard.</string>
     <string name="validation_port_used">Porten %1$s brukes allerede av: %2$s. Velg en annen port.</string>
+    <string name="validation_port_reenabled">Å slå på %1$s på port %2$s ville kollidere med %3$s. Velg en annen port.</string>
     <string name="validation_mtu_ipv6">IPv6 trenger en MTU på minst %1$s; under det kan systemet fjerne IPv6 fra tun-en.</string>
     <string name="validation_private_range_all">Dette dekker alle adresser, noe som ville hindre Tun i å rute noe som helst.</string>
     <string name="validation_dns_local_ip">Bruk en IP-adresse, for eksempel 223.5.5.5 eller tls://1.1.1.1: denne tjeneren løser navnene til de andre.</string>
@@ -2577,12 +2568,18 @@
     <string name="validation_route_dns_final">Standard DNS-tjener må være ekstern eller direkte, ikke \"%1$s\".</string>
     <string name="validation_route_dns_dropped">Profilens egne DNS-innstillinger ble droppet, så den bruker de globale: %1$s</string>
     <string name="route_dns_global_servers">Ekstern %1$s, direkte %2$s</string>
-    <string name="dns_server_suggestions">Nylige og foreslåtte tjenere</string>
     <string name="warp_api_tls_fragment_title">TLS-fragmentering for WARP-registrering</string>
     <string name="warp_api_tls_fragment_note">Gjelder bare når registreringen kobler til direkte, ikke gjennom en kjørende profil.</string>
     <string name="backup_warn_tor_egress">Sikkerhetskopien sender trafikken ut gjennom Tor, som ikke er tilgjengelig på Android; her går den direkte ut gjennom den valgte tjeneren.</string>
     <string name="validation_dns_server_item">Tjener %1$s (\"%2$s\"): %3$s</string>
-    <string name="dns_server_list_hint">Skill flere tjenere med komma: de spørres samtidig, og det første svaret vinner.</string>
+    <string name="dns_server_add">Legg til tjener</string>
+    <string name="dns_server_custom">Egendefinert adresse</string>
+    <string name="dns_server_recent">Nylige</string>
+    <string name="dns_server_address_hint">Adresse, f.eks. tls://1.1.1.1</string>
+    <string name="dns_server_list_race">Spørres samtidig; det raskeste svaret vinner.</string>
+    <string name="dns_server_list_primary">Slår også opp adressene til mellomtjenerne</string>
+    <string name="dns_server_list_empty">Legg til minst én tjener.</string>
+    <string name="dns_server_drag">Dra for å endre rekkefølge</string>
     <string name="juicity_pinned_certchain_sha256">Sertifikatkjedens SHA256</string>
     <string name="juicity_pinned_certchain_sha256_hint">Hash av sertifikatkjeden som juicity-server skriver ut; erstatter CA-verifisering, selv med Tillat usikker</string>
     <string name="validation_juicity_certchain">Bruk 32-byte-hashen av sertifikatkjeden i base64 (44 tegn som slutter med =), slik juicity-server skriver den ut.</string>
@@ -2634,9 +2631,9 @@
     <string name="chain_step_untestable">Kjeder med et ledd med egendefinert Xray-oppsett kan ikke testes</string>
     <!-- Auto selector: priority tiers, failback and passive scoring -->
     <string name="autosel_strategy">Valgmåte</string>
-    <string name="autosel_strategy_latency">Raskest og mest stabil</string>
+    <string name="autosel_strategy_latency">Raskest</string>
     <string name="autosel_strategy_priority">I prioritert rekkefølge</string>
-    <string name="autosel_strategy_latency_tip">Raskest og mest stabil: bruk alltid den best målte profilen av alle.</string>
+    <string name="autosel_strategy_latency_tip">Raskest: bruk alltid den best målte profilen av alle.</string>
     <string name="autosel_strategy_priority_tip">I prioritert rekkefølge: prøv nivåene nedenfor ovenfra. Velgeren blir på det høyeste nivået som har en fungerende profil, og flytter opp igjen så snart et høyere nivå fungerer igjen.</string>
     <string name="autosel_tier_add">Legg til nivå</string>
     <string name="autosel_tiers_hint">En profil hører til det første nivået den matcher, og profiler som ikke matcher noen, kommer sist. Velgeren bruker det høyeste nivået som har en fungerende profil og, innenfor det, den best målte.</string>
@@ -2655,20 +2652,8 @@
     <string name="autosel_tier_any_profile">enhver profil</string>
     <string name="autosel_tier_fallback">nivå %d</string>
     <string name="autosel_tier_short">N%d</string>
-    <string name="autosel_failback_checks">Flytt opp igjen etter</string>
-    <string name="autosel_failback_checks_tip">I prioritert rekkefølge: når en profil fra et høyere nivå fungerer igjen, flytter velgeren tilbake til den først etter at den har bestått så mange sjekker på rad. Kan ikke være flere enn prøvene som beholdes.</string>
-    <plurals name="autosel_checks">
-        <item quantity="one">%d sjekk</item>
-        <item quantity="other">%d sjekker</item>
-    </plurals>
-    <string name="autosel_failback_delay">Feilfri i</string>
-    <string name="autosel_failback_delay_tip">I prioritert rekkefølge: en profil fra et høyere nivå må også gå så lenge uten en mislykket sjekk eller tilkobling før velgeren flytter tilbake til den.</string>
-    <string name="autosel_failback_interrupt">Bryt tilkoblinger ved flytting opp igjen</string>
-    <string name="autosel_failback_interrupt_tip">I prioritert rekkefølge. Av: tilkoblinger som allerede er åpne, blir på profilen sin, og bare nye flytter opp til det høyere nivået. På: alt flytter opp samtidig.</string>
     <string name="autosel_passive">Lær av ekte tilkoblinger</string>
     <string name="autosel_passive_tip">Vurder også profiler etter tilkoblingene appene dine gjør gjennom dem, ikke bare etter helsekontroller. En tilkobling regnes som mislykket når den ikke får noe svar i det hele tatt eller ikke kan koble til. Når nylige tilkoblinger gjennom en profil mislykkes minst like ofte som de lykkes, tre ganger eller mer, settes profilen til side selv om sjekkene består: i ett minutt, dobbelt så lenge hver gang det skjer igjen, opptil 16 minutter. Hvert nettsted holder seg også til profilen som sist fungerte for det, og unngår en som nettopp mislyktes for det. Mens ekte trafikk flyter, sendes færre helsekontroller.</string>
-    <string name="autosel_site_memory">Husk valg per nettsted i</string>
-    <string name="autosel_site_memory_tip">Hvor lenge et nettsted fortsetter å bruke profilen som sist fungerte for det, og fortsetter å unngå en profil som mislyktes for det.</string>
     <string name="autosel_balance_hint_priority">I prioritert rekkefølge spres trafikken bare over de klare profilene i nivået som er i bruk.</string>
     <string name="autosel_plan_by_tier">Etter nivå: %s.</string>
     <string name="autosel_plan_tier_count">%1$s → %2$d</string>
@@ -2679,7 +2664,6 @@
     <string name="autosel_plan_truncated_tiers">Flere enn %d profiler matcher, så bare de best rangerte i hvert nivå beholdes.</string>
     <string name="validation_autoselector_tier_match">Velg en gruppe eller skriv inn et navnemønster for dette nivået.</string>
     <string name="validation_autoselector_tier_count">Legg til minst ett nivå for å velge i prioritert rekkefølge.</string>
-    <string name="validation_autoselector_failback_checks">Kan ikke kreve flere sjekker på rad enn det beholdes (%1$s).</string>
     <string name="autosel_status_on_tier">Automatisk velger på %1$s, nivå %2$d (%3$d av %4$d fungerer)</string>
     <string name="autosel_detail_suspect">%d under mistanke</string>
     <string name="autosel_state_suspect">Mistenkelig</string>
@@ -2779,6 +2763,17 @@
     <string name="service_ip_risk">risiko %d</string>
     <string name="service_check_checked_now">Sjekket akkurat nå</string>
     <string name="service_check_checked_at">Sjekket %s</string>
+    <string name="service_check_services">Tjenester</string>
+    <string name="service_check_services_all">Alle tjenester</string>
+    <string name="service_check_services_count">%1$d av %2$d tjenester</string>
+    <string name="service_check_none_selected">Ingen tjenester valgt</string>
+    <string name="service_check_services_unknown">Kunne ikke laste inn listen over tjenester</string>
+    <string name="service_check_current">Tjenestesjekk av gjeldende tilkobling</string>
+    <string name="service_category_ai">KI</string>
+    <string name="service_category_streaming">Strømming</string>
+    <string name="service_category_social">Sosiale medier</string>
+    <string name="service_category_reputation">IP-omdømme</string>
+    <string name="service_category_other">Annet</string>
     <string name="validation_chain_selector_twice">En kjede kan bare inneholde én automatisk velger.</string>
     <string name="validation_chain_selector_custom">En automatisk velger kan ikke dele kjede med en egendefinert konfigurasjon.</string>
     <string name="chain_step_selector">Kjeder med en automatisk velger kan ikke testes ledd for ledd; test medlemmene i stedet</string>
@@ -2786,6 +2781,8 @@
     <string name="autosel_notice_exhausted_upstream">Hver kjørende profil sluttet å fungere gjennom leddene foran den — bygger på nytt med de neste kandidatene.</string>
     <string name="validation_route_outbound_chain_selector">Rutingsregler kan ikke bruke kjeden \"%1$s\": den inneholder en automatisk velger, så den kan bare startes. Velg et annet utgående.</string>
     <string name="route_outbound_chain_selector">Rutingsprofilen sender trafikk til %1$s, som inneholder en automatisk velger; en slik kjede kan bare startes, ikke brukes i rutingsregler</string>
+    <string name="xray_full_config_tag_clash">Det egendefinerte Xray-oppsettet bruker taggen \"%1$s\", som Throne også lager for en annen Xray-profil; gi den nytt navn i det egendefinerte oppsettet</string>
+    <string name="xray_full_config_selector_clash">Velgeren \"%1$s\" i det egendefinerte Xray-oppsettet treffer også \"%2$s\", som Throne lager for en annen Xray-profil; gjør velgeren mer presis i det egendefinerte oppsettet</string>
     <string name="grp_filter_countries">Land</string>
     <string name="grp_filter_countries_tip">Utgangsland som skal beholdes, f.eks. HK,JP, eller fjernes, f.eks. !RU.</string>
     <string name="grp_filter_countries_hint">f.eks. HK,JP eller !RU</string>
@@ -2827,4 +2824,8 @@
     <string name="vpn_auth_submitting">Logger på…</string>
     <string name="vpn_auth_gone">Denne påloggingsforespørselen venter ikke lenger.</string>
     <string name="vpn_auth_no_browser">Ingen app kan åpne denne adressen.</string>
+    <string name="action_psiphon">Psiphon</string>
+    <string name="validation_psiphon_region">Bruk en landkode på to bokstaver, for eksempel US.</string>
+    <string name="validation_psiphon_ignored">Ignorerte %1$s: Psiphon-profiler tar bare en region.</string>
+    <string name="exit_runs_over_itself">Den valgte profilen går allerede ut gjennom %1$s, så %1$s-utgangen kan ikke kjøre over den. Velg en annen utgang under Innstillinger › Ruting › Utgang.</string>
 </resources>

@@ -55,12 +55,12 @@
             app:title="@string/auto_update_interval" />
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/cag_warp">
+    <PreferenceCategory app:title="@string/warp_settings">
         <io.nekohasekai.sagernet.ui.settings.WarpEntryPreference
             app:fragment="io.nekohasekai.sagernet.ui.settings.WarpSettingsFragment"
             app:icon="@drawable/ic_file_cloud_queue"
             app:key="settingsWarp"
             app:persistent="false"
-            app:title="@string/warp_settings" />
+            app:title="@string/exit_through" />
     </PreferenceCategory>
 </PreferenceScreen>

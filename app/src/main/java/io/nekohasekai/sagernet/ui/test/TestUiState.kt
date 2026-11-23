@@ -1,6 +1,5 @@
 package io.nekohasekai.sagernet.ui.test
 
-import io.nekohasekai.sagernet.bg.test.TestSpec
 import kotlin.math.min
 
 enum class RowPhase { QUEUED, TESTING, DONE }
@@ -26,7 +25,7 @@ data class RowState(
 /** Why a session ended without (all of) its results. */
 enum class TestFailure { NONE, EMPTY, BUSY, UNREACHABLE, CORE_DIED }
 
-/** A working result ranked by the session's metric: latency (URL, country mode) or throughput (speed). */
+/** A working result ranked by the session's metric: latency (URL) or throughput (speed). */
 data class RankedResult(
     val profileId: Long,
     val name: String = "",
@@ -152,9 +151,6 @@ data class TestUiState(
 
     val aborted: Int get() = (done - ok - failed).coerceAtLeast(0)
 
-    /** Speed sessions ranked by latency (country lookups only). */
-    val countryMode: Boolean get() = kind == TestSpec.KIND_SPEED && speedMode == SPEED_MODE_COUNTRY
-
     /** Ids of the failed profiles still present. */
     fun failedIds(): List<Long> = rows.entries.filter { it.value.failed && it.key !in removed }.map { it.key }
 
@@ -164,6 +160,5 @@ data class TestUiState(
         const val SPEED_MODE_DOWNLOAD = 1
         const val SPEED_MODE_UPLOAD = 2
         const val SPEED_MODE_SIMPLE_DOWNLOAD = 3
-        const val SPEED_MODE_COUNTRY = 4
     }
 }

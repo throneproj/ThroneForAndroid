@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.StringRes
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
@@ -17,7 +18,9 @@ import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeLi
 import io.nekohasekai.sagernet.ktx.needReload
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
+import io.nekohasekai.sagernet.outbound.config.ExitThrough
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
+import io.nekohasekai.sagernet.ui.profile.PsiphonRegionMenu
 import io.nekohasekai.sagernet.ui.warp.WarpClient
 import io.nekohasekai.sagernet.ui.warp.WarpGenerate
 import io.nekohasekai.sagernet.validation.Validation
@@ -25,23 +28,48 @@ import kotlinx.coroutines.launch
 import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 /**
- * Routing Settings › WARP: the desktop Warp tab (dialog_manage_routes.cpp:433-503, 570-590), saved as it is edited.
- * The WARP fields only shape the generated config while WARP is enabled.
+ * Routing Settings › Exit: the desktop Exit tab (dialog_manage_routes.cpp), saved as it is edited: exit_through, the
+ * Psiphon region and the WARP settings, which only shape the generated config while WARP is the exit.
  */
 class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
 
     private var amneziaPending = false
     private var amneziaError = ""
 
+    override fun beforeInflate() {
+        // The exit row reads exit_through as it is inflated.
+        DataStore.migrateLegacyExit()
+    }
+
     override fun bind() {
-        val enable = pref<SwitchPreference>(SettingsRegistry.ENABLE_WARP.key)
-        enable.setOnPreferenceChangeListener { _, newValue ->
-            val enabled = newValue as Boolean
-            DataStore.enableWarp = enabled
-            // WarpService::Apply: Tor outranks WARP on the desktop, so a backup taken here must not bring it back.
-            if (enabled) DataStore.enableTor = false
-            if (DataStore.serviceState.started) SagerNet.reloadService()
-            if (enabled && !WarpClient.isGenerated()) toast(R.string.warp_not_generated)
+        val exit = pref<SimpleMenuPreference>(SettingsRegistry.EXIT_THROUGH.key)
+        val region = pref<SimpleMenuPreference>(SettingsRegistry.PSIPHON_EGRESS_REGION.key)
+        val choices = offeredExits(DataStore.exitThrough)
+        exit.entries = choices.map { exitLabel(requireContext(), it) }.toTypedArray()
+        exit.entryValues = choices.map { it.value }.toTypedArray()
+        exit.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
+            val chosen = ExitThrough.of(it.value)
+            exitLabel(requireContext(), chosen) + "\n" + getString(exitHint(chosen))
+        }
+        exit.setOnPreferenceChangeListener { _, newValue ->
+            val chosen = ExitThrough.of(newValue as String)
+            region.isEnabled = chosen == ExitThrough.PSIPHON
+            if (newValue != exit.value) {
+                // Stored before the reload reads it; returning true stores it again.
+                DataStore.exitThrough = chosen
+                if (DataStore.serviceState.started) SagerNet.reloadService()
+            }
+            if (chosen == ExitThrough.WARP && !WarpClient.isGenerated()) toast(R.string.warp_not_generated)
+            true
+        }
+
+        PsiphonRegionMenu.bind(this, region)
+        region.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
+            (it.entry ?: it.value.orEmpty()).toString() + "\n" + getString(R.string.psiphon_egress_region_sum)
+        }
+        region.isEnabled = DataStore.exitThrough == ExitThrough.PSIPHON
+        region.setOnPreferenceChangeListener { _, _ ->
+            if (DataStore.exitThrough == ExitThrough.PSIPHON) needReload()
             true
         }
 
@@ -62,9 +90,9 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
             reloadIfEnabled()
             true
         }
-        validation.addRule(listOf(enable.key, mode.key), label = mode.title?.toString()) {
+        validation.addRule(listOf(exit.key, mode.key), label = mode.title?.toString()) {
             when {
-                !enable.isChecked || mode.value != WarpClient.MODE_AMNEZIA -> ""
+                ExitThrough.of(exit.value) != ExitThrough.WARP || mode.value != WarpClient.MODE_AMNEZIA -> ""
                 DataStore.warpAmneziaPackets.isNotEmpty() -> ""
                 amneziaPending -> getString(R.string.warp_amnezia_generating)
                 else -> amneziaError.ifEmpty { getString(R.string.warp_amnezia_missing) }
@@ -102,23 +130,26 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
             true
         }
 
-        // editWarpApiHosts (dialog_manage_routes.cpp:51-81): shows the default host while empty, saves normalised.
+        // editWarpApiHosts (dialog_manage_routes.cpp): shows the default hosts while empty, saves normalised.
+        val defaults = WarpClient.DEFAULT_API_HOSTS
         val hosts = pref<StringListPreference>(SettingsRegistry.WARP_API_HOSTS.key)
-        hosts.dialogMessage = getString(R.string.warp_api_hosts_message, WarpClient.DEFAULT_API_HOST)
+        hosts.dialogMessage = getString(R.string.warp_api_hosts_message, defaults.joinToString(", "))
         hosts.summaryProvider = Preference.SummaryProvider<StringListPreference> {
             if (it.text.isNullOrBlank()) {
-                getString(R.string.setting_default_value, WarpClient.DEFAULT_API_HOST)
+                getString(R.string.setting_default_value, defaults.joinToString(", "))
             } else {
                 LinesSummaryProvider(maxLines = 3).provideSummary(it)
             }
         }
         hosts.setOnBindEditTextListener { editText ->
-            if (editText.text.isNullOrBlank()) editText.setText(WarpClient.DEFAULT_API_HOST)
+            if (editText.text.isNullOrBlank()) editText.setText(defaults.joinToString("\n"))
             editText.setHorizontallyScrolling(true)
             editText.setSelection(editText.text.length)
         }
         hosts.setOnPreferenceChangeListener { _, newValue ->
-            hosts.text = WarpClient.normalizeApiHosts(newValue as String?).joinToString("\n")
+            val entered = WarpClient.normalizeApiHosts(newValue as String?)
+            // Saving the defaults verbatim would freeze them and miss later changes to the built-in list.
+            hosts.text = (if (entered == defaults) emptyList() else entered).joinToString("\n")
             false
         }
 
@@ -181,7 +212,7 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
     }
 
     private fun reloadIfEnabled() {
-        if (DataStore.enableWarp) needReload()
+        if (DataStore.isWarpExit) needReload()
     }
 
     private fun trimmedText(key: String) {
@@ -212,26 +243,45 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         }
     }
 
-    private companion object {
-        const val KEY_WIREGUARD = "warpWireGuard"
-        const val KEY_MASQUE = "warpMasque"
-        const val KEY_GENERATE = "warpGenerate"
+    companion object {
+        private const val KEY_WIREGUARD = "warpWireGuard"
+        private const val KEY_MASQUE = "warpMasque"
+        private const val KEY_GENERATE = "warpGenerate"
+
+        /** What the exit menu offers: Android runs no Tor, which is listed only while it is the stored exit. */
+        fun offeredExits(current: ExitThrough): List<ExitThrough> =
+            listOfNotNull(ExitThrough.SERVER, ExitThrough.WARP, ExitThrough.PSIPHON, ExitThrough.TOR.takeIf { current == it })
+
+        /** The exit's name; Tor says it has no Android exit. */
+        fun exitLabel(context: Context, exit: ExitThrough): String = when (exit) {
+            ExitThrough.SERVER -> context.getString(R.string.exit_server)
+            ExitThrough.TOR -> context.getString(R.string.exit_unavailable, exit.displayName)
+            else -> exit.displayName
+        }
+
+        @StringRes
+        fun exitHint(exit: ExitThrough): Int = when (exit) {
+            ExitThrough.SERVER -> R.string.exit_server_hint
+            ExitThrough.WARP -> R.string.warp_enable_sum
+            ExitThrough.TOR -> R.string.exit_tor_hint
+            ExitThrough.PSIPHON -> R.string.exit_psiphon_hint
+        }
     }
 }
 
 /**
- * The Settings › Routing row of the WARP screen, summarised as "On · WireGuard" or "Off"; the summary follows
- * changes made elsewhere on the screen (the route quick switch toggles WARP).
+ * The Settings › Routing row of the Exit screen, summarised as the exit, with the WARP mode while WARP is the exit;
+ * the summary follows changes made elsewhere (the route quick switch toggles WARP).
  */
 class WarpEntryPreference @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : Preference(context, attrs), OnPreferenceDataStoreChangeListener {
 
-    override fun getSummary(): CharSequence = if (DataStore.enableWarp) {
-        context.getString(R.string.warp_state_on, WarpClient.modeName(DataStore.warpMode))
-    } else {
-        context.getString(R.string.warp_state_off)
+    override fun getSummary(): CharSequence {
+        val exit = DataStore.exitThrough
+        val label = WarpSettingsFragment.exitLabel(context, exit)
+        return if (exit == ExitThrough.WARP) "$label · ${WarpClient.modeName(DataStore.warpMode)}" else label
     }
 
     override fun onAttached() {
@@ -245,7 +295,7 @@ class WarpEntryPreference @JvmOverloads constructor(
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
-        if (key == SettingsRegistry.ENABLE_WARP.key || key == SettingsRegistry.WARP_MODE.key) {
+        if (key == SettingsRegistry.EXIT_THROUGH.key || key == SettingsRegistry.WARP_MODE.key) {
             runOnMainDispatcher { notifyChanged() }
         }
     }

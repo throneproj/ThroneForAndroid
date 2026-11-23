@@ -30,39 +30,29 @@ class AutoSelector : Outbound("autoselector") {
 
     /** Comma-separated ISO codes matched against the members' test_country, empty = all. */
     @JvmField var countryFilter: String = ""
-    @JvmField var excludeUnavailable: Boolean = true
 
-    @JvmField var poolCap: Int = 1000
-    @JvmField var buildLimit: Int = 300
-
-    /** Minutes a stored URL-test result stays trustworthy; 0 always re-tests. */
-    @JvmField var resultValidityMins: Int = 1440
+    /** How many of the ranked pool enter the config. */
+    @JvmField var buildLimit: Int = DEFAULT_BUILD_LIMIT
 
     /** Empty = the global test_url. */
     @JvmField var testURL: String = ""
 
     /** Direct outage probe; empty = the global direct_test_url. */
     @JvmField var connectivityURL: String = ""
-    @JvmField var intervalSec: Int = 300
-    @JvmField var benchIntervalSec: Int = 600
-    @JvmField var watchIntervalSec: Int = 15
-    @JvmField var activeSize: Int = 8
-    @JvmField var sampling: Int = 10
-    @JvmField var toleranceMs: Int = 300
+    @JvmField var intervalSec: Int = DEFAULT_INTERVAL_SEC
+    @JvmField var toleranceMs: Int = DEFAULT_TOLERANCE_MS
 
-    /** 0 = no ceiling. */
+    /** 0 = no ceiling; slower members are only a fallback. */
     @JvmField var maxRTTms: Int = 0
 
     /** Members kept confirmed working (the failover pool). */
-    @JvmField var expected: Int = 3
-    @JvmField var dialRetries: Int = 2
+    @JvmField var expected: Int = DEFAULT_EXPECTED
     @JvmField var interruptOnSwitch: Boolean = true
 
     @JvmField var balance: Boolean = false
 
     /** "rotate" or "connection". */
     @JvmField var balanceMode: String = "rotate"
-    @JvmField var balanceIntervalSec: Int = 30
 
     /** "latency" or "priority". */
     @JvmField var strategy: String = STRATEGY_LATENCY
@@ -70,16 +60,17 @@ class AutoSelector : Outbound("autoselector") {
     /** A member takes the first tier it matches; members matching none form an implicit last tier. */
     @JvmField var tiers: MutableList<Tier> = ArrayList()
 
-    /** Moving back up to a recovered higher tier: checks passed in a row, and seconds since its last failure. */
-    @JvmField var failbackChecks: Int = 3
-    @JvmField var failbackDelaySec: Int = 60
-    @JvmField var failbackInterrupt: Boolean = false
-
     /** Also judge members by how the real connections they carry end, not only by probes. */
     @JvmField var passive: Boolean = false
 
-    /** How long a site sticks to the member that last answered it, and avoids one that failed it. */
-    @JvmField var siteMemoryMins: Int = 60
+    /** Members the core re-checks every interval: the ready set plus a margin of challengers (autoselector.h:75). */
+    val activeSize: Int get() = minOf(expected + CLOSE_MARGIN, buildLimit)
+
+    /** autoselector.h:77: [built] is how many members the config holds. */
+    fun benchIntervalSec(built: Int): Int = maxOf(intervalSec, (2 * built).coerceIn(600, 1800))
+
+    /** Re-checks the in-use member; a break that still accepts connections raises no error elsewhere. */
+    val watchIntervalSec: Int get() = minOf(WATCH_INTERVAL_SEC, intervalSec)
 
     /** Ranked member ids of the last client-side sweep, best first. */
     @JvmField var pool: MutableList<Long> = ArrayList()
@@ -113,7 +104,7 @@ class AutoSelector : Outbound("autoselector") {
     /** autoSelector::TierLabel: index tiers.size names the members that match no tier. */
     fun tierLabel(index: Int): String = tiers.getOrNull(index)?.label() ?: vtr(R.string.autosel_tier_everything_else)
 
-    /** autoselector.h:53. */
+    /** autoselector.h:97. */
     override fun displayType(): String = "Auto Selector"
 
     /** autoselector.cpp:9-15: the names of the tracked groups that exist ("" until the app installs [groupNames]). */
@@ -147,8 +138,8 @@ class AutoSelector : Outbound("autoselector") {
     }
 
     /**
-     * autoselector.h:61-95. A value of the wrong JSON type falls back to the member default (the desktop's
-     * QJsonValue::toInt(default) fallbacks differ from its member defaults for five keys; R11 lists that as a quirk).
+     * autoselector.h:110-150. A value of the wrong JSON type falls back to the default. Keys of settings that are now
+     * fixed (pool_cap, result_validity_mins, sampling, failback_*, …) are ignored, so older profiles still load.
      */
     override fun parseFromJson(obj: JsonObject): Boolean {
         if (obj.isEmpty()) return false
@@ -162,25 +153,16 @@ class AutoSelector : Outbound("autoselector") {
         }
         if (obj.contains("name_filter")) nameFilter = obj.string("name_filter")
         if (obj.contains("country_filter")) countryFilter = obj.string("country_filter")
-        if (obj.contains("exclude_unavailable")) excludeUnavailable = boolOr(obj["exclude_unavailable"], true)
-        if (obj.contains("pool_cap")) poolCap = intOr(obj["pool_cap"], 1000)
-        if (obj.contains("build_limit")) buildLimit = intOr(obj["build_limit"], 300)
-        if (obj.contains("result_validity_mins")) resultValidityMins = intOr(obj["result_validity_mins"], 1440)
+        if (obj.contains("build_limit")) buildLimit = intOr(obj["build_limit"], DEFAULT_BUILD_LIMIT)
         if (obj.contains("test_url")) testURL = obj.string("test_url")
         if (obj.contains("connectivity_url")) connectivityURL = obj.string("connectivity_url")
-        if (obj.contains("interval_sec")) intervalSec = intOr(obj["interval_sec"], 300)
-        if (obj.contains("bench_interval_sec")) benchIntervalSec = intOr(obj["bench_interval_sec"], 600)
-        if (obj.contains("watch_interval_sec")) watchIntervalSec = intOr(obj["watch_interval_sec"], 15)
-        if (obj.contains("active_size")) activeSize = intOr(obj["active_size"], 8)
-        if (obj.contains("sampling")) sampling = intOr(obj["sampling"], 10)
-        if (obj.contains("tolerance_ms")) toleranceMs = intOr(obj["tolerance_ms"], 300)
+        if (obj.contains("interval_sec")) intervalSec = intOr(obj["interval_sec"], DEFAULT_INTERVAL_SEC)
+        if (obj.contains("tolerance_ms")) toleranceMs = intOr(obj["tolerance_ms"], DEFAULT_TOLERANCE_MS)
         if (obj.contains("max_rtt_ms")) maxRTTms = intOr(obj["max_rtt_ms"], 0)
-        if (obj.contains("expected")) expected = intOr(obj["expected"], 3)
-        if (obj.contains("dial_retries")) dialRetries = intOr(obj["dial_retries"], 2)
+        if (obj.contains("expected")) expected = intOr(obj["expected"], DEFAULT_EXPECTED)
         if (obj.contains("interrupt_on_switch")) interruptOnSwitch = boolOr(obj["interrupt_on_switch"], true)
         if (obj.contains("balance")) balance = boolOr(obj["balance"], false)
         if (obj.contains("balance_mode")) balanceMode = obj["balance_mode"] as? String ?: "rotate"
-        if (obj.contains("balance_interval_sec")) balanceIntervalSec = intOr(obj["balance_interval_sec"], 30)
         if (obj.contains("strategy")) strategy = obj["strategy"] as? String ?: STRATEGY_LATENCY
         if (obj.contains("tiers")) {
             tiers = obj.array("tiers").mapTo(ArrayList()) { value ->
@@ -188,11 +170,7 @@ class AutoSelector : Outbound("autoselector") {
                 Tier(longOr(entry["gid"], -1), entry.string("name_filter"))
             }
         }
-        if (obj.contains("failback_checks")) failbackChecks = intOr(obj["failback_checks"], 3)
-        if (obj.contains("failback_delay_sec")) failbackDelaySec = intOr(obj["failback_delay_sec"], 60)
-        if (obj.contains("failback_interrupt")) failbackInterrupt = boolOr(obj["failback_interrupt"], false)
         if (obj.contains("passive")) passive = boolOr(obj["passive"], false)
-        if (obj.contains("site_memory_mins")) siteMemoryMins = intOr(obj["site_memory_mins"], 60)
         if (obj.contains("pool")) pool = obj.array("pool").mapTo(ArrayList()) { JsonValues.toInteger(it) }
         if (obj.contains("pool_ranked_at")) poolRankedAt = obj.double("pool_ranked_at").toLong()
         if (obj.contains("pinned_id")) pinnedID = longOr(obj["pinned_id"], -1)
@@ -203,7 +181,7 @@ class AutoSelector : Outbound("autoselector") {
         return true
     }
 
-    /** autoselector.h:97-131: every key is always written; "gid" (the first tracked group) keeps older builds tracking one. */
+    /** autoselector.h:152-183: every key is always written; "gid" (the first tracked group) keeps older builds tracking one. */
     override fun exportToJson(): JsonObject {
         val obj = JsonObject()
         obj["name"] = name
@@ -212,34 +190,21 @@ class AutoSelector : Outbound("autoselector") {
         obj["gids"] = idArray(gids)
         obj["name_filter"] = nameFilter
         obj["country_filter"] = countryFilter
-        obj["exclude_unavailable"] = excludeUnavailable
-        obj["pool_cap"] = poolCap
         obj["build_limit"] = buildLimit
-        obj["result_validity_mins"] = resultValidityMins
         obj["test_url"] = testURL
         obj["connectivity_url"] = connectivityURL
         obj["interval_sec"] = intervalSec
-        obj["bench_interval_sec"] = benchIntervalSec
-        obj["watch_interval_sec"] = watchIntervalSec
-        obj["active_size"] = activeSize
-        obj["sampling"] = sampling
         obj["tolerance_ms"] = toleranceMs
         obj["max_rtt_ms"] = maxRTTms
         obj["expected"] = expected
-        obj["dial_retries"] = dialRetries
         obj["interrupt_on_switch"] = interruptOnSwitch
         obj["balance"] = balance
         obj["balance_mode"] = balanceMode
-        obj["balance_interval_sec"] = balanceIntervalSec
         obj["strategy"] = strategy
         obj["tiers"] = JsonArray().also { array ->
             tiers.forEach { array.add(jsonObjectOf("gid" to it.gid, "name_filter" to it.nameFilter)) }
         }
-        obj["failback_checks"] = failbackChecks
-        obj["failback_delay_sec"] = failbackDelaySec
-        obj["failback_interrupt"] = failbackInterrupt
         obj["passive"] = passive
-        obj["site_memory_mins"] = siteMemoryMins
         obj["pool"] = idArray(pool)
         obj["pool_ranked_at"] = poolRankedAt
         obj["pinned_id"] = pinnedID
@@ -249,50 +214,27 @@ class AutoSelector : Outbound("autoselector") {
         return obj
     }
 
-    /** autoselector.h:133-137: the group outbound is assembled by the generator, where members are resolvable. */
+    /** autoselector.h:185-189: the group outbound is assembled by the generator, where members are resolvable. */
     override fun build(ctx: BuildContext): BuildResult =
         BuildResult(JsonObject(), "Cannot call Build on an auto selector config")
 
-    /** autoselector.h:140-167: clamps what a hand-edited profile could put out of range; runs before every plan. */
+    /** autoselector.h:192-211: clamps what a hand-edited profile could put out of range; runs before every plan. */
     fun normalize() {
         val seen = HashSet<Long>()
         gids = gids.filterTo(ArrayList()) { it >= 0 && seen.add(it) }
-        if (poolCap < 1) poolCap = 1
-        if (poolCap > MAX_POOL_CAP) poolCap = MAX_POOL_CAP
         if (buildLimit < 1) buildLimit = 1
         if (buildLimit > MAX_BUILD_LIMIT) buildLimit = MAX_BUILD_LIMIT
-        if (buildLimit > poolCap) buildLimit = poolCap
-        if (resultValidityMins < 0) resultValidityMins = 0
         if (intervalSec < 10) intervalSec = 10
-        if (benchIntervalSec < intervalSec) benchIntervalSec = intervalSec
-        if (watchIntervalSec < 5) watchIntervalSec = 5
-        if (watchIntervalSec > intervalSec) watchIntervalSec = intervalSec
-        if (activeSize < 1) activeSize = 1
         if (expected < 1) expected = 1
-        // The ready set must sit inside the closely-checked set, or readiness rides on stale bench data.
-        if (activeSize < expected) activeSize = expected
-        if (activeSize > buildLimit) activeSize = buildLimit
-        if (sampling < 2) sampling = 2
-        if (sampling > 60) sampling = 60
-        if (failbackChecks < 1) failbackChecks = 1
-        // The core cannot prove more checks in a row than it keeps samples.
-        if (failbackChecks > sampling) failbackChecks = sampling
-        if (failbackDelaySec < 1) failbackDelaySec = 1
-        if (failbackDelaySec > 3600) failbackDelaySec = 3600
-        if (siteMemoryMins < 1) siteMemoryMins = 1
-        if (siteMemoryMins > 1440) siteMemoryMins = 1440
-        if (toleranceMs < 0) toleranceMs = 0
-        if (maxRTTms < 0) maxRTTms = 0
         if (expected > buildLimit) expected = buildLimit
-        if (dialRetries < 0) dialRetries = 0
-        if (dialRetries > 5) dialRetries = 5
-        if (balanceIntervalSec < 5) balanceIntervalSec = 5
+        if (toleranceMs < MIN_TOLERANCE_MS) toleranceMs = MIN_TOLERANCE_MS
+        if (maxRTTms < 0) maxRTTms = 0
         if (balanceMode != "connection") balanceMode = "rotate"
         if (strategy != STRATEGY_PRIORITY) strategy = STRATEGY_LATENCY
         if (tiers.any { it.gid < -1 }) tiers = tiers.mapTo(ArrayList()) { if (it.gid < -1) it.copy(gid = -1) else it }
     }
 
-    /** autoselector.h:172-179. */
+    /** autoselector.h:213-220. */
     class HistoryEntry(
         @JvmField var id: Long = -1,
         @JvmField var firstUsed: Long = 0,
@@ -302,7 +244,7 @@ class AutoSelector : Outbound("autoselector") {
         @JvmField var name: String = "",
     )
 
-    /** autoselector.h:183-199: entries without a valid id are dropped. */
+    /** autoselector.h:224-240: entries without a valid id are dropped. */
     fun historyEntries(): List<HistoryEntry> {
         val entries = ArrayList<HistoryEntry>(history.size)
         for (value in history) {
@@ -320,7 +262,7 @@ class AutoSelector : Outbound("autoselector") {
         return entries
     }
 
-    /** autoselector.h:201-240: newest first, so the LRU trim at the tail drops the least recently used. */
+    /** autoselector.h:243-281: newest first, so the LRU trim at the tail drops the least recently used. */
     fun recordHistory(ids: List<Long>, names: Map<Long, String>, now: Long) {
         val byId = HashMap<Long, HistoryEntry>()
         val order = ArrayList<Long>()
@@ -361,9 +303,25 @@ class AutoSelector : Outbound("autoselector") {
         fun nameOf(gid: Long): String?
     }
 
+    /** autoselector.h:20-37: defaults of the saved settings, and the fixed values of those no longer saved. */
     companion object {
-        const val MAX_POOL_CAP = 3000
+        const val DEFAULT_BUILD_LIMIT = 300
+        const val DEFAULT_INTERVAL_SEC = 300
+        const val DEFAULT_TOLERANCE_MS = 300
+        const val DEFAULT_EXPECTED = 3
+        const val MIN_TOLERANCE_MS = 10
         const val MAX_BUILD_LIMIT = 500
+        const val POOL_CAP = 3000
+        const val SUCCESS_VALIDITY_SECS = 86400L
+        const val FAILURE_VALIDITY_SECS = 3600L
+        const val WATCH_INTERVAL_SEC = 15
+        const val SAMPLING = 10
+        const val DIAL_RETRIES = 2
+        const val FAILBACK_CHECKS = 3
+        const val FAILBACK_DELAY_SEC = 60
+        const val SITE_MEMORY_MINS = 60
+        const val BALANCE_INTERVAL_SEC = 30
+        const val CLOSE_MARGIN = 5
         const val MAX_HISTORY_ENTRIES = 2000
         const val STRATEGY_LATENCY = "latency"
         const val STRATEGY_PRIORITY = "priority"
@@ -392,7 +350,7 @@ class AutoSelector : Outbound("autoselector") {
     }
 }
 
-/** The Checks of autoselector.h: the free-text fields, and the bounds [AutoSelector.normalize] would otherwise clamp silently. */
+/** The Checks of autoselector.h: the free-text fields and the tiers. */
 object AutoSelectorChecks {
     /** The plan matches these against the two-letter country of each profile's last test; "!RU" excludes one. */
     @JvmStatic
@@ -404,26 +362,6 @@ object AutoSelectorChecks {
     @JvmStatic
     fun autoSelectorUrl(text: String): String = Validation.url(text, listOf("http", "https"))
 
-    @JvmStatic
-    fun autoSelectorBuildLimit(buildLimit: Int, poolCap: Int): String =
-        if (buildLimit <= poolCap) "" else vtr(R.string.validation_autoselector_build_limit, poolCap.toString())
-
-    @JvmStatic
-    fun autoSelectorBenchInterval(benchInterval: Int, interval: Int): String =
-        if (benchInterval >= interval) "" else vtr(R.string.validation_autoselector_bench_interval, interval.toString())
-
-    @JvmStatic
-    fun autoSelectorWatchInterval(watchInterval: Int, interval: Int): String =
-        if (watchInterval <= interval) "" else vtr(R.string.validation_autoselector_watch_interval, interval.toString())
-
-    @JvmStatic
-    fun autoSelectorReadyCount(activeSize: Int, expected: Int): String =
-        if (activeSize >= expected) "" else vtr(R.string.validation_autoselector_ready_count, expected.toString())
-
-    @JvmStatic
-    fun autoSelectorCloseCount(activeSize: Int, buildLimit: Int): String =
-        if (activeSize <= buildLimit) "" else vtr(R.string.validation_autoselector_close_count, buildLimit.toString())
-
     /** A tier with neither would take every profile, leaving the tiers below it empty. */
     @JvmStatic
     fun autoSelectorTierMatch(gid: Long, nameFilter: String): String =
@@ -432,8 +370,4 @@ object AutoSelectorChecks {
     @JvmStatic
     fun autoSelectorTierCount(tiers: Int): String =
         if (tiers > 0) "" else vtr(R.string.validation_autoselector_tier_count)
-
-    @JvmStatic
-    fun autoSelectorFailbackChecks(failbackChecks: Int, sampling: Int): String =
-        if (failbackChecks <= sampling) "" else vtr(R.string.validation_autoselector_failback_checks, sampling.toString())
 }

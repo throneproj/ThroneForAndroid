@@ -293,6 +293,8 @@ class Custom : Outbound("custom") {
         fun fromXrayFullConfig(cfg: JsonObject): Custom? {
             if (!cfg.contains("outbounds")) return null
             val stripped = cfg.copy()
+            // Their rules (often the only way into a balancer) must keep matching, now via the bridge.
+            routeXrayListenerRulesViaBridge(stripped)
             stripped.remove("inbounds")
             val custom = Custom()
             custom.subtype = CUSTOM_XRAY_FULL_CONFIG
@@ -300,6 +302,42 @@ class Custom : Outbound("custom") {
             val remarks = stripped.string("remarks")
             if (remarks.isNotEmpty()) custom.name = remarks
             return custom
+        }
+
+        /** XrayFullConfigBridgeTag (xrayStreamSetting.h): the inbound Throne feeds an Xray full config through, in place of its own listeners. */
+        const val XRAY_FULL_CONFIG_BRIDGE_TAG = "throne-bridge"
+
+        /**
+         * RouteXrayListenerRulesViaBridge (xrayStreamSetting.cpp): adds the bridge tag to every routing rule bound to a
+         * client listener inbound of [config], so bridged traffic takes those rules too. Edits [config] in place.
+         */
+        @JvmStatic
+        fun routeXrayListenerRulesViaBridge(config: JsonObject) {
+            // A dokodemo with a fixed target (api, dns-in) is not the client's traffic; mapping it would pull everything into its rule.
+            val listenerTags = HashSet<String>()
+            for (value in config.array("inbounds")) {
+                val inbound = value as? JsonObject ?: continue
+                val tag = inbound.string("tag")
+                if (tag.isEmpty()) continue
+                val protocol = xrayLower(inbound.string("protocol"))
+                val transparent = (protocol == "dokodemo-door" || protocol == "tunnel") && inbound.obj("settings").bool("followRedirect")
+                if (transparent || protocol == "socks" || protocol == "mixed" || protocol == "http" || protocol == "tun") listenerTags.add(tag)
+            }
+            if (listenerTags.isEmpty()) return
+            val rules = (config["routing"] as? JsonObject)?.get("rules") as? JsonArray ?: return
+            for (item in rules) {
+                val rule = item as? JsonObject ?: continue
+                val inboundTag = rule["inboundTag"]
+                // Xray's StringList also takes one comma-joined string, split without trimming.
+                val ruleTags = when (inboundTag) {
+                    is String -> inboundTag.split(',').toMutableList()
+                    is JsonArray -> inboundTag.strings()
+                    else -> continue
+                }
+                if (XRAY_FULL_CONFIG_BRIDGE_TAG in ruleTags || ruleTags.none { it in listenerTags }) continue
+                ruleTags.add(XRAY_FULL_CONFIG_BRIDGE_TAG)
+                rule["inboundTag"] = JsonArray().also { tags -> ruleTags.forEach { tags.add(it) } }
+            }
         }
 
         private fun firstObject(arr: JsonArray): JsonObject =
@@ -782,6 +820,8 @@ private fun stripXrayOutbound(outbound: JsonObject, at: String, issues: MutableL
 }
 
 private fun stripXrayExposure(root: JsonObject, issues: MutableList<Issue>): Boolean {
+    // Android only: as for a subscription's Xray configs, rules bound to the dropped listeners keep matching via the bridge.
+    Custom.routeXrayListenerRulesViaBridge(root)
     var removed = stripNamed(root, "inbounds", "", vtr(R.string.validation_custom_xray_inbounds), false, issues)
     removed = stripNamed(root, "api", "", opensPortMessage(), false, issues) or removed
     removed = stripNamed(root, "metrics", "", opensPortMessage(), false, issues) or removed

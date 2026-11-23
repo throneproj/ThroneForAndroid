@@ -16,9 +16,17 @@ internal class TestSessionModel(
     var groupId: Long,
     val testCurrent: Boolean,
 ) {
+    /** The removed "Only country" mode (4) runs as FULL, as the engine does. */
     var speedMode = TestUiState.SPEED_MODE_FULL
+        set(value) {
+            field = if (value in TestUiState.SPEED_MODE_FULL..TestUiState.SPEED_MODE_SIMPLE_DOWNLOAD) {
+                value
+            } else {
+                TestUiState.SPEED_MODE_FULL
+            }
+        }
 
-    /** Effective `speed_test_timeout_ms` and `test_concurrent`, for the speed test's time-based progress. */
+    /** Effective `speed_test_timeout_ms`, for the speed test's time-based progress, and `test_concurrent`. */
     var speedTimeoutMs = 0
     var concurrency = 0
     var session = 0
@@ -68,8 +76,6 @@ internal class TestSessionModel(
 
     private var windowStart = 0
     private var windowLeft = 0
-    private var windowSize = 0
-    private var windowAt = 0L
 
     private var live: Live? = null
 
@@ -104,10 +110,10 @@ internal class TestSessionModel(
         }
     }
 
-    // URL, IP, service and country lookups run in engine batches of [batch] ids in list order and report no "started"
-    // event, so the rows of the batch in flight are shown as testing until all of them reported.
+    // URL, IP and service tests run in engine batches of [batch] ids in list order and report no "started" event, so
+    // the rows of the batch in flight are shown as testing until all of them reported.
     private val batched: Boolean
-        get() = !testCurrent && (kind != TestSpec.KIND_SPEED || speedMode == TestUiState.SPEED_MODE_COUNTRY)
+        get() = !testCurrent && kind != TestSpec.KIND_SPEED
 
     private val batch = if (kind == TestSpec.KIND_SERVICE) ServiceTestRunner.SERVICE_BATCH_SIZE else BATCH
 
@@ -120,8 +126,6 @@ internal class TestSessionModel(
         total = if (testCurrent) 1 else order.size
         if (testCurrent) {
             order.firstOrNull()?.let { markTesting(it) }
-            windowSize = 1
-            windowAt = SystemClock.elapsedRealtime()
         } else if (batched) {
             openWindow()
         }
@@ -321,15 +325,9 @@ internal class TestSessionModel(
     /**
      * Speed tests advance the testing slot with time over the known maxima of their phases ([phaseBudgets]), jumping
      * to the next phase when the snapshots show it began early, and stay below [PROGRESS_CAP] until the result.
-     * Country lookups have no snapshots: their whole batch moves over its lookup rounds.
      */
     private fun testingProgress(): TestingProgress? {
         if (kind != TestSpec.KIND_SPEED || !running) return null
-        if (speedMode == TestUiState.SPEED_MODE_COUNTRY) {
-            val parallel = if (concurrency > 0) concurrency else DEFAULT_COUNTRY_CONCURRENCY
-            val rounds = ((windowSize + parallel - 1) / parallel).coerceAtLeast(1)
-            return TestingProgress(0f, PROGRESS_CAP, windowAt, rounds * DISCOVERY_MS)
-        }
         val l = live?.takeIf { rows[it.profileId]?.phase == RowPhase.TESTING } ?: return TestingProgress.NONE
         val budgets = phaseBudgets()
         val phase = min(l.phase, budgets.size - 1)
@@ -382,8 +380,6 @@ internal class TestSessionModel(
             windowLeft++
             markTesting(id)
         }
-        windowSize = windowLeft
-        windowAt = SystemClock.elapsedRealtime()
     }
 
     private fun advanceWindow(id: Long) {
@@ -431,13 +427,6 @@ internal class TestSessionModel(
                 if (row.ip.isNotEmpty()) ips.add(row.ip)
                 countriesDirty = true
             }
-
-            TestSpec.KIND_SPEED -> if (row.ok && speedMode == TestUiState.SPEED_MODE_COUNTRY &&
-                row.country.isNotEmpty()
-            ) {
-                countryCounts[row.country] = (countryCounts[row.country] ?: 0) + 1
-                countriesDirty = true
-            }
         }
         if (row.ok && kind != TestSpec.KIND_IP && kind != TestSpec.KIND_SERVICE) {
             working[id] = RankedResult(
@@ -472,9 +461,8 @@ internal class TestSessionModel(
 
     /** Every working result the session's metric can order, best first. */
     private fun rank(): List<RankedResult> {
-        val byLatency = kind == TestSpec.KIND_URL || speedMode == TestUiState.SPEED_MODE_COUNTRY
         val candidates = working.values
-        return if (byLatency) {
+        return if (kind == TestSpec.KIND_URL) {
             candidates.filter { it.latency > 0 }.sortedBy { it.latency }
         } else if (speedMode == TestUiState.SPEED_MODE_UPLOAD) {
             candidates.sortedByDescending { it.ulBps }
@@ -489,9 +477,6 @@ internal class TestSessionModel(
 
         /** getSpeedtestServer (core probe.go): the server list fetch (FetchServersTimeout, 8 s) plus its 4 s ping. */
         const val DISCOVERY_MS = 12_000L
-
-        /** BatchSpeedTest's country lookup concurrency when test_concurrent is not positive. */
-        const val DEFAULT_COUNTRY_CONCURRENCY = 5
 
         const val PROGRESS_CAP = 0.95f
 

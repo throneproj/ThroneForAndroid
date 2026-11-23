@@ -48,6 +48,7 @@ import io.nekohasekai.sagernet.ktx.launchCustomTab
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.database.SettingsMapper
 import io.nekohasekai.sagernet.outbound.`import`.ProfileImport
+import io.nekohasekai.sagernet.ui.profiles.ProfileTests
 import io.nekohasekai.sagernet.ui.route.RouteImports
 import io.nekohasekai.sagernet.ui.settings.DnsSettingsFragment
 import io.nekohasekai.sagernet.ui.settings.XrayGeoSettingsFragment
@@ -508,6 +509,7 @@ class MainActivity : ThemedActivity(),
         val popup = PopupMenu(this, binding.stats)
         popup.menuInflater.inflate(R.menu.stats_bar_menu, popup.menu)
         popup.menu.findItem(R.id.action_test_speed_current).isEnabled = DataStore.serviceState.connected
+        popup.menu.findItem(R.id.action_test_service_current).isEnabled = DataStore.serviceState.connected
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_live_graphs -> displayFragmentWithId(R.id.nav_live_graphs)
@@ -515,6 +517,9 @@ class MainActivity : ThemedActivity(),
                     if (!TestSessionClient.startCurrent(TestSpec.KIND_SPEED)) {
                         snackbar(R.string.profiles_test_busy).show()
                     }
+                }
+                R.id.action_test_service_current -> ProfileTests.startServiceCurrent(this) {
+                    snackbar(R.string.profiles_test_busy).show()
                 }
             }
             true

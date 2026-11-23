@@ -774,25 +774,21 @@ object ProfileImport {
             accept(outbound, parsed, issues, source)
         }
 
-        /** clashUsesXrayVless (SubscriptionParser.cpp): sing-box VLESS rejects the vision-udp443 flow; Xray accepts it. */
+        /** clashUsesXrayVless (SubscriptionParser.cpp): the vless:// rule ([OutboundFactory.useXrayVless]) over a Clash entry. */
         private fun clashUsesXrayVless(proxy: ClashProxy): Boolean {
             if (proxy.type != "vless") return false
             val flow = proxy.string("flow").trim().lowercase()
-            val singBoxFlow = flow.isEmpty() || flow == "none" || flow == "xtls-rprx-vision"
             val encryption = proxy.string("encryption")
-            return proxy.string("network") == "xhttp" || (encryption.isNotEmpty() && encryption != "none") || !singBoxFlow ||
-                clashRealityOnXray(proxy)
-        }
-
-        /**
-         * clashRealityOnXray (SubscriptionParser.cpp): the links' REALITY preference ([OutboundFactory.useXrayVless]),
-         * limited to the networks Xray runs REALITY over; sing-box also carries ws.
-         */
-        private fun clashRealityOnXray(proxy: ClashProxy): Boolean {
-            if (!proxy.bool("tls") || proxy.obj("reality-opts").string("public-key").isEmpty()) return false
-            if (preference == OutboundFactory.XrayVlessPreference.XhttpOnly) return false
             val network = proxy.string("network")
-            return network.isEmpty() || network == "tcp" || network == "grpc"
+            val traits = OutboundFactory.VlessTraits(
+                // Not normalizeXrayNetwork: XrayStreamSetting.parseFromClash folds only tcp.
+                transport = if (network == "tcp") "raw" else network,
+                reality = proxy.bool("tls") && proxy.obj("reality-opts").string("public-key").isNotEmpty(),
+                // sing-box VLESS rejects the vision-udp443 flow; Xray accepts it.
+                xrayOnly = (encryption.isNotEmpty() && encryption != "none") ||
+                    !(flow.isEmpty() || flow == "none" || flow == "xtls-rprx-vision"),
+            )
+            return OutboundFactory.useXrayVless(traits, preference)
         }
 
         /** Parser::wireguardFile (SubscriptionParser.cpp). */

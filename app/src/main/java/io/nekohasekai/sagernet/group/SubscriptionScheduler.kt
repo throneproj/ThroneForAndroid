@@ -50,26 +50,27 @@ object SubscriptionScheduler {
     private val attempts = ConcurrentHashMap<Long, Long>()
 
     /**
-     * ResolveAutoUpdate (GroupUpdater.cpp:429-440) in seconds, 0 = not updated automatically: the server's
-     * profile-update-interval when followed and sent, else the group's interval, else sub_auto_update. Nothing is
-     * automatic while sub_auto_update is off.
+     * ResolveAutoUpdate (GroupUpdater.cpp:590-603) in seconds, 0 = not updated automatically: the server's
+     * profile-update-interval when followed and sent, else the group's interval, else sub_auto_update. A group's own
+     * interval or respect-server choice stands while sub_auto_update is off; inherited ones follow it.
      */
     fun interval(
         group: ProxyGroup,
         global: Int = DataStore.subAutoUpdate,
         respectServer: Boolean = DataStore.subRespectServerInterval,
     ): Long {
-        if (global < MIN_INTERVAL_MINUTES || group.url.isEmpty() || group.archive || group.skipAutoUpdate) return 0L
+        if (group.url.isEmpty() || group.archive || group.skipAutoUpdate) return 0L
         val options = group.subOptions
+        val globalOn = global >= MIN_INTERVAL_MINUTES
         val serverHours = group.subInfo.serverInterval
-        if ((options.respectServerInterval ?: respectServer) && serverHours > 0) return serverHours * 3600L
+        if ((options.respectServerInterval ?: (globalOn && respectServer)) && serverHours > 0) return serverHours * 3600L
         if (options.updateInterval > 0) return maxOf(options.updateInterval, MIN_INTERVAL_MINUTES) * 60L
-        return global * 60L
+        return if (globalOn) global * 60L else 0L
     }
 
     /** Whether [group]'s automatic update follows the server's interval when it sends one. */
-    fun followsServerInterval(group: ProxyGroup): Boolean =
-        group.subOptions.respectServerInterval ?: DataStore.subRespectServerInterval
+    fun followsServerInterval(group: ProxyGroup): Boolean = group.subOptions.respectServerInterval
+        ?: (DataStore.subAutoUpdate >= MIN_INTERVAL_MINUTES && DataStore.subRespectServerInterval)
 
     /** autoUpdateDue (GroupUpdater.cpp:519-523): a failed attempt waits the interval too. */
     private fun due(group: ProxyGroup, interval: Long): Long {
@@ -82,7 +83,6 @@ object SubscriptionScheduler {
     /** The poll period is the intervals' greatest common divisor (at least [MIN_INTERVAL_MINUTES]); null = no poll. */
     private fun plan(now: Long): Plan? {
         val global = DataStore.subAutoUpdate
-        if (global < MIN_INTERVAL_MINUTES) return null
         val respectServer = DataStore.subRespectServerInterval
         var period = 0L
         var next = Long.MAX_VALUE

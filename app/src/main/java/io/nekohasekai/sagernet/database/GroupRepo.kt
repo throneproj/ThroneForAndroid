@@ -1,8 +1,10 @@
 package io.nekohasekai.sagernet.database
 
+import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.group.SubscriptionCountryVerdicts
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.ktx.app
 import java.util.concurrent.Callable
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -24,6 +26,17 @@ object GroupRepo {
         /** The tab order changed. */
         suspend fun groupsReordered() {}
     }
+
+    /** GroupsRepo's HopReference: group [groupId] uses profile [profileId] as its landing proxy when [landing], else as its front proxy. */
+    class HopReference(
+        @JvmField val groupId: Long,
+        @JvmField val groupName: String,
+        @JvmField val landing: Boolean,
+        @JvmField val profileId: Long,
+    )
+
+    /** The most references a delete confirmation lists (HopReferenceWarning). */
+    private const val HOPS_SHOWN = 5
 
     private val listeners = CopyOnWriteArrayList<Listener>()
 
@@ -112,7 +125,8 @@ object GroupRepo {
 
     /**
      * GroupsRepo::DeleteGroup with the callers' rules: the last group is never deleted (returns false), a running
-     * profile of the group is stopped first. The members go by the foreign key cascade.
+     * profile of the group is stopped first. The members go by the foreign key cascade, and other groups lose them as
+     * front/landing proxy.
      */
     suspend fun delete(id: Long): Boolean {
         val remaining = SagerDatabase.instance.runInTransaction(Callable {
@@ -121,7 +135,10 @@ object GroupRepo {
             ids - id
         }) ?: return false
         val running = ProfileManager.runningProfileId()
-        if (running > 0 && ProfileManager.getProfile(running)?.groupId == id) SagerNet.stopService()
+        val stopping = running > 0 && ProfileManager.getProfile(running)?.groupId == id
+        val members = ProfileManager.memberIds(id)
+        val used = !stopping && ProfileManager.runningUsesOther(members)
+        if (stopping) SagerNet.stopService()
         val name = dao.getById(id)?.displayName()
         dao.deleteById(id)
         SubscriptionCountryVerdicts.clear(id)
@@ -134,8 +151,77 @@ object GroupRepo {
             DataStore.selectedProxy = 0L
         }
         notify { groupRemoved(id) }
+        clearHopReferences(members)
+        if (used) ProfileManager.noteRestartNeeded(id)
         return true
     }
+
+    // ------------------------------------------------------------------------------------------------ front / landing
+
+    /** GroupsRepo::HopReferences: groups whose front or landing proxy is one of [profileIds]; [exceptGroup] (a group being deleted) is left out. */
+    fun hopReferences(profileIds: Collection<Long>, exceptGroup: Long = -1L): List<HopReference> {
+        if (profileIds.isEmpty()) return emptyList()
+        val ids = profileIds.toHashSet()
+        val refs = ArrayList<HopReference>()
+        for (group in dao.allGroups()) {
+            if (group.id == exceptGroup) continue
+            if (group.frontProxyId > 0 && group.frontProxyId in ids) {
+                refs.add(HopReference(group.id, group.displayName(), false, group.frontProxyId))
+            }
+            if (group.landingProxyId > 0 && group.landingProxyId in ids) {
+                refs.add(HopReference(group.id, group.displayName(), true, group.landingProxyId))
+            }
+        }
+        return refs
+    }
+
+    /**
+     * GroupsRepo::ClearHopReferences: the front/landing proxies among [deletedProfileIds] become none, each logged; a
+     * group left without one connects directly instead of building on a dangling id. Returns the cleared references.
+     */
+    suspend fun clearHopReferences(deletedProfileIds: Collection<Long>): List<HopReference> {
+        if (deletedProfileIds.isEmpty()) return emptyList()
+        val cleared = SagerDatabase.instance.runInTransaction(Callable {
+            hopReferences(deletedProfileIds).filter { ref ->
+                val changed = if (ref.landing) {
+                    dao.clearLandingProxy(ref.groupId, ref.profileId)
+                } else {
+                    dao.clearFrontProxy(ref.groupId, ref.profileId)
+                }
+                changed > 0
+            }
+        })
+        for (ref in cleared) {
+            Logs.i("[Groups] ${ref.groupName}: ${if (ref.landing) "landing" else "front"} proxy removed (its profile was deleted)")
+        }
+        for (groupId in cleared.mapTo(LinkedHashSet()) { it.groupId }) postUpdate(groupId)
+        return cleared
+    }
+
+    /**
+     * HopReferenceWarning: for a delete confirmation, the groups that would lose one of [profileIds] as front/landing
+     * proxy (a few, the rest counted), "" for none; [deletedGroup] is the group being deleted with them.
+     */
+    fun hopWarning(profileIds: Collection<Long>, deletedGroup: Long = -1L): String {
+        val refs = hopReferences(profileIds, deletedGroup)
+        if (refs.isEmpty()) return ""
+        val text = StringBuilder("\n\n").append(app.getString(R.string.hop_refs_warning))
+        for (ref in refs.take(HOPS_SHOWN)) text.append('\n').append(hopLine(ref))
+        val more = refs.size - HOPS_SHOWN
+        if (more > 0) text.append('\n').append(app.resources.getQuantityString(R.plurals.confirm_more_names, more, more))
+        return text.toString()
+    }
+
+    /** GroupUpdater's hopNotice: the report lines for the [cleared] references, "" for none. */
+    fun hopNotice(cleared: List<HopReference>): String {
+        if (cleared.isEmpty()) return ""
+        val text = StringBuilder("\n").append(app.getString(R.string.hop_refs_cleared))
+        for (ref in cleared) text.append('\n').append(hopLine(ref))
+        return text.toString()
+    }
+
+    private fun hopLine(ref: HopReference): String =
+        app.getString(if (ref.landing) R.string.hop_ref_landing else R.string.hop_ref_front, ref.groupName)
 
     /** SetGroupsTabOrder: [ids] become the tabs 0..n-1; groups missing from [ids] follow in their current order. */
     suspend fun setDisplayOrder(ids: List<Long>) {

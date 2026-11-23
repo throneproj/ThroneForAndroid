@@ -142,9 +142,13 @@ data class GeneratorSettings(
     /** direct_test_url: the selector's direct connectivity probe; "" omits it. */
     val directTestUrl: String = "",
 
+    // ---- exit (SettingsValues.h exit_through, psiphon_egress_region)
+    /** exit_through: what proxied traffic finally leaves through; Tor has no Android exit and builds as [ExitThrough.SERVER]. */
+    val exitThrough: ExitThrough = ExitThrough.SERVER,
+    /** psiphon_egress_region: uppercase ISO 3166-1 alpha-2 of the Psiphon exit's server, "" for the best-performing one. */
+    val psiphonEgressRegion: String = "",
+
     // ---- warp (SettingsRepo.h:252-267), the built-in WARP hop of WarpHop
-    /** enable_warp. */
-    val enableWarp: Boolean = false,
     /** warp_mode: "wireguard", "amnezia" (the WireGuard identity as AmneziaWG) or "masque". */
     val warpMode: String = "wireguard",
     /** warp_ep, warp_private_key, warp_public_key, warp_ifc_addrs, warp_reserved (decimal strings). */
@@ -186,5 +190,29 @@ data class GeneratorSettings(
         @JvmStatic
         fun splitLines(text: String): List<String> =
             text.lines().map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }
+    }
+}
+
+/**
+ * Configs::ExitThrough (ExitThrough.h): the stored [value] and the synthetic profile id each exit's traffic is counted
+ * under; every exit but [SERVER] wraps the selected profile. [displayName] is a proper name, never translated.
+ */
+enum class ExitThrough(val value: String, val profileId: Long, val displayName: String) {
+    SERVER("server", 0L, ""),
+    WARP("warp", WarpHop.PROFILE_ID, "Cloudflare WARP"),
+    TOR("tor", -2409L, "Tor"),
+    PSIPHON("psiphon", -2410L, "Psiphon");
+
+    companion object {
+        /** Unknown values, and none, read as [SERVER]. */
+        @JvmStatic
+        fun of(value: String?): ExitThrough = entries.firstOrNull { it.value == value } ?: SERVER
+
+        /** psiphonRegions (psiphon.h): what Psiphon offered when the desktop last shipped, as uppercase codes. */
+        @JvmField
+        val PSIPHON_REGIONS: List<String> = listOf(
+            "AT", "AU", "BE", "CA", "CH", "CZ", "DE", "DK", "ES", "FI", "FR", "GB", "ID",
+            "IE", "IN", "IT", "JP", "LT", "NL", "NO", "PL", "RO", "RS", "SE", "SG", "US",
+        )
     }
 }

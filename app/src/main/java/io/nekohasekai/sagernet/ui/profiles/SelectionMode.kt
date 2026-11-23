@@ -1,8 +1,17 @@
 package io.nekohasekai.sagernet.ui.profiles
 
+import android.content.Context
+import android.content.Intent
+import android.text.InputType
 import android.view.MenuItem
+import android.widget.FrameLayout
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.bg.test.TestSpec
@@ -10,12 +19,20 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
+import io.nekohasekai.sagernet.database.ProxyGroup
+import io.nekohasekai.sagernet.group.SubscriptionClient
 import io.nekohasekai.sagernet.ktx.confirmAction
+import io.nekohasekai.sagernet.ktx.dp2px
 import io.nekohasekai.sagernet.ktx.nameList
+import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ktx.showAllowingStateLoss
 import io.nekohasekai.sagernet.ktx.snackbar
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
+import io.nekohasekai.sagernet.ui.GroupSettingsActivity
+import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.widget.QRCodeDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * Multi-selection in the current tab (the desktop's selected rows): long press starts it, taps toggle, the toolbar
@@ -185,7 +202,7 @@ class SelectionMode(private val host: ConfigurationFragment) {
             return
         }
         val title = host.resources.getQuantityString(R.plurals.confirm_remove_profiles, ids.size, ids.size)
-        confirm(ids, title, R.string.delete, run)
+        confirm(ids, title, R.string.delete, deleting = true, run = run)
     }
 
     private fun clearResults(ids: List<Long>) {
@@ -199,43 +216,39 @@ class SelectionMode(private val host: ConfigurationFragment) {
         }
     }
 
-    /** [title] above the names of [ids] in list order. */
-    private fun confirm(ids: List<Long>, title: String, @StringRes action: Int, run: () -> Unit) {
+    /** [title] above the names of [ids] in list order; [deleting] adds the groups that lose one as front/landing proxy. */
+    private fun confirm(ids: List<Long>, title: String, @StringRes action: Int, deleting: Boolean = false, run: () -> Unit) {
         host.launchIo {
             // only the names the dialog shows are parsed
             val shown = ids.take(10)
             val position = shown.withIndex().associate { it.value to it.index }
             val names = ProfileManager.getProfiles(shown).sortedBy { position[it.id] }.map { it.displayName() }
+            val warning = if (deleting) GroupRepo.hopWarning(ids) else ""
             host.onUi {
                 val context = requireContext()
-                context.confirmAction(title, context.nameList(names, total = ids.size), action, run)
+                context.confirmAction(title, context.nameList(names, total = ids.size) + warning, action, run)
             }
         }
     }
 
-    /** Android extra: to the end of another basic group (as the profile editor's "Move"). */
+    /** on_menu_move_to_group: to the end of another group (as the profile editor's "Move"), ProfileService::MoveToGroup. */
     private fun moveToGroup(ids: List<Long>) {
-        val targets = host.groups().filter { !it.isSubscription && it.id != groupId }
-        if (targets.isEmpty()) {
-            host.snackbar(R.string.profiles_move_no_target).show()
-            return
-        }
-        MaterialAlertDialogBuilder(host.requireContext())
-            .setTitle(R.string.profiles_move_to_group)
-            .setItems(targets.map { it.displayName() }.toTypedArray()) { _, which ->
-                val target = targets[which]
-                finish()
-                host.launchIo {
-                    ProfileManager.moveToGroup(ids, target.id)
-                    host.onUi {
-                        snackbar(
-                            resources.getQuantityString(R.plurals.profiles_moved, ids.size, ids.size, target.displayName())
-                        ).show()
-                    }
+        val activity = host.activity ?: return
+        val scope = host.viewLifecycleOwner.lifecycleScope
+        pickMoveTarget(activity, scope, host.groups(), groupId) { target, created ->
+            val outcome = ProfileManager.moveToGroup(ids, target.id, SubscriptionClient.states.value.keys)
+            host.onUi {
+                val refusal = outcome.refusal
+                if (refusal == null) {
+                    this@SelectionMode.finish()
+                    if (created) SelectionMode.editGroup(requireContext(), target)
                 }
+                snackbar(
+                    if (refusal != null) SubscriptionClient.refusalText(refusal, move = true)
+                    else resources.getQuantityString(R.plurals.profiles_moved, outcome.moved, outcome.moved, target.displayName())
+                ).show()
             }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        }
     }
 
     /** on_menu_copy_links (share link, the Throne link when there is none) / on_menu_copy_links_nkr. */
@@ -283,5 +296,89 @@ class SelectionMode(private val host: ConfigurationFragment) {
             if (copied) resources.getQuantityString(R.plurals.profiles_copied, links.size, links.size)
             else getString(R.string.action_export_err)
         ).show()
+    }
+
+    companion object {
+
+        /**
+         * The "Move to group" menu (mainwindow_menus.cpp): the [groups] a move may target (not [sourceGid], not archived,
+         * not a subscription), then "New group", which asks for a name and adds a basic group. [onPicked] gets the
+         * target off the main thread, and whether "New group" just created it. The subscription queue's states are
+         * watched from the menu on (within [scope]), so the move knows which groups are updating.
+         */
+        fun pickMoveTarget(
+            activity: FragmentActivity,
+            scope: CoroutineScope,
+            groups: List<ProxyGroup>,
+            sourceGid: Long,
+            onPicked: suspend (target: ProxyGroup, created: Boolean) -> Unit,
+        ) {
+            val targets = groups.filter { it.id != sourceGid && !it.archive && !it.isSubscription }
+            val watch = scope.launch { SubscriptionClient.states.collect {} }
+            var picked = false
+            fun pick(created: Boolean, target: suspend () -> ProxyGroup) = runOnDefaultDispatcher {
+                try {
+                    onPicked(target(), created)
+                } finally {
+                    watch.cancel()
+                }
+            }
+            val names = targets.map { it.displayName() } + activity.getString(R.string.grp_new_group)
+            MaterialAlertDialogBuilder(activity)
+                .setTitle(R.string.profiles_move_to_group)
+                .setItems(names.toTypedArray()) { _, which ->
+                    picked = true
+                    if (which < targets.size) {
+                        pick(created = false) { targets[which] }
+                    } else {
+                        askGroupName(activity, onCancel = { watch.cancel() }) { name ->
+                            pick(created = true) { GroupRepo.add(ProxyGroup(name = name)) }
+                        }
+                    }
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .setOnDismissListener { if (!picked) watch.cancel() }
+                .show()
+        }
+
+        /** The editor of a group "New group" created, for what its name prompt does not ask (DialogEditGroup). */
+        fun editGroup(context: Context, group: ProxyGroup) {
+            context.startActivity(
+                Intent(context, GroupSettingsActivity::class.java).putExtra(GroupSettingsActivity.EXTRA_GROUP_ID, group.id)
+            )
+        }
+
+        /** DialogEditGroup's name for a new basic group; [onName] gets it trimmed, never blank. */
+        private fun askGroupName(activity: FragmentActivity, onCancel: () -> Unit, onName: (String) -> Unit) {
+            val layout = TextInputLayout(activity).apply { hint = activity.getString(R.string.grp_name) }
+            val input = TextInputEditText(layout.context).apply {
+                inputType = InputType.TYPE_CLASS_TEXT
+                isSingleLine = true
+            }
+            layout.addView(input)
+            val container = FrameLayout(activity).apply {
+                setPadding(dp2px(20), dp2px(12), dp2px(20), 0)
+                addView(layout)
+            }
+            var named = false
+            val dialog = MaterialAlertDialogBuilder(activity)
+                .setTitle(R.string.grp_new_group)
+                .setView(container)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setOnDismissListener { if (!named) onCancel() }
+                .show()
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val name = input.text?.toString()?.trim().orEmpty()
+                val problem = Validation.required(name)
+                if (problem.isNotEmpty()) {
+                    layout.error = problem
+                    return@setOnClickListener
+                }
+                named = true
+                dialog.dismiss()
+                onName(name)
+            }
+        }
     }
 }

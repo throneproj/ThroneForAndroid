@@ -17,6 +17,7 @@ import io.nekohasekai.sagernet.outbound.import.ClashProxy
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
+import io.nekohasekai.sagernet.outbound.link.Base64Strict
 import io.nekohasekai.sagernet.outbound.link.LinkBuilder
 import io.nekohasekai.sagernet.outbound.link.LinkParser
 import io.nekohasekai.sagernet.validation.Issue
@@ -32,7 +33,10 @@ val xrayFlows = listOf("xtls-rprx-vision", "xtls-rprx-vision-udp443")
 
 /** The Checks of xrayVless.h. */
 object XrayVlessChecks {
-    /** Xray infra/conf/vless.go: "none" or mlkem768x25519plus.<native|xorpub|random>.<1rtt|0rtt>.<parts>, parts of 20+ chars being keys. */
+    /**
+     * "none" or mlkem768x25519plus.<native|xorpub|random>.<1rtt|0rtt>.<padding>.<keys>. Also runs the key and padding checks
+     * Xray leaves to outbound start, where one bad string fails the whole instance (Throne #2165).
+     */
     @JvmStatic
     fun xrayVlessEncryption(encryption: String): String {
         if (encryption.isEmpty()) return vtr(R.string.validation_xray_vless_encryption_none)
@@ -41,12 +45,58 @@ object XrayVlessChecks {
         if (parts.size < 4 || parts[0] != "mlkem768x25519plus") return vtr(R.string.validation_xray_vless_encryption_format)
         if (parts[1] != "native" && parts[1] != "xorpub" && parts[1] != "random") return vtr(R.string.validation_xray_vless_encryption_mode)
         if (parts[2] != "1rtt" && parts[2] != "0rtt") return vtr(R.string.validation_xray_vless_encryption_rtt)
-        // Shorter parts are padding specs.
+        // Parts under 20 characters are padding; Xray cuts their total length off the front, so they must lead.
+        val padding = ArrayList<String>()
+        var keys = 0
         for (i in 3 until parts.size) {
-            if (parts[i].length < 20) continue
-            if (Validation.base64Key(parts[i], 32, true, false).isEmpty() || Validation.base64Key(parts[i], 1184, true, false).isEmpty()) continue
-            return vtr(R.string.validation_xray_vless_encryption_key)
+            if (parts[i].length < 20) {
+                if (keys > 0) return vtr(R.string.validation_xray_vless_encryption_padding_order)
+                padding.add(parts[i])
+                continue
+            }
+            keys++
+            if (Validation.base64Key(parts[i], 32, true, false).isEmpty()) continue
+            if (Validation.base64Key(parts[i], 1184, true, false).isNotEmpty()) return vtr(R.string.validation_xray_vless_encryption_key)
+            if (!mlkem768KeyValid(Base64Strict.decode(parts[i].trim(), urlSafe = true))) return vtr(R.string.validation_xray_vless_encryption_mlkem)
         }
+        if (keys == 0) return vtr(R.string.validation_xray_vless_encryption_no_key)
+        return xrayVlessPaddingProblem(padding)
+    }
+
+    /** FIPS 203 modulus check, as Go's mlkem.NewEncapsulationKey768: the first 1152 bytes pack 768 12-bit coefficients, each below q. */
+    private fun mlkem768KeyValid(key: ByteArray?): Boolean {
+        val q = 3329
+        if (key == null || key.size != 1184) return false
+        for (i in 0 until 1152 step 3) {
+            val b0 = key[i].toInt() and 0xFF
+            val b1 = key[i + 1].toInt() and 0xFF
+            val b2 = key[i + 2].toInt() and 0xFF
+            if ((b0 or ((b1 and 0x0F) shl 8)) >= q || ((b1 shr 4) or (b2 shl 4)) >= q) return false
+        }
+        return true
+    }
+
+    /** strconv.Atoi: digits with an optional sign, and '-' is the separator here. */
+    private fun xrayPaddingNumber(text: String): Long? {
+        val digits = text.removePrefix("+")
+        if (digits.isEmpty() || digits.any { it !in '0'..'9' }) return null
+        return digits.toLongOrNull()
+    }
+
+    /** Xray's ParsePadding: parts alternate chance-min-max lengths and gaps; only lengths count toward the cap. */
+    private fun xrayVlessPaddingProblem(padding: List<String>): String {
+        val maxTotal = 18L + 65535L
+        var total = 0L
+        for ((i, part) in padding.withIndex()) {
+            val fields = part.split('-')
+            val y = LongArray(3)
+            for (j in 0 until 3) {
+                y[j] = fields.getOrNull(j)?.let { xrayPaddingNumber(it) } ?: return vtr(R.string.validation_xray_vless_padding_format)
+            }
+            if (i == 0 && (y[0] < 100 || y[1] < 18 + 17 || y[2] < 18 + 17)) return vtr(R.string.validation_xray_vless_padding_first)
+            if (i % 2 == 0) total = minOf(total + minOf(maxOf(y[1], y[2]), maxTotal + 1), maxTotal + 1)
+        }
+        if (total > maxTotal) return vtr(R.string.validation_xray_vless_padding_total)
         return ""
     }
 

@@ -4,8 +4,9 @@ package io.nekohasekai.sagernet.database.backup
  * The tables of a fresh desktop `throne.db` (Throne @ 31a6562b, plus ccf3b459's `groups.sub_metadata_json`, 6906912f's
  * `groups.sort_method` / `sort_descending`, a6d042c2's `route_rules.tls_fragment` / `tls_fragment_fallback_delay` /
  * `tls_record_fragment`, 23b5bfcb's `route_rules.disabled`, 67261f7d's `route_profiles.dns_json` / `custom_dns` and
- * 3c7cab39's `groups.route_id` / `import_sub_route` and `route_profiles.source_gid`, 35abd923's `groups.pinned_json`
- * and 6e2063c4's `profiles.service_checks`; the later `groups.endpoint_json` of 1809cb0e is not carried), created in
+ * 3c7cab39's `groups.route_id` / `import_sub_route` and `route_profiles.source_gid`, 35abd923's `groups.pinned_json`,
+ * 6e2063c4's `profiles.service_checks`, 1c4d920a's `groups.show_services` and 870c720b's `route_profiles.remote_rules`;
+ * the later `groups.endpoint_json` of 1809cb0e is not carried), created in
  * DatabaseManager.cpp:65-128 order:
  * `entity_ids` (DatabaseManager.cpp:83-110), ProfilesRepo.cpp:17-43, GroupsRepo.cpp:19-56, RoutesRepo.cpp:13-106,
  * OtpProfilesRepo.cpp:10-29, SettingsRepo.cpp:222-229, MarkersRepo.cpp:8-15. Update together with the desktop.
@@ -82,6 +83,7 @@ object DesktopSchema {
             route_id INTEGER NOT NULL DEFAULT -1,
             import_sub_route INTEGER NOT NULL DEFAULT 0,
             pinned_json TEXT NOT NULL DEFAULT '[]',
+            show_services INTEGER NOT NULL DEFAULT 1,
             created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
             updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         )
@@ -109,6 +111,7 @@ object DesktopSchema {
             dns_json TEXT NOT NULL DEFAULT '',
             custom_dns INTEGER NOT NULL DEFAULT 0,
             source_gid INTEGER NOT NULL DEFAULT -1,
+            remote_rules TEXT,
             created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
             updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         )

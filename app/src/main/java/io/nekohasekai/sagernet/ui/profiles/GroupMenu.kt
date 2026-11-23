@@ -6,6 +6,7 @@ import android.view.View
 import androidx.core.view.MenuCompat
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.bg.test.TestSpec
+import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.GroupSortMethod
 import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.TestBy
@@ -27,6 +28,7 @@ class GroupMenu(private val host: ConfigurationFragment) {
         keepOpen(menu, R.id.action_sort_descending) { setDirection(it, true) }
         keepOpen(menu, R.id.action_show_out_ip) { toggleShown(menu, it) }
         keepOpen(menu, R.id.action_show_speed) { toggleShown(menu, it) }
+        keepOpen(menu, R.id.action_show_services) { toggleServices(it) }
     }
 
     /**
@@ -78,6 +80,16 @@ class GroupMenu(private val host: ConfigurationFragment) {
         )
     }
 
+    /** The Exit IP column header menu's "Services" (groups.show_services): the rows' service icons. */
+    private fun toggleServices(item: MenuItem) {
+        item.isChecked = !item.isChecked
+        val groupId = host.currentGroup()?.id ?: return
+        val shown = item.isChecked
+        host.launchIo {
+            GroupFields.update(groupId) { it.showServices = shown }?.let { GroupRepo.postUpdate(it) }
+        }
+    }
+
     /** Before the ⋮ menu opens: what applies to the current group and the running test / service. */
     fun prepare(menu: Menu) {
         val group = host.currentGroup()
@@ -105,6 +117,7 @@ class GroupMenu(private val host: ConfigurationFragment) {
             val shown = TestShowItems.of(group.testItemsToShow)
             menu.findItem(R.id.action_show_out_ip)?.isChecked = shown.showIp
             menu.findItem(R.id.action_show_speed)?.isChecked = shown.showSpeed
+            menu.findItem(R.id.action_show_services)?.isChecked = group.showServices
         }
     }
 
