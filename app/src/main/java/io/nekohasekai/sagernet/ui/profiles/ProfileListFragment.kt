@@ -34,6 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
+import io.nekohasekai.sagernet.ktx.scrollToPositionAnimated
 
 /** One tab of the profiles screen: the profiles of one group. */
 class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
@@ -255,9 +256,9 @@ class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
         val layoutManager = list.layoutManager as? LinearLayoutManager ?: return
         val index = adapter.displayedIds.indexOf(profileId)
         if (index >= 0 && index !in layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()) {
-            list.smoothScrollToPosition(index)
+            list.scrollToPositionAnimated(index)
         } else {
-            list.smoothScrollToPosition(0)
+            list.scrollToPositionAnimated(0)
         }
     }
 
@@ -267,7 +268,7 @@ class ProfileListFragment : Fragment(R.layout.layout_profile_list) {
         val index = adapter.displayedIds.indexOf(profileId)
         if (index < 0) return
         if (index in layoutManager.findFirstVisibleItemPosition()..layoutManager.findLastVisibleItemPosition()) {
-            list.smoothScrollToPosition(index)
+            list.scrollToPositionAnimated(index)
         } else {
             layoutManager.scrollToPositionWithOffset(index, 0)
         }

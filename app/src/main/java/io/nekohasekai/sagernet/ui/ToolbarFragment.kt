@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.GravityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.AppBarLayout
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.utils.Theme
 import io.nekohasekai.sagernet.widget.applyTopInset
+import io.nekohasekai.sagernet.ktx.openNavigation
 
 open class ToolbarFragment : Fragment {
 
@@ -34,7 +34,7 @@ open class ToolbarFragment : Fragment {
             }
         }
         toolbar?.setNavigationOnClickListener {
-            (activity as? MainActivity)?.binding?.drawerLayout?.openDrawer(GravityCompat.START)
+            (activity as? MainActivity)?.binding?.drawerLayout?.openNavigation()
         }
     }
 

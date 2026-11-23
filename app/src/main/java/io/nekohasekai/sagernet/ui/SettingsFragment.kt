@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
-import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
@@ -13,6 +12,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ui.settings.SettingsScreenFragment
 import io.nekohasekai.sagernet.utils.Theme
 import io.nekohasekai.sagernet.widget.applyListInsets
+import io.nekohasekai.sagernet.ktx.openNavigation
 
 /** Hosts the settings root and its sub-screens; back and the toolbar arrow return to the previous screen. */
 class SettingsFragment : ToolbarFragment(R.layout.layout_config_settings),
@@ -107,7 +107,7 @@ class SettingsFragment : ToolbarFragment(R.layout.layout_config_settings),
             toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
             toolbar.setNavigationContentDescription(R.string.navigation_open_drawer)
             toolbar.setNavigationOnClickListener {
-                (activity as? MainActivity)?.binding?.drawerLayout?.openDrawer(GravityCompat.START)
+                (activity as? MainActivity)?.binding?.drawerLayout?.openNavigation()
             }
         }
         // White theme: the toolbar is white, so the navigation icon turns dark

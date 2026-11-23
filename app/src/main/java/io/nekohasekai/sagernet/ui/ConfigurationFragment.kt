@@ -17,7 +17,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -68,6 +67,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import io.nekohasekai.sagernet.ktx.animationsEnabled
+import io.nekohasekai.sagernet.ktx.openNavigation
 
 /**
  * The profiles screen: one tab per group in `display_order` (the desktop main window's group tabs), the current tab is
@@ -251,7 +252,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         pager.adapter = pagerAdapter
         pager.offscreenPageLimit = 2
         applyGroups(GroupRepo.all(), initialGroupId())
-        mediator = TabLayoutMediator(tabLayout, pager) { tab, position ->
+        mediator = TabLayoutMediator(tabLayout, pager, true, animationsEnabled()) { tab, position ->
             pagerAdapter.groups.getOrNull(position)?.let { tab.text = tabLabel(it) }
             tab.view.setOnLongClickListener {
                 if (!select) pagerAdapter.groups.getOrNull(tab.position)?.let(::editGroup)
@@ -370,7 +371,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
                 if (selection.active) {
                     selection.finish()
                 } else {
-                    (activity as? MainActivity)?.binding?.drawerLayout?.openDrawer(GravityCompat.START)
+                    (activity as? MainActivity)?.binding?.drawerLayout?.openNavigation()
                 }
             }
         }

@@ -63,6 +63,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.IdentityHashMap
+import io.nekohasekai.sagernet.ktx.scrollToPositionAnimated
 
 /**
  * A route profile: name, default outbound, the remote source of a remote profile, its DNS, and the ordered rule list
@@ -293,7 +294,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
                 headerAdapter.itemCount + dnsAdapter.itemCount + rawAdapter.itemCount + titleAdapter.itemCount + index
             }
         }
-        list.smoothScrollToPosition(position)
+        list.scrollToPositionAnimated(position)
     }
 
     private fun nameRules(p: RouteProfile) {
@@ -514,7 +515,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
                     p.rules.add(rule)
                     rulesAdapter.notifyItemInserted(p.rules.size - 1)
                     countChanged()
-                    list.post { list.smoothScrollToPosition(list.adapter!!.itemCount - 1) }
+                    list.post { list.scrollToPositionAnimated(list.adapter!!.itemCount - 1) }
                 }
                 markDirty()
                 resolveNames(rule)

@@ -66,6 +66,8 @@ import androidx.drawerlayout.widget.DrawerLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import io.nekohasekai.sagernet.ktx.closeNavigation
+import io.nekohasekai.sagernet.ktx.openNavigation
 
 class MainActivity : ThemedActivity(),
     SagerConnection.Callback,
@@ -339,7 +341,7 @@ class MainActivity : ThemedActivity(),
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        if (item.isChecked) binding.drawerLayout.closeDrawers() else {
+        if (item.isChecked) binding.drawerLayout.closeNavigation() else {
             return displayFragmentWithId(item.itemId)
         }
         return true
@@ -352,7 +354,7 @@ class MainActivity : ThemedActivity(),
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_holder, fragment)
             .commitAllowingStateLoss()
-        binding.drawerLayout.closeDrawers()
+        binding.drawerLayout.closeNavigation()
         syncMainControls(fragment, showWhenConnected = false, animate = true)
     }
 
@@ -657,7 +659,7 @@ class MainActivity : ThemedActivity(),
                 // Row buttons, grid columns, tabs and toolbar items come first; the drawer opens at the edge.
                 val direction = if (rtl) View.FOCUS_RIGHT else View.FOCUS_LEFT
                 if (!binding.drawerLayout.isOpen && screenFocusTarget(direction) == null) {
-                    binding.drawerLayout.open()
+                    binding.drawerLayout.openNavigation()
                     navigation.requestFocus()
                     return true
                 }
@@ -665,7 +667,7 @@ class MainActivity : ThemedActivity(),
 
             awayFromDrawer -> {
                 if (binding.drawerLayout.isOpen) {
-                    binding.drawerLayout.close()
+                    binding.drawerLayout.closeNavigation()
                     return true
                 }
             }
