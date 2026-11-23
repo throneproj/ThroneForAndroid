@@ -3008,6 +3008,23 @@
     <string name="autosel_notice_exhausted_upstream">Every running profile stopped working through the hops in front of it — rebuilding with the next candidates.</string>
     <string name="validation_route_outbound_chain_selector">Routing rules cannot use the chain \"%1$s\": it holds an auto selector, so it can only be started. Pick another outbound.</string>
     <string name="route_outbound_chain_selector">The routing profile sends traffic to %1$s, which holds an auto selector; such a chain can only be started, not used in routing rules</string>
+    <string name="grp_filter_countries">Countries</string>
+    <string name="grp_filter_countries_tip">Exit countries to keep, e.g. HK,JP, or to remove, e.g. !RU.</string>
+    <string name="grp_filter_countries_hint">e.g. HK,JP or !RU</string>
+    <string name="grp_filter_countries_keeps">Keeps %1$s.</string>
+    <string name="grp_filter_countries_removes">Removes %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">After each update, profiles whose exit country is unknown get an exit IP test, so the next update can test up to %1$d profile. On a large group this takes a while.</item>
+        <item quantity="other">After each update, profiles whose exit country is unknown get an exit IP test, so the next update can test up to %1$d profiles. On a large group this takes a while.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">After each update, profiles whose exit country is unknown get an exit IP test. On a large subscription this takes a while.</string>
+    <string name="validation_country_rules">Not a two-letter country code: %1$s. Use codes such as HK,JP to keep only those countries, or !RU to remove one.</string>
+    <string name="subs_filter_bad_countries">Not a two-letter country code, ignored: %1$s</string>
+    <string name="subs_country_none_accepted">The country rules accept none of the %1$d tested profiles, so none were removed.</string>
+    <string name="subs_removed_countries">Removed %1$d profiles outside the country rules:</string>
+    <string name="subs_country_testing">Testing the exit country of %1$d profiles of %2$s for its country rules. On a large group this takes a while.</string>
+    <string name="subs_country_untested_kept">%1$d profiles without a test result were kept; the next update tests them again.</string>
+    <string name="subs_after_country_test">After the country test of %1$s:</string>
     <string name="channel_vpn_sign_in">VPN sign-in</string>
     <string name="vpn_auth_notification_title">%1$s: sign-in required</string>
     <string name="vpn_auth_notification_text">Tap to sign in.</string>

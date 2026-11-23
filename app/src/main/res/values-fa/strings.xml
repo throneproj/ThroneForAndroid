@@ -2806,6 +2806,23 @@
     <string name="autosel_notice_exhausted_upstream">همه پروفایل‌های در حال اجرا از طریق گام‌های جلوی آن از کار افتادند — بازسازی با نامزدهای بعدی.</string>
     <string name="validation_route_outbound_chain_selector">قوانین مسیریابی نمی‌توانند از زنجیره \"%1$s\" استفاده کنند: این زنجیره یک انتخابگر خودکار دارد، پس فقط قابل اجراست. خروجی دیگری انتخاب کنید.</string>
     <string name="route_outbound_chain_selector">پروفایل مسیریابی ترافیک را به %1$s می‌فرستد که یک انتخابگر خودکار دارد؛ چنین زنجیره‌ای فقط قابل اجراست و نمی‌توان آن را در قوانین مسیریابی به کار برد</string>
+    <string name="grp_filter_countries">کشورها</string>
+    <string name="grp_filter_countries_tip">کشورهای خروجی برای نگه داشتن (مثلاً HK,JP) یا حذف (مثلاً !RU).</string>
+    <string name="grp_filter_countries_hint">مثلاً HK,JP یا !RU</string>
+    <string name="grp_filter_countries_keeps">%1$s را نگه می‌دارد.</string>
+    <string name="grp_filter_countries_removes">%1$s را حذف می‌کند.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">پس از هر به‌روزرسانی، پروفایل‌هایی که کشور خروجی‌شان نامعلوم است آزمایش IP خروجی می‌شوند، بنابراین به‌روزرسانی بعدی ممکن است تا %1$d پروفایل را آزمایش کند. در یک گروه بزرگ این کار مدتی طول می‌کشد.</item>
+        <item quantity="other">پس از هر به‌روزرسانی، پروفایل‌هایی که کشور خروجی‌شان نامعلوم است آزمایش IP خروجی می‌شوند، بنابراین به‌روزرسانی بعدی ممکن است تا %1$d پروفایل را آزمایش کند. در یک گروه بزرگ این کار مدتی طول می‌کشد.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">پس از هر به‌روزرسانی، پروفایل‌هایی که کشور خروجی‌شان نامعلوم است آزمایش IP خروجی می‌شوند. در یک اشتراک بزرگ این کار مدتی طول می‌کشد.</string>
+    <string name="validation_country_rules">کد دوحرفی کشور نیست: %1$s. برای نگه داشتن فقط همان کشورها از کدهایی مانند HK,JP، یا برای حذف یک کشور از !RU استفاده کنید.</string>
+    <string name="subs_filter_bad_countries">کد دوحرفی کشور نیست، نادیده گرفته شد: %1$s</string>
+    <string name="subs_country_none_accepted">قوانین کشور هیچ‌یک از %1$d پروفایل آزمایش‌شده را نمی‌پذیرند، بنابراین هیچ پروفایلی حذف نشد.</string>
+    <string name="subs_removed_countries">%1$d پروفایل خارج از قوانین کشور حذف شد:</string>
+    <string name="subs_country_testing">در حال آزمایش کشور خروجی %1$d پروفایل از %2$s برای قوانین کشور آن. در یک گروه بزرگ این کار مدتی طول می‌کشد.</string>
+    <string name="subs_country_untested_kept">%1$d پروفایل بدون نتیجهٔ آزمایش نگه داشته شد؛ به‌روزرسانی بعدی دوباره آن‌ها را آزمایش می‌کند.</string>
+    <string name="subs_after_country_test">پس از آزمایش کشور %1$s:</string>
     <string name="channel_vpn_sign_in">ورود به VPN</string>
     <string name="vpn_auth_notification_title">%1$s: ورود لازم است</string>
     <string name="vpn_auth_notification_text">برای ورود ضربه بزنید.</string>

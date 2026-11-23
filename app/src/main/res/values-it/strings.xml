@@ -2793,6 +2793,24 @@
     <string name="autosel_notice_exhausted_upstream">Ogni profilo in esecuzione ha smesso di funzionare attraverso gli hop davanti a esso, ricostruzione con i candidati successivi.</string>
     <string name="validation_route_outbound_chain_selector">Le regole di instradamento non possono usare la catena \"%1$s\": contiene un selettore automatico, quindi può solo essere avviata. Scegli un altro outbound.</string>
     <string name="route_outbound_chain_selector">Il profilo di instradamento invia traffico a %1$s, che contiene un selettore automatico; una catena del genere può solo essere avviata, non usata nelle regole di instradamento</string>
+    <string name="grp_filter_countries">Paesi</string>
+    <string name="grp_filter_countries_tip">Paesi di uscita da conservare, ad es. HK,JP, o da rimuovere, ad es. !RU.</string>
+    <string name="grp_filter_countries_hint">ad es. HK,JP o !RU</string>
+    <string name="grp_filter_countries_keeps">Conserva %1$s.</string>
+    <string name="grp_filter_countries_removes">Rimuove %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">Dopo ogni aggiornamento, i profili con paese di uscita sconosciuto ricevono un test dell\'IP di uscita, quindi il prossimo aggiornamento può testare fino a %1$d profilo. Su un gruppo grande richiede un po\' di tempo.</item>
+        <item quantity="many">Dopo ogni aggiornamento, i profili con paese di uscita sconosciuto ricevono un test dell\'IP di uscita, quindi il prossimo aggiornamento può testare fino a %1$d profili. Su un gruppo grande richiede un po\' di tempo.</item>
+        <item quantity="other">Dopo ogni aggiornamento, i profili con paese di uscita sconosciuto ricevono un test dell\'IP di uscita, quindi il prossimo aggiornamento può testare fino a %1$d profili. Su un gruppo grande richiede un po\' di tempo.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">Dopo ogni aggiornamento, i profili con paese di uscita sconosciuto ricevono un test dell\'IP di uscita. Su un abbonamento grande richiede un po\' di tempo.</string>
+    <string name="validation_country_rules">Non è un codice paese di due lettere: %1$s. Usa codici come HK,JP per conservare solo quei paesi, o !RU per rimuoverne uno.</string>
+    <string name="subs_filter_bad_countries">Non è un codice paese di due lettere, ignorato: %1$s</string>
+    <string name="subs_country_none_accepted">Le regole dei paesi non accettano nessuno dei %1$d profili testati, quindi non ne è stato rimosso nessuno.</string>
+    <string name="subs_removed_countries">Rimossi %1$d profili fuori dalle regole dei paesi:</string>
+    <string name="subs_country_testing">Test del paese di uscita di %1$d profili di %2$s per le sue regole dei paesi. Su un gruppo grande richiede un po\' di tempo.</string>
+    <string name="subs_country_untested_kept">Conservati %1$d profili senza risultato del test; il prossimo aggiornamento li testerà di nuovo.</string>
+    <string name="subs_after_country_test">Dopo il test dei paesi di %1$s:</string>
     <string name="channel_vpn_sign_in">Accesso VPN</string>
     <string name="vpn_auth_notification_title">%1$s: accesso richiesto</string>
     <string name="vpn_auth_notification_text">Tocca per accedere.</string>

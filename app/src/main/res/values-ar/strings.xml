@@ -2941,6 +2941,27 @@
     <string name="autosel_notice_exhausted_upstream">توقف كل ملف قيد التشغيل عن العمل عبر القفزات التي أمامه — إعادة البناء بالمرشحين التاليين.</string>
     <string name="validation_route_outbound_chain_selector">لا يمكن لقواعد التوجيه استخدام السلسلة «%1$s»: فهي تحتوي على منتقٍ تلقائي، لذا لا يمكن إلا تشغيلها. اختر صادرًا آخر.</string>
     <string name="route_outbound_chain_selector">يرسل ملف التوجيه حركة المرور إلى %1$s، الذي يحتوي على منتقٍ تلقائي؛ لا يمكن إلا تشغيل مثل هذه السلسلة، لا استخدامها في قواعد التوجيه</string>
+    <string name="grp_filter_countries">البلدان</string>
+    <string name="grp_filter_countries_tip">بلدان الخروج المراد إبقاؤها، مثل HK,JP، أو إزالتها، مثل !RU.</string>
+    <string name="grp_filter_countries_hint">مثلًا HK,JP أو !RU</string>
+    <string name="grp_filter_countries_keeps">يُبقي %1$s.</string>
+    <string name="grp_filter_countries_removes">يُزيل %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="zero">بعد كل تحديث، تخضع الملفات التي بلد خروجها غير معروف لاختبار IP الخروج، لذا قد يختبر التحديث التالي ما يصل إلى %1$d ملف. يستغرق هذا بعض الوقت في مجموعة كبيرة.</item>
+        <item quantity="one">بعد كل تحديث، تخضع الملفات التي بلد خروجها غير معروف لاختبار IP الخروج، لذا قد يختبر التحديث التالي ما يصل إلى %1$d ملف. يستغرق هذا بعض الوقت في مجموعة كبيرة.</item>
+        <item quantity="two">بعد كل تحديث، تخضع الملفات التي بلد خروجها غير معروف لاختبار IP الخروج، لذا قد يختبر التحديث التالي ما يصل إلى %1$d ملفين. يستغرق هذا بعض الوقت في مجموعة كبيرة.</item>
+        <item quantity="few">بعد كل تحديث، تخضع الملفات التي بلد خروجها غير معروف لاختبار IP الخروج، لذا قد يختبر التحديث التالي ما يصل إلى %1$d ملفات. يستغرق هذا بعض الوقت في مجموعة كبيرة.</item>
+        <item quantity="many">بعد كل تحديث، تخضع الملفات التي بلد خروجها غير معروف لاختبار IP الخروج، لذا قد يختبر التحديث التالي ما يصل إلى %1$d ملفًا. يستغرق هذا بعض الوقت في مجموعة كبيرة.</item>
+        <item quantity="other">بعد كل تحديث، تخضع الملفات التي بلد خروجها غير معروف لاختبار IP الخروج، لذا قد يختبر التحديث التالي ما يصل إلى %1$d ملف. يستغرق هذا بعض الوقت في مجموعة كبيرة.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">بعد كل تحديث، تخضع الملفات التي بلد خروجها غير معروف لاختبار IP الخروج. يستغرق هذا بعض الوقت في اشتراك كبير.</string>
+    <string name="validation_country_rules">ليس رمز بلد من حرفين: %1$s. استخدم رموزًا مثل HK,JP لإبقاء تلك البلدان فقط، أو !RU لإزالة بلد واحد.</string>
+    <string name="subs_filter_bad_countries">ليس رمز بلد من حرفين، تم تجاهله: %1$s</string>
+    <string name="subs_country_none_accepted">لا تقبل قواعد البلدان أيًّا من الملفات المختبرة (%1$d)، لذا لم يُزل أي منها.</string>
+    <string name="subs_removed_countries">أُزيل %1$d ملف خارج قواعد البلدان:</string>
+    <string name="subs_country_testing">جارٍ اختبار بلد الخروج لـ %1$d ملف من %2$s وفق قواعد البلدان الخاصة به. يستغرق هذا بعض الوقت في مجموعة كبيرة.</string>
+    <string name="subs_country_untested_kept">أُبقي %1$d ملف بلا نتيجة اختبار؛ سيختبرها التحديث التالي مجددًا.</string>
+    <string name="subs_after_country_test">بعد اختبار البلد لـ %1$s:</string>
     <string name="channel_vpn_sign_in">تسجيل الدخول إلى VPN</string>
     <string name="vpn_auth_notification_title">%1$s: يلزم تسجيل الدخول</string>
     <string name="vpn_auth_notification_text">انقر لتسجيل الدخول.</string>

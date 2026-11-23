@@ -2748,6 +2748,22 @@
     <string name="autosel_notice_exhausted_upstream">稼働中のすべてのプロファイルが手前のホップ経由で停止 — 次の候補で再構築します。</string>
     <string name="validation_route_outbound_chain_selector">ルーティングルールではチェーン「%1$s」を使用できません：自動選択を含むため、起動することしかできません。別のアウトバウンドを選んでください。</string>
     <string name="route_outbound_chain_selector">ルーティングプロファイルが自動選択を含む %1$s にトラフィックを送っています。このようなチェーンは起動のみ可能で、ルーティングルールでは使用できません</string>
+    <string name="grp_filter_countries">国</string>
+    <string name="grp_filter_countries_tip">残す出口の国（例: HK,JP）、または除外する国（例: !RU）。</string>
+    <string name="grp_filter_countries_hint">例: HK,JP または !RU</string>
+    <string name="grp_filter_countries_keeps">%1$s を残します。</string>
+    <string name="grp_filter_countries_removes">%1$s を除外します。</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="other">更新のたびに、出口の国が不明なプロファイルに出口 IP テストを行うため、次回の更新では最大 %1$d 件のプロファイルをテストする場合があります。大きなグループでは時間がかかります。</item>
+    </plurals>
+    <string name="grp_filter_countries_test">更新のたびに、出口の国が不明なプロファイルに出口 IP テストを行います。大きな購読では時間がかかります。</string>
+    <string name="validation_country_rules">2 文字の国コードではありません: %1$s。HK,JP のようなコードでその国だけを残すか、!RU で 1 つの国を除外してください。</string>
+    <string name="subs_filter_bad_countries">2 文字の国コードではないため無視しました: %1$s</string>
+    <string name="subs_country_none_accepted">国ルールはテスト済みの %1$d 件のプロファイルをどれも受け入れないため、何も削除しませんでした。</string>
+    <string name="subs_removed_countries">国ルールに合わないプロファイル %1$d 件を削除：</string>
+    <string name="subs_country_testing">%2$s の国ルールのため、%1$d 件のプロファイルの出口の国をテストしています。大きなグループでは時間がかかります。</string>
+    <string name="subs_country_untested_kept">テスト結果のないプロファイル %1$d 件は保持しました。次回の更新で再度テストします。</string>
+    <string name="subs_after_country_test">%1$s の国テストの後：</string>
     <string name="channel_vpn_sign_in">VPN サインイン</string>
     <string name="vpn_auth_notification_title">%1$s: サインインが必要です</string>
     <string name="vpn_auth_notification_text">タップしてサインインします。</string>

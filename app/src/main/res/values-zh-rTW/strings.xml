@@ -2760,6 +2760,22 @@
     <string name="autosel_notice_exhausted_upstream">所有執行中的配置經由其前方的跳點都停止工作——正以下一批候選重建。</string>
     <string name="validation_route_outbound_chain_selector">路由規則無法使用鏈結「%1$s」：其中包含自動選擇，因此只能被啟動。請選擇其他出站。</string>
     <string name="route_outbound_chain_selector">路由設定檔將流量傳送到 %1$s，而它包含自動選擇；這樣的鏈結只能被啟動，不能用於路由規則</string>
+    <string name="grp_filter_countries">國家/地區</string>
+    <string name="grp_filter_countries_tip">要保留（例如 HK,JP）或移除（例如 !RU）的出口國家/地區。</string>
+    <string name="grp_filter_countries_hint">例如 HK,JP 或 !RU</string>
+    <string name="grp_filter_countries_keeps">保留 %1$s。</string>
+    <string name="grp_filter_countries_removes">移除 %1$s。</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="other">每次更新後，出口國家/地區未知的配置會進行出口 IP 測試，因此下次更新最多可能測試 %1$d 個配置。群組較大時需要一段時間。</item>
+    </plurals>
+    <string name="grp_filter_countries_test">每次更新後，出口國家/地區未知的配置會進行出口 IP 測試。訂閱較大時需要一段時間。</string>
+    <string name="validation_country_rules">不是兩字母國家/地區代碼：%1$s。使用 HK,JP 之類的代碼僅保留這些國家/地區，或使用 !RU 移除一個。</string>
+    <string name="subs_filter_bad_countries">不是兩字母國家/地區代碼，已忽略：%1$s</string>
+    <string name="subs_country_none_accepted">國家/地區規則不接受已測試的 %1$d 個配置中的任何一個，因此未移除任何配置。</string>
+    <string name="subs_removed_countries">已移除 %1$d 個不符合國家/地區規則的配置：</string>
+    <string name="subs_country_testing">正在為 %2$s 的國家/地區規則測試 %1$d 個配置的出口國家/地區。群組較大時需要一段時間。</string>
+    <string name="subs_country_untested_kept">已保留 %1$d 個沒有測試結果的配置；下次更新時會再次測試。</string>
+    <string name="subs_after_country_test">%1$s 的國家/地區測試之後：</string>
     <string name="channel_vpn_sign_in">VPN 登入</string>
     <string name="vpn_auth_notification_title">%1$s：需要登入</string>
     <string name="vpn_auth_notification_text">輕觸以登入。</string>

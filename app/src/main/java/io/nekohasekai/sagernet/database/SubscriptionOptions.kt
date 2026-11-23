@@ -112,7 +112,7 @@ data class SubscriptionOptions(
     var nameExclude: String = "",
     /** SubscriptionNameFilter.PROTOCOLS ids whose profiles every update drops; unknown ids are kept as they are. */
     var typeExclude: List<String> = emptyList(),
-    /** The desktop's IP-test country filter ("HK,JP" keeps, "!RU" drops): carried, not applied on Android. */
+    /** Exit countries by IP test ("HK,JP" keeps, "!RU" drops), stored normalized; see CountryRules. */
     var countryFilter: String = "",
     /** Android-only: the subscription info card above the profiles; stored only when off. */
     var showInfoCard: Boolean = true,

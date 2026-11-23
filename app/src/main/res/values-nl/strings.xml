@@ -2782,6 +2782,23 @@
     <string name="autosel_notice_exhausted_upstream">Elk draaiend profiel is gestopt met werken via de schakels ervoor, opnieuw opbouwen met de volgende kandidaten.</string>
     <string name="validation_route_outbound_chain_selector">Routeringsregels kunnen de keten \"%1$s\" niet gebruiken: die bevat een automatische selector en kan dus alleen worden gestart. Kies een andere outbound.</string>
     <string name="route_outbound_chain_selector">Het routeringsprofiel stuurt verkeer naar %1$s, dat een automatische selector bevat; zo\'n keten kan alleen worden gestart, niet in routeringsregels worden gebruikt</string>
+    <string name="grp_filter_countries">Landen</string>
+    <string name="grp_filter_countries_tip">Uitgangslanden om te behouden, bijv. HK,JP, of te verwijderen, bijv. !RU.</string>
+    <string name="grp_filter_countries_hint">bijv. HK,JP of !RU</string>
+    <string name="grp_filter_countries_keeps">Behoudt %1$s.</string>
+    <string name="grp_filter_countries_removes">Verwijdert %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">Na elke update krijgen profielen met een onbekend uitgangsland een uitgangs-IP-test, dus de volgende update kan tot %1$d profiel testen. Bij een grote groep duurt dit even.</item>
+        <item quantity="other">Na elke update krijgen profielen met een onbekend uitgangsland een uitgangs-IP-test, dus de volgende update kan tot %1$d profielen testen. Bij een grote groep duurt dit even.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">Na elke update krijgen profielen met een onbekend uitgangsland een uitgangs-IP-test. Bij een groot abonnement duurt dit even.</string>
+    <string name="validation_country_rules">Geen landcode van twee letters: %1$s. Gebruik codes zoals HK,JP om alleen die landen te behouden, of !RU om er één te verwijderen.</string>
+    <string name="subs_filter_bad_countries">Geen landcode van twee letters, genegeerd: %1$s</string>
+    <string name="subs_country_none_accepted">De landregels accepteren geen van de %1$d geteste profielen, dus er is niets verwijderd.</string>
+    <string name="subs_removed_countries">%1$d profielen buiten de landregels verwijderd:</string>
+    <string name="subs_country_testing">Het uitgangsland van %1$d profielen van %2$s wordt getest voor de landregels. Bij een grote groep duurt dit even.</string>
+    <string name="subs_country_untested_kept">%1$d profielen zonder testresultaat zijn behouden; de volgende update test ze opnieuw.</string>
+    <string name="subs_after_country_test">Na de landtest van %1$s:</string>
     <string name="channel_vpn_sign_in">VPN-aanmelding</string>
     <string name="vpn_auth_notification_title">%1$s: aanmelden vereist</string>
     <string name="vpn_auth_notification_text">Tik om aan te melden.</string>

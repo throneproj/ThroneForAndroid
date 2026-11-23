@@ -35,6 +35,7 @@ import io.nekohasekai.sagernet.database.SubUserInfo
 import io.nekohasekai.sagernet.database.SubscriptionOptions
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
+import io.nekohasekai.sagernet.group.CountryRules
 import io.nekohasekai.sagernet.group.DeviceDetails
 import io.nekohasekai.sagernet.group.RequestIdentity
 import io.nekohasekai.sagernet.group.SubscriptionClient
@@ -44,6 +45,7 @@ import io.nekohasekai.sagernet.ktx.FixedLinearLayoutManager
 import io.nekohasekai.sagernet.ktx.confirmAction
 import io.nekohasekai.sagernet.ui.settings.DefaultSummaryProvider
 import io.nekohasekai.sagernet.ui.settings.SettingChecks
+import io.nekohasekai.sagernet.ui.test.TestFormat
 import io.nekohasekai.sagernet.validation.Empty
 import io.nekohasekai.sagernet.validation.Severity
 import io.nekohasekai.sagernet.validation.Validation
@@ -111,6 +113,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         private const val KEY_NAME_FILTER = "groupSubNameInclude"
         private const val KEY_NAME_EXCLUDE = "groupSubNameExclude"
         private const val KEY_TYPE_EXCLUDE = "groupSubTypeExclude"
+        private const val KEY_COUNTRY_FILTER = "groupSubCountryFilter"
         private val NAME_FILTERS = listOf(KEY_NAME_FILTER, KEY_NAME_EXCLUDE)
 
         private val HWID_KEYS = listOf(KEY_HWID, KEY_HWID_OS, KEY_HWID_OS_VERSION, KEY_HWID_MODEL)
@@ -143,6 +146,9 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
     private var loaded = false
     private var advancedExpanded = false
     private var groupCount = 0
+
+    /** The group's profiles, the most the country filter's IP test after an update can take. */
+    private var profileCount = 0
 
     /** ResolveIdentity(nullptr), resolved while loading: the Advanced placeholders and the "Keep Default" state. */
     private var defaultUserAgent = ""
@@ -208,6 +214,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
                     DataStore.dirty = prefilled
                 }
                 groupCount = GroupRepo.ids().size
+                if (editingId > 0) profileCount = ProfileManager.memberIds(editingId).size
                 val identity = RequestIdentity.resolve(null)
                 defaultUserAgent = identity.userAgent
                 defaultDevice = identity.device
@@ -363,13 +370,14 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         store.putString(KEY_NAME_FILTER, options.nameFilter)
         store.putString(KEY_NAME_EXCLUDE, options.nameExclude)
         store.putStringSet(KEY_TYPE_EXCLUDE, options.typeExclude.toMutableSet())
+        store.putString(KEY_COUNTRY_FILTER, options.countryFilter)
     }
 
     /**
      * DialogEditGroupAdvanced::accept: the strings trimmed, disabled fields kept, the interval as entered (the form
-     * refuses 1-29); the ticked types in the desktop's order, then the unknown ones. [countryFilter] has no field here.
+     * refuses 1-29); the ticked types in the desktop's order, then the unknown ones; the country rules normalized.
      */
-    private fun optionsFromCache(countryFilter: String): SubscriptionOptions {
+    private fun optionsFromCache(): SubscriptionOptions {
         val store = DataStore.profileCacheStore
         fun text(key: String) = store.getString(key).orEmpty().trim()
         fun flag(key: String) = store.getBoolean(key, false)
@@ -398,7 +406,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             nameFilter = text(KEY_NAME_FILTER),
             nameExclude = text(KEY_NAME_EXCLUDE),
             typeExclude = (SubscriptionNameFilter.PROTOCOLS.map { it.id } + unknownTypes).filter { it in ticked },
-            countryFilter = countryFilter,
+            countryFilter = CountryRules.normalize(text(KEY_COUNTRY_FILTER)),
             showInfoCard = store.getBoolean(KEY_SHOW_INFO_CARD, true),
         )
     }
@@ -444,7 +452,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             group.autoClearUnavailable = store.getBoolean(KEY_AUTO_CLEAR, false)
             group.url = newUrl
             group.skipAutoUpdate = store.getBoolean(KEY_SKIP_AUTO_UPDATE, false)
-            val options = optionsFromCache(group.subOptions.countryFilter)
+            val options = optionsFromCache()
             // DialogEditGroup::accept: new filters apply to an existing subscription right away.
             refreshNeeded = editingId > 0 && newUrl.isNotEmpty() && !group.archive && !group.subOptions.sameFilters(options)
             group.subOptions = options
@@ -573,6 +581,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             nameFilter(KEY_NAME_FILTER, R.string.grp_filter_include_empty)
             nameFilter(KEY_NAME_EXCLUDE, R.string.grp_filter_exclude_empty)
             typeFilter()
+            countryFilter()
 
             findPreference<Preference>(KEY_ADVANCED_TOGGLE)!!.setOnPreferenceClickListener {
                 host.advancedExpanded = !host.advancedExpanded
@@ -593,6 +602,10 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             validation.bind(Key.SUBSCRIPTION_LINK, ::subscriptionUrlError).onlyIf { DataStore.groupType == TYPE_SUBSCRIPTION }
             for (key in NAME_FILTERS) {
                 validation.bind(key) { pattern -> SubscriptionNameFilter.error(pattern)?.let { vtr(R.string.validation_regex, it) }.orEmpty() }
+            }
+            validation.bind(KEY_COUNTRY_FILTER) { text ->
+                val bad = CountryRules.problems(text)
+                if (bad.isEmpty()) "" else vtr(R.string.validation_country_rules, bad.joinToString(", "))
             }
             validation.addIssueSource(::advancedIssues)
             validation.revealer = { key ->
@@ -705,6 +718,42 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
                 val ticked = it.values
                 val shown = ids.indices.filter { i -> ids[i] in ticked }.joinToString(", ") { i -> labels[i] }
                 shown.ifEmpty { getString(R.string.grp_filter_exclude_empty) } + "\n" + getString(R.string.grp_filter_type_exclude_tip)
+            }
+        }
+
+        /**
+         * The rules as entered, then what they keep and remove and the warning that an update IP-tests the profiles
+         * of unknown country (syncCountryHint); rules with a bad code show as entered, the form marks them.
+         */
+        private fun countryFilter() {
+            val preference = findPreference<EditTextPreference>(KEY_COUNTRY_FILTER) ?: return
+            fun names(codes: Set<String>) = codes.sorted().joinToString(", ") { TestFormat.countryName(it) }
+            preference.summaryProvider = Preference.SummaryProvider<EditTextPreference> {
+                val text = it.text?.trim().orEmpty()
+                val bad = ArrayList<String>()
+                val rules = CountryRules.parse(text, bad)
+                if (text.isEmpty()) {
+                    getString(R.string.grp_filter_include_empty)
+                } else if (bad.isNotEmpty() || !rules.active) {
+                    text
+                } else {
+                    val summary = ArrayList<String>()
+                    if (rules.keep.isNotEmpty()) summary.add(getString(R.string.grp_filter_countries_keeps, names(rules.keep)))
+                    if (rules.drop.isNotEmpty()) summary.add(getString(R.string.grp_filter_countries_removes, names(rules.drop)))
+                    val count = host.profileCount
+                    val warning = if (count > 0) {
+                        resources.getQuantityString(R.plurals.grp_filter_countries_test_count, count, count)
+                    } else {
+                        getString(R.string.grp_filter_countries_test)
+                    }
+                    text + "\n" + summary.joinToString(" ") + "\n" + warning
+                }
+            }
+            preference.setOnBindEditTextListener {
+                it.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
+                    InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+                it.setSingleLine()
+                it.hint = getString(R.string.grp_filter_countries_hint)
             }
         }
 

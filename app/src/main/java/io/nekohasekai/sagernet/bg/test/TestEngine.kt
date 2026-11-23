@@ -102,10 +102,19 @@ object TestEngine {
      * cancelling the caller stops the tests. [onResult] gets each stored result on a test thread, a profile possibly
      * twice (a failure, then its Connect OK verdict).
      */
-    suspend fun queueUrlTests(ids: List<Long>, onResult: ((ProxyEntity) -> Unit)? = null) {
+    suspend fun queueUrlTests(ids: List<Long>, onResult: ((ProxyEntity) -> Unit)? = null) =
+        queue(TestSpec.KIND_URL, ids, onResult)
+
+    /**
+     * Waits for a running session to finish, then IP-tests [ids] and persists the results (desktop queueIpTests);
+     * cancelling the caller stops the tests.
+     */
+    suspend fun queueIpTests(ids: List<Long>) = queue(TestSpec.KIND_IP, ids, null)
+
+    private suspend fun queue(kind: Int, ids: List<Long>, onResult: ((ProxyEntity) -> Unit)?) {
         if (ids.isEmpty()) return
         session.lock()
-        val test = TestSession(sessionIds.incrementAndGet(), TestSpec(TestSpec.KIND_URL, ids.toLongArray()), null, onResult)
+        val test = TestSession(sessionIds.incrementAndGet(), TestSpec(kind, ids.toLongArray()), null, onResult)
         current = test
         try {
             coroutineScope {

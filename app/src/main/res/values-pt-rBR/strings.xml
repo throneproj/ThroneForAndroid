@@ -2793,6 +2793,24 @@
     <string name="autosel_notice_exhausted_upstream">Todos os perfis em execução pararam de funcionar pelos saltos à frente dele, reconstruindo com os próximos candidatos.</string>
     <string name="validation_route_outbound_chain_selector">Regras de roteamento não podem usar a cadeia \"%1$s\": ela contém um seletor automático, então só pode ser iniciada. Escolha outra saída.</string>
     <string name="route_outbound_chain_selector">O perfil de roteamento envia tráfego para %1$s, que contém um seletor automático; uma cadeia assim só pode ser iniciada, não usada em regras de roteamento</string>
+    <string name="grp_filter_countries">Países</string>
+    <string name="grp_filter_countries_tip">Países de saída a manter (ex.: HK,JP) ou a remover (ex.: !RU).</string>
+    <string name="grp_filter_countries_hint">ex.: HK,JP ou !RU</string>
+    <string name="grp_filter_countries_keeps">Mantém %1$s.</string>
+    <string name="grp_filter_countries_removes">Remove %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">Após cada atualização, os perfis cujo país de saída é desconhecido passam por um teste de IP de saída, então a próxima atualização pode testar até %1$d perfil. Em um grupo grande isso leva algum tempo.</item>
+        <item quantity="many">Após cada atualização, os perfis cujo país de saída é desconhecido passam por um teste de IP de saída, então a próxima atualização pode testar até %1$d perfis. Em um grupo grande isso leva algum tempo.</item>
+        <item quantity="other">Após cada atualização, os perfis cujo país de saída é desconhecido passam por um teste de IP de saída, então a próxima atualização pode testar até %1$d perfis. Em um grupo grande isso leva algum tempo.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">Após cada atualização, os perfis cujo país de saída é desconhecido passam por um teste de IP de saída. Em uma assinatura grande isso leva algum tempo.</string>
+    <string name="validation_country_rules">Não é um código de país de duas letras: %1$s. Use códigos como HK,JP para manter apenas esses países, ou !RU para remover um.</string>
+    <string name="subs_filter_bad_countries">Não é um código de país de duas letras, ignorado: %1$s</string>
+    <string name="subs_country_none_accepted">As regras de país não aceitam nenhum dos %1$d perfis testados, então nenhum foi removido.</string>
+    <string name="subs_removed_countries">Removidos %1$d perfis fora das regras de país:</string>
+    <string name="subs_country_testing">Testando o país de saída de %1$d perfis de %2$s para suas regras de país. Em um grupo grande isso leva algum tempo.</string>
+    <string name="subs_country_untested_kept">%1$d perfis sem resultado de teste foram mantidos; a próxima atualização vai testá-los novamente.</string>
+    <string name="subs_after_country_test">Após o teste de país de %1$s:</string>
     <string name="channel_vpn_sign_in">Login da VPN</string>
     <string name="vpn_auth_notification_title">%1$s: login necessário</string>
     <string name="vpn_auth_notification_text">Toque para entrar.</string>

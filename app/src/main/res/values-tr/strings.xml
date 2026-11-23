@@ -2788,6 +2788,23 @@
     <string name="autosel_notice_exhausted_upstream">Çalışan her profil önündeki atlamalar üzerinden çalışmayı durdurdu — sonraki adaylarla yeniden oluşturuluyor.</string>
     <string name="validation_route_outbound_chain_selector">\"%1$s\" zinciri yönlendirme kurallarında kullanılamaz: otomatik seçici içerdiği için yalnızca başlatılabilir. Başka bir giden bağlantı seçin.</string>
     <string name="route_outbound_chain_selector">Yönlendirme profili trafiği %1$s öğesine gönderiyor ve bu öğe bir otomatik seçici içeriyor; böyle bir zincir yalnızca başlatılabilir, yönlendirme kurallarında kullanılamaz</string>
+    <string name="grp_filter_countries">Ülkeler</string>
+    <string name="grp_filter_countries_tip">Tutulacak çıkış ülkeleri (ör. HK,JP) veya kaldırılacaklar (ör. !RU).</string>
+    <string name="grp_filter_countries_hint">ör. HK,JP veya !RU</string>
+    <string name="grp_filter_countries_keeps">%1$s tutulur.</string>
+    <string name="grp_filter_countries_removes">%1$s kaldırılır.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">Her güncellemeden sonra çıkış ülkesi bilinmeyen profiller çıkış IP testinden geçer, bu yüzden sonraki güncelleme en fazla %1$d profili test edebilir. Büyük bir grupta bu biraz zaman alır.</item>
+        <item quantity="other">Her güncellemeden sonra çıkış ülkesi bilinmeyen profiller çıkış IP testinden geçer, bu yüzden sonraki güncelleme en fazla %1$d profili test edebilir. Büyük bir grupta bu biraz zaman alır.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">Her güncellemeden sonra çıkış ülkesi bilinmeyen profiller çıkış IP testinden geçer. Büyük bir abonelikte bu biraz zaman alır.</string>
+    <string name="validation_country_rules">İki harfli bir ülke kodu değil: %1$s. Yalnızca bu ülkeleri tutmak için HK,JP gibi kodlar, birini kaldırmak için !RU kullanın.</string>
+    <string name="subs_filter_bad_countries">İki harfli bir ülke kodu değil, yok sayıldı: %1$s</string>
+    <string name="subs_country_none_accepted">Ülke kuralları test edilen %1$d profilin hiçbirini kabul etmiyor, bu yüzden hiçbiri kaldırılmadı.</string>
+    <string name="subs_removed_countries">Ülke kurallarının dışındaki %1$d profil kaldırıldı:</string>
+    <string name="subs_country_testing">%2$s ülke kuralları için %1$d profilin çıkış ülkesi test ediliyor. Büyük bir grupta bu biraz zaman alır.</string>
+    <string name="subs_country_untested_kept">Test sonucu olmayan %1$d profil korundu; sonraki güncelleme onları yeniden test edecek.</string>
+    <string name="subs_after_country_test">%1$s ülke testinden sonra:</string>
     <string name="channel_vpn_sign_in">VPN oturum açma</string>
     <string name="vpn_auth_notification_title">%1$s: oturum açma gerekli</string>
     <string name="vpn_auth_notification_text">Oturum açmak için dokunun.</string>

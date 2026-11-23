@@ -2793,6 +2793,24 @@
     <string name="autosel_notice_exhausted_upstream">Tous les profils en cours ont cessé de fonctionner à travers les sauts devant lui, reconstruction avec les candidats suivants.</string>
     <string name="validation_route_outbound_chain_selector">Les règles de routage ne peuvent pas utiliser la chaîne \"%1$s\" : elle contient un sélecteur automatique, elle ne peut donc qu\'être démarrée. Choisissez une autre sortie.</string>
     <string name="route_outbound_chain_selector">Le profil de routage envoie le trafic vers %1$s, qui contient un sélecteur automatique ; une telle chaîne peut seulement être démarrée, pas utilisée dans des règles de routage</string>
+    <string name="grp_filter_countries">Pays</string>
+    <string name="grp_filter_countries_tip">Pays de sortie à conserver, p. ex. HK,JP, ou à retirer, p. ex. !RU.</string>
+    <string name="grp_filter_countries_hint">p. ex. HK,JP ou !RU</string>
+    <string name="grp_filter_countries_keeps">Conserve %1$s.</string>
+    <string name="grp_filter_countries_removes">Retire %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">Après chaque mise à jour, les profils dont le pays de sortie est inconnu passent un test d\'IP de sortie, donc la prochaine mise à jour peut tester jusqu\'à %1$d profil. Sur un grand groupe, cela prend un moment.</item>
+        <item quantity="many">Après chaque mise à jour, les profils dont le pays de sortie est inconnu passent un test d\'IP de sortie, donc la prochaine mise à jour peut tester jusqu\'à %1$d profils. Sur un grand groupe, cela prend un moment.</item>
+        <item quantity="other">Après chaque mise à jour, les profils dont le pays de sortie est inconnu passent un test d\'IP de sortie, donc la prochaine mise à jour peut tester jusqu\'à %1$d profils. Sur un grand groupe, cela prend un moment.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">Après chaque mise à jour, les profils dont le pays de sortie est inconnu passent un test d\'IP de sortie. Sur un grand abonnement, cela prend un moment.</string>
+    <string name="validation_country_rules">Ce n\'est pas un code pays à deux lettres : %1$s. Utilisez des codes comme HK,JP pour ne conserver que ces pays, ou !RU pour en retirer un.</string>
+    <string name="subs_filter_bad_countries">Ce n\'est pas un code pays à deux lettres, ignoré : %1$s</string>
+    <string name="subs_country_none_accepted">Les règles de pays n\'acceptent aucun des %1$d profils testés, donc aucun n\'a été retiré.</string>
+    <string name="subs_removed_countries">%1$d profils hors des règles de pays retirés :</string>
+    <string name="subs_country_testing">Test du pays de sortie de %1$d profils de %2$s pour ses règles de pays. Sur un grand groupe, cela prend un moment.</string>
+    <string name="subs_country_untested_kept">%1$d profils sans résultat de test ont été conservés ; la prochaine mise à jour les testera à nouveau.</string>
+    <string name="subs_after_country_test">Après le test de pays de %1$s :</string>
     <string name="channel_vpn_sign_in">Connexion VPN</string>
     <string name="vpn_auth_notification_title">%1$s : connexion requise</string>
     <string name="vpn_auth_notification_text">Touchez pour vous connecter.</string>

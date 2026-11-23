@@ -2786,6 +2786,23 @@
     <string name="autosel_notice_exhausted_upstream">Hver kjørende profil sluttet å fungere gjennom leddene foran den — bygger på nytt med de neste kandidatene.</string>
     <string name="validation_route_outbound_chain_selector">Rutingsregler kan ikke bruke kjeden \"%1$s\": den inneholder en automatisk velger, så den kan bare startes. Velg et annet utgående.</string>
     <string name="route_outbound_chain_selector">Rutingsprofilen sender trafikk til %1$s, som inneholder en automatisk velger; en slik kjede kan bare startes, ikke brukes i rutingsregler</string>
+    <string name="grp_filter_countries">Land</string>
+    <string name="grp_filter_countries_tip">Utgangsland som skal beholdes, f.eks. HK,JP, eller fjernes, f.eks. !RU.</string>
+    <string name="grp_filter_countries_hint">f.eks. HK,JP eller !RU</string>
+    <string name="grp_filter_countries_keeps">Beholder %1$s.</string>
+    <string name="grp_filter_countries_removes">Fjerner %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">Etter hver oppdatering får profiler med ukjent utgangsland en utgangs-IP-test, så neste oppdatering kan teste opptil %1$d profil. I en stor gruppe tar dette en stund.</item>
+        <item quantity="other">Etter hver oppdatering får profiler med ukjent utgangsland en utgangs-IP-test, så neste oppdatering kan teste opptil %1$d profiler. I en stor gruppe tar dette en stund.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">Etter hver oppdatering får profiler med ukjent utgangsland en utgangs-IP-test. I et stort abonnement tar dette en stund.</string>
+    <string name="validation_country_rules">Ikke en landskode på to bokstaver: %1$s. Bruk koder som HK,JP for å beholde bare disse landene, eller !RU for å fjerne ett.</string>
+    <string name="subs_filter_bad_countries">Ikke en landskode på to bokstaver, ignorert: %1$s</string>
+    <string name="subs_country_none_accepted">Landsreglene godtar ingen av de %1$d testede profilene, så ingen ble fjernet.</string>
+    <string name="subs_removed_countries">Fjernet %1$d profiler utenfor landsreglene:</string>
+    <string name="subs_country_testing">Tester utgangslandet til %1$d profiler i %2$s for landsreglene. I en stor gruppe tar dette en stund.</string>
+    <string name="subs_country_untested_kept">%1$d profiler uten testresultat ble beholdt; neste oppdatering tester dem igjen.</string>
+    <string name="subs_after_country_test">Etter landstesten av %1$s:</string>
     <string name="channel_vpn_sign_in">VPN-pålogging</string>
     <string name="vpn_auth_notification_title">%1$s: pålogging kreves</string>
     <string name="vpn_auth_notification_text">Trykk for å logge på.</string>

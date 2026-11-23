@@ -2861,6 +2861,25 @@
     <string name="autosel_notice_exhausted_upstream">Кожны профіль у запуску перастаў працаваць праз звёны перад ім — аднаўленне з наступнымі кандыдатамі.</string>
     <string name="validation_route_outbound_chain_selector">Правілы маршрутызацыі не могуць выкарыстоўваць ланцуг «%1$s»: у ім ёсць аўтаматычны выбар, таму яго можна толькі запусціць. Абярыце іншы выхад.</string>
     <string name="route_outbound_chain_selector">Профіль маршрутызацыі накіроўвае трафік у %1$s, дзе ёсць аўтаматычны выбар; такі ланцуг можна толькі запусціць, але не выкарыстоўваць у правілах маршрутызацыі</string>
+    <string name="grp_filter_countries">Краіны</string>
+    <string name="grp_filter_countries_tip">Краіны выхаду, якія трэба пакінуць (напрыклад, HK,JP) або выдаліць (напрыклад, !RU).</string>
+    <string name="grp_filter_countries_hint">напрыклад, HK,JP або !RU</string>
+    <string name="grp_filter_countries_keeps">Пакідае: %1$s.</string>
+    <string name="grp_filter_countries_removes">Выдаляе: %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">Пасля кожнага абнаўлення профілі з невядомай краінай выхаду праходзяць тэст выходнага IP, таму наступнае абнаўленне можа праверыць да %1$d профілю. Для вялікай групы гэта зойме некаторы час.</item>
+        <item quantity="few">Пасля кожнага абнаўлення профілі з невядомай краінай выхаду праходзяць тэст выходнага IP, таму наступнае абнаўленне можа праверыць да %1$d профіляў. Для вялікай групы гэта зойме некаторы час.</item>
+        <item quantity="many">Пасля кожнага абнаўлення профілі з невядомай краінай выхаду праходзяць тэст выходнага IP, таму наступнае абнаўленне можа праверыць да %1$d профіляў. Для вялікай групы гэта зойме некаторы час.</item>
+        <item quantity="other">Пасля кожнага абнаўлення профілі з невядомай краінай выхаду праходзяць тэст выходнага IP, таму наступнае абнаўленне можа праверыць да %1$d профілю. Для вялікай групы гэта зойме некаторы час.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">Пасля кожнага абнаўлення профілі з невядомай краінай выхаду праходзяць тэст выходнага IP. Для вялікай падпіскі гэта зойме некаторы час.</string>
+    <string name="validation_country_rules">Не двухлітарны код краіны: %1$s. Укажыце коды накшталт HK,JP, каб пакінуць толькі гэтыя краіны, або !RU, каб выдаліць адну.</string>
+    <string name="subs_filter_bad_countries">Прапушчана (не двухлітарны код краіны): %1$s</string>
+    <string name="subs_country_none_accepted">Правілы краін не прапускаюць ніводнага з правераных профіляў (%1$d), таму нічога не выдалена.</string>
+    <string name="subs_removed_countries">Выдалена профіляў па-за правіламі краін (%1$d):</string>
+    <string name="subs_country_testing">Праверка краіны выхаду для профіляў групы %2$s (%1$d) па яе правілах краін. Для вялікай групы гэта зойме некаторы час.</string>
+    <string name="subs_country_untested_kept">Профілі без выніку праверкі захаваны (%1$d); наступнае абнаўленне праверыць іх зноў.</string>
+    <string name="subs_after_country_test">Пасля праверкі краін групы %1$s:</string>
     <string name="channel_vpn_sign_in">Уваход у VPN</string>
     <string name="vpn_auth_notification_title">%1$s: патрэбны ўваход</string>
     <string name="vpn_auth_notification_text">Націсніце, каб увайсці.</string>

@@ -2775,6 +2775,22 @@
     <string name="autosel_notice_exhausted_upstream">Setiap profil yang berjalan berhenti berfungsi melalui hop di depannya — membangun ulang dengan kandidat berikutnya.</string>
     <string name="validation_route_outbound_chain_selector">Aturan perutean tidak dapat menggunakan rantai \"%1$s\": rantai ini berisi pemilih otomatis, jadi hanya dapat dijalankan. Pilih outbound lain.</string>
     <string name="route_outbound_chain_selector">Profil perutean mengirim lalu lintas ke %1$s, yang berisi pemilih otomatis; rantai seperti itu hanya dapat dijalankan, tidak dapat digunakan dalam aturan perutean</string>
+    <string name="grp_filter_countries">Negara</string>
+    <string name="grp_filter_countries_tip">Negara keluar yang dipertahankan, mis. HK,JP, atau dihapus, mis. !RU.</string>
+    <string name="grp_filter_countries_hint">mis. HK,JP atau !RU</string>
+    <string name="grp_filter_countries_keeps">Mempertahankan %1$s.</string>
+    <string name="grp_filter_countries_removes">Menghapus %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="other">Setelah setiap pembaruan, profil yang negara keluarnya tidak diketahui menjalani tes IP keluar, sehingga pembaruan berikutnya dapat menguji hingga %1$d profil. Pada grup besar, ini memakan waktu.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">Setelah setiap pembaruan, profil yang negara keluarnya tidak diketahui menjalani tes IP keluar. Pada langganan besar, ini memakan waktu.</string>
+    <string name="validation_country_rules">Bukan kode negara dua huruf: %1$s. Gunakan kode seperti HK,JP untuk hanya mempertahankan negara tersebut, atau !RU untuk menghapus satu negara.</string>
+    <string name="subs_filter_bad_countries">Bukan kode negara dua huruf, diabaikan: %1$s</string>
+    <string name="subs_country_none_accepted">Aturan negara tidak menerima satu pun dari %1$d profil yang diuji, sehingga tidak ada yang dihapus.</string>
+    <string name="subs_removed_countries">Menghapus %1$d profil di luar aturan negara:</string>
+    <string name="subs_country_testing">Menguji negara keluar dari %1$d profil %2$s untuk aturan negaranya. Pada grup besar, ini memakan waktu.</string>
+    <string name="subs_country_untested_kept">%1$d profil tanpa hasil tes dipertahankan; pembaruan berikutnya akan mengujinya lagi.</string>
+    <string name="subs_after_country_test">Setelah tes negara %1$s:</string>
     <string name="channel_vpn_sign_in">Masuk VPN</string>
     <string name="vpn_auth_notification_title">%1$s: perlu masuk</string>
     <string name="vpn_auth_notification_text">Ketuk untuk masuk.</string>

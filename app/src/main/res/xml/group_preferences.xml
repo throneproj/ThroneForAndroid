@@ -207,6 +207,12 @@
             app:key="groupSubTypeExclude"
             app:title="@string/grp_filter_type_exclude" />
 
+        <EditTextPreference
+            app:dialogMessage="@string/grp_filter_countries_tip"
+            app:icon="@drawable/baseline_public_24"
+            app:key="groupSubCountryFilter"
+            app:title="@string/grp_filter_countries" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

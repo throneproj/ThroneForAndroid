@@ -2782,6 +2782,23 @@
     <string name="autosel_notice_exhausted_upstream">Jedes laufende Profil hat über die Hops vor ihm aufgehört zu funktionieren — baue mit den nächsten Kandidaten neu auf.</string>
     <string name="validation_route_outbound_chain_selector">Routing-Regeln können die Kette \"%1$s\" nicht verwenden: Sie enthält einen Auto-Selektor und kann daher nur gestartet werden. Wähle ein anderes Outbound.</string>
     <string name="route_outbound_chain_selector">Das Routing-Profil leitet Verkehr an %1$s, das einen Auto-Selektor enthält; eine solche Kette kann nur gestartet, nicht in Routing-Regeln verwendet werden</string>
+    <string name="grp_filter_countries">Länder</string>
+    <string name="grp_filter_countries_tip">Ausgangsländer, die behalten (z. B. HK,JP) oder entfernt (z. B. !RU) werden sollen.</string>
+    <string name="grp_filter_countries_hint">z. B. HK,JP oder !RU</string>
+    <string name="grp_filter_countries_keeps">Behält %1$s.</string>
+    <string name="grp_filter_countries_removes">Entfernt %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">Nach jeder Aktualisierung erhalten Profile mit unbekanntem Ausgangsland einen Ausgangs-IP-Test, daher kann die nächste Aktualisierung bis zu %1$d Profil testen. Bei einer großen Gruppe dauert das eine Weile.</item>
+        <item quantity="other">Nach jeder Aktualisierung erhalten Profile mit unbekanntem Ausgangsland einen Ausgangs-IP-Test, daher kann die nächste Aktualisierung bis zu %1$d Profile testen. Bei einer großen Gruppe dauert das eine Weile.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">Nach jeder Aktualisierung erhalten Profile mit unbekanntem Ausgangsland einen Ausgangs-IP-Test. Bei einem großen Abonnement dauert das eine Weile.</string>
+    <string name="validation_country_rules">Kein zweibuchstabiger Ländercode: %1$s. Verwenden Sie Codes wie HK,JP, um nur diese Länder zu behalten, oder !RU, um eines zu entfernen.</string>
+    <string name="subs_filter_bad_countries">Kein zweibuchstabiger Ländercode, ignoriert: %1$s</string>
+    <string name="subs_country_none_accepted">Die Länderregeln akzeptieren keines der %1$d getesteten Profile, daher wurde keines entfernt.</string>
+    <string name="subs_removed_countries">%1$d Profile außerhalb der Länderregeln entfernt:</string>
+    <string name="subs_country_testing">Das Ausgangsland von %1$d Profilen von %2$s wird für dessen Länderregeln getestet. Bei einer großen Gruppe dauert das eine Weile.</string>
+    <string name="subs_country_untested_kept">%1$d Profile ohne Testergebnis wurden behalten; die nächste Aktualisierung testet sie erneut.</string>
+    <string name="subs_after_country_test">Nach dem Ländertest von %1$s:</string>
     <string name="channel_vpn_sign_in">VPN-Anmeldung</string>
     <string name="vpn_auth_notification_title">%1$s: Anmeldung erforderlich</string>
     <string name="vpn_auth_notification_text">Tippe, um dich anzumelden.</string>

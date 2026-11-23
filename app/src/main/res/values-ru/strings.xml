@@ -2862,6 +2862,25 @@
     <string name="autosel_notice_exhausted_upstream">Все запущенные профили перестали работать через звенья перед ним — пересборка со следующими кандидатами.</string>
     <string name="validation_route_outbound_chain_selector">Правила маршрутизации не могут использовать цепочку «%1$s»: в ней есть автовыбор, поэтому её можно только запустить. Выберите другой исходящий.</string>
     <string name="route_outbound_chain_selector">Профиль маршрутизации направляет трафик в %1$s, где есть автовыбор; такую цепочку можно только запустить, но не использовать в правилах маршрутизации</string>
+    <string name="grp_filter_countries">Страны</string>
+    <string name="grp_filter_countries_tip">Страны выхода, которые нужно оставить (например, HK,JP) или убрать (например, !RU).</string>
+    <string name="grp_filter_countries_hint">например, HK,JP или !RU</string>
+    <string name="grp_filter_countries_keeps">Оставляет: %1$s.</string>
+    <string name="grp_filter_countries_removes">Удаляет: %1$s.</string>
+    <plurals name="grp_filter_countries_test_count">
+        <item quantity="one">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP, поэтому следующее обновление может проверить до %1$d профиля. Для большой группы это займёт некоторое время.</item>
+        <item quantity="few">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP, поэтому следующее обновление может проверить до %1$d профилей. Для большой группы это займёт некоторое время.</item>
+        <item quantity="many">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP, поэтому следующее обновление может проверить до %1$d профилей. Для большой группы это займёт некоторое время.</item>
+        <item quantity="other">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP, поэтому следующее обновление может проверить до %1$d профиля. Для большой группы это займёт некоторое время.</item>
+    </plurals>
+    <string name="grp_filter_countries_test">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP. Для большой подписки это займёт некоторое время.</string>
+    <string name="validation_country_rules">Не двухбуквенный код страны: %1$s. Укажите коды вроде HK,JP, чтобы оставить только эти страны, или !RU, чтобы убрать одну.</string>
+    <string name="subs_filter_bad_countries">Пропущено (не двухбуквенный код страны): %1$s</string>
+    <string name="subs_country_none_accepted">Правила стран не пропускают ни один из проверенных профилей (%1$d), поэтому ничего не удалено.</string>
+    <string name="subs_removed_countries">Удалено профилей вне правил стран (%1$d):</string>
+    <string name="subs_country_testing">Проверка страны выхода для профилей группы %2$s (%1$d) по её правилам стран. Для большой группы это займёт некоторое время.</string>
+    <string name="subs_country_untested_kept">Профили без результата проверки сохранены (%1$d); следующее обновление проверит их снова.</string>
+    <string name="subs_after_country_test">После проверки стран группы %1$s:</string>
     <string name="channel_vpn_sign_in">Вход в VPN</string>
     <string name="vpn_auth_notification_title">%1$s: требуется вход</string>
     <string name="vpn_auth_notification_text">Нажмите, чтобы войти.</string>

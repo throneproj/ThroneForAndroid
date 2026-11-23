@@ -10,8 +10,8 @@ import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
 /**
- * The name and type filters of a subscription (SubscriptionFilter.cpp, f5fb80b4), applied as a fetch is parsed.
- * The desktop's country filter is only carried in the options: Android does not apply it.
+ * The filters of a subscription (SubscriptionFilter.cpp): name and type rules while a fetch is parsed, country rules
+ * ([CountryRules]) after an IP test.
  */
 internal object SubscriptionNameFilter {
 
@@ -60,13 +60,14 @@ internal object SubscriptionNameFilter {
     }
 
     /**
-     * ImportFilter without the country rules. A stored pattern that no longer compiles, or an unknown protocol id,
-     * is skipped with a warning in the log, never read as matching everything.
+     * ImportFilter. A stored pattern that no longer compiles, an unknown protocol id or a bad country code is skipped
+     * with a warning in the log, never read as matching everything.
      */
     class Filter(options: SubscriptionOptions, group: String) {
         private val include = compile(options.nameFilter, group)
         private val exclude = compile(options.nameExclude, group)
         private val types = HashSet<String>()
+        val countries: CountryRules
 
         init {
             for (id in options.typeExclude) {
@@ -77,20 +78,30 @@ internal object SubscriptionNameFilter {
                 }
                 types.addAll(protocol.types)
             }
+            val badCodes = ArrayList<String>()
+            countries = CountryRules.parse(options.countryFilter, badCodes)
+            if (badCodes.isNotEmpty()) {
+                Logs.w("$group: " + app.getString(R.string.subs_filter_bad_countries, badCodes.joinToString(", ")))
+            }
         }
 
-        val active: Boolean get() = include != null || exclude != null || types.isNotEmpty()
+        val active: Boolean get() = include != null || exclude != null || types.isNotEmpty() || countries.active
 
-        /** judge: the type first, then the exclusion, then the inclusion, on the display name. */
-        fun admits(type: String, name: () -> String): Boolean {
+        /**
+         * judge: the type first, then the exclusion, then the inclusion on the display name, then the exit [country]
+         * an earlier test found ("" when unknown).
+         */
+        fun admits(type: String, country: String, name: () -> String): Boolean {
             if (type in types) return false
-            if (include == null && exclude == null) return true
-            val display = name()
-            if (exclude != null && exclude.matcher(display).find()) return false
-            return include == null || include.matcher(display).find()
+            if (include != null || exclude != null) {
+                val display = name()
+                if (exclude != null && exclude.matcher(display).find()) return false
+                if (include != null && !include.matcher(display).find()) return false
+            }
+            return countries.accepts(country)
         }
 
-        fun admits(outbound: Outbound): Boolean = admits(outbound.type) { outbound.displayName() }
+        fun admits(outbound: Outbound, country: String): Boolean = admits(outbound.type, country) { outbound.displayName() }
     }
 
     private fun compile(pattern: String, group: String): Pattern? {

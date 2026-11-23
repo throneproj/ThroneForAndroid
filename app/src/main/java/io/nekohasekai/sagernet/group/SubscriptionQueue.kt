@@ -317,6 +317,28 @@ object SubscriptionQueue {
         }
     }
 
+    /**
+     * The country tester (SetCountryTester, TestRunner::queueIpTests): an IP test of [profileIds] once no session
+     * runs; afterCountryTest goes back through the queue.
+     */
+    internal fun requestCountryTest(gid: Long, profileIds: List<Long>) {
+        outstanding.update { it + 1 }
+        scope.launch {
+            try {
+                try {
+                    TestEngine.queueIpTests(profileIds)
+                } catch (e: Exception) {
+                    if (e is CancellationException) ensureActive() else Logs.w(e)
+                }
+                synchronized(lock) {
+                    enqueueLocked(Job(-1L, batch = false, foreground = false) { SubscriptionRefresh.afterCountryTest(gid) })
+                }
+            } finally {
+                outstanding.update { it - 1 }
+            }
+        }
+    }
+
     // ------------------------------------------------------------------------------------------------ worker
 
     private fun enqueueLocked(job: Job) {
