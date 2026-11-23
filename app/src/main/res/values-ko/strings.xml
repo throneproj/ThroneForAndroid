@@ -1475,8 +1475,6 @@
     <string name="exit_through">출구 경로</string>
     <string name="exit_server">선택한 프로필</string>
     <string name="exit_server_hint">트래픽이 시작한 프로필을 통해 나갑니다.</string>
-    <string name="exit_tor_hint">Android에서는 Tor를 사용할 수 없으므로 트래픽이 선택한 프로필을 통해 나갑니다.</string>
-    <string name="exit_unavailable">%s (Android에서 사용 불가)</string>
     <string name="warp_tos_message"><![CDATA[WARP 신원을 생성하면 Cloudflare에 새 기기가 등록됩니다.<br><br><a href="%1$s">Cloudflare WARP 이용약관</a>에 동의하시겠습니까?]]></string>
     <string name="warp_wireguard_note">WARP는 프록시 위를 달립니다: WireGuard는 UDP를 전달하는 프록시가 필요합니다.</string>
     <string name="webdav_choose_backup">백업 선택</string>
@@ -2531,8 +2529,6 @@
     <string name="route_dns_global_servers">원격 %1$s, 직접 %2$s</string>
     <string name="warp_api_tls_fragment_title">WARP 등록용 TLS 조각화</string>
     <string name="warp_api_tls_fragment_note">등록이 실행 중인 프로필을 거치지 않고 직접 연결할 때만 적용됩니다.</string>
-    <string name="backup_warn_tor_egress">백업은 트래픽을 Tor로 내보내지만 Android에서는 Tor를 사용할 수 없습니다. 여기서는 선택한 서버로 바로 나갑니다.</string>
-    <string name="backup_warn_psiphon_egress">백업은 트래픽을 Psiphon으로 내보내지만 Android에서는 Psiphon을 사용할 수 없습니다. 여기서는 선택한 서버로 바로 나갑니다.</string>
     <string name="validation_dns_server_item">서버 %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">서버 추가</string>
     <string name="dns_server_custom">사용자 지정 주소</string>
@@ -2542,10 +2538,6 @@
     <string name="dns_server_list_primary">프록시 서버 주소도 확인합니다</string>
     <string name="dns_server_list_empty">서버를 하나 이상 추가하세요.</string>
     <string name="dns_server_drag">드래그하여 순서 변경</string>
-    <string name="juicity_pinned_certchain_sha256">인증서 체인 SHA256</string>
-    <string name="juicity_pinned_certchain_sha256_hint">juicity-server가 출력하는 인증서 체인 해시입니다. 안전하지 않은 연결 허용을 켜도 CA 검증을 대신합니다</string>
-    <string name="validation_juicity_certchain">juicity-server가 출력하는 대로 32바이트 인증서 체인 해시를 base64(=로 끝나는 44자)로 입력하세요.</string>
-    <string name="validation_juicity_certchain_conflict">인증서 체인 고정이 인증서 검증을 대신합니다. TLS 인증서와 인증서 고정을 비우세요.</string>
     <string name="trusttunnel_client_random_auth_key">클라이언트 난수 키</string>
     <string name="trusttunnel_client_random_auth_key_hint">서버의 client_random_auth_key 규칙의 16진수 키입니다. 클라이언트 난수 대신 사용합니다</string>
     <string name="validation_trusttunnel_client_random_pair">클라이언트 난수와 클라이언트 난수 키 중 하나만 사용하세요.</string>

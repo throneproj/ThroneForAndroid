@@ -1478,8 +1478,6 @@
     <string name="exit_through">Выход через</string>
     <string name="exit_server">Выбранный профиль</string>
     <string name="exit_server_hint">Трафик выходит через запущенный профиль.</string>
-    <string name="exit_tor_hint">Tor недоступен на Android, поэтому трафик выходит через выбранный профиль.</string>
-    <string name="exit_unavailable">%s (недоступно на Android)</string>
     <string name="warp_tos_message"><![CDATA[Создание идентификатора WARP регистрирует новое устройство в Cloudflare.<br><br>Принимаете ли вы <a href="%1$s">условия использования Cloudflare WARP</a>?]]></string>
     <string name="warp_wireguard_note">WARP едет поверх вашего прокси: WireGuard требует прокси, пересылающего UDP.</string>
     <string name="webdav_choose_backup">Выбрать резервную копию</string>
@@ -2637,8 +2635,6 @@
     <string name="route_dns_global_servers">Удаленный %1$s, прямой %2$s</string>
     <string name="warp_api_tls_fragment_title">Фрагментация TLS при регистрации WARP</string>
     <string name="warp_api_tls_fragment_note">Действует только при прямой регистрации, а не через запущенный профиль.</string>
-    <string name="backup_warn_tor_egress">Резервная копия направляет трафик через Tor, который недоступен на Android; здесь он выходит напрямую через выбранный сервер.</string>
-    <string name="backup_warn_psiphon_egress">Резервная копия направляет трафик через Psiphon, который недоступен на Android; здесь он выходит напрямую через выбранный сервер.</string>
     <string name="validation_dns_server_item">Сервер %1$s («%2$s»): %3$s</string>
     <string name="dns_server_add">Добавить сервер</string>
     <string name="dns_server_custom">Свой адрес</string>
@@ -2648,10 +2644,6 @@
     <string name="dns_server_list_primary">Также преобразует адреса прокси-серверов в IP</string>
     <string name="dns_server_list_empty">Добавьте хотя бы один сервер.</string>
     <string name="dns_server_drag">Перетащите, чтобы изменить порядок</string>
-    <string name="juicity_pinned_certchain_sha256">SHA256 цепочки сертификатов</string>
-    <string name="juicity_pinned_certchain_sha256_hint">Хеш цепочки сертификатов, который выводит juicity-server; заменяет проверку по CA, даже при «Разрешить небезопасное подключение»</string>
-    <string name="validation_juicity_certchain">Укажите 32-байтовый хеш цепочки сертификатов в base64 (44 символа, в конце =), как его выводит juicity-server.</string>
-    <string name="validation_juicity_certchain_conflict">Хеш цепочки сертификатов заменяет проверку сертификата; очистите сертификат TLS и закрепление сертификатов.</string>
     <string name="trusttunnel_client_random_auth_key">Ключ случайного значения клиента</string>
     <string name="trusttunnel_client_random_auth_key_hint">Ключ в hex из правила client_random_auth_key на сервере; указывается вместо случайного значения клиента</string>
     <string name="validation_trusttunnel_client_random_pair">Укажите либо случайное значение клиента, либо его ключ, но не оба.</string>

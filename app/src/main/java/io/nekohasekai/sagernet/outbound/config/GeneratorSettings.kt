@@ -143,10 +143,7 @@ data class GeneratorSettings(
     val directTestUrl: String = "",
 
     // ---- exit (SettingsValues.h exit_through)
-    /**
-     * exit_through: what proxied traffic finally leaves through; Tor and Psiphon have no Android exit and build as
-     * [ExitThrough.SERVER].
-     */
+    /** exit_through: what proxied traffic finally leaves through. */
     val exitThrough: ExitThrough = ExitThrough.SERVER,
 
     // ---- warp (SettingsRepo.h:252-267), the built-in WARP hop of WarpHop
@@ -200,8 +197,7 @@ data class GeneratorSettings(
  */
 enum class ExitThrough(val value: String, val profileId: Long, val displayName: String) {
     SERVER("server", 0L, ""),
-    WARP("warp", WarpHop.PROFILE_ID, "Cloudflare WARP"),
-    TOR("tor", -2409L, "Tor");
+    WARP("warp", WarpHop.PROFILE_ID, "Cloudflare WARP");
 
     companion object {
         /** Unknown values, and none, read as [SERVER]. */

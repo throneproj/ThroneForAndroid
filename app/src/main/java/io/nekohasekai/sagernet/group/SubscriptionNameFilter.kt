@@ -35,7 +35,6 @@ internal object SubscriptionNameFilter {
         Protocol("http", R.string.action_http, setOf("http")),
         Protocol("ssh", R.string.action_ssh, setOf("ssh")),
         Protocol("snell", R.string.action_snell, setOf("snell")),
-        Protocol("juicity", R.string.action_juicity, setOf("juicity")),
         Protocol("mieru", R.string.action_mieru, setOf("mieru")),
         Protocol("naive", R.string.action_naive, setOf("naive")),
         Protocol("trusttunnel", R.string.action_trusttunnel, setOf("trusttunnel")),

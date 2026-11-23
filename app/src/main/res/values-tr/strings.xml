@@ -1438,8 +1438,6 @@
     <string name="exit_through">Çıkış yolu</string>
     <string name="exit_server">Seçili profil</string>
     <string name="exit_server_hint">Trafik, başlattığınız profil üzerinden çıkar.</string>
-    <string name="exit_tor_hint">Tor Android\'de kullanılamaz, bu yüzden trafik seçili profil üzerinden çıkar.</string>
-    <string name="exit_unavailable">%s (Android\'de kullanılamaz)</string>
     <string name="warp_enable">WARP\'ı etkinleştir</string>
     <string name="warp_enable_sum">Aşağıdaki yapılandırmanın çıkış olarak kullanılmasını sağlar, WARP dışı VPN\'leri kısıtlayan hizmetleri atlamak için kullanışlıdır</string>
     <string name="warp_mode">Mod</string>
@@ -2569,8 +2567,6 @@
     <string name="route_dns_global_servers">Uzak %1$s, direkt %2$s</string>
     <string name="warp_api_tls_fragment_title">WARP kaydı için TLS parçalama</string>
     <string name="warp_api_tls_fragment_note">Yalnızca kayıt çalışan bir profil üzerinden değil, doğrudan bağlandığında uygulanır.</string>
-    <string name="backup_warn_tor_egress">Yedek, trafiği Android\'de bulunmayan Tor üzerinden çıkarıyor; burada trafik doğrudan seçili sunucu üzerinden çıkar.</string>
-    <string name="backup_warn_psiphon_egress">Yedek, trafiği Android\'de bulunmayan Psiphon üzerinden çıkarıyor; burada trafik doğrudan seçili sunucu üzerinden çıkar.</string>
     <string name="validation_dns_server_item">Sunucu %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Sunucu ekle</string>
     <string name="dns_server_custom">Özel adres</string>
@@ -2580,10 +2576,6 @@
     <string name="dns_server_list_primary">Vekil sunucu adreslerini de çözümler</string>
     <string name="dns_server_list_empty">En az bir sunucu ekleyin.</string>
     <string name="dns_server_drag">Yeniden sıralamak için sürükleyin</string>
-    <string name="juicity_pinned_certchain_sha256">Sertifika zinciri SHA256</string>
-    <string name="juicity_pinned_certchain_sha256_hint">juicity-server\'ın yazdırdığı sertifika zinciri karması; Güvenliksiz Bağlantıyı Etkinleştir açıkken bile CA doğrulamasının yerini alır</string>
-    <string name="validation_juicity_certchain">Sertifika zincirinin 32 baytlık karmasını juicity-server\'ın yazdırdığı gibi base64 olarak kullanın (= ile biten 44 karakter).</string>
-    <string name="validation_juicity_certchain_conflict">Sertifika zinciri sabitlemesi sertifika doğrulamasının yerini alır; TLS sertifikasını ve sertifika sabitlemelerini temizleyin.</string>
     <string name="trusttunnel_client_random_auth_key">İstemci rastgeleliği anahtarı</string>
     <string name="trusttunnel_client_random_auth_key_hint">Sunucunun client_random_auth_key kuralının onaltılık anahtarı; İstemci rastgeleliği yerine kullanılır</string>
     <string name="validation_trusttunnel_client_random_pair">İstemci rastgeleliği ile İstemci rastgeleliği anahtarından yalnızca birini kullanın.</string>

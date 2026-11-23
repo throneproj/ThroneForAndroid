@@ -1430,8 +1430,6 @@
     <string name="exit_through">Sair por</string>
     <string name="exit_server">Perfil selecionado</string>
     <string name="exit_server_hint">O tráfego sai pelo perfil que você iniciou.</string>
-    <string name="exit_tor_hint">O Tor não está disponível no Android, então o tráfego sai pelo perfil selecionado.</string>
-    <string name="exit_unavailable">%s (indisponível no Android)</string>
     <string name="warp_enable">Ativar WARP</string>
     <string name="warp_enable_sum">Permite usar a configuração abaixo como saída, útil para contornar serviços que restringem VPNs que não são WARP</string>
     <string name="warp_mode">Modo</string>
@@ -2574,8 +2572,6 @@
     <string name="route_dns_global_servers">Remoto %1$s, direto %2$s</string>
     <string name="warp_api_tls_fragment_title">Fragmentação TLS para o registro do WARP</string>
     <string name="warp_api_tls_fragment_note">Aplica-se apenas quando o registro se conecta diretamente, não por meio de um perfil em execução.</string>
-    <string name="backup_warn_tor_egress">O backup envia o tráfego pelo Tor, que não está disponível no Android; aqui ele sai diretamente pelo servidor selecionado.</string>
-    <string name="backup_warn_psiphon_egress">O backup envia o tráfego pelo Psiphon, que não está disponível no Android; aqui ele sai diretamente pelo servidor selecionado.</string>
     <string name="validation_dns_server_item">Servidor %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Adicionar servidor</string>
     <string name="dns_server_custom">Endereço personalizado</string>
@@ -2585,10 +2581,6 @@
     <string name="dns_server_list_primary">Também resolve os endereços dos servidores proxy</string>
     <string name="dns_server_list_empty">Adicione pelo menos um servidor.</string>
     <string name="dns_server_drag">Arraste para reordenar</string>
-    <string name="juicity_pinned_certchain_sha256">SHA256 da cadeia de certificados</string>
-    <string name="juicity_pinned_certchain_sha256_hint">Hash da cadeia de certificados exibido pelo juicity-server; substitui a verificação por CA, mesmo com Permitir inseguro</string>
-    <string name="validation_juicity_certchain">Use o hash de 32 bytes da cadeia de certificados em base64 (44 caracteres terminando em =), como o juicity-server o exibe.</string>
-    <string name="validation_juicity_certchain_conflict">O pin da cadeia de certificados substitui a verificação do certificado; limpe o certificado TLS e os pins de certificado.</string>
     <string name="trusttunnel_client_random_auth_key">Chave do aleatório do cliente</string>
     <string name="trusttunnel_client_random_auth_key_hint">Chave hexadecimal da regra client_random_auth_key do servidor; use no lugar do aleatório do cliente</string>
     <string name="validation_trusttunnel_client_random_pair">Use o aleatório do cliente ou a chave do aleatório do cliente, não ambos.</string>

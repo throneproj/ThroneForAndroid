@@ -1747,8 +1747,6 @@
     <string name="exit_through">Выхад праз</string>
     <string name="exit_server">Выбраны профіль</string>
     <string name="exit_server_hint">Трафік выходзіць праз запушчаны профіль.</string>
-    <string name="exit_tor_hint">Tor недаступны на Android, таму трафік выходзіць праз выбраны профіль.</string>
-    <string name="exit_unavailable">%s (недаступна на Android)</string>
 
     <string name="ech_query_target_hint">Дамен або дамен+рэзальвер (напр. cloudflare-ech.com+https://1.1.1.1/dns-query)</string>
     <string name="certificate_sha256">SHA256 сертыфіката</string>
@@ -2636,8 +2634,6 @@
     <string name="route_dns_global_servers">Аддалены %1$s, прамы %2$s</string>
     <string name="warp_api_tls_fragment_title">Фрагментацыя TLS пры рэгістрацыі WARP</string>
     <string name="warp_api_tls_fragment_note">Дзейнічае толькі пры прамой рэгістрацыі, а не праз запушчаны профіль.</string>
-    <string name="backup_warn_tor_egress">Рэзервовая копія накіроўвае трафік праз Tor, які недаступны на Android; тут ён выходзіць напрамую праз выбраны сервер.</string>
-    <string name="backup_warn_psiphon_egress">Рэзервовая копія накіроўвае трафік праз Psiphon, які недаступны на Android; тут ён выходзіць напрамую праз выбраны сервер.</string>
     <string name="validation_dns_server_item">Сервер %1$s («%2$s»): %3$s</string>
     <string name="dns_server_add">Дадаць сервер</string>
     <string name="dns_server_custom">Свой адрас</string>
@@ -2647,10 +2643,6 @@
     <string name="dns_server_list_primary">Таксама вызначае адрасы проксі-сервераў</string>
     <string name="dns_server_list_empty">Дадайце хаця б адзін сервер.</string>
     <string name="dns_server_drag">Перацягніце, каб змяніць парадак</string>
-    <string name="juicity_pinned_certchain_sha256">SHA256 ланцужка сертыфікатаў</string>
-    <string name="juicity_pinned_certchain_sha256_hint">Хэш ланцужка сертыфікатаў, які выводзіць juicity-server; замяняе праверку праз CA, нават з «Дазволіць небяспечна»</string>
-    <string name="validation_juicity_certchain">Укажыце 32-байтавы хэш ланцужка сертыфікатаў у base64 (44 сімвалы, што заканчваюцца на =), як яго выводзіць juicity-server.</string>
-    <string name="validation_juicity_certchain_conflict">Хэш ланцужка сертыфікатаў замяняе праверку сертыфіката; ачысціце сертыфікат TLS і замацаванні сертыфікатаў.</string>
     <string name="trusttunnel_client_random_auth_key">Ключ выпадковага кліента</string>
     <string name="trusttunnel_client_random_auth_key_hint">Ключ у hex з правіла client_random_auth_key на серверы; выкарыстоўваецца замест «Выпадковы кліент»</string>
     <string name="validation_trusttunnel_client_random_pair">Укажыце або «Выпадковы кліент», або ключ выпадковага кліента, але не абодва.</string>

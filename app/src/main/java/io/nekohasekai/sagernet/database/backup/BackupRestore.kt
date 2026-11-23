@@ -21,7 +21,6 @@ import io.nekohasekai.sagernet.database.backup.DesktopSchema.SETTINGS
 import io.nekohasekai.sagernet.group.RemoteRouteUpdater
 import io.nekohasekai.sagernet.group.SubscriptionScheduler
 import io.nekohasekai.sagernet.ktx.app
-import io.nekohasekai.sagernet.outbound.config.ExitThrough
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.json.JsonValues
@@ -411,7 +410,7 @@ object BackupRestore {
                 // Database.cpp:364-377 raises all three counters whichever of the two parts was restored.
                 for ((table, value) in staged.counters) raiseSequence(db, table, value)
             }
-            if (choice.settings) applySettings(db, staged, choice, fromAndroid, warnings)
+            if (choice.settings) applySettings(db, staged, choice, fromAndroid)
             // Configs.cpp:32-44 initDB: an empty table gets its Default row, with a fresh id.
             if (choice.profiles) SagerDatabase.groupDao.insertDefaultIfEmpty(SagerDatabase.defaultGroupName())
             // GroupsRepo's NormalizePins on load, once for the restored groups: the pins head their order.
@@ -452,15 +451,14 @@ object BackupRestore {
      * R10 §8.3: every restore keeps this phone's device-local and [SettingsRegistry.RESTORE_KEPT_KEYS] rows and the
      * selection ids of the tables it leaves ([keptSelection]). An Android backup replaces every other row; a desktop
      * backup replaces the desktop rows but the Host ones and keeps this phone's Android-only rows (adopting only those
-     * the phone lacks). Unknown and desktop-only keys are stored as they are so they go back to the desktop;
-     * exit_through "tor" and "psiphon" are kept too, with a warning since Android has neither exit.
+     * the phone lacks). Unknown and desktop-only keys are stored as they are so they go back to the desktop, but
+     * exit_through migrates as on load ([DataStore.migrateLegacyExit]) and the retired exit rows go.
      */
     private fun applySettings(
         db: SupportSQLiteDatabase,
         staged: Staged,
         choice: Choice,
         fromAndroid: Boolean,
-        warnings: MutableList<String>,
     ) {
         val local = SettingsRegistry.DEVICE_LOCAL_KEYS + SettingsRegistry.RESTORE_KEPT_KEYS + keptSelection(choice) +
             (if (fromAndroid) emptySet<String>() else SettingsRegistry.HOST_KEYS)
@@ -481,12 +479,10 @@ object BackupRestore {
                 }
             }
         }
-        // SettingsRepo::load: a backup from before exit_through brings enable_tor / enable_warp instead.
-        SettingsRegistry.legacyExitThrough { readSetting(db, it) }?.let { writeSetting(db, SettingsRegistry.EXIT_THROUGH.key, it) }
-        for (key in SettingsRegistry.LEGACY_EXIT_KEYS) writeSetting(db, key, null)
-        val exit = readSetting(db, SettingsRegistry.EXIT_THROUGH.key)
-        if (ExitThrough.of(exit) == ExitThrough.TOR) warnings.add(app.getString(R.string.backup_warn_tor_egress))
-        if (exit == PSIPHON_EXIT) warnings.add(app.getString(R.string.backup_warn_psiphon_egress))
+        // A backup from before exit_through brings enable_warp instead, and an older desktop's may exit through Tor or
+        // Psiphon; the process may have migrated already, so it is done here too.
+        SettingsRegistry.migratedExitThrough { readSetting(db, it) }?.let { writeSetting(db, SettingsRegistry.EXIT_THROUGH.key, it) }
+        for (key in SettingsRegistry.RETIRED_EXIT_KEYS) writeSetting(db, key, null)
         // Database.cpp:357-359: without a markers table the backup predates the migrations, which then run again.
         db.execSQL("DELETE FROM `$MARKERS`")
         staged.markers?.let { insertRows(db, MARKERS, it) }
@@ -580,9 +576,6 @@ object BackupRestore {
     }
 
     private const val REMEMBER_ID = "remember_id"
-
-    /** The desktop's Psiphon exit_through, which Android no longer has. */
-    private const val PSIPHON_EXIT = "psiphon"
 
     /** entity_ids column -> the Room table whose AUTOINCREMENT sequence plays it. */
     private val COUNTERS = listOf(

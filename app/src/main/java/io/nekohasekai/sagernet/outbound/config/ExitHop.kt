@@ -3,9 +3,9 @@ package io.nekohasekai.sagernet.outbound.config
 import io.nekohasekai.sagernet.outbound.Outbound
 
 /**
- * The exit wrappers of generate_profiles.cpp (exitProfile, exitError) for the exit Android runs, WARP; Tor and Psiphon
- * build as [ExitThrough.SERVER]. The exit stands in for [WarpHop.PROFILE_ID] in a hop list and takes the `proxy` tag,
- * dialing through the wrapped hop, which becomes `warp-bypass`.
+ * The exit wrappers of generate_profiles.cpp (exitProfile, exitError) for the WARP exit. The exit stands in for
+ * [WarpHop.PROFILE_ID] in a hop list and takes the `proxy` tag, dialing through the wrapped hop, which becomes
+ * `warp-bypass`.
  */
 internal object ExitHop {
 

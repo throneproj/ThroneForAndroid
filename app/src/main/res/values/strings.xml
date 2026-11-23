@@ -169,7 +169,6 @@
     <string name="action_ssh" translatable="false">SSH</string>
     <string name="action_wireguard" translatable="false">WireGuard</string>
     <string name="action_tuic" translatable="false">TUIC</string>
-    <string name="action_juicity" translatable="false">Juicity</string>
     <string name="proxy_chain">Proxy chain</string>
     <string name="custom_config">Custom config</string>
     <string name="chain_settings">Chain settings</string>
@@ -1625,8 +1624,6 @@
     <string name="exit_through">Exit through</string>
     <string name="exit_server">Selected profile</string>
     <string name="exit_server_hint">Traffic leaves through the profile you started.</string>
-    <string name="exit_tor_hint">Tor is not available on Android, so traffic leaves through the selected profile.</string>
-    <string name="exit_unavailable">%s (not available on Android)</string>
     <string name="warp_enable">Enable WARP</string>
     <string name="warp_enable_sum">Enables the config below to be used as exit, useful for bypassing services restricting non-WARP VPNs</string>
     <string name="warp_mode">Mode</string>
@@ -1785,8 +1782,6 @@
     <string name="backup_warn_unsupported_rules">%1$d routing rules were skipped because they use fields this app does not support (%2$s).</string>
     <string name="backup_warn_raw_routes">%d raw routing profiles from Throne desktop are kept read-only; Android cannot use them.</string>
     <string name="backup_warn_lan_access">The backup lets other devices connect (inbound address %s); this was turned off. Turn it on again in the inbound settings if you need it.</string>
-    <string name="backup_warn_tor_egress">The backup sends traffic out through Tor, which is not available on Android; here it leaves through the selected server directly.</string>
-    <string name="backup_warn_psiphon_egress">The backup sends traffic out through Psiphon, which is not available on Android; here it leaves through the selected server directly.</string>
 
     <string name="webdav_choose_backup">Choose a backup</string>
     <string name="webdav_no_backups">No .thrbackup files were found in %s.</string>
@@ -2797,10 +2792,6 @@
     <string name="dns_server_list_primary">Also resolves proxy server addresses</string>
     <string name="dns_server_list_empty">Add at least one server.</string>
     <string name="dns_server_drag">Drag to reorder</string>
-    <string name="juicity_pinned_certchain_sha256">Certificate chain SHA256</string>
-    <string name="juicity_pinned_certchain_sha256_hint">Certificate chain hash printed by juicity-server; replaces CA verification, even with Allow insecure</string>
-    <string name="validation_juicity_certchain">Use the 32-byte certificate chain hash in base64 (44 characters ending in =), as juicity-server prints it.</string>
-    <string name="validation_juicity_certchain_conflict">The certificate chain pin replaces certificate verification; clear the TLS certificate and certificate pins.</string>
     <string name="trusttunnel_client_random_auth_key">Client random key</string>
     <string name="trusttunnel_client_random_auth_key_hint">Hex key of the server\'s client_random_auth_key rule; use instead of Client random</string>
     <string name="validation_trusttunnel_client_random_pair">Use either Client Random or Client Random Key, not both.</string>

@@ -17,7 +17,6 @@ import io.nekohasekai.sagernet.outbound.link.Hosts
 import io.nekohasekai.sagernet.outbound.link.LinkBuilder
 import io.nekohasekai.sagernet.outbound.link.LinkParser
 import io.nekohasekai.sagernet.outbound.link.ParsedLink
-import io.nekohasekai.sagernet.outbound.types.Juicity
 import io.nekohasekai.sagernet.outbound.types.Masque
 import io.nekohasekai.sagernet.outbound.types.Naive
 import io.nekohasekai.sagernet.outbound.types.TrustTunnel
@@ -114,7 +113,7 @@ object OutboundChecks {
     private fun dialsTcp(out: Outbound): Boolean {
         // warpmasque falls back to HTTP/2 over TCP unless that is turned off.
         if (out is Masque) return out.http_version == 2 || !out.disable_version_fallback
-        if (out.hasQuic() || out is Juicity) return false
+        if (out.hasQuic()) return false
         if (out is TrustTunnel) return !out.quic
         if (out is Naive) return !out.quic
         return !out.hasTransport() || out.getTransport().type != "quic"

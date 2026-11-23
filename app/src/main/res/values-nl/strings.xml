@@ -1430,8 +1430,6 @@
     <string name="exit_through">Uitgang via</string>
     <string name="exit_server">Geselecteerd profiel</string>
     <string name="exit_server_hint">Verkeer gaat via het gestarte profiel naar buiten.</string>
-    <string name="exit_tor_hint">Tor is niet beschikbaar op Android, dus verkeer gaat via het geselecteerde profiel naar buiten.</string>
-    <string name="exit_unavailable">%s (niet beschikbaar op Android)</string>
     <string name="warp_enable">WARP inschakelen</string>
     <string name="warp_enable_sum">Maakt het mogelijk de onderstaande configuratie als uitgang te gebruiken, handig voor het omzeilen van diensten die niet-WARP-VPN\'s beperken</string>
     <string name="warp_mode">Modus</string>
@@ -2563,8 +2561,6 @@
     <string name="route_dns_global_servers">Extern %1$s, direct %2$s</string>
     <string name="warp_api_tls_fragment_title">TLS-fragmentatie voor WARP-registratie</string>
     <string name="warp_api_tls_fragment_note">Geldt alleen wanneer de registratie direct verbindt, niet via een actief profiel.</string>
-    <string name="backup_warn_tor_egress">De back-up stuurt verkeer naar buiten via Tor, dat niet beschikbaar is op Android; hier gaat het direct via de geselecteerde server naar buiten.</string>
-    <string name="backup_warn_psiphon_egress">De back-up stuurt verkeer naar buiten via Psiphon, dat niet beschikbaar is op Android; hier gaat het direct via de geselecteerde server naar buiten.</string>
     <string name="validation_dns_server_item">Server %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Server toevoegen</string>
     <string name="dns_server_custom">Aangepast adres</string>
@@ -2574,10 +2570,6 @@
     <string name="dns_server_list_primary">Zet ook de adressen van proxyservers om</string>
     <string name="dns_server_list_empty">Voeg minstens één server toe.</string>
     <string name="dns_server_drag">Sleep om de volgorde te wijzigen</string>
-    <string name="juicity_pinned_certchain_sha256">SHA256 van certificaatketen</string>
-    <string name="juicity_pinned_certchain_sha256_hint">Hash van de certificaatketen die juicity-server toont; vervangt CA-verificatie, ook met \"Onveilig toestaan\"</string>
-    <string name="validation_juicity_certchain">Gebruik de 32-byte-hash van de certificaatketen in base64 (44 tekens, eindigend op =), zoals juicity-server hem toont.</string>
-    <string name="validation_juicity_certchain_conflict">De pin van de certificaatketen vervangt de certificaatverificatie; maak het TLS-certificaat en de certificaatpins leeg.</string>
     <string name="trusttunnel_client_random_auth_key">Client random-sleutel</string>
     <string name="trusttunnel_client_random_auth_key_hint">Hex-sleutel van de client_random_auth_key-regel van de server; gebruik in plaats van Client random</string>
     <string name="validation_trusttunnel_client_random_pair">Gebruik Client random of de Client random-sleutel, niet beide.</string>

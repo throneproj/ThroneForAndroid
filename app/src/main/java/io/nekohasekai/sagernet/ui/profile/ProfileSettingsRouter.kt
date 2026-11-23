@@ -17,7 +17,6 @@ fun settingsActivityFor(type: String): Class<out ProfileSettingsActivity<*>> =
         "trojan" -> TrojanSettingsActivity::class.java
         "hysteria" -> HysteriaSettingsActivity::class.java
         "tuic" -> TuicSettingsActivity::class.java
-        "juicity" -> JuicitySettingsActivity::class.java
         "anytls" -> AnyTLSSettingsActivity::class.java
         "shadowtls" -> ShadowTLSSettingsActivity::class.java
         "ssh" -> SSHSettingsActivity::class.java

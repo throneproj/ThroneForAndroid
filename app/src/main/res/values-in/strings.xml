@@ -1434,8 +1434,6 @@
     <string name="exit_through">Keluar melalui</string>
     <string name="exit_server">Profil terpilih</string>
     <string name="exit_server_hint">Lalu lintas keluar melalui profil yang Anda jalankan.</string>
-    <string name="exit_tor_hint">Tor tidak tersedia di Android, jadi lalu lintas keluar melalui profil terpilih.</string>
-    <string name="exit_unavailable">%s (tidak tersedia di Android)</string>
     <string name="warp_enable">Aktifkan WARP</string>
     <string name="warp_enable_sum">Mengaktifkan konfigurasi di bawah untuk digunakan sebagai keluar, berguna untuk melewati layanan yang membatasi VPN non-WARP</string>
     <string name="warp_mode">Mode</string>
@@ -2556,8 +2554,6 @@
     <string name="route_dns_global_servers">Remot %1$s, direk %2$s</string>
     <string name="warp_api_tls_fragment_title">Fragmentasi TLS untuk registrasi WARP</string>
     <string name="warp_api_tls_fragment_note">Hanya berlaku saat registrasi terhubung langsung, bukan melalui profil yang sedang berjalan.</string>
-    <string name="backup_warn_tor_egress">Cadangan mengirim lalu lintas keluar melalui Tor, yang tidak tersedia di Android; di sini lalu lintas keluar langsung melalui server yang dipilih.</string>
-    <string name="backup_warn_psiphon_egress">Cadangan mengirim lalu lintas keluar melalui Psiphon, yang tidak tersedia di Android; di sini lalu lintas keluar langsung melalui server yang dipilih.</string>
     <string name="validation_dns_server_item">Server %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Tambah server</string>
     <string name="dns_server_custom">Alamat khusus</string>
@@ -2567,10 +2563,6 @@
     <string name="dns_server_list_primary">Juga me-resolve alamat server proksi</string>
     <string name="dns_server_list_empty">Tambahkan setidaknya satu server.</string>
     <string name="dns_server_drag">Seret untuk mengubah urutan</string>
-    <string name="juicity_pinned_certchain_sha256">SHA256 rantai sertifikat</string>
-    <string name="juicity_pinned_certchain_sha256_hint">Hash rantai sertifikat yang dicetak juicity-server; menggantikan verifikasi CA, bahkan dengan Izinkan Koneksi Tidak Aman</string>
-    <string name="validation_juicity_certchain">Gunakan hash rantai sertifikat 32 byte dalam base64 (44 karakter berakhiran =), seperti yang dicetak juicity-server.</string>
-    <string name="validation_juicity_certchain_conflict">Pin rantai sertifikat menggantikan verifikasi sertifikat; kosongkan sertifikat TLS dan pin sertifikat.</string>
     <string name="trusttunnel_client_random_auth_key">Kunci acak klien</string>
     <string name="trusttunnel_client_random_auth_key_hint">Kunci hex dari aturan client_random_auth_key server; dipakai sebagai pengganti Acak klien</string>
     <string name="validation_trusttunnel_client_random_pair">Gunakan Acak klien atau Kunci acak klien, bukan keduanya.</string>

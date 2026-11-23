@@ -42,17 +42,8 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
 
     override fun bind() {
         val exit = pref<SimpleMenuPreference>(SettingsRegistry.EXIT_THROUGH.key)
-        val choices = offeredExits(DataStore.exitThrough)
-        exit.entries = choices.map { exitLabel(requireContext(), it) }.toTypedArray()
-        exit.entryValues = choices.map { it.value }.toTypedArray()
-        if (choices.none { it.value == exit.value }) {
-            // An exit Android does not know (the desktop's psiphon) runs as the server and stays stored until another
-            // is picked; the menu would store its first entry over a value it does not list as soon as it is bound.
-            val persistent = exit.isPersistent
-            exit.isPersistent = false
-            exit.value = ExitThrough.SERVER.value
-            exit.isPersistent = persistent
-        }
+        exit.entries = ExitThrough.entries.map { exitLabel(requireContext(), it) }.toTypedArray()
+        exit.entryValues = ExitThrough.entries.map { it.value }.toTypedArray()
         exit.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
             val chosen = ExitThrough.of(it.value)
             exitLabel(requireContext(), chosen) + "\n" + getString(exitHint(chosen))
@@ -243,22 +234,15 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         private const val KEY_MASQUE = "warpMasque"
         private const val KEY_GENERATE = "warpGenerate"
 
-        /** What the exit menu offers: Android runs no Tor, which is listed only while it is the stored exit. */
-        fun offeredExits(current: ExitThrough): List<ExitThrough> =
-            listOfNotNull(ExitThrough.SERVER, ExitThrough.WARP, ExitThrough.TOR.takeIf { current == it })
-
-        /** The exit's name; Tor says it has no Android exit. */
         fun exitLabel(context: Context, exit: ExitThrough): String = when (exit) {
             ExitThrough.SERVER -> context.getString(R.string.exit_server)
-            ExitThrough.TOR -> context.getString(R.string.exit_unavailable, exit.displayName)
-            else -> exit.displayName
+            ExitThrough.WARP -> exit.displayName
         }
 
         @StringRes
         fun exitHint(exit: ExitThrough): Int = when (exit) {
             ExitThrough.SERVER -> R.string.exit_server_hint
             ExitThrough.WARP -> R.string.warp_enable_sum
-            ExitThrough.TOR -> R.string.exit_tor_hint
         }
     }
 }

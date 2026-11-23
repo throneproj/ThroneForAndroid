@@ -38,7 +38,7 @@ object OutboundFactory {
     @JvmField
     val ALL_TYPES: List<String> = listOf(
         "socks", "http", "shadowsocks", "chain", "autoselector", "vmess", "trojan", "vless", "xrayvless", "hysteria",
-        "tuic", "juicity", "trusttunnel", "anytls", "mieru", "snell", "shadowtls", "wireguard", "masque", "openvpn",
+        "tuic", "trusttunnel", "anytls", "mieru", "snell", "shadowtls", "wireguard", "masque", "openvpn",
         "openconnect", "tailscale", "ssh", "custom", "extracore", "naive", "direct", "dnstt", "masterdns",
     )
 
@@ -46,17 +46,17 @@ object OutboundFactory {
     private val TYPE_ALIASES = mapOf("hysteria2" to "hysteria", "openvpn-client" to "openvpn")
 
     /**
-     * Not ported (tailscale) or desktop-only (extracore, tor, psiphon); always an [InvalidOutbound]. tor and psiphon
-     * stay out of [ALL_TYPES] so their rows from desktop backups count as unsupported, not malformed.
+     * Not ported (tailscale), desktop-only (extracore) or retired (tor, psiphon, juicity); always an [InvalidOutbound].
+     * The retired ones stay out of [ALL_TYPES] so their stored rows count as unsupported, not malformed.
      */
     @JvmField
-    val UNSUPPORTED_TYPES: Set<String> = setOf("tailscale", "extracore", "tor", "psiphon")
+    val UNSUPPORTED_TYPES: Set<String> = setOf("tailscale", "extracore", "tor", "psiphon", "juicity")
 
     /** Factory string to the class expected in io.nekohasekai.sagernet.outbound.types for the types other packages add. */
     @JvmField
     val CONVENTION_CLASSES: Map<String, String> = mapOf(
         "vmess" to "Vmess", "trojan" to "Trojan", "vless" to "Vless", "xrayvless" to "XrayVless",
-        "hysteria" to "Hysteria", "tuic" to "Tuic", "juicity" to "Juicity", "trusttunnel" to "TrustTunnel",
+        "hysteria" to "Hysteria", "tuic" to "Tuic", "trusttunnel" to "TrustTunnel",
         "anytls" to "AnyTls", "mieru" to "Mieru", "snell" to "Snell", "shadowtls" to "ShadowTls",
         "wireguard" to "WireGuard", "masque" to "Masque", "openvpn" to "OpenVpn", "openconnect" to "OpenConnect",
         "ssh" to "Ssh", "custom" to "Custom", "naive" to "Naive", "direct" to "Direct", "chain" to "Chain",
@@ -129,7 +129,6 @@ object OutboundFactory {
         Protocol("snell", listOf("snell://"), listOf("snell"), listOf("snell")),
         Protocol("hysteria", listOf("hysteria://", "hysteria2://", "hy2://"), listOf("hysteria", "hysteria2"), listOf("hysteria", "hysteria2")),
         Protocol("tuic", listOf("tuic://"), listOf("tuic"), listOf("tuic")),
-        Protocol("juicity", listOf("juicity://"), listOf("juicity"), emptyList()),
         Protocol("trusttunnel", listOf("tt://"), listOf("trusttunnel"), emptyList()),
         Protocol("shadowtls", listOf("shadowtls://"), listOf("shadowtls"), emptyList()),
         Protocol("wireguard", listOf("awg://", "wg://", "wireguard://"), listOf("wireguard"), listOf("wireguard")),

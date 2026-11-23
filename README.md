@@ -42,7 +42,6 @@ Releases from v2.0.0 on are signed with a new key, so Android refuses to install
 - Mieru
 - Snell
 - NaïveProxy
-- Juicity
 - TrustTunnel
 - ShadowTLS
 - Wireguard

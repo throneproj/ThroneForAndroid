@@ -186,10 +186,13 @@ data class SubscriptionOptions(
             )
         }
 
-        /** Trimmed, non-empty, first occurrence kept (Group.cpp FromJson). */
+        /**
+         * Trimmed, non-empty, first occurrence kept (Group.cpp FromJson). The retired juicity is dropped: excluding it
+         * means nothing, and keeping it would warn on every update.
+         */
         @JvmStatic
         fun typeIds(ids: Iterable<String>): List<String> =
-            ids.mapNotNullTo(LinkedHashSet()) { id -> id.trim().takeIf { it.isNotEmpty() } }.toList()
+            ids.mapNotNullTo(LinkedHashSet()) { id -> id.trim().takeIf { it.isNotEmpty() && it != "juicity" } }.toList()
 
         /** QJsonValue::toInt(-1): null unless a whole number that fits an int. */
         private fun JsonObject.intOrNull(key: String): Int? = when (val v = this[key]) {

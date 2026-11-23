@@ -1493,8 +1493,6 @@
     <string name="exit_through">出口方式</string>
     <string name="exit_server">所選設定檔</string>
     <string name="exit_server_hint">流量從你啟動的設定檔出去。</string>
-    <string name="exit_tor_hint">Android 上無法使用 Tor，因此流量從所選設定檔出去。</string>
-    <string name="exit_unavailable">%s（Android 上不可用）</string>
     <string name="warp_tos_message"><![CDATA[生成 WARP 身份會向 Cloudflare 註冊新裝置。<br><br>你是否接受 <a href="%1$s">Cloudflare WARP 服務條款</a>？]]></string>
     <string name="warp_wireguard_note">WARP 依託你的代理：WireGuard 需要轉發 UDP 的代理。</string>
     <string name="webdav_choose_backup">選擇備份</string>
@@ -2544,8 +2542,6 @@
     <string name="route_dns_global_servers">遠端 %1$s，直連 %2$s</string>
     <string name="warp_api_tls_fragment_title">WARP 註冊時的 TLS 分片</string>
     <string name="warp_api_tls_fragment_note">僅在註冊直接連線、而非經由正在執行的配置時生效。</string>
-    <string name="backup_warn_tor_egress">備份經由 Tor 出站，但 Android 不支援 Tor；此處流量將直接經由所選伺服器出站。</string>
-    <string name="backup_warn_psiphon_egress">備份經由 Psiphon 出站，但 Android 不支援 Psiphon；此處流量將直接經由所選伺服器出站。</string>
     <string name="validation_dns_server_item">第 %1$s 個伺服器（「%2$s」）：%3$s</string>
     <string name="dns_server_add">新增伺服器</string>
     <string name="dns_server_custom">自訂地址</string>
@@ -2555,10 +2551,6 @@
     <string name="dns_server_list_primary">也用於解析代理伺服器地址</string>
     <string name="dns_server_list_empty">請至少新增一個伺服器。</string>
     <string name="dns_server_drag">拖曳以調整順序</string>
-    <string name="juicity_pinned_certchain_sha256">證書鏈 SHA256</string>
-    <string name="juicity_pinned_certchain_sha256_hint">juicity-server 輸出的證書鏈雜湊；即使啟用「允許不安全的連線」，也會取代 CA 驗證</string>
-    <string name="validation_juicity_certchain">請使用 base64 格式的 32 位元組證書鏈雜湊（44 個字元，以 = 結尾），即 juicity-server 輸出的值。</string>
-    <string name="validation_juicity_certchain_conflict">證書鏈釘選會取代證書驗證；請清除 TLS 證書與證書釘選。</string>
     <string name="trusttunnel_client_random_auth_key">客戶端隨機值金鑰</string>
     <string name="trusttunnel_client_random_auth_key_hint">伺服器 client_random_auth_key 規則的十六進位金鑰；用來取代客戶端隨機值</string>
     <string name="validation_trusttunnel_client_random_pair">客戶端隨機值與客戶端隨機值金鑰只能擇一使用。</string>

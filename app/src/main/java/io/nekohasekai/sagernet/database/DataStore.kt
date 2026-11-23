@@ -286,7 +286,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     @Volatile
     private var legacyExitMigrated = false
 
-    /** exit_through; an unknown stored value reads as [ExitThrough.SERVER] and stays stored until the exit is changed. */
+    /** exit_through; an unknown stored value reads as [ExitThrough.SERVER], and [migrateLegacyExit] rewrites it. */
     var exitThrough: ExitThrough
         get() {
             migrateLegacyExit()
@@ -300,17 +300,15 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     /** WARP is the exit (the desktop's former enable_warp). */
     val isWarpExit: Boolean get() = exitThrough == ExitThrough.WARP
 
-    var torExitCountry by SettingsRegistry.TOR_EXIT_COUNTRY
-
     /**
-     * SettingsRepo::load: enable_tor / enable_warp become exit_through when it is absent, then go; once per process,
-     * since both processes share the table and the migration is idempotent.
+     * SettingsRepo::load: exit_through is migrated ([SettingsRegistry.migratedExitThrough]) and the retired exit rows
+     * go; once per process, since both processes share the table and the migration is idempotent.
      */
     fun migrateLegacyExit() {
         if (legacyExitMigrated) return
         val store = configurationStore
-        SettingsRegistry.legacyExitThrough(store::getRaw)?.let { SettingsRegistry.EXIT_THROUGH.write(store, it) }
-        for (key in SettingsRegistry.LEGACY_EXIT_KEYS) if (store.contains(key)) store.remove(key)
+        SettingsRegistry.migratedExitThrough(store::getRaw)?.let { SettingsRegistry.EXIT_THROUGH.write(store, it) }
+        for (key in SettingsRegistry.RETIRED_EXIT_KEYS) if (store.contains(key)) store.remove(key)
         legacyExitMigrated = true
     }
 

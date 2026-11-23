@@ -1434,8 +1434,6 @@
     <string name="exit_through">Utgang via</string>
     <string name="exit_server">Valgt profil</string>
     <string name="exit_server_hint">Trafikken går ut gjennom profilen du startet.</string>
-    <string name="exit_tor_hint">Tor er ikke tilgjengelig på Android, så trafikken går ut gjennom den valgte profilen.</string>
-    <string name="exit_unavailable">%s (ikke tilgjengelig på Android)</string>
     <string name="warp_enable">Aktiver WARP</string>
     <string name="warp_enable_sum">Aktiverer konfigurasjonen nedenfor for bruk som utgang, nyttig for å omgå tjenester som begrenser ikke-WARP VPN-er</string>
     <string name="warp_mode">Modus</string>
@@ -2567,8 +2565,6 @@
     <string name="route_dns_global_servers">Ekstern %1$s, direkte %2$s</string>
     <string name="warp_api_tls_fragment_title">TLS-fragmentering for WARP-registrering</string>
     <string name="warp_api_tls_fragment_note">Gjelder bare når registreringen kobler til direkte, ikke gjennom en kjørende profil.</string>
-    <string name="backup_warn_tor_egress">Sikkerhetskopien sender trafikken ut gjennom Tor, som ikke er tilgjengelig på Android; her går den direkte ut gjennom den valgte tjeneren.</string>
-    <string name="backup_warn_psiphon_egress">Sikkerhetskopien sender trafikken ut gjennom Psiphon, som ikke er tilgjengelig på Android; her går den direkte ut gjennom den valgte tjeneren.</string>
     <string name="validation_dns_server_item">Tjener %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Legg til tjener</string>
     <string name="dns_server_custom">Egendefinert adresse</string>
@@ -2578,10 +2574,6 @@
     <string name="dns_server_list_primary">Slår også opp adressene til mellomtjenerne</string>
     <string name="dns_server_list_empty">Legg til minst én tjener.</string>
     <string name="dns_server_drag">Dra for å endre rekkefølge</string>
-    <string name="juicity_pinned_certchain_sha256">Sertifikatkjedens SHA256</string>
-    <string name="juicity_pinned_certchain_sha256_hint">Hash av sertifikatkjeden som juicity-server skriver ut; erstatter CA-verifisering, selv med Tillat usikker</string>
-    <string name="validation_juicity_certchain">Bruk 32-byte-hashen av sertifikatkjeden i base64 (44 tegn som slutter med =), slik juicity-server skriver den ut.</string>
-    <string name="validation_juicity_certchain_conflict">Festingen av sertifikatkjeden erstatter sertifikatverifiseringen; tøm TLS-sertifikatet og sertifikatfestingene.</string>
     <string name="trusttunnel_client_random_auth_key">Nøkkel for tilfeldig klient</string>
     <string name="trusttunnel_client_random_auth_key_hint">Hex-nøkkel fra tjenerens client_random_auth_key-regel; brukes i stedet for Tilfeldig klient</string>
     <string name="validation_trusttunnel_client_random_pair">Bruk enten Tilfeldig klient eller Nøkkel for tilfeldig klient, ikke begge.</string>

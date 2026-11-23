@@ -1720,8 +1720,6 @@
     <string name="exit_through">خروج از طریق</string>
     <string name="exit_server">پروفایل انتخاب‌شده</string>
     <string name="exit_server_hint">ترافیک از پروفایلی که اجرا کرده‌اید خارج می‌شود.</string>
-    <string name="exit_tor_hint">Tor در اندروید در دسترس نیست، پس ترافیک از پروفایل انتخاب‌شده خارج می‌شود.</string>
-    <string name="exit_unavailable">%s (در اندروید در دسترس نیست)</string>
 
     <string name="ech_query_target_hint">دامنه، یا دامنه+حل‌کننده (مثلاً cloudflare-ech.com+https://1.1.1.1/dns-query)</string>
     <string name="certificate_sha256">SHA256 گواهی</string>
@@ -2587,8 +2585,6 @@
     <string name="route_dns_global_servers">ریموت %1$s، مستقیم %2$s</string>
     <string name="warp_api_tls_fragment_title">قطعه‌بندی TLS برای ثبت‌نام WARP</string>
     <string name="warp_api_tls_fragment_note">فقط وقتی اعمال می‌شود که ثبت‌نام مستقیم وصل شود، نه از طریق پروفایل در حال اجرا.</string>
-    <string name="backup_warn_tor_egress">پشتیبان ترافیک را از طریق Tor می‌فرستد که در Android در دسترس نیست؛ اینجا ترافیک مستقیم از طریق سرور انتخاب‌شده خارج می‌شود.</string>
-    <string name="backup_warn_psiphon_egress">پشتیبان ترافیک را از طریق Psiphon می‌فرستد که در Android در دسترس نیست؛ اینجا ترافیک مستقیم از طریق سرور انتخاب‌شده خارج می‌شود.</string>
     <string name="validation_dns_server_item">سرور %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">افزودن سرور</string>
     <string name="dns_server_custom">نشانی دلخواه</string>
@@ -2598,10 +2594,6 @@
     <string name="dns_server_list_primary">نشانی سرورهای پراکسی را هم حل می‌کند</string>
     <string name="dns_server_list_empty">دست‌کم یک سرور بیفزایید.</string>
     <string name="dns_server_drag">برای تغییر ترتیب بکشید</string>
-    <string name="juicity_pinned_certchain_sha256">SHA256 زنجیرهٔ گواهی</string>
-    <string name="juicity_pinned_certchain_sha256_hint">هش زنجیرهٔ گواهی که juicity-server چاپ می‌کند؛ حتی با «اتصال محافظت نشده» جایگزین اعتبارسنجی CA می‌شود</string>
-    <string name="validation_juicity_certchain">هش 32 بایتی زنجیرهٔ گواهی را به صورت base64 (44 نویسه که با = تمام می‌شود)، همان‌طور که juicity-server چاپ می‌کند، وارد کنید.</string>
-    <string name="validation_juicity_certchain_conflict">هش زنجیرهٔ گواهی جایگزین اعتبارسنجی گواهی می‌شود؛ گواهی TLS و پین‌های گواهی را پاک کنید.</string>
     <string name="trusttunnel_client_random_auth_key">کلید تصادفی کلاینت</string>
     <string name="trusttunnel_client_random_auth_key_hint">کلید هگز قاعدهٔ client_random_auth_key سرور؛ به جای «تصادفی کلاینت» به کار می‌رود</string>
     <string name="validation_trusttunnel_client_random_pair">فقط یکی از «تصادفی کلاینت» یا «کلید تصادفی کلاینت» را تنظیم کنید، نه هر دو.</string>

@@ -1476,8 +1476,6 @@
     <string name="exit_through">出口の経由先</string>
     <string name="exit_server">選択したプロファイル</string>
     <string name="exit_server_hint">トラフィックは起動したプロファイルから出ます。</string>
-    <string name="exit_tor_hint">Android では Tor を利用できないため、トラフィックは選択したプロファイルから出ます。</string>
-    <string name="exit_unavailable">%s（Android では利用不可）</string>
     <string name="warp_tos_message"><![CDATA[WARP 身份情報の生成は Cloudflare に新しいデバイスを登録します。<br><br><a href="%1$s">Cloudflare WARP 利用規約</a>に同意しますか？]]></string>
     <string name="warp_wireguard_note">WARP はプロキシ上を走行：WireGuard は UDP を転送するプロキシが必要です。</string>
     <string name="webdav_choose_backup">バックアップを選択</string>
@@ -2532,8 +2530,6 @@
     <string name="route_dns_global_servers">リモート %1$s、ダイレクト %2$s</string>
     <string name="warp_api_tls_fragment_title">WARP 登録時の TLS フラグメント</string>
     <string name="warp_api_tls_fragment_note">登録が実行中のプロファイルを経由せず直接接続する場合にのみ適用されます。</string>
-    <string name="backup_warn_tor_egress">バックアップはトラフィックを Tor 経由で送出しますが、Android では Tor を利用できません。ここでは選択したサーバーから直接送出されます。</string>
-    <string name="backup_warn_psiphon_egress">バックアップはトラフィックを Psiphon 経由で送出しますが、Android では Psiphon を利用できません。ここでは選択したサーバーから直接送出されます。</string>
     <string name="validation_dns_server_item">サーバー %1$s（「%2$s」）：%3$s</string>
     <string name="dns_server_add">サーバーを追加</string>
     <string name="dns_server_custom">カスタムアドレス</string>
@@ -2543,10 +2539,6 @@
     <string name="dns_server_list_primary">プロキシサーバーのアドレスも解決します</string>
     <string name="dns_server_list_empty">サーバーを 1 つ以上追加してください。</string>
     <string name="dns_server_drag">ドラッグして並べ替え</string>
-    <string name="juicity_pinned_certchain_sha256">証明書チェーン SHA256</string>
-    <string name="juicity_pinned_certchain_sha256_hint">juicity-server が出力する証明書チェーンのハッシュ。「安全でない接続を許可」が有効でも CA による検証の代わりになります</string>
-    <string name="validation_juicity_certchain">juicity-server が出力するとおり、32 バイトの証明書チェーンハッシュを base64（= で終わる 44 文字）で指定してください。</string>
-    <string name="validation_juicity_certchain_conflict">証明書チェーンのピンは証明書の検証に代わるものです。TLS 証明書と証明書ピンを空にしてください。</string>
     <string name="trusttunnel_client_random_auth_key">クライアントランダムキー</string>
     <string name="trusttunnel_client_random_auth_key_hint">サーバーの client_random_auth_key ルールの 16 進数キー。クライアントランダムの代わりに使います</string>
     <string name="validation_trusttunnel_client_random_pair">クライアントランダムとクライアントランダムキーのどちらか一方だけを指定してください。</string>

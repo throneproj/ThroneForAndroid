@@ -307,36 +307,30 @@ object SettingsRegistry {
 
     // ------------------------------------------------------------------------------------------------ exit
 
-    /**
-     * ExitThrough (ExitThrough.h): "server", "warp", "tor" or "psiphon". Any value is kept for the round trip and an
-     * unknown one reads as "server"; Android has no Tor or Psiphon exit, so "tor" and "psiphon" act as "server" here.
-     */
+    /** ExitThrough (ExitThrough.h): "server" or "warp"; [migratedExitThrough] rewrites any other value to "server". */
     @JvmField val EXIT_THROUGH = string("exit_through", ExitThrough.SERVER.value)
-    /** Lowercase ISO 3166-1 alpha-2 of the desktop Tor exit's last relay, "" = any; kept for the round trip. */
-    @JvmField val TOR_EXIT_COUNTRY = string("tor_exit_country", "")
-    /** Uppercase ISO 3166-1 alpha-2 of the desktop Psiphon exit's server, "" = best performance; kept for the round trip. */
-    @JvmField val PSIPHON_EGRESS_REGION = string("psiphon_egress_region", "")
 
-    /** The two exclusive switches exit_through replaced, Tor outranking WARP; deleted once migrated. */
-    const val LEGACY_ENABLE_WARP = "enable_warp"
-    const val LEGACY_ENABLE_TOR = "enable_tor"
-
-    @JvmField
-    val LEGACY_EXIT_KEYS = listOf(LEGACY_ENABLE_TOR, LEGACY_ENABLE_WARP)
+    /** The WARP switch exit_through replaced. */
+    private const val LEGACY_ENABLE_WARP = "enable_warp"
 
     /**
-     * SettingsRepo::load: the exit_through value the legacy switches in [read] (a key's stored text) migrate to, or
-     * null when exit_through is already stored or neither switch is on.
+     * Deleted on load and on restore so they never go back out: the switches exit_through replaced, and the options of
+     * the retired Tor and Psiphon exits.
+     */
+    @JvmField
+    val RETIRED_EXIT_KEYS = listOf("enable_tor", LEGACY_ENABLE_WARP, "tor_exit_country", "psiphon_egress_region")
+
+    /**
+     * SettingsRepo::load: what exit_through is rewritten to, given the rows in [read] (a key's stored text), or null
+     * when it stays. Without exit_through, a legacy enable_warp makes it "warp"; an exit this version lacks (the
+     * retired "tor" and "psiphon") becomes "server". A legacy enable_tor no longer selects anything.
      */
     @JvmStatic
-    fun legacyExitThrough(read: (String) -> String?): String? {
-        if (read(EXIT_THROUGH.key) != null) return null
-        fun on(key: String) = read(key)?.let { SettingsStore.decodeBoolean(it) } == true
-        return when {
-            on(LEGACY_ENABLE_TOR) -> ExitThrough.TOR.value
-            on(LEGACY_ENABLE_WARP) -> ExitThrough.WARP.value
-            else -> null
+    fun migratedExitThrough(read: (String) -> String?): String? {
+        val stored = read(EXIT_THROUGH.key) ?: return ExitThrough.WARP.value.takeIf {
+            read(LEGACY_ENABLE_WARP)?.let { SettingsStore.decodeBoolean(it) } == true
         }
+        return ExitThrough.of(stored).value.takeIf { it != stored }
     }
 
     // ------------------------------------------------------------------------------------------------ warp
