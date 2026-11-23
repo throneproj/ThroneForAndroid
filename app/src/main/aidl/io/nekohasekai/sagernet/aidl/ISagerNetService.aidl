@@ -26,4 +26,11 @@ interface ISagerNetService {
 
   // The live graphs' points after afterSerial of session (bg.LiveStatsRecorder); another session returns them all.
   LiveStatsBatch liveStats(long session, long afterSerial);
+
+  // OpenVPN/OpenConnect sign-in of the running instance (bg.VpnAuthRuntime): its pending challenges and refused
+  // sign-ins as bg.VpnAuthState JSON, also pushed through cbVpnAuthUpdate. Submit and cancel return "" or the core's
+  // error; answerJson is {"username","password","secret","form_values":{submission_key: value}} and is never logged.
+  String vpnAuthState();
+  String submitVpnChallenge(String tag, String id, String answerJson);
+  String cancelVpnChallenge(String tag, String id);
 }

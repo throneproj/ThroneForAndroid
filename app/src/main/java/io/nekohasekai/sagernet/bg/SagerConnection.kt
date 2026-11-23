@@ -36,6 +36,7 @@ class SagerConnection(
         const val CONNECTION_ID_MAIN_ACTIVITY_BACKGROUND = 3
         const val CONNECTION_ID_RESTART_BG = 4
         const val CONNECTION_ID_AUTO_SELECTOR = 5
+        const val CONNECTION_ID_VPN_AUTH = 6
 
         var restartingApp = false
     }
@@ -49,6 +50,9 @@ class SagerConnection(
 
         /** The auto-selector status changed; [AutoSelectorClient] already holds it. */
         fun cbAutoSelectorUpdate(json: String) {}
+
+        /** The VPN sign-in state changed; [VpnAuthClient] already holds it. */
+        fun cbVpnAuthUpdate() {}
 
         fun stateChanged(state: BaseService.State, profileName: String?, msg: String?)
 
@@ -105,6 +109,14 @@ class SagerConnection(
             }
         }
 
+        override fun cbVpnAuthUpdate(json: String?) {
+            VpnAuthClient.update(json)
+            val callback = callback ?: return
+            runOnMainDispatcher {
+                callback.cbVpnAuthUpdate()
+            }
+        }
+
     }
 
     private var binder: IBinder? = null
@@ -134,6 +146,10 @@ class SagerConnection(
         }
         runOnDefaultDispatcher {
             runCatching { service.autoSelectorStatus(false) }.onSuccess(AutoSelectorClient::update)
+            runCatching { service.vpnAuthState() }.onSuccess {
+                VpnAuthClient.update(it)
+                callback?.also { callback -> runOnMainDispatcher { callback.cbVpnAuthUpdate() } }
+            }
         }
         callback?.onServiceConnected(service)
     }
@@ -141,6 +157,7 @@ class SagerConnection(
     override fun onServiceDisconnected(name: ComponentName?) {
         unregisterCallback()
         AutoSelectorClient.reset()
+        VpnAuthClient.reset()
         callback?.onServiceDisconnected()
         service = null
         binder = null
@@ -150,6 +167,7 @@ class SagerConnection(
         service = null
         callbackRegistered = false
         AutoSelectorClient.reset()
+        VpnAuthClient.reset()
         if (!restartingApp) {
             callback?.also { runOnMainDispatcher { it.onBinderDied() } }
         }

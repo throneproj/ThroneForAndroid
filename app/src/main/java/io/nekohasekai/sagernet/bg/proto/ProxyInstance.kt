@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.bg.proto
 
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.ServiceNotification
+import io.nekohasekai.sagernet.bg.VpnAuthRuntime
 import io.nekohasekai.sagernet.bg.XrayGeoAssets
 import io.nekohasekai.sagernet.bg.autoselector.AutoSelectorRuntime
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -61,6 +62,7 @@ class ProxyInstance(profile: ProxyEntity, var service: BaseService.Interface? = 
     override fun launch() {
         super.launch() // start box
         AutoSelectorRuntime.onStarted(this)
+        VpnAuthRuntime.onStarted(this)
         runOnDefaultDispatcher {
             looper = service?.let { TrafficLooper(it.data, this) }
             looper?.start()
@@ -73,6 +75,15 @@ class ProxyInstance(profile: ProxyEntity, var service: BaseService.Interface? = 
             AutoSelectorRuntime.onClosed(this)
         } catch (error: Throwable) {
             closeError = error
+        }
+        try {
+            VpnAuthRuntime.onClosed(this)
+        } catch (error: Throwable) {
+            if (closeError == null) {
+                closeError = error
+            } else {
+                closeError?.addSuppressed(error)
+            }
         }
         try {
             super.close()

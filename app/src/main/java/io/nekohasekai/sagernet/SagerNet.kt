@@ -21,6 +21,7 @@ import androidx.core.content.getSystemService
 import io.nekohasekai.sagernet.appwidget.Widgets
 import io.nekohasekai.sagernet.bg.CoreRuntime
 import io.nekohasekai.sagernet.bg.SagerConnection
+import io.nekohasekai.sagernet.bg.VpnAuthRuntime
 import io.nekohasekai.sagernet.bg.autoselector.AutoSelectorRuntime
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SettingsMapper
@@ -215,6 +216,10 @@ class SagerNet : Application(),
                             PlatformNotifications.CHANNEL_WARNINGS,
                             application.getText(R.string.channel_warnings),
                             NotificationManager.IMPORTANCE_DEFAULT
+                        ), NotificationChannel(
+                            VpnAuthRuntime.CHANNEL,
+                            application.getText(R.string.channel_vpn_sign_in),
+                            NotificationManager.IMPORTANCE_HIGH
                         )
                     )
                 )

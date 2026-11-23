@@ -269,6 +269,24 @@ class BaseService {
 
         override fun liveStats(session: Long, afterSerial: Long): LiveStatsBatch = LiveStatsRecorder.batch(session, afterSerial)
 
+        override fun vpnAuthState(): String = VpnAuthRuntime.stateJson()
+
+        override fun submitVpnChallenge(tag: String?, id: String?, answerJson: String?): String =
+            VpnAuthRuntime.submit(tag.orEmpty(), id.orEmpty(), answerJson.orEmpty())
+
+        override fun cancelVpnChallenge(tag: String?, id: String?): String = VpnAuthRuntime.cancel(tag.orEmpty(), id.orEmpty())
+
+        /** A screen of the app is in the foreground: MainActivity between onStart and onStop, or the VPN sign-in prompt. */
+        fun uiForeground(): Boolean = try {
+            callbackIdMap.values.any {
+                it == SagerConnection.CONNECTION_ID_MAIN_ACTIVITY_FOREGROUND || it == SagerConnection.CONNECTION_ID_VPN_AUTH
+            }
+        } catch (_: ConcurrentModificationException) {
+            false
+        }
+
+        fun vpnAuthChanged(json: String) = launch { broadcast { it.cbVpnAuthUpdate(json) } }
+
         fun stateChanged(s: State, msg: String?) = launch {
             val profileName = profileName
             broadcast { it.stateChanged(s.ordinal, profileName, msg) }

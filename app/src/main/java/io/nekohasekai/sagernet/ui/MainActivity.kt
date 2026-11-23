@@ -34,6 +34,7 @@ import io.nekohasekai.sagernet.aidl.SpeedDisplayData
 import io.nekohasekai.sagernet.aidl.TrafficDataBatch
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.SagerConnection
+import io.nekohasekai.sagernet.bg.VpnAuthClient
 import io.nekohasekai.sagernet.bg.test.TestSpec
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SettingsRegistry
@@ -61,6 +62,7 @@ import io.nekohasekai.sagernet.utils.PlatformNotifications
 import io.nekohasekai.sagernet.utils.Theme
 import io.nekohasekai.sagernet.utils.WifiStateAccess
 import io.nekohasekai.sagernet.widget.bars
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.drawerlayout.widget.DrawerLayout
 import kotlinx.coroutines.Dispatchers
@@ -606,6 +608,17 @@ class MainActivity : ThemedActivity(),
         ProfileManager.postUpdate(data.items)
     }
 
+    override fun cbVpnAuthUpdate() {
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) promptVpnSignIn()
+    }
+
+    /** A sign-in an endpoint of the running profile waits for opens over the app by itself; the notification covers the rest. */
+    private fun promptVpnSignIn() {
+        val challenge = VpnAuthClient.unprompted() ?: return
+        VpnAuthClient.markPrompted(challenge)
+        startActivity(VpnAuthActivity.intent(this, challenge.tag))
+    }
+
     override fun cbSelectorUpdate(id: Long) {
         val old = DataStore.selectedProxy
         DataStore.selectedProxy = id
@@ -635,6 +648,7 @@ class MainActivity : ThemedActivity(),
     override fun onStart() {
         connection.updateConnectionId(SagerConnection.CONNECTION_ID_MAIN_ACTIVITY_FOREGROUND)
         super.onStart()
+        promptVpnSignIn()
     }
 
     override fun onStop() {

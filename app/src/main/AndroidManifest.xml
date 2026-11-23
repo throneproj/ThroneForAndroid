@@ -361,6 +361,12 @@
             android:launchMode="singleInstance"
             android:theme="@style/Theme.SagerNet.Dialog" />
         <activity
+            android:name="io.nekohasekai.sagernet.ui.VpnAuthActivity"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.SagerNet.Dialog" />
+        <activity
             android:name="io.nekohasekai.sagernet.update.UpdateActivity"
             android:configChanges="uiMode"
             android:launchMode="singleTop"

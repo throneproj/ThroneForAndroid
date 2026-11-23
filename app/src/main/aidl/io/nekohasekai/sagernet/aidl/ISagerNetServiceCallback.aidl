@@ -9,4 +9,5 @@ oneway interface ISagerNetServiceCallback {
   void cbTrafficUpdate(in TrafficDataBatch stats);
   void cbSelectorUpdate(long id);
   void cbAutoSelectorUpdate(String json);
+  void cbVpnAuthUpdate(String json);
 }
