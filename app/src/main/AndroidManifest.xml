@@ -258,9 +258,6 @@
             android:name="io.nekohasekai.sagernet.ui.profile.MasterDnsSettingsActivity"
             android:configChanges="uiMode" />
         <activity
-            android:name="io.nekohasekai.sagernet.ui.profile.PsiphonSettingsActivity"
-            android:configChanges="uiMode" />
-        <activity
             android:name="io.nekohasekai.sagernet.ui.profile.DirectSettingsActivity"
             android:configChanges="uiMode" />
         <activity

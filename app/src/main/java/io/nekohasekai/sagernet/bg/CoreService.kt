@@ -77,8 +77,6 @@ class CoreService : Service() {
         override fun testRoute(requestJson: String?): String = RouteTester.test(requestJson.orEmpty())
 
         override fun describeServiceChecks(): String = ServiceDefinitions.prepare().list
-
-        override fun psiphonRegions(): Array<String> = PsiphonRegions.reported()
     }
 
     override fun onCreate() {

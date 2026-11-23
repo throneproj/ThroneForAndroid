@@ -98,11 +98,14 @@ object UpdateChecker {
         fun notes(release: Release) = if (withNotes) notesOf(client, release) else ""
 
         var best: Pair<Release, JSONObject>? = null
+        // A newer release whose manifest is unreadable (its host can fail where the API answers) fails the check.
+        var manifestError: String? = null
         for (release in candidates.filter { r -> r.assets.any { it.name == MANIFEST } }.take(MAX_MANIFESTS)) {
             val manifest = try {
                 fetchManifest(client, release.assets.first { it.name == MANIFEST })
             } catch (e: Exception) {
                 Logs.w("Update manifest of ${release.tag}: ${e.readableMessage}")
+                if (manifestError == null) manifestError = "${release.tag}: ${e.readableMessage}"
                 continue
             }
             if (manifest.optString("packageName") != context.packageName) continue
@@ -111,6 +114,7 @@ object UpdateChecker {
             if (best == null || code > best.second.optLong("versionCode")) best = release to manifest
         }
         best?.let { (release, manifest) -> return Result.Available(offerOf(context, release, manifest, notes(release))) }
+        manifestError?.let { return Result.Failed(it) }
 
         // Releases without a manifest predate the in-app updater: open them in the browser.
         val legacy = candidates.firstOrNull { r -> r.assets.none { it.name == MANIFEST } } ?: return Result.UpToDate

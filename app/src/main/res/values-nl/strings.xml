@@ -261,6 +261,7 @@
     <string name="protocol_version">Protocolversie</string>
     <string name="show_group_in_notification">Groepsnaam tonen in melding</string>
     <string name="reset_connections">Verbindingen resetten</string>
+    <string name="reset_upstream_connections_done">Verbindingen gereset</string>
     <string name="mtu_help">Houd de voorkeur ingedrukt om een aangepaste MTU in te stellen.</string>
     <string name="log_level_help">Houd de voorkeur ingedrukt om de buffergrootte in te stellen.</string>
     <string name="tls_camouflage_settings">TLS-camouflage-instellingen</string>
@@ -1429,12 +1430,8 @@
     <string name="exit_through">Uitgang via</string>
     <string name="exit_server">Geselecteerd profiel</string>
     <string name="exit_server_hint">Verkeer gaat via het gestarte profiel naar buiten.</string>
-    <string name="exit_psiphon_hint">Psiphon is een gratis netwerk van Psiphon Inc., dat net als elke VPN-aanbieder kan zien welke sites je bezoekt.</string>
     <string name="exit_tor_hint">Tor is niet beschikbaar op Android, dus verkeer gaat via het geselecteerde profiel naar buiten.</string>
     <string name="exit_unavailable">%s (niet beschikbaar op Android)</string>
-    <string name="psiphon_egress_region">Regio</string>
-    <string name="psiphon_region_best">Beste prestaties</string>
-    <string name="psiphon_egress_region_sum">Het land van de Psiphon-server; Beste prestaties laat Psiphon kiezen.</string>
     <string name="warp_enable">WARP inschakelen</string>
     <string name="warp_enable_sum">Maakt het mogelijk de onderstaande configuratie als uitgang te gebruiken, handig voor het omzeilen van diensten die niet-WARP-VPN\'s beperken</string>
     <string name="warp_mode">Modus</string>
@@ -2567,6 +2564,7 @@
     <string name="warp_api_tls_fragment_title">TLS-fragmentatie voor WARP-registratie</string>
     <string name="warp_api_tls_fragment_note">Geldt alleen wanneer de registratie direct verbindt, niet via een actief profiel.</string>
     <string name="backup_warn_tor_egress">De back-up stuurt verkeer naar buiten via Tor, dat niet beschikbaar is op Android; hier gaat het direct via de geselecteerde server naar buiten.</string>
+    <string name="backup_warn_psiphon_egress">De back-up stuurt verkeer naar buiten via Psiphon, dat niet beschikbaar is op Android; hier gaat het direct via de geselecteerde server naar buiten.</string>
     <string name="validation_dns_server_item">Server %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Server toevoegen</string>
     <string name="dns_server_custom">Aangepast adres</string>
@@ -2820,8 +2818,4 @@
     <string name="vpn_auth_submitting">Aanmelden…</string>
     <string name="vpn_auth_gone">Dit aanmeldverzoek staat niet meer open.</string>
     <string name="vpn_auth_no_browser">Geen app kan dit adres openen.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">Gebruik een landcode van twee letters, zoals US.</string>
-    <string name="validation_psiphon_ignored">%1$s genegeerd: Psiphon-profielen nemen alleen een regio aan.</string>
-    <string name="exit_runs_over_itself">Het geselecteerde profiel gaat al via %1$s naar buiten, dus de %1$s-uitgang kan er niet overheen lopen. Kies een andere uitgang in Instellingen › Routering › Uitgang.</string>
 </resources>

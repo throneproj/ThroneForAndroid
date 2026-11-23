@@ -126,7 +126,7 @@ class Vless : Outbound("vless") {
         return true
     }
 
-    /** vless::ExportToLink (vless.cpp): no dial-field query items. */
+    /** vless::ExportToLink (vless.cpp). */
     override fun exportToLink(): String {
         val url = LinkBuilder("vless")
         // a uuid missing from the link or JSON is a null QString on the desktop, which adds no user-info
@@ -140,6 +140,7 @@ class Vless : Outbound("vless") {
         url.addQueryItems(transport.exportToLink(tls.enabled))
         url.addQueryItems(multiplex.exportToLink())
         url.addQueryItem("packetEncoding", packet_encoding.ifEmpty { "none" })
+        url.addQueryItems(baseLinkQuery())
         return url.build()
     }
 

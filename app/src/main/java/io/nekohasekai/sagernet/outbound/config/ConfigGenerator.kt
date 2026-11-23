@@ -173,7 +173,7 @@ class ConfigGenerator @JvmOverloads constructor(
         landingProxyId: Long, frontProxyId: Long, plan: AutoSelectorPlan?,
     ) {
         val pre = state.prerequisites
-        val exitRefusal = ExitHop.error(settings, reads, profile, landingProxyId)
+        val exitRefusal = ExitHop.error(settings)
         if (exitRefusal.isNotEmpty()) {
             state.error = exitRefusal
             return
@@ -760,9 +760,9 @@ class ConfigGenerator @JvmOverloads constructor(
     }
 
     /**
-     * buildOutboundsSection (:1795-1911): the main chain (the exit, WARP or Psiphon, in front of it while one is on),
-     * the auto-selector group, or a chain built around its auto-selector hop ([selectorHop], planned by [plan]), one
-     * chain per route outbound, then bridges and `direct`. [origin] names a deleted hop of the main and route chains.
+     * buildOutboundsSection (:1795-1911): the main chain (WARP in front of it while WARP is the exit), the auto-selector
+     * group, or a chain built around its auto-selector hop ([selectorHop], planned by [plan]), one chain per route
+     * outbound, then bridges and `direct`. [origin] names a deleted hop of the main and route chains.
      */
     private fun buildOutboundsSection(
         state: BuildState, chains: ChainBuilder, reads: ProfileProvider, profile: Outbound, profileId: Long,
@@ -1424,8 +1424,9 @@ class ConfigGenerator @JvmOverloads constructor(
     }
 
     /**
-     * get_route_rules(false, outboundMap) (RouteProfile.cpp:593-628) with get_rule_json (RouteRule.cpp:82-190): simple
-     * rules without a condition are skipped and the adblock reject goes in front of the first `route` rule, else last.
+     * get_route_rules(false, outboundMap) (RouteProfile.cpp:593-628) with get_rule_json (RouteRule.cpp:82-190): empty
+     * rules ([RouteRule.isEmpty]) are skipped, custom ones too unlike the desktop, since one imported or restored
+     * without conditions would catch all traffic; the adblock reject goes in front of the first `route` rule, else last.
      * Endpoint rules are skipped (no auxiliary endpoints on Android), rule-level TLS spoof is dropped (D8), so is a
      * TLS fragment fallback delay the core would refuse (an imported value; the editor checks its own), so is
      * tls_record_fragment next to tls_fragment on route-options, and a rule
@@ -1438,7 +1439,7 @@ class ConfigGenerator @JvmOverloads constructor(
         for ((index, rule) in route.rules.withIndex()) {
             val type = RuleType.ofId(rule.type)
             if (type == RuleType.ENDPOINT_PREFERRED_BY) continue
-            if (type != RuleType.CUSTOM && rule.isEmpty()) continue
+            if (rule.isEmpty()) continue
             val json = rule.toConfigJson(state.prerequisites.outboundMap[rule.outbound_id])
             if (json.isEmpty()) {
                 state.error = "Aborted generating routing section, an error has occurred"

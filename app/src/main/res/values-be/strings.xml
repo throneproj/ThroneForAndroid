@@ -920,6 +920,7 @@
     <string name="remote_dns_disable_ipv6">Аддалены DNS: адключыць IPv6</string>
     <string name="reserved_hint">Тры лікі, па адным на радок</string>
     <string name="reset_connections">Скінуць злучэнні</string>
+    <string name="reset_upstream_connections_done">Злучэнні скінуты</string>
     <string name="reset_settings">Аднавіць налады па змаўчанні</string>
     <string name="reset_settings_message">Профілі, групы і профілі маршрутызацыі захоўваюцца. Каб выдаліць усё, ачысціце дадзеныя праграмы ў сістэмных наладах.</string>
     <string name="resolve_domain_strategy">Стратэгія развязвання дамена</string>
@@ -1746,12 +1747,8 @@
     <string name="exit_through">Выхад праз</string>
     <string name="exit_server">Выбраны профіль</string>
     <string name="exit_server_hint">Трафік выходзіць праз запушчаны профіль.</string>
-    <string name="exit_psiphon_hint">Psiphon — бясплатная сетка пад кіраваннем Psiphon Inc.; як і любы VPN-правайдар, яна можа бачыць сайты, якія вы наведваеце.</string>
     <string name="exit_tor_hint">Tor недаступны на Android, таму трафік выходзіць праз выбраны профіль.</string>
     <string name="exit_unavailable">%s (недаступна на Android)</string>
-    <string name="psiphon_egress_region">Рэгіён</string>
-    <string name="psiphon_region_best">Найлепшая прадукцыйнасць</string>
-    <string name="psiphon_egress_region_sum">Краіна сервера Psiphon; «Найлепшая прадукцыйнасць» пакідае выбар Psiphon.</string>
 
     <string name="ech_query_target_hint">Дамен або дамен+рэзальвер (напр. cloudflare-ech.com+https://1.1.1.1/dns-query)</string>
     <string name="certificate_sha256">SHA256 сертыфіката</string>
@@ -2640,6 +2637,7 @@
     <string name="warp_api_tls_fragment_title">Фрагментацыя TLS пры рэгістрацыі WARP</string>
     <string name="warp_api_tls_fragment_note">Дзейнічае толькі пры прамой рэгістрацыі, а не праз запушчаны профіль.</string>
     <string name="backup_warn_tor_egress">Рэзервовая копія накіроўвае трафік праз Tor, які недаступны на Android; тут ён выходзіць напрамую праз выбраны сервер.</string>
+    <string name="backup_warn_psiphon_egress">Рэзервовая копія накіроўвае трафік праз Psiphon, які недаступны на Android; тут ён выходзіць напрамую праз выбраны сервер.</string>
     <string name="validation_dns_server_item">Сервер %1$s («%2$s»): %3$s</string>
     <string name="dns_server_add">Дадаць сервер</string>
     <string name="dns_server_custom">Свой адрас</string>
@@ -2897,8 +2895,4 @@
     <string name="vpn_auth_submitting">Выконваецца ўваход…</string>
     <string name="vpn_auth_gone">Гэты запыт уваходу больш не чакае адказу.</string>
     <string name="vpn_auth_no_browser">Няма праграмы, якая можа адкрыць гэты адрас.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">Выкарыстоўвайце двухлітарны код краіны, напрыклад US.</string>
-    <string name="validation_psiphon_ignored">Праігнаравана %1$s: профілі Psiphon прымаюць толькі рэгіён.</string>
-    <string name="exit_runs_over_itself">Выбраны профіль ужо выходзіць праз %1$s, таму выхад %1$s не можа працаваць паверх яго. Выберыце іншы выхад у раздзеле «Налады › Маршрутызацыя › Выхад».</string>
 </resources>

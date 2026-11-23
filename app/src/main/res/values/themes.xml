@@ -280,6 +280,22 @@
         <item name="rippleColor">@color/dialog_button_ripple</item>
     </style>
 
+    <!-- Choice chips and outlined (toggle) buttons of the black and white themes, whose colorPrimary does not show on
+         their surfaces: the stock ones draw their checked state and text in that colour -->
+    <style name="Widget.SagerNet.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="android:textColor">@color/chip_text_color</item>
+        <item name="checkedIconTint">?primaryOrTextPrimary</item>
+        <item name="rippleColor">@color/chip_ripple_color</item>
+    </style>
+
+    <style name="Widget.SagerNet.Button.Toggle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/toggle_text</item>
+        <item name="strokeColor">@color/toggle_stroke</item>
+        <item name="backgroundTint">@color/toggle_background</item>
+        <item name="rippleColor">@color/chip_ripple_color</item>
+    </style>
+
     <style name="ShapeAppearance.SagerNet.NavItem" parent="ShapeAppearance.MaterialComponents.SmallComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/nav_item_corner_radius</item>
@@ -579,6 +595,10 @@
         <item name="accentOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextPrimary">?android:textColorPrimary</item>
+        <!-- The stock checked chip, toggle and text buttons draw their text in colorPrimary, dark on dark at night -->
+        <item name="selectionChipStyle">@style/Widget.SagerNet.Chip.Choice</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.SagerNet.Button.Toggle</item>
+        <item name="borderlessButtonStyle">@style/Widget.SagerNet.Button.TextButton</item>
     </style>
 
     <style name="Theme.SagerNet.VerdantMint" parent="Theme.SagerNet">
@@ -600,6 +620,9 @@
         <item name="accentOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextPrimary">?android:textColorPrimary</item>
+        <item name="selectionChipStyle">@style/Widget.SagerNet.Chip.Choice</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.SagerNet.Button.Toggle</item>
+        <item name="borderlessButtonStyle">@style/Widget.SagerNet.Button.TextButton</item>
     </style>
 
     <style name="Theme.SagerNet.Dialog.VerdantMint" parent="Theme.SagerNet.Dialog">
@@ -637,23 +660,10 @@
         <item name="accentOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextPrimary">?android:textColorPrimary</item>
-        <!-- The stock checked chip and toggle button draw their text in colorPrimary -->
-        <item name="selectionChipStyle">@style/Widget.SagerNet.Chip.Choice.White</item>
-        <item name="materialButtonOutlinedStyle">@style/Widget.SagerNet.Button.Toggle.White</item>
-    </style>
-
-    <style name="Widget.SagerNet.Chip.Choice.White" parent="Widget.MaterialComponents.Chip.Choice">
-        <item name="chipBackgroundColor">@color/chip_background</item>
-        <item name="android:textColor">@color/chip_text_color</item>
-        <item name="checkedIconTint">?primaryOrTextPrimary</item>
-        <item name="rippleColor">@color/chip_ripple_color</item>
-    </style>
-
-    <style name="Widget.SagerNet.Button.Toggle.White" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:textColor">@color/toggle_text_white</item>
-        <item name="strokeColor">@color/toggle_stroke_white</item>
-        <item name="backgroundTint">@color/toggle_background_white</item>
-        <item name="rippleColor">@color/chip_ripple_color</item>
+        <!-- The stock checked chip, toggle and text buttons draw their text in colorPrimary, white on white -->
+        <item name="selectionChipStyle">@style/Widget.SagerNet.Chip.Choice</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.SagerNet.Button.Toggle</item>
+        <item name="borderlessButtonStyle">@style/Widget.SagerNet.Button.TextButton</item>
     </style>
 
     <style name="Theme.SagerNet.Dialog.White.Night" parent="Theme.SagerNet.Dialog.Black">
@@ -675,6 +685,9 @@
         <item name="accentOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextPrimary">?android:textColorPrimary</item>
+        <item name="selectionChipStyle">@style/Widget.SagerNet.Chip.Choice</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.SagerNet.Button.Toggle</item>
+        <item name="borderlessButtonStyle">@style/Widget.SagerNet.Button.TextButton</item>
     </style>
 
     <!-- AMOLED black overlay: applied at night by Theme.apply/applyDialog; only background, surface and card colours.

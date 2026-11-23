@@ -39,18 +39,18 @@ object OutboundFactory {
     val ALL_TYPES: List<String> = listOf(
         "socks", "http", "shadowsocks", "chain", "autoselector", "vmess", "trojan", "vless", "xrayvless", "hysteria",
         "tuic", "juicity", "trusttunnel", "anytls", "mieru", "snell", "shadowtls", "wireguard", "masque", "openvpn",
-        "openconnect", "tailscale", "ssh", "custom", "extracore", "naive", "direct", "dnstt", "masterdns", "psiphon",
+        "openconnect", "tailscale", "ssh", "custom", "extracore", "naive", "direct", "dnstt", "masterdns",
     )
 
     /** OutboundFactory.cpp:44 and the JSON alias of openvpn.cpp:157-158. */
     private val TYPE_ALIASES = mapOf("hysteria2" to "hysteria", "openvpn-client" to "openvpn")
 
     /**
-     * Not ported (tailscale) or desktop-only (extracore, tor); always an [InvalidOutbound]. tor stays out of [ALL_TYPES]
-     * so its rows from desktop backups count as unsupported, not malformed.
+     * Not ported (tailscale) or desktop-only (extracore, tor, psiphon); always an [InvalidOutbound]. tor and psiphon
+     * stay out of [ALL_TYPES] so their rows from desktop backups count as unsupported, not malformed.
      */
     @JvmField
-    val UNSUPPORTED_TYPES: Set<String> = setOf("tailscale", "extracore", "tor")
+    val UNSUPPORTED_TYPES: Set<String> = setOf("tailscale", "extracore", "tor", "psiphon")
 
     /** Factory string to the class expected in io.nekohasekai.sagernet.outbound.types for the types other packages add. */
     @JvmField
@@ -60,7 +60,7 @@ object OutboundFactory {
         "anytls" to "AnyTls", "mieru" to "Mieru", "snell" to "Snell", "shadowtls" to "ShadowTls",
         "wireguard" to "WireGuard", "masque" to "Masque", "openvpn" to "OpenVpn", "openconnect" to "OpenConnect",
         "ssh" to "Ssh", "custom" to "Custom", "naive" to "Naive", "direct" to "Direct", "chain" to "Chain",
-        "autoselector" to "AutoSelector", "dnstt" to "Dnstt", "masterdns" to "MasterDns", "psiphon" to "Psiphon",
+        "autoselector" to "AutoSelector", "dnstt" to "Dnstt", "masterdns" to "MasterDns",
     )
 
     private const val TYPES_PACKAGE = "io.nekohasekai.sagernet.outbound.types."
@@ -139,7 +139,6 @@ object OutboundFactory {
         // dnst:// links of the masterdns transport go to masterdns, see parseLink.
         Protocol("dnstt", listOf("dnst://", "slipnet://", "slipnet-enc://", "slipnet-bundle-enc://"), listOf("dnstt"), emptyList()),
         Protocol("masterdns", listOf("masterdns://", "stormdns://"), listOf("masterdns"), emptyList()),
-        Protocol("psiphon", emptyList(), listOf("psiphon"), emptyList()),
     )
 
     /** typeForScheme (SubscriptionParser.cpp:69-76): case-sensitive prefix match. */

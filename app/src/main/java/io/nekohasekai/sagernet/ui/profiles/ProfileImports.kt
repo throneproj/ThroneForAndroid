@@ -39,7 +39,6 @@ import io.nekohasekai.sagernet.ui.profile.MieruSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.NaiveSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.OpenConnectSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.OpenVpnSettingsActivity
-import io.nekohasekai.sagernet.ui.profile.PsiphonSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.SSHSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.ShadowTLSSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.ShadowsocksSettingsActivity
@@ -165,7 +164,6 @@ class ProfileImports(private val host: ConfigurationFragment) {
         R.id.action_new_trusttunnel -> TrustTunnelSettingsActivity::class.java
         R.id.action_new_dnstt -> DnsttSettingsActivity::class.java
         R.id.action_new_masterdns -> MasterDnsSettingsActivity::class.java
-        R.id.action_new_psiphon -> PsiphonSettingsActivity::class.java
         R.id.action_new_direct -> DirectSettingsActivity::class.java
         R.id.action_new_masque -> MasqueSettingsActivity::class.java
         R.id.action_new_openvpn -> OpenVpnSettingsActivity::class.java

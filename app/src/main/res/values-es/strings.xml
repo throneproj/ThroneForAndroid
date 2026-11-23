@@ -261,6 +261,7 @@
     <string name="protocol_version">Versión del protocolo</string>
     <string name="show_group_in_notification">Mostrar nombre del grupo en la notificación</string>
     <string name="reset_connections">Restablecer conexiones</string>
+    <string name="reset_upstream_connections_done">Conexiones restablecidas</string>
     <string name="mtu_help">Mantenga pulsada la preferencia para establecer una MTU personalizada.</string>
     <string name="log_level_help">Mantenga pulsada la preferencia para establecer el tamaño del búfer.</string>
     <string name="tls_camouflage_settings">Ajustes de camuflaje TLS</string>
@@ -1429,12 +1430,8 @@
     <string name="exit_through">Salir a través de</string>
     <string name="exit_server">Perfil seleccionado</string>
     <string name="exit_server_hint">El tráfico sale por el perfil iniciado.</string>
-    <string name="exit_psiphon_hint">Psiphon es una red gratuita gestionada por Psiphon Inc., que puede ver los sitios que visita, como cualquier proveedor de VPN.</string>
     <string name="exit_tor_hint">Tor no está disponible en Android, así que el tráfico sale por el perfil seleccionado.</string>
     <string name="exit_unavailable">%s (no disponible en Android)</string>
-    <string name="psiphon_egress_region">Región</string>
-    <string name="psiphon_region_best">Mejor rendimiento</string>
-    <string name="psiphon_egress_region_sum">El país del servidor de Psiphon; «Mejor rendimiento» deja elegir a Psiphon.</string>
     <string name="warp_enable">Activar WARP</string>
     <string name="warp_enable_sum">Permite usar la configuración de abajo como salida, útil para eludir servicios que restringen VPN que no son WARP</string>
     <string name="warp_mode">Modo</string>
@@ -2578,6 +2575,7 @@
     <string name="warp_api_tls_fragment_title">Fragmentación TLS para el registro de WARP</string>
     <string name="warp_api_tls_fragment_note">Solo se aplica cuando el registro se conecta directamente, no a través de un perfil en ejecución.</string>
     <string name="backup_warn_tor_egress">La copia de seguridad envía el tráfico a través de Tor, que no está disponible en Android; aquí sale directamente por el servidor seleccionado.</string>
+    <string name="backup_warn_psiphon_egress">La copia de seguridad envía el tráfico a través de Psiphon, que no está disponible en Android; aquí sale directamente por el servidor seleccionado.</string>
     <string name="validation_dns_server_item">Servidor %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Añadir servidor</string>
     <string name="dns_server_custom">Dirección personalizada</string>
@@ -2832,8 +2830,4 @@
     <string name="vpn_auth_submitting">Iniciando sesión…</string>
     <string name="vpn_auth_gone">Esta solicitud de inicio de sesión ya no está pendiente.</string>
     <string name="vpn_auth_no_browser">Ninguna aplicación puede abrir esta dirección.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">Use un código de país de dos letras, como US.</string>
-    <string name="validation_psiphon_ignored">Se ignoró %1$s: los perfiles de Psiphon solo admiten una región.</string>
-    <string name="exit_runs_over_itself">El perfil seleccionado ya sale por %1$s, así que la salida %1$s no puede funcionar sobre él. Elija otra salida en Ajustes › Enrutamiento › Salida.</string>
 </resources>

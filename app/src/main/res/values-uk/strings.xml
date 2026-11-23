@@ -242,6 +242,7 @@
     <string name="protocol_version">Версія протоколу</string>
     <string name="show_group_in_notification">Показувати назву групи у сповіщенні</string>
     <string name="reset_connections">Скинути з\'єднання</string>
+    <string name="reset_upstream_connections_done">З\'єднання скинуто</string>
     <string name="mtu_help">Довге натискання на налаштування, щоб встановити власний MTU.</string>
     <string name="log_level_help">Довге натискання на налаштування, щоб встановити розмір буфера.</string>
     <string name="tls_camouflage_settings">Налаштування маскування TLS</string>
@@ -1437,12 +1438,8 @@
     <string name="exit_through">Вихід через</string>
     <string name="exit_server">Вибраний профіль</string>
     <string name="exit_server_hint">Трафік виходить через запущений профіль.</string>
-    <string name="exit_psiphon_hint">Psiphon — безкоштовна мережа під керуванням Psiphon Inc.; як і будь-який VPN-провайдер, вона може бачити сайти, які ви відвідуєте.</string>
     <string name="exit_tor_hint">Tor недоступний на Android, тому трафік виходить через вибраний профіль.</string>
     <string name="exit_unavailable">%s (недоступно на Android)</string>
-    <string name="psiphon_egress_region">Регіон</string>
-    <string name="psiphon_region_best">Найкраща продуктивність</string>
-    <string name="psiphon_egress_region_sum">Країна сервера Psiphon; «Найкраща продуктивність» залишає вибір Psiphon.</string>
     <string name="warp_tos_message"><![CDATA[Створення ідентифікатора WARP реєструє новий пристрій у Cloudflare.<br><br>Чи приймаєте ви <a href="%1$s">умови використання Cloudflare WARP</a>?]]></string>
     <string name="warp_wireguard_note">WARP їде поверх вашого проксі: WireGuard потребує проксі, що пересилає UDP.</string>
     <string name="webdav_choose_backup">Вибрати резервну копію</string>
@@ -2651,6 +2648,7 @@
     <string name="warp_api_tls_fragment_title">Фрагментація TLS під час реєстрації WARP</string>
     <string name="warp_api_tls_fragment_note">Діє лише за прямої реєстрації, а не через запущений профіль.</string>
     <string name="backup_warn_tor_egress">Резервна копія спрямовує трафік через Tor, який недоступний на Android; тут він виходить напряму через вибраний сервер.</string>
+    <string name="backup_warn_psiphon_egress">Резервна копія спрямовує трафік через Psiphon, який недоступний на Android; тут він виходить напряму через вибраний сервер.</string>
     <string name="validation_dns_server_item">Сервер %1$s («%2$s»): %3$s</string>
     <string name="dns_server_add">Додати сервер</string>
     <string name="dns_server_custom">Власна адреса</string>
@@ -2908,8 +2906,4 @@
     <string name="vpn_auth_submitting">Виконується вхід…</string>
     <string name="vpn_auth_gone">Цей запит входу більше не очікує відповіді.</string>
     <string name="vpn_auth_no_browser">Немає застосунку, який може відкрити цю адресу.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">Укажіть дволітерний код країни, наприклад US.</string>
-    <string name="validation_psiphon_ignored">Проігноровано %1$s: профілі Psiphon приймають лише регіон.</string>
-    <string name="exit_runs_over_itself">Вибраний профіль уже виходить через %1$s, тому вихід %1$s не може працювати поверх нього. Виберіть інший вихід у розділі «Налаштування › Маршрутизація › Вихід».</string>
 </resources>

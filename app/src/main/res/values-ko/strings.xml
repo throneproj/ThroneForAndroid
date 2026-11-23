@@ -233,6 +233,7 @@
     <string name="protocol_version">프로토콜 버전</string>
     <string name="show_group_in_notification">알림에 그룹 이름 표시</string>
     <string name="reset_connections">연결 재설정</string>
+    <string name="reset_upstream_connections_done">연결을 재설정했습니다</string>
     <string name="mtu_help">설정을 길게 눌러 사용자 지정 MTU를 설정하세요.</string>
     <string name="log_level_help">설정을 길게 눌러 버퍼 크기를 설정하세요.</string>
     <string name="tls_camouflage_settings">TLS 위장 설정</string>
@@ -1474,12 +1475,8 @@
     <string name="exit_through">출구 경로</string>
     <string name="exit_server">선택한 프로필</string>
     <string name="exit_server_hint">트래픽이 시작한 프로필을 통해 나갑니다.</string>
-    <string name="exit_psiphon_hint">Psiphon은 Psiphon Inc.가 운영하는 무료 네트워크로, 다른 VPN 제공업체처럼 방문하는 사이트를 볼 수 있습니다.</string>
     <string name="exit_tor_hint">Android에서는 Tor를 사용할 수 없으므로 트래픽이 선택한 프로필을 통해 나갑니다.</string>
     <string name="exit_unavailable">%s (Android에서 사용 불가)</string>
-    <string name="psiphon_egress_region">지역</string>
-    <string name="psiphon_region_best">최고 성능</string>
-    <string name="psiphon_egress_region_sum">Psiphon 서버의 국가입니다. 최고 성능을 고르면 Psiphon이 선택합니다.</string>
     <string name="warp_tos_message"><![CDATA[WARP 신원을 생성하면 Cloudflare에 새 기기가 등록됩니다.<br><br><a href="%1$s">Cloudflare WARP 이용약관</a>에 동의하시겠습니까?]]></string>
     <string name="warp_wireguard_note">WARP는 프록시 위를 달립니다: WireGuard는 UDP를 전달하는 프록시가 필요합니다.</string>
     <string name="webdav_choose_backup">백업 선택</string>
@@ -2535,6 +2532,7 @@
     <string name="warp_api_tls_fragment_title">WARP 등록용 TLS 조각화</string>
     <string name="warp_api_tls_fragment_note">등록이 실행 중인 프로필을 거치지 않고 직접 연결할 때만 적용됩니다.</string>
     <string name="backup_warn_tor_egress">백업은 트래픽을 Tor로 내보내지만 Android에서는 Tor를 사용할 수 없습니다. 여기서는 선택한 서버로 바로 나갑니다.</string>
+    <string name="backup_warn_psiphon_egress">백업은 트래픽을 Psiphon으로 내보내지만 Android에서는 Psiphon을 사용할 수 없습니다. 여기서는 선택한 서버로 바로 나갑니다.</string>
     <string name="validation_dns_server_item">서버 %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">서버 추가</string>
     <string name="dns_server_custom">사용자 지정 주소</string>
@@ -2786,8 +2784,4 @@
     <string name="vpn_auth_submitting">로그인 중…</string>
     <string name="vpn_auth_gone">이 로그인 요청은 더 이상 대기 중이 아닙니다.</string>
     <string name="vpn_auth_no_browser">이 주소를 열 수 있는 앱이 없습니다.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">US처럼 두 글자 국가 코드를 사용하세요.</string>
-    <string name="validation_psiphon_ignored">%1$s 무시됨: Psiphon 프로필은 지역만 받습니다.</string>
-    <string name="exit_runs_over_itself">선택한 프로필은 이미 %1$s을(를) 통해 나가므로 %1$s 출구를 그 위에서 실행할 수 없습니다. 설정 › 라우팅 › 출구에서 다른 출구를 선택하세요.</string>
 </resources>

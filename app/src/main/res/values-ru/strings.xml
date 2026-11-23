@@ -172,6 +172,7 @@
 <string name="reboot_required">Не удалось запустить службу VPN. Возможно, вам потребуется перезагрузить устройство.</string>
 <string name="remote_dns">Удаленный DNS</string>
 <string name="reset_connections">Сбросить соединения</string>
+<string name="reset_upstream_connections_done">Соединения сброшены</string>
 <string name="reset_settings">Восстановить настройки по умолчанию</string>
 <string name="reset_settings_message">Восстановить настройки по умолчанию, такие данные, как узлы и группы, будут сохранены. Для полной очистки данных, очистите данные приложения непосредственно в системных настройках.</string>
 <string name="route_profile">Выбрать профиль…</string>
@@ -1477,12 +1478,8 @@
     <string name="exit_through">Выход через</string>
     <string name="exit_server">Выбранный профиль</string>
     <string name="exit_server_hint">Трафик выходит через запущенный профиль.</string>
-    <string name="exit_psiphon_hint">Psiphon — бесплатная сеть под управлением Psiphon Inc.; как и любой VPN-провайдер, она может видеть, какие сайты вы посещаете.</string>
     <string name="exit_tor_hint">Tor недоступен на Android, поэтому трафик выходит через выбранный профиль.</string>
     <string name="exit_unavailable">%s (недоступно на Android)</string>
-    <string name="psiphon_egress_region">Регион</string>
-    <string name="psiphon_region_best">Лучшая производительность</string>
-    <string name="psiphon_egress_region_sum">Страна сервера Psiphon; «Лучшая производительность» оставляет выбор за Psiphon.</string>
     <string name="warp_tos_message"><![CDATA[Создание идентификатора WARP регистрирует новое устройство в Cloudflare.<br><br>Принимаете ли вы <a href="%1$s">условия использования Cloudflare WARP</a>?]]></string>
     <string name="warp_wireguard_note">WARP едет поверх вашего прокси: WireGuard требует прокси, пересылающего UDP.</string>
     <string name="webdav_choose_backup">Выбрать резервную копию</string>
@@ -2641,6 +2638,7 @@
     <string name="warp_api_tls_fragment_title">Фрагментация TLS при регистрации WARP</string>
     <string name="warp_api_tls_fragment_note">Действует только при прямой регистрации, а не через запущенный профиль.</string>
     <string name="backup_warn_tor_egress">Резервная копия направляет трафик через Tor, который недоступен на Android; здесь он выходит напрямую через выбранный сервер.</string>
+    <string name="backup_warn_psiphon_egress">Резервная копия направляет трафик через Psiphon, который недоступен на Android; здесь он выходит напрямую через выбранный сервер.</string>
     <string name="validation_dns_server_item">Сервер %1$s («%2$s»): %3$s</string>
     <string name="dns_server_add">Добавить сервер</string>
     <string name="dns_server_custom">Свой адрес</string>
@@ -2898,8 +2896,4 @@
     <string name="vpn_auth_submitting">Выполняется вход…</string>
     <string name="vpn_auth_gone">Этот запрос входа больше не ожидает ответа.</string>
     <string name="vpn_auth_no_browser">Нет приложения, которое может открыть этот адрес.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">Укажите двухбуквенный код страны, например US.</string>
-    <string name="validation_psiphon_ignored">Проигнорировано %1$s: в профилях Psiphon задается только регион.</string>
-    <string name="exit_runs_over_itself">Выбранный профиль уже выходит через %1$s, поэтому выход %1$s не может работать поверх него. Выберите другой выход в разделе «Настройки › Маршрутизация › Выход».</string>
 </resources>

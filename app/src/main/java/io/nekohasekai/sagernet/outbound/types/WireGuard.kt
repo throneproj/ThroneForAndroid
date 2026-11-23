@@ -11,6 +11,7 @@ import io.nekohasekai.sagernet.outbound.import.ClashProxy
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.json.JsonValues
+import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
 import io.nekohasekai.sagernet.outbound.link.Base64Strict
 import io.nekohasekai.sagernet.outbound.link.Hosts
 import io.nekohasekai.sagernet.outbound.link.LinkBuilder
@@ -776,6 +777,12 @@ class WireGuard : Outbound("wireguard") {
         val peerObj = peer.exportToJson()
         if (peerObj.isNotEmpty()) obj["peers"] = JsonArray.of(peerObj)
         return obj
+    }
+
+    /** wireguard::ExportIdentity: keyed on the peer, which every parser fills; the JSON loader leaves the base server empty. */
+    override fun exportIdentity(): JsonObject {
+        if (peer.address.isEmpty()) return exportToJson()
+        return jsonObjectOf("server" to Hosts.toAceHost(peer.address), "server_port" to peer.port)
     }
 
     /** wireguard::Build: the core's key for the worker count is `workers`. */

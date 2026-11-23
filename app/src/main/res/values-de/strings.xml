@@ -261,6 +261,7 @@
     <string name="protocol_version">Protokollversion</string>
     <string name="show_group_in_notification">Gruppenname in der Benachrichtigung anzeigen</string>
     <string name="reset_connections">Verbindungen zurücksetzen</string>
+    <string name="reset_upstream_connections_done">Verbindungen zurückgesetzt</string>
     <string name="mtu_help">Lange auf die Einstellung drücken, um eine benutzerdefinierte MTU festzulegen.</string>
     <string name="log_level_help">Lange auf die Einstellung drücken, um die Puffergröße festzulegen.</string>
     <string name="tls_camouflage_settings">TLS-Verschleierungseinstellungen</string>
@@ -1429,12 +1430,8 @@
     <string name="exit_through">Ausgang über</string>
     <string name="exit_server">Ausgewähltes Profil</string>
     <string name="exit_server_hint">Der Datenverkehr verlässt das Gerät über das gestartete Profil.</string>
-    <string name="exit_psiphon_hint">Psiphon ist ein kostenloses Netz von Psiphon Inc., das wie jeder VPN-Anbieter die besuchten Websites sehen kann.</string>
     <string name="exit_tor_hint">Tor ist auf Android nicht verfügbar, daher verlässt der Datenverkehr das Gerät über das ausgewählte Profil.</string>
     <string name="exit_unavailable">%s (auf Android nicht verfügbar)</string>
-    <string name="psiphon_egress_region">Region</string>
-    <string name="psiphon_region_best">Beste Leistung</string>
-    <string name="psiphon_egress_region_sum">Das Land des Psiphon-Servers; „Beste Leistung“ überlässt die Wahl Psiphon.</string>
     <string name="warp_enable">WARP aktivieren</string>
     <string name="warp_enable_sum">Ermöglicht die Verwendung der untenstehenden Konfiguration als Ausgang, nützlich zum Umgehen von Diensten, die Nicht-WARP-VPNs einschränken</string>
     <string name="warp_mode">Modus</string>
@@ -2567,6 +2564,7 @@
     <string name="warp_api_tls_fragment_title">TLS-Fragmentierung für die WARP-Registrierung</string>
     <string name="warp_api_tls_fragment_note">Gilt nur, wenn die Registrierung direkt verbindet, nicht über ein laufendes Profil.</string>
     <string name="backup_warn_tor_egress">Die Sicherung leitet den Verkehr über Tor, das unter Android nicht verfügbar ist; hier verlässt er das Gerät direkt über den ausgewählten Server.</string>
+    <string name="backup_warn_psiphon_egress">Die Sicherung leitet den Verkehr über Psiphon, das unter Android nicht verfügbar ist; hier verlässt er das Gerät direkt über den ausgewählten Server.</string>
     <string name="validation_dns_server_item">Server %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Server hinzufügen</string>
     <string name="dns_server_custom">Eigene Adresse</string>
@@ -2820,8 +2818,4 @@
     <string name="vpn_auth_submitting">Anmeldung läuft…</string>
     <string name="vpn_auth_gone">Diese Anmeldeanfrage ist nicht mehr offen.</string>
     <string name="vpn_auth_no_browser">Keine App kann diese Adresse öffnen.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">Verwende einen zweibuchstabigen Ländercode, etwa US.</string>
-    <string name="validation_psiphon_ignored">%1$s ignoriert: Psiphon-Profile nehmen nur eine Region an.</string>
-    <string name="exit_runs_over_itself">Das ausgewählte Profil läuft bereits über %1$s, daher kann der %1$s-Ausgang nicht darüber laufen. Wähle einen anderen Ausgang unter Einstellungen › Routing › Ausgang.</string>
 </resources>

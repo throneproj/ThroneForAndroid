@@ -152,7 +152,7 @@ object SettingsRegistry {
     @JvmField val CURRENT_GROUP = long("current_group", 0L) { it >= 0 }
     @JvmField val SHOW_CONFIG_SECURITY = bool("show_config_security", false)
     @JvmField val ALLOW_BETA_UPDATE = bool("allow_beta_update", false)
-    /** BackupArchive::PartNames of the parts ticked for the last backup made; empty means all (a [HOST_KEYS] key). */
+    /** BackupArchive::PartNames of the parts ticked for the last backup made; empty means all (a [RESTORE_KEPT_KEYS] key). */
     @JvmField val BACKUP_PARTS = stringList("backup_parts", emptyList())
 
     // ------------------------------------------------------------------------------------------------ inbound
@@ -309,12 +309,12 @@ object SettingsRegistry {
 
     /**
      * ExitThrough (ExitThrough.h): "server", "warp", "tor" or "psiphon". Any value is kept for the round trip and an
-     * unknown one reads as "server"; Android has no Tor exit, so "tor" acts as "server" here.
+     * unknown one reads as "server"; Android has no Tor or Psiphon exit, so "tor" and "psiphon" act as "server" here.
      */
     @JvmField val EXIT_THROUGH = string("exit_through", ExitThrough.SERVER.value)
     /** Lowercase ISO 3166-1 alpha-2 of the desktop Tor exit's last relay, "" = any; kept for the round trip. */
     @JvmField val TOR_EXIT_COUNTRY = string("tor_exit_country", "")
-    /** Uppercase ISO 3166-1 alpha-2 of the Psiphon exit's server, "" = best performance. */
+    /** Uppercase ISO 3166-1 alpha-2 of the desktop Psiphon exit's server, "" = best performance; kept for the round trip. */
     @JvmField val PSIPHON_EGRESS_REGION = string("psiphon_egress_region", "")
 
     /** The two exclusive switches exit_through replaced, Tor outranking WARP; deleted once migrated. */
@@ -438,9 +438,26 @@ object SettingsRegistry {
         CORE_BOX_API_PORT.key,
     )
 
-    /** The desktop's Host scope (SettingsSchema.h): a backup carries these, but a restore keeps this device's value. */
+    /** A backup carries these, but every restore keeps this device's value. */
     @JvmField
-    val HOST_KEYS: Set<String> = setOf(BACKUP_PARTS.key)
+    val RESTORE_KEPT_KEYS: Set<String> = setOf(BACKUP_PARTS.key)
+
+    /**
+     * The desktop's Host scope (SettingsSchema.cpp) among the keys Android holds; core_box_api_port is in
+     * [DEVICE_LOCAL_KEYS]. A desktop backup's values never replace this phone's, as the desktop's API restore keeps the
+     * host's against another machine's archive; an Android backup restores them, as the desktop window does its own.
+     */
+    @JvmField
+    val HOST_KEYS: Set<String> = setOf(
+        LOG_LEVEL.key, XRAY_LOG_LEVEL.key, REMEMBER_ENABLE.key,
+        DISABLE_MIXED_INBOUND.key, INBOUND_ADDRESS.key, INBOUND_SOCKS_PORT.key, RANDOM_INBOUND_PORT.key,
+        CUSTOM_INBOUND.key, INBOUND_AUTH.key, INBOUND_USER.key, INBOUND_PASS.key,
+        ENABLE_TUN_ROUTING.key, VPN_MTU.key, DISABLE_PRIVATE_RANGE_BYPASS.key, VPN_PRIVATE_RANGES.key, VPN_IPV6.key,
+        VPN_TUN_IPV4_CIDR.key, VPN_TUN_IPV6_CIDR.key,
+        ENABLE_NTP.key, NTP_SERVER_ADDRESS.key, NTP_SERVER_PORT.key, NTP_INTERVAL.key, NTP_OUTBOUND.key,
+        CORE_BOX_CLASH_API.key, CORE_BOX_CLASH_LISTEN_ADDR.key, CORE_BOX_CLASH_API_SECRET.key, CORE_BOX_API_SECRET.key,
+        CORE_BOX_UNDERLYING_DNS.key, CORE_DNS_IN_PORT.key,
+    )
 
     // ------------------------------------------------------------------------------------------------ listeners
 

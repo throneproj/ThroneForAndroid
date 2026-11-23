@@ -211,7 +211,10 @@ class XrayVless : Outbound("xrayvless") {
         return streamParsed
     }
 
-    /** xrayVless::ExportToLink: no dial-field query items; '+' goes out as %2B so receivers don't decode it as a space. */
+    /**
+     * xrayVless::ExportToLink without the desktop's bind_interface, the one dial field Xray takes: binding is wired by the
+     * core here. '+' goes out as %2B so receivers don't decode it as a space.
+     */
     override fun exportToLink(): String {
         // Callers fall back to exportJsonLink, which keeps the storage settings a vless:// link cannot carry.
         if (normalizeXrayNetwork(streamSetting.network) == "xdrive") return ""

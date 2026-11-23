@@ -93,10 +93,17 @@ class MainActivity : ThemedActivity(),
 
         binding = LayoutMainBinding.inflate(layoutInflater)
         binding.fab.initProgress(binding.fabProgress)
-        // White theme: a dark FAB with a light icon (white on white is unreadable)
-        if (Theme.isWhiteTheme()) {
+        // White theme: a dark FAB with a light icon, as white on white is unreadable. Black and White at night: a
+        // lighter grey, since their primary hardly shows on the night background (OLED White's is black on black).
+        val fabTint = when {
+            Theme.isWhiteTheme() -> R.color.color_white_theme_fab
+            themeResId == R.style.Theme_SagerNet_White_Night ||
+                (themeResId == R.style.Theme_SagerNet_Black && Theme.usingNightMode()) -> R.color.material_grey_700
+            else -> null
+        }
+        if (fabTint != null) {
             binding.fab.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                ContextCompat.getColor(this, R.color.color_white_theme_fab)
+                ContextCompat.getColor(this, fabTint)
             )
         }
         if (themeResId !in intArrayOf(

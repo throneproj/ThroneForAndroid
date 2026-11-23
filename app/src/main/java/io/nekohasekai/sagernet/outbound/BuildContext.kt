@@ -62,8 +62,6 @@ data class BuildContext(
     val useDnsObject: Boolean = false,
     /** generate.cpp BuildContext::routeOwnsDns: the routing profile has its own DNS, which also beats [useDnsObject]. */
     val routeOwnsDns: Boolean = false,
-    /** SettingsRepo.h:201 ruleset_mirror — get_jsdelivr_link in psiphon.cpp's server list URLs. */
-    val rulesetMirror: Int = 1,
 ) {
     /** getDirectDomainStrategy (xrayStreamSetting.cpp:1342-1349). */
     fun directDomainStrategy(): String =

@@ -301,7 +301,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     val isWarpExit: Boolean get() = exitThrough == ExitThrough.WARP
 
     var torExitCountry by SettingsRegistry.TOR_EXIT_COUNTRY
-    var psiphonEgressRegion by SettingsRegistry.PSIPHON_EGRESS_REGION
 
     /**
      * SettingsRepo::load: enable_tor / enable_warp become exit_through when it is absent, then go; once per process,

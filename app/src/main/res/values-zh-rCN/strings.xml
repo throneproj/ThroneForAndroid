@@ -256,6 +256,7 @@
     <string name="protocol_version">协议版本</string>
     <string name="show_group_in_notification">在通知中显示组名</string>
     <string name="reset_connections">重置连接</string>
+    <string name="reset_upstream_connections_done">连接已重置</string>
     <string name="tls_camouflage_settings">TLS 伪装设置</string>
     <string name="mtu_help">长按设置项以设置自定义 MTU。</string>
     <string name="log_level_help">长按设置项以设置缓冲区大小。</string>
@@ -1498,12 +1499,8 @@
     <string name="exit_through">出口方式</string>
     <string name="exit_server">所选配置</string>
     <string name="exit_server_hint">流量从你启动的配置出去。</string>
-    <string name="exit_psiphon_hint">Psiphon 是由 Psiphon Inc. 运营的免费网络，与任何 VPN 提供商一样，它能看到你访问的网站。</string>
     <string name="exit_tor_hint">Android 上无法使用 Tor，因此流量从所选配置出去。</string>
     <string name="exit_unavailable">%s（Android 上不可用）</string>
-    <string name="psiphon_egress_region">区域</string>
-    <string name="psiphon_region_best">最佳性能</string>
-    <string name="psiphon_egress_region_sum">Psiphon 服务器所在国家；选择“最佳性能”由 Psiphon 决定。</string>
     <string name="warp_tos_message"><![CDATA[生成 WARP 身份会向 Cloudflare 注册新设备。<br><br>你是否接受 <a href="%1$s">Cloudflare WARP 服务条款</a>？]]></string>
     <string name="warp_wireguard_note">WARP 依托你的代理：WireGuard 需要转发 UDP 的代理。</string>
     <string name="webdav_choose_backup">选择备份</string>
@@ -2551,6 +2548,7 @@
     <string name="warp_api_tls_fragment_title">WARP 注册时的 TLS 分片</string>
     <string name="warp_api_tls_fragment_note">仅在注册直接连接、而非经由正在运行的配置时生效。</string>
     <string name="backup_warn_tor_egress">备份通过 Tor 出站，但 Android 不支持 Tor；此处流量将直接经由所选服务器出站。</string>
+    <string name="backup_warn_psiphon_egress">备份通过 Psiphon 出站，但 Android 不支持 Psiphon；此处流量将直接经由所选服务器出站。</string>
     <string name="validation_dns_server_item">第 %1$s 个服务器（\"%2$s\"）：%3$s</string>
     <string name="dns_server_add">添加服务器</string>
     <string name="dns_server_custom">自定义地址</string>
@@ -2802,8 +2800,4 @@
     <string name="vpn_auth_submitting">正在登录…</string>
     <string name="vpn_auth_gone">此登录请求已不再等待处理。</string>
     <string name="vpn_auth_no_browser">没有可以打开此地址的应用。</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">使用两字母的国家/地区代码，例如 US。</string>
-    <string name="validation_psiphon_ignored">已忽略 %1$s：Psiphon 配置只接受地区。</string>
-    <string name="exit_runs_over_itself">所选配置本身已经经由 %1$s 出去，因此 %1$s 出口无法在其之上运行。请在“设置 › 路由 › 出口”中选择其他出口。</string>
 </resources>

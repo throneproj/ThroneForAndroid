@@ -147,10 +147,8 @@ class TrafficLooper(val data: BaseService.Data, private val sc: CoroutineScope) 
             }
             ProfileManager.resetTraffic(targetIds.toLongArray())
             val batches = updates.values.chunked(TRAFFIC_BATCH_SIZE).map { TrafficDataBatch(ArrayList(it)) }
-            data.binder.broadcast { callback ->
-                if (data.binder.callbackIdMap[callback] == SagerConnection.CONNECTION_ID_MAIN_ACTIVITY_FOREGROUND) {
-                    batches.forEach { callback.cbTrafficUpdate(it) }
-                }
+            data.binder.broadcast(SagerConnection.CONNECTION_ID_MAIN_ACTIVITY_FOREGROUND) { callback ->
+                batches.forEach { callback.cbTrafficUpdate(it) }
             }
         }
     }
@@ -242,14 +240,12 @@ class TrafficLooper(val data: BaseService.Data, private val sc: CoroutineScope) 
                     trafficUpdates = trafficUpdates,
                 )
                 if (data.state == BaseService.State.Connected &&
-                    data.binder.callbackIdMap.containsValue(SagerConnection.CONNECTION_ID_MAIN_ACTIVITY_FOREGROUND)
+                    data.binder.hasCallback(SagerConnection.CONNECTION_ID_MAIN_ACTIVITY_FOREGROUND)
                 ) {
-                    data.binder.broadcast { callback ->
-                        if (data.binder.callbackIdMap[callback] == SagerConnection.CONNECTION_ID_MAIN_ACTIVITY_FOREGROUND) {
-                            callback.cbSpeedUpdate(snapshot.speed)
-                            snapshot.trafficUpdates.chunked(TRAFFIC_BATCH_SIZE).forEach {
-                                callback.cbTrafficUpdate(TrafficDataBatch(ArrayList(it)))
-                            }
+                    data.binder.broadcast(SagerConnection.CONNECTION_ID_MAIN_ACTIVITY_FOREGROUND) { callback ->
+                        callback.cbSpeedUpdate(snapshot.speed)
+                        snapshot.trafficUpdates.chunked(TRAFFIC_BATCH_SIZE).forEach {
+                            callback.cbTrafficUpdate(TrafficDataBatch(ArrayList(it)))
                         }
                     }
                 }

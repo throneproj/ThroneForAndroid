@@ -20,7 +20,6 @@ import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
 import io.nekohasekai.sagernet.outbound.config.ExitThrough
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
-import io.nekohasekai.sagernet.ui.profile.PsiphonRegionMenu
 import io.nekohasekai.sagernet.ui.warp.WarpClient
 import io.nekohasekai.sagernet.ui.warp.WarpGenerate
 import io.nekohasekai.sagernet.validation.Validation
@@ -28,8 +27,8 @@ import kotlinx.coroutines.launch
 import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 /**
- * Routing Settings › Exit: the desktop Exit tab (dialog_manage_routes.cpp), saved as it is edited: exit_through, the
- * Psiphon region and the WARP settings, which only shape the generated config while WARP is the exit.
+ * Routing Settings › Exit: the desktop Exit tab (dialog_manage_routes.cpp), saved as it is edited: exit_through and the
+ * WARP settings, which only shape the generated config while WARP is the exit.
  */
 class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
 
@@ -43,33 +42,29 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
 
     override fun bind() {
         val exit = pref<SimpleMenuPreference>(SettingsRegistry.EXIT_THROUGH.key)
-        val region = pref<SimpleMenuPreference>(SettingsRegistry.PSIPHON_EGRESS_REGION.key)
         val choices = offeredExits(DataStore.exitThrough)
         exit.entries = choices.map { exitLabel(requireContext(), it) }.toTypedArray()
         exit.entryValues = choices.map { it.value }.toTypedArray()
+        if (choices.none { it.value == exit.value }) {
+            // An exit Android does not know (the desktop's psiphon) runs as the server and stays stored until another
+            // is picked; the menu would store its first entry over a value it does not list as soon as it is bound.
+            val persistent = exit.isPersistent
+            exit.isPersistent = false
+            exit.value = ExitThrough.SERVER.value
+            exit.isPersistent = persistent
+        }
         exit.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
             val chosen = ExitThrough.of(it.value)
             exitLabel(requireContext(), chosen) + "\n" + getString(exitHint(chosen))
         }
         exit.setOnPreferenceChangeListener { _, newValue ->
             val chosen = ExitThrough.of(newValue as String)
-            region.isEnabled = chosen == ExitThrough.PSIPHON
             if (newValue != exit.value) {
                 // Stored before the reload reads it; returning true stores it again.
                 DataStore.exitThrough = chosen
                 if (DataStore.serviceState.started) SagerNet.reloadService()
             }
             if (chosen == ExitThrough.WARP && !WarpClient.isGenerated()) toast(R.string.warp_not_generated)
-            true
-        }
-
-        PsiphonRegionMenu.bind(this, region)
-        region.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
-            (it.entry ?: it.value.orEmpty()).toString() + "\n" + getString(R.string.psiphon_egress_region_sum)
-        }
-        region.isEnabled = DataStore.exitThrough == ExitThrough.PSIPHON
-        region.setOnPreferenceChangeListener { _, _ ->
-            if (DataStore.exitThrough == ExitThrough.PSIPHON) needReload()
             true
         }
 
@@ -250,7 +245,7 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
 
         /** What the exit menu offers: Android runs no Tor, which is listed only while it is the stored exit. */
         fun offeredExits(current: ExitThrough): List<ExitThrough> =
-            listOfNotNull(ExitThrough.SERVER, ExitThrough.WARP, ExitThrough.PSIPHON, ExitThrough.TOR.takeIf { current == it })
+            listOfNotNull(ExitThrough.SERVER, ExitThrough.WARP, ExitThrough.TOR.takeIf { current == it })
 
         /** The exit's name; Tor says it has no Android exit. */
         fun exitLabel(context: Context, exit: ExitThrough): String = when (exit) {
@@ -264,7 +259,6 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
             ExitThrough.SERVER -> R.string.exit_server_hint
             ExitThrough.WARP -> R.string.warp_enable_sum
             ExitThrough.TOR -> R.string.exit_tor_hint
-            ExitThrough.PSIPHON -> R.string.exit_psiphon_hint
         }
     }
 }

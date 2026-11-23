@@ -73,7 +73,7 @@ class Trojan : Outbound("trojan") {
         return true
     }
 
-    /** Trojan::ExportToLink (trojan.cpp): an explicit multiplex Off is not written (only an enabled one is), no dial-field items. */
+    /** Trojan::ExportToLink (trojan.cpp): an explicit multiplex Off goes out as mux=false. */
     override fun exportToLink(): String {
         val url = LinkBuilder("trojan")
         url.host = server
@@ -83,7 +83,8 @@ class Trojan : Outbound("trojan") {
         if (password.isNotEmpty()) url.setUserName(password)
         if (tls.enabled) url.addQueryItems(tls.exportToLink())
         if (transport.type.isNotEmpty()) url.addQueryItems(transport.exportToLink(tls.enabled))
-        if (multiplex.enabled) url.addQueryItems(multiplex.exportToLink())
+        url.addQueryItems(multiplex.exportToLink())
+        url.addQueryItems(baseLinkQuery())
         return url.build()
     }
 

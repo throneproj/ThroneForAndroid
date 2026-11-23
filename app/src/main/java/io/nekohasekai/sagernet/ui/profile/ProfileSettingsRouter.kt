@@ -28,7 +28,6 @@ fun settingsActivityFor(type: String): Class<out ProfileSettingsActivity<*>> =
         "trusttunnel" -> TrustTunnelSettingsActivity::class.java
         "dnstt" -> DnsttSettingsActivity::class.java
         "masterdns" -> MasterDnsSettingsActivity::class.java
-        "psiphon" -> PsiphonSettingsActivity::class.java
         "direct" -> DirectSettingsActivity::class.java
         "masque" -> MasqueSettingsActivity::class.java
         "openvpn" -> OpenVpnSettingsActivity::class.java

@@ -258,6 +258,7 @@
     <string name="protocol_version">Versi protokol</string>
     <string name="show_group_in_notification">Tampilkan nama grup di notifikasi</string>
     <string name="reset_connections">Setel ulang koneksi</string>
+    <string name="reset_upstream_connections_done">Koneksi telah disetel ulang</string>
     <string name="mtu_help">Tekan lama preferensi untuk mengatur MTU kustom.</string>
     <string name="log_level_help">Tekan lama preferensi untuk mengatur ukuran buffer.</string>
     <string name="tls_camouflage_settings">Pengaturan kamuflase TLS</string>
@@ -1433,12 +1434,8 @@
     <string name="exit_through">Keluar melalui</string>
     <string name="exit_server">Profil terpilih</string>
     <string name="exit_server_hint">Lalu lintas keluar melalui profil yang Anda jalankan.</string>
-    <string name="exit_psiphon_hint">Psiphon adalah jaringan gratis yang dikelola Psiphon Inc., yang dapat melihat situs yang Anda kunjungi, seperti penyedia VPN mana pun.</string>
     <string name="exit_tor_hint">Tor tidak tersedia di Android, jadi lalu lintas keluar melalui profil terpilih.</string>
     <string name="exit_unavailable">%s (tidak tersedia di Android)</string>
-    <string name="psiphon_egress_region">Wilayah</string>
-    <string name="psiphon_region_best">Performa terbaik</string>
-    <string name="psiphon_egress_region_sum">Negara server Psiphon; Performa terbaik membiarkan Psiphon memilih.</string>
     <string name="warp_enable">Aktifkan WARP</string>
     <string name="warp_enable_sum">Mengaktifkan konfigurasi di bawah untuk digunakan sebagai keluar, berguna untuk melewati layanan yang membatasi VPN non-WARP</string>
     <string name="warp_mode">Mode</string>
@@ -2560,6 +2557,7 @@
     <string name="warp_api_tls_fragment_title">Fragmentasi TLS untuk registrasi WARP</string>
     <string name="warp_api_tls_fragment_note">Hanya berlaku saat registrasi terhubung langsung, bukan melalui profil yang sedang berjalan.</string>
     <string name="backup_warn_tor_egress">Cadangan mengirim lalu lintas keluar melalui Tor, yang tidak tersedia di Android; di sini lalu lintas keluar langsung melalui server yang dipilih.</string>
+    <string name="backup_warn_psiphon_egress">Cadangan mengirim lalu lintas keluar melalui Psiphon, yang tidak tersedia di Android; di sini lalu lintas keluar langsung melalui server yang dipilih.</string>
     <string name="validation_dns_server_item">Server %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Tambah server</string>
     <string name="dns_server_custom">Alamat khusus</string>
@@ -2812,8 +2810,4 @@
     <string name="vpn_auth_submitting">Sedang masuk…</string>
     <string name="vpn_auth_gone">Permintaan masuk ini tidak lagi tertunda.</string>
     <string name="vpn_auth_no_browser">Tidak ada aplikasi yang dapat membuka alamat ini.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">Gunakan kode negara dua huruf, seperti US.</string>
-    <string name="validation_psiphon_ignored">%1$s diabaikan: profil Psiphon hanya menerima wilayah.</string>
-    <string name="exit_runs_over_itself">Profil terpilih sudah keluar melalui %1$s, jadi jalur keluar %1$s tidak dapat berjalan di atasnya. Pilih jalur keluar lain di Pengaturan › Perutean › Jalur keluar.</string>
 </resources>

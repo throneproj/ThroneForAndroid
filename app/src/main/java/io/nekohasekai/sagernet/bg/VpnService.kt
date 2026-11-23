@@ -97,14 +97,12 @@ class VpnService : BaseVpnService(),
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // The system starts an always-on VPN whatever the service mode says; the rest of the app follows the mode.
         if (DataStore.serviceMode != Key.MODE_VPN && isAlwaysOnVpn()) DataStore.serviceMode = Key.MODE_VPN
-        if (DataStore.serviceMode == Key.MODE_VPN) {
-            if (prepare(this) != null) {
-                startActivity(
-                    Intent(
-                        this, VpnRequestActivity::class.java
-                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                )
-            } else return super<BaseService.Interface>.onStartCommand(intent, flags, startId)
+        val vpnMode = DataStore.serviceMode == Key.MODE_VPN
+        if (vpnMode && prepare(this) == null) return super<BaseService.Interface>.onStartCommand(intent, flags, startId)
+        // Started as a foreground service: stopping before startForeground crashes the process (see startProxy).
+        if (data.notification == null) data.notification = createNotification("")
+        if (vpnMode) {
+            startActivity(Intent(this, VpnRequestActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
         stopRunner()
         return Service.START_NOT_STICKY

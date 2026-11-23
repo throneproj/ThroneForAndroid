@@ -436,13 +436,10 @@ class StatsBar @JvmOverloads constructor(
                 Logs.w(e.toString())
                 onMainDispatcher {
                     isEnabled = true
-                    setStatus(app.getText(R.string.connection_test_testing))
-
-                    activity.snackbar(
-                        app.getString(
-                            R.string.connection_test_error, e.readableMessage
-                        )
-                    ).show()
+                    val failure = app.getString(R.string.connection_test_error, e.readableMessage)
+                    setStatus(failure)
+                    // The status keeps to one line: the snackbar shows a long error in full.
+                    activity.snackbar(failure).show()
                 }
             }
             // After the test, not beside it: one request at a time through the running connection.

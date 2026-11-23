@@ -184,7 +184,7 @@ private const val CHECK_PARALLELISM = 4
 /**
  * runLatencyGroup (TestRunner.cpp:307-406) for URL, IP and service tests: batches of [batchSize] profiles, one test
  * build each, its probes at most [MAX_PARALLEL_PROBES] at a time; results are reported in arrival order, a chunk per
- * wake-up. Profiles with a slow-start hop go last, [SlowStart.BATCH_SIZE] to a batch (testRunnerForBatches).
+ * wake-up.
  */
 internal abstract class LatencySweep(protected val session: TestSession) {
 
@@ -202,8 +202,7 @@ internal abstract class LatencySweep(protected val session: TestSession) {
     protected abstract fun invalid(profileId: Long, reason: String): ProbeResult
 
     suspend fun run(profiles: List<ProxyEntity>) {
-        val (slow, others) = SlowStart.split(profiles)
-        for (slice in others.chunked(batchSize) + slow.chunked(SlowStart.BATCH_SIZE)) {
+        for (slice in profiles.chunked(batchSize)) {
             if (session.cancelled) break
             runBatch(slice)
         }

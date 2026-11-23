@@ -11,6 +11,7 @@ import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.json.JsonValues
 import io.nekohasekai.sagernet.outbound.link.Base64Strict
 import io.nekohasekai.sagernet.outbound.link.LinkBuilder
+import io.nekohasekai.sagernet.outbound.link.LinkCodec
 import io.nekohasekai.sagernet.outbound.link.LinkParser
 import io.nekohasekai.sagernet.validation.Issue
 import io.nekohasekai.sagernet.validation.ParseDiag
@@ -60,7 +61,8 @@ class Http : Outbound("http") {
         if (q.has("path")) path = q.value("path")
         val rawHeaders = q.value("headers")
         if (rawHeaders.isNotEmpty()) {
-            headers = QtStrings.split(rawHeaders, ",")
+            // A comma inside a name or value stays escaped in the PrettyDecoded value, so items decode after the split.
+            headers = QtStrings.split(rawHeaders, ",").mapTo(ArrayList()) { LinkCodec.decodeFully(it) }
             if (headers.size % 2 != 0) {
                 ParseDiag.warn("headers", vtr(R.string.validation_http_headers_unpaired))
                 headers = ArrayList()
@@ -106,7 +108,10 @@ class Http : Outbound("http") {
         if (username.isNotEmpty()) url.setUserName(username)
         if (password.isNotEmpty()) url.setPassword(password)
         if (path.isNotEmpty()) url.addQueryItem("path", path)
-        if (headers.isNotEmpty()) url.addQueryItem("headers", headers.joinToString(","))
+        // Bare commas separate the items, so a comma inside one goes out as %2C.
+        if (headers.isNotEmpty()) {
+            url.addQueryItemPercentEncoded("headers", headers.joinToString(",") { LinkCodec.encodeQueryPart(it).replace(",", "%2C") })
+        }
         url.addQueryItems(tls.exportToLink())
         url.addQueryItems(baseLinkQuery())
         return url.build()

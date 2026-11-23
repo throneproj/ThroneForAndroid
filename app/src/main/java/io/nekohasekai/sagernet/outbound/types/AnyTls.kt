@@ -104,7 +104,8 @@ class AnyTls : Outbound("anytls") {
         if (name.isNotEmpty()) url.fragment = name
         if (idle_session_check_interval.isNotEmpty()) url.addQueryItem("idle_session_check_interval", idle_session_check_interval)
         if (idle_session_timeout.isNotEmpty()) url.addQueryItem("idle_session_timeout", idle_session_timeout)
-        if (min_idle_session > 0) url.addQueryItem("min_idle_session", min_idle_session.toString())
+        // 0 is written too: a missing key reads back as the app default of 5, not the core's 0.
+        if (min_idle_session >= 0) url.addQueryItem("min_idle_session", min_idle_session.toString())
         url.addQueryItems(tls.exportToLink())
         url.addQueryItems(baseLinkQuery())
         return url.build()
@@ -118,7 +119,7 @@ class AnyTls : Outbound("anytls") {
         if (password.isNotEmpty()) obj["password"] = password
         if (idle_session_check_interval.isNotEmpty()) obj["idle_session_check_interval"] = idle_session_check_interval
         if (idle_session_timeout.isNotEmpty()) obj["idle_session_timeout"] = idle_session_timeout
-        if (min_idle_session > 0) obj["min_idle_session"] = min_idle_session
+        if (min_idle_session >= 0) obj["min_idle_session"] = min_idle_session
         obj["tls"] = tls.exportToJson()
         return obj
     }

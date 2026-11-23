@@ -234,6 +234,7 @@
     <string name="protocol_version">プロトコルバージョン</string>
     <string name="show_group_in_notification">通知にグループ名を表示</string>
     <string name="reset_connections">接続をリセット</string>
+    <string name="reset_upstream_connections_done">接続をリセットしました</string>
     <string name="mtu_help">設定を長押ししてカスタム MTU を設定します。</string>
     <string name="log_level_help">設定を長押ししてバッファサイズを設定します。</string>
     <string name="tls_camouflage_settings">TLS カモフラージュ設定</string>
@@ -1475,12 +1476,8 @@
     <string name="exit_through">出口の経由先</string>
     <string name="exit_server">選択したプロファイル</string>
     <string name="exit_server_hint">トラフィックは起動したプロファイルから出ます。</string>
-    <string name="exit_psiphon_hint">Psiphon は Psiphon Inc. が運営する無料ネットワークで、他の VPN プロバイダーと同様に、アクセスしたサイトを見ることができます。</string>
     <string name="exit_tor_hint">Android では Tor を利用できないため、トラフィックは選択したプロファイルから出ます。</string>
     <string name="exit_unavailable">%s（Android では利用不可）</string>
-    <string name="psiphon_egress_region">地域</string>
-    <string name="psiphon_region_best">最高のパフォーマンス</string>
-    <string name="psiphon_egress_region_sum">Psiphon サーバーの国。「最高のパフォーマンス」では Psiphon が選びます。</string>
     <string name="warp_tos_message"><![CDATA[WARP 身份情報の生成は Cloudflare に新しいデバイスを登録します。<br><br><a href="%1$s">Cloudflare WARP 利用規約</a>に同意しますか？]]></string>
     <string name="warp_wireguard_note">WARP はプロキシ上を走行：WireGuard は UDP を転送するプロキシが必要です。</string>
     <string name="webdav_choose_backup">バックアップを選択</string>
@@ -2536,6 +2533,7 @@
     <string name="warp_api_tls_fragment_title">WARP 登録時の TLS フラグメント</string>
     <string name="warp_api_tls_fragment_note">登録が実行中のプロファイルを経由せず直接接続する場合にのみ適用されます。</string>
     <string name="backup_warn_tor_egress">バックアップはトラフィックを Tor 経由で送出しますが、Android では Tor を利用できません。ここでは選択したサーバーから直接送出されます。</string>
+    <string name="backup_warn_psiphon_egress">バックアップはトラフィックを Psiphon 経由で送出しますが、Android では Psiphon を利用できません。ここでは選択したサーバーから直接送出されます。</string>
     <string name="validation_dns_server_item">サーバー %1$s（「%2$s」）：%3$s</string>
     <string name="dns_server_add">サーバーを追加</string>
     <string name="dns_server_custom">カスタムアドレス</string>
@@ -2787,8 +2785,4 @@
     <string name="vpn_auth_submitting">サインインしています…</string>
     <string name="vpn_auth_gone">このサインイン要求はもう保留されていません。</string>
     <string name="vpn_auth_no_browser">このアドレスを開けるアプリがありません。</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">US のような 2 文字の国コードを使用してください。</string>
-    <string name="validation_psiphon_ignored">%1$s を無視しました：Psiphon プロファイルで指定できるのは地域だけです。</string>
-    <string name="exit_runs_over_itself">選択したプロファイルはすでに %1$s を経由して出るため、%1$s 出口をその上で動かせません。設定 › ルーティング › 出口 で別の出口を選んでください。</string>
 </resources>

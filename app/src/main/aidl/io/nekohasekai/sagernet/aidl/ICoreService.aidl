@@ -47,8 +47,4 @@ interface ICoreService {
   // Service check: the categories and checks of the definitions a check would run with, downloading a newer copy when
   // due; returns the ParseServiceChecks description JSON, "" when the core cannot describe them (see ServiceDefinitions).
   String describeServiceChecks();
-
-  // The egress regions Psiphon last reported in :bg, uppercase country codes; empty until a Psiphon outbound has
-  // connected there since the process started.
-  String[] psiphonRegions();
 }

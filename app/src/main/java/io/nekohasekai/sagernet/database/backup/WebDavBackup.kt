@@ -5,7 +5,9 @@ import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.ktx.USER_AGENT
 import io.nekohasekai.sagernet.ktx.app
+import io.nekohasekai.sagernet.ktx.newHttpClient
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonInput
@@ -14,7 +16,6 @@ import okhttp3.Credentials
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -72,14 +73,17 @@ class WebDavBackup private constructor(private val base: HttpUrl, private val se
         val existed: Boolean,
     )
 
-    private val authorization = Credentials.basic(
-        DataStore.webdavUsername.orEmpty(), DataStore.webdavPassword.orEmpty(), Charsets.UTF_8
-    )
+    /** None without a user or password, as desktop: an empty pair would still go out as `Basic Og==`. */
+    private val authorization: String? = run {
+        val user = DataStore.webdavUsername.orEmpty()
+        val password = DataStore.webdavPassword.orEmpty()
+        if (user.isEmpty() && password.isEmpty()) null else Credentials.basic(user, password, Charsets.UTF_8)
+    }
 
-    private val client = OkHttpClient.Builder()
+    /** Direct; net_insecure lets self-signed and private-CA servers through, as on desktop. */
+    private val client = newHttpClient(viaProxy = false, allowInsecure = DataStore.netInsecure, timeoutSeconds = 60)
+        .newBuilder()
         .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
     /** For PROPFIND, MKCOL, PUT and DELETE: a followed 301/302 may turn into a GET. */
@@ -294,7 +298,8 @@ class WebDavBackup private constructor(private val base: HttpUrl, private val se
 
     // ------------------------------------------------------------------------------------------------ transport
 
-    private fun request(url: HttpUrl) = Request.Builder().url(url).header("Authorization", authorization)
+    private fun request(url: HttpUrl) = Request.Builder().url(url).header("User-Agent", USER_AGENT)
+        .apply { authorization?.let { header("Authorization", it) } }
 
     /** The first [depth] folder segments as a collection URL. */
     private fun collection(depth: Int): HttpUrl = base.newBuilder().apply {

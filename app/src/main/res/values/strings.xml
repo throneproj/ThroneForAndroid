@@ -309,6 +309,7 @@
     <string name="protocol_version">Protocol version</string>
     <string name="show_group_in_notification">Show group name in notification</string>
     <string name="reset_connections">Reset connections</string>
+    <string name="reset_upstream_connections_done">Connections reset</string>
     <string name="mtu_help">Long press the preference to set custom MTU.</string>
     <string name="log_level_help">Long press the preference to set the buffer size.</string>
     <string name="tls_camouflage_settings">TLS camouflage settings</string>
@@ -1624,12 +1625,8 @@
     <string name="exit_through">Exit through</string>
     <string name="exit_server">Selected profile</string>
     <string name="exit_server_hint">Traffic leaves through the profile you started.</string>
-    <string name="exit_psiphon_hint">Psiphon is a free network run by Psiphon Inc., which can see the sites you visit, like any VPN provider.</string>
     <string name="exit_tor_hint">Tor is not available on Android, so traffic leaves through the selected profile.</string>
     <string name="exit_unavailable">%s (not available on Android)</string>
-    <string name="psiphon_egress_region">Region</string>
-    <string name="psiphon_region_best">Best performance</string>
-    <string name="psiphon_egress_region_sum">The country of the Psiphon server; Best performance lets Psiphon choose.</string>
     <string name="warp_enable">Enable WARP</string>
     <string name="warp_enable_sum">Enables the config below to be used as exit, useful for bypassing services restricting non-WARP VPNs</string>
     <string name="warp_mode">Mode</string>
@@ -1789,6 +1786,7 @@
     <string name="backup_warn_raw_routes">%d raw routing profiles from Throne desktop are kept read-only; Android cannot use them.</string>
     <string name="backup_warn_lan_access">The backup lets other devices connect (inbound address %s); this was turned off. Turn it on again in the inbound settings if you need it.</string>
     <string name="backup_warn_tor_egress">The backup sends traffic out through Tor, which is not available on Android; here it leaves through the selected server directly.</string>
+    <string name="backup_warn_psiphon_egress">The backup sends traffic out through Psiphon, which is not available on Android; here it leaves through the selected server directly.</string>
 
     <string name="webdav_choose_backup">Choose a backup</string>
     <string name="webdav_no_backups">No .thrbackup files were found in %s.</string>
@@ -3046,8 +3044,4 @@
     <string name="vpn_auth_submitting">Signing in…</string>
     <string name="vpn_auth_gone">This sign-in request is no longer pending.</string>
     <string name="vpn_auth_no_browser">No app can open this address.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">Use a two-letter country code, like US.</string>
-    <string name="validation_psiphon_ignored">Ignored %1$s: Psiphon profiles take only a region.</string>
-    <string name="exit_runs_over_itself">The selected profile already leaves through %1$s, so the %1$s exit cannot run over it. Choose another exit in Settings › Routing › Exit.</string>
 </resources>

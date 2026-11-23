@@ -411,7 +411,7 @@ object BackupRestore {
                 // Database.cpp:364-377 raises all three counters whichever of the two parts was restored.
                 for ((table, value) in staged.counters) raiseSequence(db, table, value)
             }
-            if (choice.settings) applySettings(db, staged, fromAndroid, warnings)
+            if (choice.settings) applySettings(db, staged, choice, fromAndroid, warnings)
             // Configs.cpp:32-44 initDB: an empty table gets its Default row, with a fresh id.
             if (choice.profiles) SagerDatabase.groupDao.insertDefaultIfEmpty(SagerDatabase.defaultGroupName())
             // GroupsRepo's NormalizePins on load, once for the restored groups: the pins head their order.
@@ -449,13 +449,21 @@ object BackupRestore {
     }
 
     /**
-     * R10 §8.3: an Android backup replaces every row but the device-local and Host keys; a desktop backup replaces the
-     * desktop rows and keeps this phone's Android-only rows (adopting only those the phone lacks). Unknown and
-     * desktop-only keys are stored as they are so they go back to the desktop; exit_through "tor" is kept too, with a
-     * warning since Android has no Tor exit.
+     * R10 §8.3: every restore keeps this phone's device-local and [SettingsRegistry.RESTORE_KEPT_KEYS] rows and the
+     * selection ids of the tables it leaves ([keptSelection]). An Android backup replaces every other row; a desktop
+     * backup replaces the desktop rows but the Host ones and keeps this phone's Android-only rows (adopting only those
+     * the phone lacks). Unknown and desktop-only keys are stored as they are so they go back to the desktop;
+     * exit_through "tor" and "psiphon" are kept too, with a warning since Android has neither exit.
      */
-    private fun applySettings(db: SupportSQLiteDatabase, staged: Staged, fromAndroid: Boolean, warnings: MutableList<String>) {
-        val local = SettingsRegistry.DEVICE_LOCAL_KEYS + SettingsRegistry.HOST_KEYS
+    private fun applySettings(
+        db: SupportSQLiteDatabase,
+        staged: Staged,
+        choice: Choice,
+        fromAndroid: Boolean,
+        warnings: MutableList<String>,
+    ) {
+        val local = SettingsRegistry.DEVICE_LOCAL_KEYS + SettingsRegistry.RESTORE_KEPT_KEYS + keptSelection(choice) +
+            (if (fromAndroid) emptySet<String>() else SettingsRegistry.HOST_KEYS)
         val kept = if (fromAndroid) local else local + SettingsRegistry.ANDROID_KEYS
         db.execSQL(
             "DELETE FROM `$SETTINGS` WHERE `key` NOT IN (${kept.joinToString(",") { "?" }})",
@@ -476,9 +484,9 @@ object BackupRestore {
         // SettingsRepo::load: a backup from before exit_through brings enable_tor / enable_warp instead.
         SettingsRegistry.legacyExitThrough { readSetting(db, it) }?.let { writeSetting(db, SettingsRegistry.EXIT_THROUGH.key, it) }
         for (key in SettingsRegistry.LEGACY_EXIT_KEYS) writeSetting(db, key, null)
-        if (ExitThrough.of(readSetting(db, SettingsRegistry.EXIT_THROUGH.key)) == ExitThrough.TOR) {
-            warnings.add(app.getString(R.string.backup_warn_tor_egress))
-        }
+        val exit = readSetting(db, SettingsRegistry.EXIT_THROUGH.key)
+        if (ExitThrough.of(exit) == ExitThrough.TOR) warnings.add(app.getString(R.string.backup_warn_tor_egress))
+        if (exit == PSIPHON_EXIT) warnings.add(app.getString(R.string.backup_warn_psiphon_egress))
         // Database.cpp:357-359: without a markers table the backup predates the migrations, which then run again.
         db.execSQL("DELETE FROM `$MARKERS`")
         staged.markers?.let { insertRows(db, MARKERS, it) }
@@ -497,10 +505,18 @@ object BackupRestore {
         }
     }
 
+    /** Database.cpp:548-555: a selection whose table stays keeps this phone's id; the backup's would name an unrelated row. */
+    private fun keptSelection(choice: Choice): Set<String> = buildSet {
+        if (!choice.profiles) addAll(listOf(SettingsRegistry.CURRENT_GROUP.key, Key.PROFILE_ID, Key.PROFILE_CURRENT, REMEMBER_ID))
+        if (!choice.routes) add(SettingsRegistry.CURRENT_ROUTE_ID.key)
+    }
+
     /**
-     * The ids kept in settings must name existing rows: `current_group` (else the first tab), `current_route_id`
-     * (a non-raw profile, else the first one), the selected / last profile (a desktop backup's `remember_id` when it
-     * names a restored profile, else none); `inbound_address` goes back to loopback unless LAN access was already on.
+     * Database.cpp:568-591: the ids kept in settings must name existing rows, and one this phone kept for a table the
+     * backup replaced now names an unrelated row. So `current_group` (else the first tab), `current_route_id` (a
+     * non-raw profile, else the first one) and the selected / last profile (a desktop backup's `remember_id` when it
+     * names a restored profile, else none) follow the replaced tables; `inbound_address` goes back to loopback unless
+     * LAN access was already on.
      */
     private fun fixSelection(
         db: SupportSQLiteDatabase,
@@ -516,12 +532,26 @@ object BackupRestore {
             out
         }
 
+        fun id(key: String): Long? = readSetting(db, key)?.trim()?.toLongOrNull()
+
         if (choice.profiles || choice.settings) {
+            // Without the backup's settings, the ids are still this phone's.
+            val stale = choice.profiles && !choice.settings
             val groups = ids("SELECT `id` FROM `$GROUPS` ORDER BY `display_order`, `id`")
-            val key = SettingsRegistry.CURRENT_GROUP.key
-            if (readSetting(db, key)?.trim()?.toLongOrNull() !in groups) writeSetting(db, key, groups.firstOrNull()?.toString())
+            val groupKey = SettingsRegistry.CURRENT_GROUP.key
+            if (stale || id(groupKey) !in groups) writeSetting(db, groupKey, groups.firstOrNull()?.toString())
 
             val profiles = ids("SELECT `id` FROM `$PROFILES`").toHashSet()
+            // A desktop backup keeps this phone's Android-only selection, which its profiles replace just the same.
+            val staleProfile = stale || choice.profiles && !fromAndroid
+            for (selection in listOf(Key.PROFILE_ID, Key.PROFILE_CURRENT)) {
+                val selected = id(selection) ?: continue
+                if (selected > 0L && (staleProfile || selected !in profiles)) writeSetting(db, selection, null)
+            }
+            val rememberId = id(REMEMBER_ID)
+            if (rememberId != null && rememberId >= 0L && (stale || rememberId !in profiles)) {
+                writeSetting(db, REMEMBER_ID, DesktopSchema.NO_PROFILE_ID.toString())
+            }
             // remember_id names a profile of the same backup only when its profiles came along.
             if (choice.settings && choice.profiles && !fromAndroid) {
                 val remember = staged.settings?.get(REMEMBER_ID)?.trim()?.toLongOrNull()?.takeIf { it in profiles }
@@ -530,16 +560,13 @@ object BackupRestore {
                     writeSetting(db, Key.PROFILE_CURRENT, remember.toString())
                 }
             }
-            for (selection in listOf(Key.PROFILE_ID, Key.PROFILE_CURRENT)) {
-                val id = readSetting(db, selection)?.trim()?.toLongOrNull() ?: continue
-                if (id > 0L && id !in profiles) writeSetting(db, selection, null)
-            }
         }
 
         if (choice.routes || choice.settings) {
             val usable = ids("SELECT `id` FROM `$ROUTE_PROFILES` WHERE `is_raw` = 0 ORDER BY `id`")
             val key = SettingsRegistry.CURRENT_ROUTE_ID.key
-            if (readSetting(db, key)?.trim()?.toLongOrNull() !in usable) writeSetting(db, key, usable.firstOrNull()?.toString())
+            val stale = choice.routes && !choice.settings
+            if (stale || id(key) !in usable) writeSetting(db, key, usable.firstOrNull()?.toString())
         }
 
         if (choice.settings && !lanWasOn) {
@@ -553,6 +580,9 @@ object BackupRestore {
     }
 
     private const val REMEMBER_ID = "remember_id"
+
+    /** The desktop's Psiphon exit_through, which Android no longer has. */
+    private const val PSIPHON_EXIT = "psiphon"
 
     /** entity_ids column -> the Room table whose AUTOINCREMENT sequence plays it. */
     private val COUNTERS = listOf(

@@ -275,7 +275,12 @@ class RouteRule {
         return obj
     }
 
-    /** RouteRule::isEmpty (RouteRule.cpp:586-604), judged on the effective action. */
+    /**
+     * RouteRule::isEmpty (RouteRule.cpp:285-303) on the effective action, judged by match conditions where the desktop
+     * counts JSON keys: a route or bypass rule always carries its outbound, so the count never found one empty, and
+     * one without conditions would catch all traffic. Without conditions a route-options rule still applies its
+     * options to all traffic, so it is empty only when it has no options either.
+     */
     fun isEmpty(): Boolean {
         val t = RuleType.ofId(type)
         if (t != RuleType.CUSTOM) {
@@ -286,12 +291,16 @@ class RouteRule {
             }
             return blank(process_name) && blank(process_path)
         }
-        val size = toRuleJson(false).size
         return when (effectiveAction()) {
-            "route", "route-options", "hijack-dns" -> size <= 1
+            "route", "bypass", "hijack-dns" -> !hasMatchConditions()
+            "route-options" -> !hasMatchConditions() && !hasRouteOptions()
             else -> false
         }
     }
+
+    /** Whether a route-options rule sets anything the core takes; it refuses one without ("empty route option action"). */
+    private fun hasRouteOptions(): Boolean = override_address.isNotBlank() || QtStrings.toInt(override_port) > 0 ||
+        tls_fragment || tls_record_fragment || tls_spoof.isNotBlank()
 
     /**
      * The member names of the attributes that are not at their default (the desktop's is_attribute_at_default), in
@@ -432,10 +441,8 @@ class RouteRule {
             if (tls_fragment && tls_record_fragment) {
                 add(Severity.Error, "tls_record_fragment", vtr(R.string.validation_route_fragment_exclusive), "tls_fragment")
             }
-            val anyOption = override_address.isNotBlank() || QtStrings.toInt(override_port) > 0 || tls_fragment ||
-                tls_record_fragment || tls_spoof.isNotBlank()
             // Without conditions either, the rule is empty and dropped at save.
-            if (!anyOption && hasMatchConditions()) add(Severity.Error, "action", vtr(R.string.validation_route_options_empty))
+            if (!hasRouteOptions() && hasMatchConditions()) add(Severity.Error, "action", vtr(R.string.validation_route_options_empty))
         }
         if (applies("tls_fragment") && tls_fragment_fallback_delay.isNotBlank() && !tls_fragment) {
             add(Severity.Warning, "tls_fragment_fallback_delay", vtr(R.string.validation_route_fallback_delay_unused), "tls_fragment")

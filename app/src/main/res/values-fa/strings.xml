@@ -248,6 +248,7 @@
     <string name="protocol_version">نسخه پروتکل</string>
     <string name="show_group_in_notification">نمایش نام گروه در نوار اعلان</string>
     <string name="reset_connections">بازنشانی اتصالات</string>
+    <string name="reset_upstream_connections_done">اتصالات بازنشانی شد</string>
     <string name="mtu_help">برای تنظیم MTU سفارشی، تنظیمات را مدتی فشار دهید.</string>
     <string name="log_level_help">برای تنظیم اندازه بافر، تنظیمات را مدتی فشار دهید.</string>
     <string name="tls_camouflage_settings">تنظیمات استتار TLS</string>
@@ -1719,12 +1720,8 @@
     <string name="exit_through">خروج از طریق</string>
     <string name="exit_server">پروفایل انتخاب‌شده</string>
     <string name="exit_server_hint">ترافیک از پروفایلی که اجرا کرده‌اید خارج می‌شود.</string>
-    <string name="exit_psiphon_hint">Psiphon شبکه‌ای رایگان است که Psiphon Inc. آن را اداره می‌کند و مانند هر ارائه‌دهندهٔ VPN می‌تواند سایت‌هایی را که بازدید می‌کنید ببیند.</string>
     <string name="exit_tor_hint">Tor در اندروید در دسترس نیست، پس ترافیک از پروفایل انتخاب‌شده خارج می‌شود.</string>
     <string name="exit_unavailable">%s (در اندروید در دسترس نیست)</string>
-    <string name="psiphon_egress_region">منطقه</string>
-    <string name="psiphon_region_best">بهترین عملکرد</string>
-    <string name="psiphon_egress_region_sum">کشور سرور Psiphon؛ «بهترین عملکرد» انتخاب را به Psiphon می‌سپارد.</string>
 
     <string name="ech_query_target_hint">دامنه، یا دامنه+حل‌کننده (مثلاً cloudflare-ech.com+https://1.1.1.1/dns-query)</string>
     <string name="certificate_sha256">SHA256 گواهی</string>
@@ -2591,6 +2588,7 @@
     <string name="warp_api_tls_fragment_title">قطعه‌بندی TLS برای ثبت‌نام WARP</string>
     <string name="warp_api_tls_fragment_note">فقط وقتی اعمال می‌شود که ثبت‌نام مستقیم وصل شود، نه از طریق پروفایل در حال اجرا.</string>
     <string name="backup_warn_tor_egress">پشتیبان ترافیک را از طریق Tor می‌فرستد که در Android در دسترس نیست؛ اینجا ترافیک مستقیم از طریق سرور انتخاب‌شده خارج می‌شود.</string>
+    <string name="backup_warn_psiphon_egress">پشتیبان ترافیک را از طریق Psiphon می‌فرستد که در Android در دسترس نیست؛ اینجا ترافیک مستقیم از طریق سرور انتخاب‌شده خارج می‌شود.</string>
     <string name="validation_dns_server_item">سرور %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">افزودن سرور</string>
     <string name="dns_server_custom">نشانی دلخواه</string>
@@ -2844,8 +2842,4 @@
     <string name="vpn_auth_submitting">در حال ورود…</string>
     <string name="vpn_auth_gone">این درخواست ورود دیگر در انتظار نیست.</string>
     <string name="vpn_auth_no_browser">هیچ برنامه‌ای نمی‌تواند این نشانی را باز کند.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">یک کد دوحرفی کشور به کار ببرید، مانند US.</string>
-    <string name="validation_psiphon_ignored">%1$s نادیده گرفته شد: پروفایل‌های Psiphon فقط منطقه را می‌پذیرند.</string>
-    <string name="exit_runs_over_itself">پروفایل انتخاب‌شده خودش از طریق %1$s خارج می‌شود، پس خروجی %1$s نمی‌تواند روی آن اجرا شود. در «تنظیمات › مسیریابی › خروجی» خروجی دیگری انتخاب کنید.</string>
 </resources>

@@ -54,6 +54,9 @@ private fun vmessImportPacketEncoding(raw: String): String {
 /** The entry's `tls` for TLS::ParseFromClash's readPin, read without a report: the TLS parse reports a malformed value itself. */
 internal fun clashTlsOn(proxy: ClashProxy): Boolean = ParseDiag.scoped(ArrayList()) { proxy.bool("tls") }
 
+/** The [Tls.exportToLink] items the V2RayN fields already carry; the rest travels in `throneExtra`. */
+private val V2RAYN_TLS_KEYS = setOf("security", "sni", "allowInsecure", "alpn", "cs", "fp")
+
 /** vmess (include/configs/outbounds/vmess.h, src/configs/outbounds/vmess.cpp). */
 class Vmess : Outbound("vmess") {
     @JvmField var uuid: String = ""
@@ -102,7 +105,7 @@ class Vmess : Outbound("vmess") {
         return !(uuid.isEmpty() || server.isEmpty())
     }
 
-    /** The V2RayN object of vmess::ParseFromLink: no base parse, so no dial fields. */
+    /** The V2RayN object of vmess::ParseFromLink: no base parse, so the dial fields come from `throneExtra` only. */
     private fun parseV2RayN(objN: JsonObject): Boolean {
         uuid = objN.string("id")
         server = Hosts.toAceHost(objN.string("add"))
@@ -150,6 +153,9 @@ class Vmess : Outbound("vmess") {
             val extraLink = LinkParser.parse("vmess://x@127.0.0.1:1?$extra")
             transport.parseFromLink(extraLink)
             multiplex.parseFromLink(extraLink)
+            // Only under the V2RayN tls switch, so the extra never turns TLS on by itself.
+            if (tls.enabled) tls.parseFromLink(extraLink)
+            dial.parseFromLink(extraLink)
             val extraQuery = LinkParser.parseQuery(extra)
             if (extraQuery.has("globalPadding")) global_padding = extraQuery.value("globalPadding") == "true"
             if (extraQuery.has("authenticatedLength")) authenticated_length = extraQuery.value("authenticatedLength") == "true"
@@ -213,6 +219,8 @@ class Vmess : Outbound("vmess") {
         if (global_padding) extra.add("globalPadding" to "true")
         if (authenticated_length) extra.add("authenticatedLength" to "true")
         if (packet_encoding != "xudp") extra.add("packetEncoding" to packet_encoding.ifEmpty { "none" })
+        extra.addAll(tls.exportToLink().filter { it.first !in V2RAYN_TLS_KEYS })
+        extra.addAll(baseLinkQuery())
 
         val obj = JsonObject()
         obj["v"] = "2"

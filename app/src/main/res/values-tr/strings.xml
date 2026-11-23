@@ -272,6 +272,7 @@
     <string name="protocol_version">Protokol sürümü</string>
     <string name="show_group_in_notification">Bildirimde grup adını göster</string>
     <string name="reset_connections">Bağlantıları sıfırla</string>
+    <string name="reset_upstream_connections_done">Bağlantılar sıfırlandı</string>
     <string name="mtu_help">Özel MTU ayarlamak için tercihe uzun basın.</string>
     <string name="log_level_help">Tampon boyutunu ayarlamak için tercihe uzun basın.</string>
     <string name="tls_camouflage_settings">TLS gizleme ayarları</string>
@@ -1437,12 +1438,8 @@
     <string name="exit_through">Çıkış yolu</string>
     <string name="exit_server">Seçili profil</string>
     <string name="exit_server_hint">Trafik, başlattığınız profil üzerinden çıkar.</string>
-    <string name="exit_psiphon_hint">Psiphon, Psiphon Inc. tarafından işletilen ücretsiz bir ağdır ve her VPN sağlayıcısı gibi ziyaret ettiğiniz siteleri görebilir.</string>
     <string name="exit_tor_hint">Tor Android\'de kullanılamaz, bu yüzden trafik seçili profil üzerinden çıkar.</string>
     <string name="exit_unavailable">%s (Android\'de kullanılamaz)</string>
-    <string name="psiphon_egress_region">Bölge</string>
-    <string name="psiphon_region_best">En iyi performans</string>
-    <string name="psiphon_egress_region_sum">Psiphon sunucusunun ülkesi; En iyi performans seçimi Psiphon\'a bırakır.</string>
     <string name="warp_enable">WARP\'ı etkinleştir</string>
     <string name="warp_enable_sum">Aşağıdaki yapılandırmanın çıkış olarak kullanılmasını sağlar, WARP dışı VPN\'leri kısıtlayan hizmetleri atlamak için kullanışlıdır</string>
     <string name="warp_mode">Mod</string>
@@ -2573,6 +2570,7 @@
     <string name="warp_api_tls_fragment_title">WARP kaydı için TLS parçalama</string>
     <string name="warp_api_tls_fragment_note">Yalnızca kayıt çalışan bir profil üzerinden değil, doğrudan bağlandığında uygulanır.</string>
     <string name="backup_warn_tor_egress">Yedek, trafiği Android\'de bulunmayan Tor üzerinden çıkarıyor; burada trafik doğrudan seçili sunucu üzerinden çıkar.</string>
+    <string name="backup_warn_psiphon_egress">Yedek, trafiği Android\'de bulunmayan Psiphon üzerinden çıkarıyor; burada trafik doğrudan seçili sunucu üzerinden çıkar.</string>
     <string name="validation_dns_server_item">Sunucu %1$s (\"%2$s\"): %3$s</string>
     <string name="dns_server_add">Sunucu ekle</string>
     <string name="dns_server_custom">Özel adres</string>
@@ -2826,8 +2824,4 @@
     <string name="vpn_auth_submitting">Oturum açılıyor…</string>
     <string name="vpn_auth_gone">Bu oturum açma isteği artık beklemede değil.</string>
     <string name="vpn_auth_no_browser">Bu adresi açabilecek uygulama yok.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">US gibi iki harfli bir ülke kodu kullanın.</string>
-    <string name="validation_psiphon_ignored">%1$s yok sayıldı: Psiphon profilleri yalnızca bir bölge alır.</string>
-    <string name="exit_runs_over_itself">Seçili profil zaten %1$s üzerinden çıkıyor, bu yüzden %1$s çıkışı onun üzerinden çalışamaz. Ayarlar › Yönlendirme › Çıkış bölümünden başka bir çıkış seçin.</string>
 </resources>

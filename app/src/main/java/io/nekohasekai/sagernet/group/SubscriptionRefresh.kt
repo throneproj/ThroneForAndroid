@@ -349,8 +349,8 @@ internal object SubscriptionRefresh {
     }
 
     /**
-     * EngineHost's subscriptionReplacedRunning: the delete only asked the service to stop, and a start while it is
-     * stopping is ignored, so this waits for Stopped. Whatever the user started meanwhile wins.
+     * EngineHost's subscriptionReplacedRunning: the delete only asked the service to stop, so this waits for Stopped
+     * before starting the successor. Whatever the user started meanwhile wins.
      */
     private suspend fun startWhenStopped(stoppedId: Long, successor: Long) {
         val deadline = SystemClock.elapsedRealtime() + RECONNECT_WAIT_MS

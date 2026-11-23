@@ -1230,12 +1230,8 @@
     <string name="exit_through">出口方式</string>
     <string name="exit_server">所選配置</string>
     <string name="exit_server_hint">流量從你啟動的配置出去。</string>
-    <string name="exit_psiphon_hint">Psiphon 是由 Psiphon Inc. 營運的免費網路，與任何 VPN 供應商一樣，它能看到你造訪的網站。</string>
     <string name="exit_tor_hint">Android 上無法使用 Tor，因此流量從所選配置出去。</string>
     <string name="exit_unavailable">%s（Android 上不可用）</string>
-    <string name="psiphon_egress_region">區域</string>
-    <string name="psiphon_region_best">最佳效能</string>
-    <string name="psiphon_egress_region_sum">Psiphon 伺服器所在國家；選擇「最佳效能」由 Psiphon 決定。</string>
     <string name="warp_tos_message"><![CDATA[生成 WARP 身份會向 Cloudflare 註冊新裝置。<br><br>你是否接受 <a href="%1$s">Cloudflare WARP 服務條款</a>？]]></string>
     <string name="warp_wireguard_note">WARP 依託你的代理：WireGuard 需要轉發 UDP 的代理。</string>
     <string name="webdav_choose_backup">選擇備份</string>
@@ -1617,6 +1613,7 @@
     <string name="protocol_version">協議版本</string>
     <string name="show_group_in_notification">在通知中顯示組名</string>
     <string name="reset_connections">重置連線</string>
+    <string name="reset_upstream_connections_done">連線已重置</string>
     <string name="mtu_help">長按設定項以設定自定義 MTU。</string>
     <string name="log_level_help">長按設定項以設定緩衝區大小。</string>
     <string name="tls_camouflage_settings">TLS 偽裝設定</string>
@@ -2536,6 +2533,7 @@
     <string name="warp_api_tls_fragment_title">WARP 註冊時的 TLS 分片</string>
     <string name="warp_api_tls_fragment_note">僅在註冊直接連線、而非經由正在執行的配置時生效。</string>
     <string name="backup_warn_tor_egress">備份經由 Tor 出站，但 Android 不支援 Tor；此處流量將直接經由所選伺服器出站。</string>
+    <string name="backup_warn_psiphon_egress">備份經由 Psiphon 出站，但 Android 不支援 Psiphon；此處流量將直接經由所選伺服器出站。</string>
     <string name="validation_dns_server_item">第 %1$s 個伺服器（「%2$s」）：%3$s</string>
     <string name="dns_server_add">新增伺服器</string>
     <string name="dns_server_custom">自訂地址</string>
@@ -2787,8 +2785,4 @@
     <string name="vpn_auth_submitting">正在登入…</string>
     <string name="vpn_auth_gone">此登入請求已不再等待處理。</string>
     <string name="vpn_auth_no_browser">沒有可開啟此位址的應用程式。</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">請使用兩個字母的國家/地區代碼，例如 US。</string>
-    <string name="validation_psiphon_ignored">已忽略 %1$s：Psiphon 配置只接受地區。</string>
-    <string name="exit_runs_over_itself">所選配置本身已經經由 %1$s 出去，因此 %1$s 出口無法在其之上運行。請在「設定 › 路由 › 出口」中選擇其他出口。</string>
 </resources>

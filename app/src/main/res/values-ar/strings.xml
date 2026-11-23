@@ -975,6 +975,7 @@
     <string name="remote_dns_disable_ipv6">DNS البعيد: تعطيل IPv6</string>
     <string name="reserved_hint">ثلاثة أرقام، واحد في كل سطر</string>
     <string name="reset_connections">إعادة تعيين الاتصالات</string>
+    <string name="reset_upstream_connections_done">تمت إعادة تعيين الاتصالات</string>
     <string name="reset_settings">استعادة الإعدادات الافتراضية</string>
     <string name="reset_settings_message">تُحفظ الملفات والمجموعات وملفات التوجيه. للإزالة الكاملة، امسح بيانات التطبيق من إعدادات النظام.</string>
     <string name="resolve_domain_strategy">استراتيجية تحليل النطاق</string>
@@ -1470,12 +1471,8 @@
     <string name="exit_through">الخروج عبر</string>
     <string name="exit_server">الملف المحدد</string>
     <string name="exit_server_hint">تخرج حركة المرور عبر الملف الذي شغّلته.</string>
-    <string name="exit_psiphon_hint">Psiphon شبكة مجانية تديرها Psiphon Inc.، ويمكنها رؤية المواقع التي تزورها، مثل أي مزوّد VPN.</string>
     <string name="exit_tor_hint">Tor غير متاح على Android، لذا تخرج حركة المرور عبر الملف المحدد.</string>
     <string name="exit_unavailable">%s (غير متاح على Android)</string>
-    <string name="psiphon_egress_region">المنطقة</string>
-    <string name="psiphon_region_best">أفضل أداء</string>
-    <string name="psiphon_egress_region_sum">بلد خادم Psiphon؛ «أفضل أداء» يترك الاختيار لـ Psiphon.</string>
     <string name="warp_tos_message"><![CDATA[إنشاء هوية WARP يسجّل جهازًا جديدًا مع Cloudflare.<br><br>هل تقبل <a href="%1$s">شروط خدمة Cloudflare WARP</a>؟]]></string>
     <string name="warp_wireguard_note">يعتمد WARP على بروکسيك: يحتاج WireGuard إلى بروکسي يمرر UDP.</string>
     <string name="webdav_auth_error">فشلت المصادقة: اسم المستخدم أو كلمة المرور غير صحيحة</string>
@@ -2714,6 +2711,7 @@
     <string name="warp_api_tls_fragment_title">تقطيع TLS لتسجيل WARP</string>
     <string name="warp_api_tls_fragment_note">يُطبَّق فقط عندما يتصل التسجيل مباشرةً، لا عبر ملف قيد التشغيل.</string>
     <string name="backup_warn_tor_egress">ترسل النسخة الاحتياطية حركة المرور عبر Tor، وهو غير متاح على Android؛ هنا تخرج مباشرةً عبر الخادم المحدد.</string>
+    <string name="backup_warn_psiphon_egress">ترسل النسخة الاحتياطية حركة المرور عبر Psiphon، وهو غير متاح على Android؛ هنا تخرج مباشرةً عبر الخادم المحدد.</string>
     <string name="validation_dns_server_item">الخادم %1$s («%2$s»): %3$s</string>
     <string name="dns_server_add">إضافة خادم</string>
     <string name="dns_server_custom">عنوان مخصص</string>
@@ -2975,8 +2973,4 @@
     <string name="vpn_auth_submitting">جارٍ تسجيل الدخول…</string>
     <string name="vpn_auth_gone">لم يعد طلب تسجيل الدخول هذا معلقًا.</string>
     <string name="vpn_auth_no_browser">لا يوجد تطبيق يمكنه فتح هذا العنوان.</string>
-    <string name="action_psiphon">Psiphon</string>
-    <string name="validation_psiphon_region">استخدم رمز بلد من حرفين، مثل US.</string>
-    <string name="validation_psiphon_ignored">تم تجاهل %1$s: ملفات Psiphon تقبل المنطقة فقط.</string>
-    <string name="exit_runs_over_itself">الملف المحدد يخرج أصلاً عبر %1$s، لذا لا يمكن تشغيل مخرج %1$s فوقه. اختر مخرجاً آخر في إعدادات › التوجيه › الخروج.</string>
 </resources>

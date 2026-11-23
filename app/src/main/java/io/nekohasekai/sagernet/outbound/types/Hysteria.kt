@@ -346,6 +346,10 @@ class Hysteria : Outbound("hysteria") {
             protocol_version = "1"
             if (q.has("protocol")) rejectTransport("protocol", q.value("protocol"))
             if (q.has("obfsParam")) obfs = q.valueFully("obfsParam")
+            if (q.has("auth_base64")) {
+                auth = q.valueFully("auth_base64")
+                auth_type = "BASE64"
+            }
             if (q.has("auth")) {
                 auth = q.value("auth")
                 auth_type = "STRING"
@@ -581,7 +585,11 @@ class Hysteria : Outbound("hysteria") {
         var linkPassword: String? = null
         if (v1) {
             if (obfs.isNotEmpty()) url.addQueryItemPercentEncoded("obfsParam", LinkCodec.percentEncodeAll(obfs))
-            if (auth_type == "STRING" && auth.isNotEmpty()) url.addQueryItem("auth", auth)
+            if (auth.isNotEmpty()) {
+                // The URI's auth is the string form; the base64 one has a key of its own.
+                if (auth_type == "STRING") url.addQueryItem("auth", auth)
+                if (auth_type == "BASE64") url.addQueryItem("auth_base64", auth)
+            }
             if (recv_window_conn > 0) url.addQueryItem("recv_window_conn", recv_window_conn.toString())
             if (recv_window > 0) url.addQueryItem("recv_window", recv_window.toString())
             if (disable_mtu_discovery) url.addQueryItem("disable_mtu_discovery", "true")

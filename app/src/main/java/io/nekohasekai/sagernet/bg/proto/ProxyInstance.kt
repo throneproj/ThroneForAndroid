@@ -8,8 +8,9 @@ import io.nekohasekai.sagernet.bg.autoselector.AutoSelectorRuntime
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.outbound.config.AutoSelectorBuild
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
 class ProxyInstance(profile: ProxyEntity, var service: BaseService.Interface? = null) :
@@ -18,6 +19,7 @@ class ProxyInstance(profile: ProxyEntity, var service: BaseService.Interface? = 
     var displayProfileName = ServiceNotification.genTitle(profile)
 
     // for TrafficLooper
+    @Volatile
     var looper: TrafficLooper? = null
 
     /**
@@ -63,10 +65,9 @@ class ProxyInstance(profile: ProxyEntity, var service: BaseService.Interface? = 
         super.launch() // start box
         AutoSelectorRuntime.onStarted(this)
         VpnAuthRuntime.onStarted(this)
-        runOnDefaultDispatcher {
-            looper = service?.let { TrafficLooper(it.data, this) }
-            looper?.start()
-        }
+        // Set before launch returns, on the thread close runs on: a close right after the start always finds it.
+        looper = service?.let { TrafficLooper(it.data, CoroutineScope(Dispatchers.Default)) }
+        looper?.start()
     }
 
     override fun close() {
