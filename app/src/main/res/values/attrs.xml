@@ -12,6 +12,8 @@
     <attr name="cardElevatedSurfaceColor" format="color" />
     <!-- Outline of the profile cards, set only where their shadow does not show (OLED black); unset means none -->
     <attr name="profileCardStrokeColor" format="color" />
+    <!-- Single-choice chips in forms; the white theme swaps in one whose checked state is not white on white -->
+    <attr name="selectionChipStyle" format="reference" />
 
     <!-- JSON editor preference -->
     <declare-styleable name="EditConfigPreference">

@@ -146,8 +146,7 @@ class AppearanceSettingsFragment : SettingsScreenFragment(R.xml.settings_appeara
             true
         }
         pref<SimpleMenuPreference>(Key.NIGHT_THEME).setOnPreferenceChangeListener { _, newTheme ->
-            Theme.currentNightMode = (newTheme as String).toInt()
-            Theme.applyNightTheme()
+            Theme.applyNightTheme((newTheme as String).toInt())
             true
         }
         // AMOLED black: recreate the host so the overlay is applied or removed

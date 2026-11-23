@@ -1,5 +1,6 @@
 package io.nekohasekai.sagernet.ui
 
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
@@ -35,13 +36,18 @@ abstract class ThemedActivity : AppCompatActivity {
     var lightStatusBar = false
         private set
 
+    // Before AppCompat derives this activity's configuration from the default night mode.
+    override fun attachBaseContext(newBase: Context) {
+        Theme.applyNightTheme()
+        super.attachBaseContext(newBase)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         if (!isDialog) {
             Theme.apply(this)
         } else {
             Theme.applyDialog(this)
         }
-        Theme.applyNightTheme()
         if (!isDialog) enableEdgeToEdge(statusBarStyle(), navigationBarStyle())
 
         super.onCreate(savedInstanceState)

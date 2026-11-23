@@ -156,13 +156,13 @@
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/final_remote"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    style="?attr/selectionChipStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/final_direct"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    style="?attr/selectionChipStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 

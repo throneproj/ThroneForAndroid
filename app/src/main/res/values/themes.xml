@@ -30,6 +30,7 @@
         <item name="windowNoTitle">true</item>
 
         <item name="chipStyle">@style/Widget.MaterialComponents.Chip.Choice.SagerNet</item>
+        <item name="selectionChipStyle">@style/Widget.MaterialComponents.Chip.Choice</item>
 
         <item name="itemShapeAppearance">
             @style/ShapeAppearance.MaterialComponents.MediumComponent
@@ -86,6 +87,7 @@
         <item name="windowNoTitle">true</item>
 
         <item name="chipStyle">@style/Widget.MaterialComponents.Chip.Choice.SagerNet</item>
+        <item name="selectionChipStyle">@style/Widget.MaterialComponents.Chip.Choice</item>
 
         <item name="itemShapeAppearance">
             @style/ShapeAppearance.MaterialComponents.MediumComponent
@@ -635,6 +637,23 @@
         <item name="accentOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextSecondary">?android:textColorSecondary</item>
         <item name="primaryOrTextPrimary">?android:textColorPrimary</item>
+        <!-- The stock checked chip and toggle button draw their text in colorPrimary -->
+        <item name="selectionChipStyle">@style/Widget.SagerNet.Chip.Choice.White</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.SagerNet.Button.Toggle.White</item>
+    </style>
+
+    <style name="Widget.SagerNet.Chip.Choice.White" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="android:textColor">@color/chip_text_color</item>
+        <item name="checkedIconTint">?primaryOrTextPrimary</item>
+        <item name="rippleColor">@color/chip_ripple_color</item>
+    </style>
+
+    <style name="Widget.SagerNet.Button.Toggle.White" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/toggle_text_white</item>
+        <item name="strokeColor">@color/toggle_stroke_white</item>
+        <item name="backgroundTint">@color/toggle_background_white</item>
+        <item name="rippleColor">@color/chip_ripple_color</item>
     </style>
 
     <style name="Theme.SagerNet.Dialog.White.Night" parent="Theme.SagerNet.Dialog.Black">

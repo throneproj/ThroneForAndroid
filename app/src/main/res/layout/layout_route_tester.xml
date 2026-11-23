@@ -161,14 +161,14 @@
 
                                 <com.google.android.material.chip.Chip
                                     android:id="@+id/network_tcp"
-                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    style="?attr/selectionChipStyle"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:checked="true" />
 
                                 <com.google.android.material.chip.Chip
                                     android:id="@+id/network_udp"
-                                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                                    style="?attr/selectionChipStyle"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content" />
 

@@ -43,25 +43,25 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/outbound_proxy"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
+                style="?attr/selectionChipStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/outbound_direct"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
+                style="?attr/selectionChipStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/outbound_block"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
+                style="?attr/selectionChipStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/outbound_warp"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
+                style="?attr/selectionChipStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 

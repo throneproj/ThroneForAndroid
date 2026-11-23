@@ -2,11 +2,11 @@ package io.nekohasekai.sagernet.utils
 
 import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.SagerNet
 
 object Theme {
@@ -152,34 +152,32 @@ object Theme {
         return DataStore.appTheme == WHITE && !usingNightMode()
     }
 
-    var currentNightMode = -1
-    fun getNightMode(): Int {
-        if (currentNightMode == -1) {
-            currentNightMode = DataStore.nightTheme
-        }
-        return getNightMode(currentNightMode)
-    }
+    const val NIGHT_AUTO_BATTERY = 3
 
-    fun getNightMode(mode: Int): Int {
+    fun usingNightMode(): Boolean = usingNightMode(DataStore.nightTheme)
+
+    fun usingNightMode(mode: Int): Boolean {
         return when (mode) {
-            0 -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            1 -> AppCompatDelegate.MODE_NIGHT_YES
-            2 -> AppCompatDelegate.MODE_NIGHT_NO
-            else -> AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY
-        }
-    }
-
-    fun usingNightMode(): Boolean {
-        return when (DataStore.nightTheme) {
-            0 -> (app.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+            0 -> systemNightMode()
             1 -> true
             2 -> false
             else -> SagerNet.power.isPowerSaveMode
         }
     }
 
-    fun applyNightTheme() {
-        AppCompatDelegate.setDefaultNightMode(getNightMode())
+    // Not the app's resources: an activity handling uiMode gets AppCompat's night mode written into resources it
+    // shares with the application, so those can keep a mode the system does not have.
+    private fun systemNightMode(): Boolean =
+        (Resources.getSystem().configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
+    /**
+     * AppCompat gets the resolved mode instead of FOLLOW_SYSTEM / AUTO_BATTERY, so the resources it loads always match
+     * the theme [getTheme] picked; activities recreate on the resulting uiMode change (ThemedActivity).
+     */
+    fun applyNightTheme(mode: Int = DataStore.nightTheme) {
+        AppCompatDelegate.setDefaultNightMode(
+            if (usingNightMode(mode)) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
     }
 
 }
