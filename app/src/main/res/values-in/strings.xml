@@ -1024,6 +1024,7 @@
     <string name="grp_file_too_large">%1$s: lebih besar dari 50 MB, dilewati</string>
     <string name="grp_file_not_readable">%1$s: bukan berkas konfigurasi yang dapat dibaca</string>
     <string name="subs_request_proxy_no_profile">Permintaan dengan proksi tetapi tidak ada profil yang dimulai.</string>
+    <string name="request_tunnel_unavailable">VPN belum meneruskan lalu lintas aplikasi ini, jadi permintaan tidak dikirim.</string>
     <string name="subs_insecure_redirect">Pengalihan tidak aman</string>
     <string name="subs_too_many_redirects">Terlalu banyak pengalihan</string>
     <string name="subs_response_too_large">Respons lebih besar dari %1$d MB</string>

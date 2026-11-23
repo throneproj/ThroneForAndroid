@@ -1020,6 +1020,7 @@
     <string name="grp_file_too_large">%1$s: größer als 50 MB, übersprungen</string>
     <string name="grp_file_not_readable">%1$s: keine lesbare Konfigurationsdatei</string>
     <string name="subs_request_proxy_no_profile">Anfrage mit Proxy, aber kein Profil gestartet.</string>
+    <string name="request_tunnel_unavailable">Das VPN leitet den eigenen Datenverkehr der App noch nicht weiter, daher wurde die Anfrage nicht gesendet.</string>
     <string name="subs_insecure_redirect">Unsichere Weiterleitung</string>
     <string name="subs_too_many_redirects">Zu viele Weiterleitungen</string>
     <string name="subs_response_too_large">Antwort größer als %1$d MB</string>

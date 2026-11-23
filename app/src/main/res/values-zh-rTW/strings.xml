@@ -1275,6 +1275,7 @@
     <string name="subs_request_error">請求訂閱 %1$s 出錯：%2$s</string>
     <string name="subs_request_finished">訂閱請求完成：%1$s</string>
     <string name="subs_request_proxy_no_profile">請求使用代理但未啟動配置。</string>
+    <string name="request_tunnel_unavailable">VPN 尚未接管本應用程式自身的流量，因此未傳送請求。</string>
     <string name="subs_requesting">正在請求訂閱：%1$s</string>
     <string name="subs_resolved">已解析 %2$d 個域名伺服器地址中的 %1$d 個。</string>
     <string name="resolve_domain_failed">無法解析 %1$s：%2$s</string>

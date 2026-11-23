@@ -1028,6 +1028,7 @@
     <string name="grp_file_too_large">%1$s: 50 MB\'tan büyük, atlandı</string>
     <string name="grp_file_not_readable">%1$s: okunabilir bir yapılandırma dosyası değil</string>
     <string name="subs_request_proxy_no_profile">Vekil sunucu ile istek ama hiçbir profil başlatılmadı.</string>
+    <string name="request_tunnel_unavailable">VPN henüz uygulamanın kendi trafiğini taşımıyor, bu yüzden istek gönderilmedi.</string>
     <string name="subs_insecure_redirect">Güvenliksiz yönlendirme</string>
     <string name="subs_too_many_redirects">Çok fazla yönlendirme</string>
     <string name="subs_response_too_large">Yanıt %1$d MB\'tan büyük</string>

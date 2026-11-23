@@ -1,9 +1,6 @@
 package io.nekohasekai.sagernet.widget
 
-import android.net.Network
-import android.net.NetworkCapabilities
 import android.os.SystemClock
-import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.proto.exitsThroughVpn
 import io.nekohasekai.sagernet.database.DataStore
@@ -13,17 +10,15 @@ import io.nekohasekai.sagernet.ktx.appHttpClient
 import io.nekohasekai.sagernet.ktx.appUserAgent
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
+import io.nekohasekai.sagernet.ktx.tunnelNetwork
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.ui.test.TestFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.net.InetAddress
-import java.net.Proxy
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
@@ -196,25 +191,11 @@ object ExitIp {
     /**
      * The desktop asks through the mixed inbound (HttpGet useProxy, HTTPRequestHelper.cpp:36), which the core routes in
      * either service mode.
-     * A VPN without that inbound carries the app's own traffic only while its per-app lists leave this app inside: the
-     * request is then bound to the VPN network, and is skipped otherwise rather than sent around the tunnel.
+     * A VPN without that inbound carries the request itself (appHttpClient); until it is this app's network the lookup
+     * is skipped rather than failed.
      */
     private fun client(): OkHttpClient? {
-        if (!DataStore.mixedInboundDisabled) return appHttpClient(viaProxy = true, timeoutSeconds = TIMEOUT_SECONDS)
-        val network = tunnelNetwork() ?: return null
-        return appHttpClient(viaProxy = false, timeoutSeconds = TIMEOUT_SECONDS).newBuilder()
-            .proxy(Proxy.NO_PROXY)
-            .socketFactory(network.socketFactory)
-            .dns(object : Dns {
-                override fun lookup(hostname: String): List<InetAddress> = network.getAllByName(hostname).toList()
-            })
-            .build()
-    }
-
-    /** The default network of this app's UID when it is the VPN. */
-    private fun tunnelNetwork(): Network? {
-        val network = SagerNet.connectivity.activeNetwork ?: return null
-        val capabilities = SagerNet.connectivity.getNetworkCapabilities(network) ?: return null
-        return network.takeIf { capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) }
+        if (DataStore.mixedInboundDisabled && tunnelNetwork() == null) return null
+        return appHttpClient(viaProxy = true, timeoutSeconds = TIMEOUT_SECONDS)
     }
 }

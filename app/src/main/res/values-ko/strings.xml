@@ -1255,6 +1255,7 @@
     <string name="subs_request_error">구독 %1$s 요청 오류: %2$s</string>
     <string name="subs_request_finished">구독 요청 완료: %1$s</string>
     <string name="subs_request_proxy_no_profile">프록시로 요청했지만 프로필이 시작되지 않았습니다.</string>
+    <string name="request_tunnel_unavailable">VPN이 아직 앱 자체의 트래픽을 전달하지 않아 요청을 보내지 않았습니다.</string>
     <string name="subs_requesting">구독 요청 중: %1$s</string>
     <string name="subs_resolved">%2$d개 도메인 서버 주소 중 %1$d개 해석됨.</string>
     <string name="resolve_domain_failed">%1$s 해석 실패: %2$s</string>

@@ -1167,6 +1167,7 @@
     <!-- subscription updates and group actions -->
     <!-- Requests (HTTPRequestHelper.cpp) -->
     <string name="subs_request_proxy_no_profile">Request with proxy but no profile started.</string>
+    <string name="request_tunnel_unavailable">The VPN is not carrying the app\'s own traffic yet, so the request was not sent.</string>
     <string name="subs_insecure_redirect">Insecure redirect</string>
     <string name="subs_too_many_redirects">Too many redirects</string>
     <string name="subs_response_too_large">Response larger than %1$d MB</string>

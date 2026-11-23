@@ -1284,6 +1284,7 @@
     <string name="subs_request_error">خطای درخواست اشتراک %1$s: %2$s</string>
     <string name="subs_request_finished">درخواست اشتراک پایان یافت: %1$s</string>
     <string name="subs_request_proxy_no_profile">درخواست با پراکسی اما بدون پروفایل شروع شد.</string>
+    <string name="request_tunnel_unavailable">VPN هنوز ترافیک خود برنامه را عبور نمی‌دهد، بنابراین درخواست ارسال نشد.</string>
     <string name="subs_requesting">در حال درخواست اشتراک: %1$s</string>
     <string name="subs_resolved">%1$d از %2$d آدرس سرور دامنه حل شد.</string>
     <string name="resolve_domain_failed">حل کردن %1$s ناموفق بود: %2$s</string>

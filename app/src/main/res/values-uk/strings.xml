@@ -1218,6 +1218,7 @@
     <string name="subs_request_error">Помилка запиту підписки %1$s: %2$s</string>
     <string name="subs_request_finished">Запит підписки завершено: %1$s</string>
     <string name="subs_request_proxy_no_profile">Запит із проксі, але профіль не запущено.</string>
+    <string name="request_tunnel_unavailable">VPN ще не пропускає власний трафік застосунку, тому запит не надіслано.</string>
     <string name="subs_requesting">Запит підписки: %1$s</string>
     <string name="subs_resolved">Розв’язано %1$d із %2$d адрес доменних серверів.</string>
     <string name="resolve_domain_failed">Не вдалося розв’язати %1$s: %2$s</string>

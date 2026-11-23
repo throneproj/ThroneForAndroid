@@ -1256,6 +1256,7 @@
     <string name="subs_request_error">購読 %1$s のリクエストエラー：%2$s</string>
     <string name="subs_request_finished">購読リクエスト完了：%1$s</string>
     <string name="subs_request_proxy_no_profile">プロキシ指定でリクエストしましたが、プロファイルが起動していません。</string>
+    <string name="request_tunnel_unavailable">VPN がまだアプリ自身の通信を転送していないため、リクエストは送信されませんでした。</string>
     <string name="subs_requesting">購読をリクエスト中：%1$s</string>
     <string name="subs_resolved">%2$d 件のドメインサーバーアドレスのうち %1$d 件を解決しました。</string>
     <string name="resolve_domain_failed">%1$s の解決に失敗しました：%2$s</string>

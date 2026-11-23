@@ -1020,6 +1020,7 @@
     <string name="grp_file_too_large">%1$s: groter dan 50 MB, overgeslagen</string>
     <string name="grp_file_not_readable">%1$s: geen leesbaar configuratiebestand</string>
     <string name="subs_request_proxy_no_profile">Verzoek met proxy maar geen profiel gestart.</string>
+    <string name="request_tunnel_unavailable">De VPN vervoert het eigen verkeer van de app nog niet, dus het verzoek is niet verzonden.</string>
     <string name="subs_insecure_redirect">Onveilige omleiding</string>
     <string name="subs_too_many_redirects">Te veel omleidingen</string>
     <string name="subs_response_too_large">Antwoord groter dan %1$d MB</string>

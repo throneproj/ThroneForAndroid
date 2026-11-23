@@ -1281,6 +1281,7 @@
     <string name="subs_request_error">请求订阅 %1$s 出错：%2$s</string>
     <string name="subs_request_finished">订阅请求完成：%1$s</string>
     <string name="subs_request_proxy_no_profile">请求使用代理但未启动配置。</string>
+    <string name="request_tunnel_unavailable">VPN 尚未接管本应用自身的流量，因此未发送请求。</string>
     <string name="subs_requesting">正在请求订阅：%1$s</string>
     <string name="subs_resolved">已解析 %2$d 个域名服务器地址中的 %1$d 个。</string>
     <string name="resolve_domain_failed">解析 %1$s 失败：%2$s</string>

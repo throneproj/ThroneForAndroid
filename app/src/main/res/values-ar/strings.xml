@@ -1238,6 +1238,7 @@
     <string name="subs_request_error">خطأ في طلب الاشتراك %1$s: %2$s</string>
     <string name="subs_request_finished">انتهى طلب الاشتراك: %1$s</string>
     <string name="subs_request_proxy_no_profile">بدأ الطلب عبر البروكسي بدون ملف.</string>
+    <string name="request_tunnel_unavailable">لا يمرّ الـ VPN حركة التطبيق نفسه بعد، لذلك لم يُرسل الطلب.</string>
     <string name="subs_requesting">جارٍ طلب الاشتراك: %1$s</string>
     <string name="subs_resolved">تم حل %1$d من %2$d عناوين خوادم النطاقات.</string>
     <string name="resolve_domain_failed">تعذّر تحليل %1$s: %2$s</string>

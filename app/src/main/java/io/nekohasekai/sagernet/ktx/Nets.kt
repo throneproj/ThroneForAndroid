@@ -2,14 +2,18 @@
 
 package io.nekohasekai.sagernet.ktx
 
+import android.net.Network
+import android.net.NetworkCapabilities
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SubTlsVersion
 import moe.matsuri.nb4a.utils.NGUtil
 import okhttp3.ConnectionSpec
 import okhttp3.Credentials
+import okhttp3.Dns
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -21,6 +25,7 @@ import okhttp3.TlsVersion
 import okio.Buffer
 import java.io.IOException
 import java.net.Authenticator
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.PasswordAuthentication
 import java.net.Proxy
@@ -51,8 +56,29 @@ fun appRequestsViaProxy(): Boolean = DataStore.netUseProxy || DataStore.serviceM
  */
 fun appRequestsNeedProxy(useProxy: Boolean = false): Boolean = useProxy || DataStore.netUseProxy
 
+/** The VPN while it is this app's default network. */
+fun tunnelNetwork(): Network? {
+    val network = SagerNet.connectivity.activeNetwork ?: return null
+    val capabilities = SagerNet.connectivity.getNetworkCapabilities(network) ?: return null
+    return network.takeIf { capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) }
+}
+
+/**
+ * A VPN without the mixed inbound carries the app's proxied requests itself (VpnService keeps the app inside then):
+ * they are bound to it, and fail rather than go around the tunnel while it is not the app's network.
+ */
+private fun OkHttpClient.Builder.viaTunnel(): OkHttpClient.Builder {
+    val network = tunnelNetwork()
+        ?: return addInterceptor { throw IOException(app.getString(R.string.request_tunnel_unavailable)) }
+    return proxy(Proxy.NO_PROXY)
+        .socketFactory(network.socketFactory)
+        .dns(object : Dns {
+            override fun lookup(hostname: String): List<InetAddress> = network.getAllByName(hostname).toList()
+        })
+}
+
 // App-internal HTTP (subscriptions, update check): through the mixed inbound when [viaProxy] and the service is
-// connected and that inbound exists, direct otherwise. The main process never loads the core.
+// connected and that inbound exists, through the VPN without it, direct otherwise. The main process never loads the core.
 fun newHttpClient(
     viaProxy: Boolean = true,
     allowInsecure: Boolean = false,
@@ -63,9 +89,13 @@ fun newHttpClient(
         .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
         .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
         .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
-    if (viaProxy && DataStore.serviceState.connected && !DataStore.mixedInboundDisabled) {
-        builder.proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress(LOCALHOST, DataStore.inboundSocksPort)))
-        if (DataStore.inboundAuth) SocksAuthenticator.install()
+    if (viaProxy && DataStore.serviceState.connected) {
+        if (DataStore.mixedInboundDisabled) {
+            builder.viaTunnel()
+        } else {
+            builder.proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress(LOCALHOST, DataStore.inboundSocksPort)))
+            if (DataStore.inboundAuth) SocksAuthenticator.install()
+        }
     }
     if (restrictTls13) {
         builder.connectionSpecs(
@@ -130,7 +160,7 @@ private const val MAX_REDIRECTS = 20
  * except from https to http, net_insecure, the TLS and HTTP versions, the user agent (options or user_agent2 / the app
  * default), a body cap. A URL's `user:pass@` goes out as Basic auth, only while the redirects stay on its origin.
  * With net_use_proxy, the proxy service mode or [HttpGetOptions.useProxy] the request goes through the mixed inbound
- * as an HTTP proxy; a VPN without the mixed inbound tunnels the request instead. While no profile runs it fails
+ * as an HTTP proxy; a VPN without the mixed inbound carries the request itself ([viaTunnel]). While no profile runs it fails
  * with net_use_proxy or useProxy, and goes direct in the proxy service mode ([appRequestsNeedProxy]).
  * Blocking: call it off the main thread.
  */
@@ -151,7 +181,9 @@ fun httpGet(url: String, options: HttpGetOptions = HttpGetOptions()): HttpGetRes
         return HttpGetResponse(ByteArray(0), null, app.getString(R.string.subs_request_proxy_no_profile))
     }
     if (connected && (options.useProxy || appRequestsViaProxy())) {
-        if (!DataStore.mixedInboundDisabled) {
+        if (DataStore.mixedInboundDisabled) {
+            builder.viaTunnel()
+        } else {
             val address = DataStore.inboundAddress.let { if (it == "::") LOCALHOST else it }
             builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(address, DataStore.inboundSocksPort)))
             if (DataStore.inboundAuth) {
@@ -253,14 +285,16 @@ fun serviceConnected(): Boolean = DataStore.baseService?.data?.state?.connected 
 
 /**
  * A client for app requests that stream their body: [httpGet]'s setup (net_insecure, app_tls_version, the mixed inbound
- * as an HTTP proxy when [viaProxy] and it exists) with OkHttp following redirects itself. Blocking calls.
+ * as an HTTP proxy when [viaProxy] and it exists, else the VPN) with OkHttp following redirects itself. Blocking calls.
  */
 fun appHttpClient(viaProxy: Boolean, timeoutSeconds: Long = 30): OkHttpClient {
     val builder = OkHttpClient.Builder()
         .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
         .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
         .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
-    if (viaProxy && !DataStore.mixedInboundDisabled) {
+    if (viaProxy && DataStore.mixedInboundDisabled) {
+        builder.viaTunnel()
+    } else if (viaProxy) {
         val address = DataStore.inboundAddress.let { if (it == "::") LOCALHOST else it }
         builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(address, DataStore.inboundSocksPort)))
         if (DataStore.inboundAuth) {

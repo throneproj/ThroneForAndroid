@@ -1204,6 +1204,7 @@
     <string name="subs_request_error">Памылка запыту падпіскі %1$s: %2$s</string>
     <string name="subs_request_finished">Запыт падпіскі завершаны: %1$s</string>
     <string name="subs_request_proxy_no_profile">Запыт з проксі, але без запушчанага профілю.</string>
+    <string name="request_tunnel_unavailable">VPN яшчэ не перадае ўласны трафік праграмы, таму запыт не адпраўлены.</string>
     <string name="subs_requesting">Запыт падпіскі: %1$s</string>
     <string name="subs_resolved">Развязана %1$d з %2$d адрасоў сервераў даменаў.</string>
     <string name="resolve_domain_failed">Не ўдалося развязаць %1$s: %2$s</string>

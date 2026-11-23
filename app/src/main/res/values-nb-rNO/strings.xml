@@ -1024,6 +1024,7 @@
     <string name="grp_file_too_large">%1$s: større enn 50 MB, hoppet over</string>
     <string name="grp_file_not_readable">%1$s: ikke en lesbar konfigurasjonsfil</string>
     <string name="subs_request_proxy_no_profile">Forespørsel med mellomtjener, men ingen profil startet.</string>
+    <string name="request_tunnel_unavailable">VPN-et fører ikke appens egen trafikk ennå, så forespørselen ble ikke sendt.</string>
     <string name="subs_insecure_redirect">Usikker omdirigering</string>
     <string name="subs_too_many_redirects">For mange omdirigeringer</string>
     <string name="subs_response_too_large">Svar større enn %1$d MB</string>

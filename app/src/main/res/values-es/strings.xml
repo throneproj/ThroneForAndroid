@@ -1020,6 +1020,7 @@
     <string name="grp_file_too_large">%1$s: mayor que 50 MB, omitido</string>
     <string name="grp_file_not_readable">%1$s: no es un archivo de configuración legible</string>
     <string name="subs_request_proxy_no_profile">Solicitud con proxy pero sin perfil iniciado.</string>
+    <string name="request_tunnel_unavailable">La VPN aún no transporta el tráfico propio de la aplicación, así que la solicitud no se envió.</string>
     <string name="subs_insecure_redirect">Redirección insegura</string>
     <string name="subs_too_many_redirects">Demasiadas redirecciones</string>
     <string name="subs_response_too_large">Respuesta mayor que %1$d MB</string>

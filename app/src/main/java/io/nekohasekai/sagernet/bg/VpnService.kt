@@ -163,6 +163,9 @@ class VpnService : BaseVpnService(),
             }
         }
 
+        // Without the mixed inbound the app's own proxied requests (subscriptions, downloads) count on the tun
+        // carrying them, so the per-app lists never leave this app outside (HTTPRequestHelper RequestUsesMixedInbound).
+        val keepSelf = DataStore.mixedInboundDisabled
         val includePackage = options.getIncludePackage()
         if (includePackage.hasNext()) {
             val added = includePackage.toList().count {
@@ -174,11 +177,12 @@ class VpnService : BaseVpnService(),
                 }
             }
             // None of the chosen apps is installed: an empty allow list would capture every app instead of none.
-            if (added == 0) builder.addAllowedApplication(packageName)
+            if (added == 0 || keepSelf) builder.addAllowedApplication(packageName)
         }
         val excludePackage = options.getExcludePackage()
         if (excludePackage.hasNext()) {
             excludePackage.toList().forEach {
+                if (keepSelf && it == packageName) return@forEach
                 try {
                     builder.addDisallowedApplication(it)
                 } catch (_: PackageManager.NameNotFoundException) {

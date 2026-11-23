@@ -1258,6 +1258,7 @@
     <string name="subs_request_error">Ошибка запроса подписки %1$s: %2$s</string>
     <string name="subs_request_finished">Запрос подписки завершён: %1$s</string>
     <string name="subs_request_proxy_no_profile">Запрос с прокси, но профиль не запущен.</string>
+    <string name="request_tunnel_unavailable">VPN ещё не пропускает собственный трафик приложения, поэтому запрос не отправлен.</string>
     <string name="subs_requesting">Запрос подписки: %1$s</string>
     <string name="subs_resolved">Разрешено %1$d из %2$d адресов доменных серверов.</string>
     <string name="resolve_domain_failed">Не удалось разрешить %1$s: %2$s</string>
