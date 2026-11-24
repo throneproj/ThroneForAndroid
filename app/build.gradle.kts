@@ -22,6 +22,7 @@ android {
     ksp {
         arg("room.incremental", "true")
         arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.generateKotlin", "false")
     }
     bundle {
         language {
@@ -55,43 +56,40 @@ dependencies {
 
     implementation(fileTree("libs"))
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.recyclerview:recyclerview:1.3.0")
-    implementation("androidx.activity:activity-ktx:1.10.1")
-    implementation("androidx.fragment:fragment-ktx:1.5.6")
-    implementation("androidx.browser:browser:1.5.0")
-    implementation("androidx.preference:preference-ktx:1.2.0")
+    implementation("androidx.activity:activity-ktx:1.11.0")
+    implementation("androidx.fragment:fragment-ktx:1.5.7")
+    implementation("androidx.browser:browser:1.10.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
-    implementation("androidx.work:work-multiprocess:2.8.1")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("androidx.work:work-multiprocess:2.9.1")
 
     implementation("com.google.android.material:material:1.8.0")
-    implementation("com.google.code.gson:gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.11.0")
 
     implementation("com.github.jenly1314:zxing-lite:2.1.1")
-    // 0.24.x is built with Kotlin 2.2 (unreadable for the Kotlin 2.0 compiler/KSP) and 0.24.5+ needs compileSdk 36;
-    // 0.23.7 is Kotlin 2.1 and only references stdlib members that 2.0.21 has, so the app keeps its own stdlib
-    implementation("io.github.rosemoe:editor:0.23.7") {
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
-    }
+    // 0.24.x reworks the editor's rendering
+    implementation("io.github.rosemoe:editor:0.23.7")
 
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.3")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.8")
     implementation("org.yaml:snakeyaml:1.30")
     implementation("com.github.daniel-stoneuk:material-about-library:3.2.0-rc01")
-    implementation("com.jakewharton:process-phoenix:2.1.2")
+    implementation("com.jakewharton:process-phoenix:3.0.0")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.json:json:20231013")
+    testImplementation("org.json:json:20260814")
 
     implementation("com.simplecityapps:recyclerview-fastscroll:2.0.1") {
         exclude(group = "androidx.recyclerview")
         exclude(group = "androidx.appcompat")
     }
 
-    implementation("androidx.room:room-runtime:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.room:room-runtime:2.7.2")
+    ksp("androidx.room:room-compiler:2.7.2")
+    implementation("androidx.room:room-ktx:2.7.2")
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }
