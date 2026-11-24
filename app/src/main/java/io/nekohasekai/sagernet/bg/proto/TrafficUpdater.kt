@@ -1,9 +1,11 @@
 package io.nekohasekai.sagernet.bg.proto
 
 import io.throneproj.mobile.Instance
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /** Per-tag traffic of the running box, read once per tick. */
-class TrafficUpdater(private val box: Instance, tags: Collection<String>) {
+class TrafficUpdater(box: Instance, tags: Collection<String>) {
 
     class TagStat(val tag: String) {
         /** Bytes moved since the previous tick. */
@@ -15,13 +17,17 @@ class TrafficUpdater(private val box: Instance, tags: Collection<String>) {
     }
 
     val stats: Map<String, TagStat> = tags.associateWith { TagStat(it) }
+    private val ordered = stats.values.toList()
+    private val reader = box.newTrafficReader(ordered.joinToString("\n") { it.tag })
 
     fun updateAll() {
         val now = System.currentTimeMillis()
-        for (stat in stats.values) {
-            // trafficcontrol.Manager.TotalOutbound swaps its counters to 0: every read is already a delta.
-            stat.tx = box.queryOutboundStats(stat.tag, "uplink").coerceAtLeast(0)
-            stat.rx = box.queryOutboundStats(stat.tag, "downlink").coerceAtLeast(0)
+        // One call for every tag: uplink then downlink per tag, each already a delta (the core swaps its counters to 0).
+        val buffer = ByteBuffer.wrap(reader.read() ?: ByteArray(0)).order(ByteOrder.LITTLE_ENDIAN)
+        for (stat in ordered) {
+            val present = buffer.remaining() >= 16
+            stat.tx = if (present) buffer.long.coerceAtLeast(0) else 0L
+            stat.rx = if (present) buffer.long.coerceAtLeast(0) else 0L
             val interval = now - stat.lastUpdate
             if (stat.lastUpdate > 0L && interval > 0L) {
                 stat.txRate = stat.tx * 1000 / interval

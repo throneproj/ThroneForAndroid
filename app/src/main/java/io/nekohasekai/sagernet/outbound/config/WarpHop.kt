@@ -66,7 +66,7 @@ object WarpHop {
             address = host
             this.port = port
             reserved = settings.warpReserved.mapTo(ArrayList()) { QtStrings.toInt(it) }
-            persistent_keepalive = "10"
+            persistent_keepalive = "25"
         }
         wireGuard.mtu = 1280
         if (settings.warpMode == "amnezia") {

@@ -285,6 +285,26 @@ private fun xrayUseSystemCAIn(streams: List<XrayNode>) {
     }
 }
 
+// Xray probes an idle TCP flow every 45 s (Chrome's default) until its 300 s idle timeout closes it. Every 120 s still
+// refreshes NAT mappings well inside the shortest measured TCP timeouts (sing-box waits 5 min) with a third of the wakeups.
+private const val XRAY_TCP_KEEPALIVE_IDLE_S = 120L
+
+private fun xrayTcpKeepAliveIn(streams: List<XrayNode>) {
+    xrayEditLive(streams, "sockopt", true) { sockopts ->
+        if (xrayLast(sockopts, "tcpKeepAliveIdle", false).first != null) return@xrayEditLive
+        if (xrayLast(sockopts, "tcpKeepAliveInterval", false).first != null) return@xrayEditLive
+        sockopts.last().obj["tcpKeepAliveIdle"] = XRAY_TCP_KEEPALIVE_IDLE_S
+    }
+}
+
+/** Sets a longer TCP keepalive idle time on every leg of an Xray outbound, unless a leg sets its own keepalive. */
+fun relaxXrayTcpKeepAlive(outbound: JsonObject) {
+    xrayEditLive(xrayRoot(outbound), "streamSettings", true) { streams ->
+        xrayTcpKeepAliveIn(streams)
+        xrayEditDownloadLeg(streams, ::xrayTcpKeepAliveIn)
+    }
+}
+
 /** UseXraySystemCA: turns on useSystemCA in every TLS block of an Xray outbound, the XHTTP download leg included, unless the block sets it itself. */
 fun useXraySystemCA(outbound: JsonObject) {
     xrayEditLive(xrayRoot(outbound), "streamSettings", false) { streams ->

@@ -26,6 +26,7 @@ import io.nekohasekai.sagernet.ktx.getColorAttr
 import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
 import io.nekohasekai.sagernet.ui.SwitchActivity
 import io.nekohasekai.sagernet.utils.Theme
+import io.throneproj.mobile.Mobile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -76,44 +77,37 @@ class ServiceNotification(
     /** Whether the screen is on; the traffic looper stops polling the core while it is off. */
     val screenOn = MutableStateFlow(SagerNet.power.isInteractive)
 
+    /** The speed and totals last posted; an idle tunnel would otherwise re-post the same notification every second. */
+    private var postedSpeed: String? = null
+    private var postedTotal: String? = null
+
     suspend fun postNotificationSpeedUpdate(stats: SpeedDisplayData) {
-        useBuilder {
-            if (showDirectSpeed) {
-                val speedDetail = (service as Context).getString(
-                    R.string.speed_detail, service.getString(
-                        R.string.speed, Formatter.formatFileSize(service, stats.txRateProxy)
-                    ), service.getString(
-                        R.string.speed, Formatter.formatFileSize(service, stats.rxRateProxy)
-                    ), service.getString(
-                        R.string.speed,
-                        Formatter.formatFileSize(service, stats.txRateDirect)
-                    ), service.getString(
-                        R.string.speed,
-                        Formatter.formatFileSize(service, stats.rxRateDirect)
-                    )
-                )
-                it.setStyle(NotificationCompat.BigTextStyle().bigText(speedDetail))
-                it.setContentText(speedDetail)
-            } else {
-                val speedSimple = (service as Context).getString(
-                    R.string.traffic, service.getString(
-                        R.string.speed, Formatter.formatFileSize(service, stats.txRateProxy)
-                    ), service.getString(
-                        R.string.speed, Formatter.formatFileSize(service, stats.rxRateProxy)
-                    )
-                )
-                it.setStyle(null)
-                it.setContentText(speedSimple)
-            }
-            it.setSubText(
-                service.getString(
-                    R.string.traffic,
-                    Formatter.formatFileSize(service, stats.txTotal),
-                    Formatter.formatFileSize(service, stats.rxTotal)
-                )
+        service as Context
+        fun speed(bytes: Long) = service.getString(R.string.speed, Formatter.formatFileSize(service, bytes))
+        val direct = showDirectSpeed
+        val text = if (direct) {
+            service.getString(
+                R.string.speed_detail,
+                speed(stats.txRateProxy), speed(stats.rxRateProxy), speed(stats.txRateDirect), speed(stats.rxRateDirect),
             )
+        } else {
+            service.getString(R.string.traffic, speed(stats.txRateProxy), speed(stats.rxRateProxy))
         }
-        update()
+        val total = service.getString(
+            R.string.traffic,
+            Formatter.formatFileSize(service, stats.txTotal),
+            Formatter.formatFileSize(service, stats.rxTotal)
+        )
+        val changed = useBuilder {
+            if (text == postedSpeed && total == postedTotal) return@useBuilder false
+            postedSpeed = text
+            postedTotal = total
+            it.setStyle(if (direct) NotificationCompat.BigTextStyle().bigText(text) else null)
+            it.setContentText(text)
+            it.setSubText(total)
+            true
+        }
+        if (changed) update()
     }
 
     suspend fun postNotificationTitle(newTitle: String) {
@@ -133,6 +127,8 @@ class ServiceNotification(
             it.setContentText(null)
             it.setSubText(null)
             it.setStyle(null)
+            postedSpeed = null
+            postedTotal = null
         }
         update()
     }
@@ -142,6 +138,7 @@ class ServiceNotification(
         useBuilder {
             it.setContentText(text)
             if (text == null) it.setProgress(0, 0, false) else it.setProgress(100, percent.coerceAtLeast(0), percent < 0)
+            postedSpeed = null
         }
         update()
     }
@@ -164,6 +161,7 @@ class ServiceNotification(
                 title = newTitle
                 it.setContentTitle(newTitle)
             }
+            postedSpeed = null
         }
         update()
     }
@@ -188,11 +186,7 @@ class ServiceNotification(
 
     private val buildLock = Mutex()
 
-    private suspend fun useBuilder(f: (NotificationCompat.Builder) -> Unit) {
-        buildLock.withLock {
-            f(builder)
-        }
-    }
+    private suspend fun <T> useBuilder(f: (NotificationCompat.Builder) -> T): T = buildLock.withLock { f(builder) }
 
     init {
         service as Context
@@ -205,6 +199,8 @@ class ServiceNotification(
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
         })
+        // Auto-selectors probe less often while the screen is off.
+        Mobile.setScreenOff(!screenOn.value)
 
         runOnMainDispatcher {
             updateActions()
@@ -270,6 +266,7 @@ class ServiceNotification(
         val on = intent.action == Intent.ACTION_SCREEN_ON
         screenOn.value = on
         listenPostSpeed = on
+        Mobile.setScreenOff(!on)
     }
 
 
@@ -308,5 +305,6 @@ class ServiceNotification(
             (service as Service).stopForeground(true)
         }
         service.unregisterReceiver(this)
+        Mobile.setScreenOff(false)
     }
 }

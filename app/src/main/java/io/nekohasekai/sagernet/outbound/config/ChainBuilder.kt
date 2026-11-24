@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.outbound.config
 
 import io.nekohasekai.sagernet.outbound.BuildContext
 import io.nekohasekai.sagernet.outbound.Outbound
+import io.nekohasekai.sagernet.outbound.common.relaxXrayTcpKeepAlive
 import io.nekohasekai.sagernet.outbound.common.setXrayDialerProxy
 import io.nekohasekai.sagernet.outbound.common.useXraySystemCA
 import io.nekohasekai.sagernet.outbound.json.JsonArray
@@ -484,6 +485,7 @@ internal class ChainBuilder(
             // Xray removed outbound-level proxySettings; sockopt.dialerProxy is its 1:1 replacement, the XHTTP download leg included.
             if (nextTag.isNotEmpty() && (opts.link || bridge.needed)) setXrayDialerProxy(obj, nextTag)
             if (ctx.xrayUseSystemCA) useXraySystemCA(obj)
+            relaxXrayTcpKeepAlive(obj)
             state.xrayOutbounds.add(obj)
         }
         if (bridge.needed) {
