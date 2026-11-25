@@ -424,10 +424,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group), Toolbar.OnMenuItem
                 if (info.isExpired() || percent >= 90) context.getColorAttr(R.attr.colorError)
                 else ContextCompat.getColor(context, R.color.material_green_500)
             )
-            binding.groupQuota.contentDescription = getString(
-                R.string.subinfo_quota,
-                SubscriptionInfoCard.readableSize(info.used), SubscriptionInfoCard.readableSize(info.total), percent,
-            )
+            binding.groupQuota.contentDescription = SubscriptionInfoCard.quotaText(context, info)
         }
 
         override fun onMenuItemClick(item: MenuItem): Boolean {

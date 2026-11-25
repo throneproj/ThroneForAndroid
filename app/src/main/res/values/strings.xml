@@ -2005,16 +2005,28 @@
     <string name="subinfo_support">Support</string>
     <string name="subinfo_portal_tip">Website / Portal: %s</string>
     <string name="subinfo_support_tip">Technical support: %s</string>
-    <string name="subinfo_provider">Provider: %s</string>
     <string name="subinfo_expired">Expired</string>
     <string name="subinfo_minutes_left">%dm left</string>
     <string name="subinfo_hours_minutes_left">%1$dh %2$dm left</string>
     <string name="subinfo_days_hours_left">%1$dd %2$dh left</string>
     <string name="subinfo_expires">Expires: %s</string>
-    <string name="subinfo_quota">%1$s / %2$s (%3$d%%)</string>
-    <string name="subinfo_quota_unlimited">%1$s / ∞</string>
-    <string name="subinfo_announcement_title">Announcement - %s</string>
+    <string name="subinfo_quota">%1$s · %2$d%%</string>
     <string name="subinfo_no_app">No app can open %s</string>
+    <string name="subinfo_details">Subscription details</string>
+    <string name="subinfo_details_new">Subscription details, new announcement</string>
+    <string name="subinfo_label_provider">Provider</string>
+    <string name="subinfo_label_traffic">Traffic</string>
+    <string name="subinfo_traffic_used">%1$s of %2$s used (%3$d%%)</string>
+    <string name="subinfo_traffic_unlimited">%s used, no limit</string>
+    <string name="subinfo_label_expires">Expires</string>
+    <string name="subinfo_label_last_update">Last update</string>
+    <string name="subinfo_label_auto_update">Auto-update</string>
+    <string name="subinfo_auto_update_every">Every %1$s (%2$s)</string>
+    <string name="subinfo_auto_update_server">set by the server</string>
+    <string name="subinfo_auto_update_group">set for this group</string>
+    <string name="subinfo_auto_update_global">global setting</string>
+    <string name="subinfo_label_announcement">Announcement</string>
+    <string name="subinfo_website">Website</string>
 
     <!-- A2 import/parsing -->
     <string name="cipher_suites">Cipher suites</string>

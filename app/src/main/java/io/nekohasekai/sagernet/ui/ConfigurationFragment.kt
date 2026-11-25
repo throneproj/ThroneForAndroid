@@ -330,6 +330,7 @@ class ConfigurationFragment : ToolbarFragment(R.layout.layout_group_list),
         testPanel = null
         panelHeight = 0
         header = null
+        infoCard?.dismissDetails()
         infoCard = null
         sidePanelShown = false
         pager.unregisterOnPageChangeCallback(pageCallback)

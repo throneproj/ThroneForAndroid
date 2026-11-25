@@ -34,12 +34,17 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
                 android:ellipsize="end"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minHeight="40dp"
                 android:singleLine="true"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textStyle="bold"
-                tools:text="My subscription · Provider" />
+                tools:text="My subscription" />
 
             <LinearLayout
                 android:id="@+id/sub_card_expiry"
@@ -72,6 +77,39 @@
                     tools:text="12d left" />
 
             </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/sub_card_details"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/subinfo_details"
+                android:focusable="true">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/sub_card_details_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:importantForAccessibility="no"
+                    android:padding="10dp"
+                    app:srcCompat="@drawable/ic_baseline_info_24"
+                    app:tint="?android:attr/textColorSecondary" />
+
+                <!-- A new announcement since the details were last opened. -->
+                <View
+                    android:id="@+id/sub_card_details_dot"
+                    android:layout_width="7dp"
+                    android:layout_height="7dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/sub_card_dot"
+                    android:importantForAccessibility="no"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+            </FrameLayout>
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/sub_card_portal"
@@ -132,45 +170,7 @@
                 android:singleLine="true"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="?android:attr/textColorSecondary"
-                tools:text="40.00 GiB / 100.00 GiB (40%)" />
-
-        </LinearLayout>
-
-        <!-- Two lines at most; the whole text opens in a dialog. -->
-        <LinearLayout
-            android:id="@+id/sub_card_announce"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="8dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginTop="1dp"
-                android:importantForAccessibility="no"
-                app:srcCompat="@drawable/ic_baseline_info_24"
-                app:tint="?accentOrTextSecondary" />
-
-            <TextView
-                android:id="@+id/sub_card_announce_text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorPrimary"
-                tools:text="Your plan renews on the 1st. Visit the portal to extend it." />
+                tools:text="40 / 100 GB · 40%" />
 
         </LinearLayout>
 

@@ -49,24 +49,39 @@ object SubscriptionScheduler {
     /** autoAttempts (GroupUpdater.hpp): in :bg memory, so a new :bg process retries a failing group once. */
     private val attempts = ConcurrentHashMap<Long, Long>()
 
+    enum class IntervalSource { SERVER, GROUP, GLOBAL }
+
+    class AutoUpdate(val seconds: Long, val source: IntervalSource)
+
     /**
-     * ResolveAutoUpdate (GroupUpdater.cpp:590-603) in seconds, 0 = not updated automatically: the server's
+     * ResolveAutoUpdate (GroupUpdater.cpp:590-603), null = not updated automatically: the server's
      * profile-update-interval when followed and sent, else the group's interval, else sub_auto_update. A group's own
      * interval or respect-server choice stands while sub_auto_update is off; inherited ones follow it.
      */
+    fun resolve(
+        group: ProxyGroup,
+        global: Int = DataStore.subAutoUpdate,
+        respectServer: Boolean = DataStore.subRespectServerInterval,
+    ): AutoUpdate? {
+        if (group.url.isEmpty() || group.archive || group.skipAutoUpdate) return null
+        val options = group.subOptions
+        val globalOn = global >= MIN_INTERVAL_MINUTES
+        val serverHours = group.subInfo.serverInterval
+        if ((options.respectServerInterval ?: (globalOn && respectServer)) && serverHours > 0) {
+            return AutoUpdate(serverHours * 3600L, IntervalSource.SERVER)
+        }
+        if (options.updateInterval > 0) {
+            return AutoUpdate(maxOf(options.updateInterval, MIN_INTERVAL_MINUTES) * 60L, IntervalSource.GROUP)
+        }
+        return if (globalOn) AutoUpdate(global * 60L, IntervalSource.GLOBAL) else null
+    }
+
+    /** [resolve] in seconds, 0 = not updated automatically. */
     fun interval(
         group: ProxyGroup,
         global: Int = DataStore.subAutoUpdate,
         respectServer: Boolean = DataStore.subRespectServerInterval,
-    ): Long {
-        if (group.url.isEmpty() || group.archive || group.skipAutoUpdate) return 0L
-        val options = group.subOptions
-        val globalOn = global >= MIN_INTERVAL_MINUTES
-        val serverHours = group.subInfo.serverInterval
-        if ((options.respectServerInterval ?: (globalOn && respectServer)) && serverHours > 0) return serverHours * 3600L
-        if (options.updateInterval > 0) return maxOf(options.updateInterval, MIN_INTERVAL_MINUTES) * 60L
-        return if (globalOn) global * 60L else 0L
-    }
+    ): Long = resolve(group, global, respectServer)?.seconds ?: 0L
 
     /** Whether [group]'s automatic update follows the server's interval when it sends one. */
     fun followsServerInterval(group: ProxyGroup): Boolean = group.subOptions.respectServerInterval

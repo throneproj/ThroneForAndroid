@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One row of the subscription details sheet: a caption over its value. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="12dp">
+
+    <TextView
+        android:id="@+id/detail_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceCaption"
+        android:textColor="?android:attr/textColorSecondary"
+        tools:text="Traffic" />
+
+    <TextView
+        android:id="@+id/detail_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textAlignment="viewStart"
+        android:textAppearance="?attr/textAppearanceBody2"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textDirection="firstStrong"
+        tools:text="3.22 GB of 5 GB used (64%)" />
+
+</LinearLayout>
