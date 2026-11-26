@@ -42,7 +42,14 @@ import io.nekohasekai.sagernet.group.SubscriptionClient
 import io.nekohasekai.sagernet.group.SubscriptionNameFilter
 import io.nekohasekai.sagernet.group.SubscriptionScheduler
 import io.nekohasekai.sagernet.ktx.FixedLinearLayoutManager
+import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.confirmAction
+import io.nekohasekai.sagernet.outbound.link.Hosts
+import io.nekohasekai.sagernet.scan.EndpointResolution
+import io.nekohasekai.sagernet.scan.EndpointSource
+import io.nekohasekai.sagernet.scan.EndpointSources
+import io.nekohasekai.sagernet.ui.iplist.IpListChoices
+import io.nekohasekai.sagernet.ui.iplist.IpListMenu
 import io.nekohasekai.sagernet.ui.settings.DefaultSummaryProvider
 import io.nekohasekai.sagernet.ui.settings.SettingChecks
 import io.nekohasekai.sagernet.ui.test.TestFormat
@@ -52,13 +59,15 @@ import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.validation.vtr
 import io.nekohasekai.sagernet.widget.ListListener
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.matsuri.nb4a.ui.SimpleMenuPreference
 
 /**
- * Edit Group (dialog_edit_group + dialog_edit_group_advanced): Common, Subscription and the collapsed Advanced
- * subscription options. The type is chosen only while creating; a new group is saved without being updated.
+ * Edit Group (dialog_edit_group + dialog_edit_group_advanced): Common, Subscription, the collapsed Advanced
+ * subscription options and the server address source. The type is chosen only while creating; a new group is saved
+ * without being updated.
  * Fields live in the profile cache store while editing.
  */
 class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), OnPreferenceDataStoreChangeListener {
@@ -82,6 +91,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         private const val STATE_ADVANCED = "advancedExpanded"
         private const val STATE_LOADED_FRONT = "loadedFrontProxy"
         private const val STATE_LOADED_LANDING = "loadedLandingProxy"
+        private const val STATE_LOADED_ENDPOINT = "loadedEndpoint"
         private const val AUTO_SELECTOR = "autoselector"
 
         private const val KEY_FRONT = "groupFrontProxyId"
@@ -117,6 +127,31 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         private const val KEY_TYPE_EXCLUDE = "groupSubTypeExclude"
         private const val KEY_COUNTRY_FILTER = "groupSubCountryFilter"
         private val NAME_FILTERS = listOf(KEY_NAME_FILTER, KEY_NAME_EXCLUDE)
+
+        private const val KEY_ENDPOINT_MODE = "groupEndpointMode"
+        private const val KEY_ENDPOINT_ADDRESS = "groupEndpointAddress"
+        private const val KEY_ENDPOINT_LIST = "groupEndpointList"
+        private const val KEY_ENDPOINT_HINT = "groupEndpointHint"
+        private const val ENDPOINT_INHERIT = "inherit"
+        private const val ENDPOINT_ADDRESS = "address"
+        private const val ENDPOINT_LIST = "list"
+
+        private val HOST_NAME = Regex("""^(?:(?!-)[A-Za-z0-9_-]{1,63}(?<!-)\.)*(?![0-9]+$)(?!-)[A-Za-z0-9_-]{1,63}(?<!-)$""")
+
+        /** groupEndpointHost: empty unless [raw] is a bare IP address or host name, without scheme, port or path. */
+        private fun endpointHost(raw: String): String {
+            var text = raw.trim()
+            if (text.startsWith('[') && text.endsWith(']')) text = text.substring(1, text.length - 1)
+            if (Hosts.isIpv6Address(text)) {
+                val zone = text.indexOf('%')
+                val bytes = Hosts.parseIpv6(if (zone >= 0) text.substring(0, zone) else text) ?: return ""
+                return Hosts.formatIpv6(bytes) + (if (zone >= 0) text.substring(zone) else "")
+            }
+            // "1.2.3" reads as IPv4 and "999.1.1.1" would pass as a name; both are typos, so neither is accepted.
+            Hosts.parseIpv4(text)?.let { return if (Hosts.formatIpv4(it) == text) text else "" }
+            val ace = Hosts.toAceHost(text)
+            return if (ace.length <= 253 && HOST_NAME.matches(ace)) ace else ""
+        }
 
         private val HWID_KEYS = listOf(KEY_HWID, KEY_HWID_OS, KEY_HWID_OS_VERSION, KEY_HWID_MODEL)
         private val OPTION_TEXT_KEYS = listOf(KEY_USER_AGENT) + HWID_KEYS
@@ -174,6 +209,9 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
     private var loadedFront = -1L
     private var loadedLanding = -1L
 
+    /** endpoint_json as loaded, kept the same way: a list deleted meanwhile is not pointed at again. */
+    private var loadedEndpoint = "{}"
+
     /** The "Routing profile" menu as (route id, label), Default ("-1") first. */
     private var routeChoices: List<Pair<String, String>> = emptyList()
 
@@ -206,6 +244,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         if (savedInstanceState != null) {
             loadedFront = savedInstanceState.getLong(STATE_LOADED_FRONT, -1L)
             loadedLanding = savedInstanceState.getLong(STATE_LOADED_LANDING, -1L)
+            loadedEndpoint = savedInstanceState.getString(STATE_LOADED_ENDPOINT) ?: "{}"
         }
         onBackPressedDispatcher.addCallback(this) { close() }
 
@@ -215,11 +254,18 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             val found = withContext(Dispatchers.IO) {
                 val group = if (editingId > 0) GroupRepo.get(editingId) ?: return@withContext false else ProxyGroup()
                 loadRouteChoices(group)
+                // The endpoint section offers "IP list" from the first frame only when it knows the lists.
+                try {
+                    IpListChoices.load()
+                } catch (e: Exception) {
+                    Logs.w(e)
+                }
                 unknownTypes = group.subOptions.typeExclude.filter { id -> SubscriptionNameFilter.PROTOCOLS.none { it.id == id } }
                 if (fresh) {
                     writeToCache(group)
                     loadedFront = proxyId(KEY_FRONT)
                     loadedLanding = proxyId(KEY_LANDING)
+                    loadedEndpoint = group.endpointJson
                     val prefilled = editingId == 0L && !link.isNullOrBlank()
                     if (prefilled) {
                         DataStore.groupType = TYPE_SUBSCRIPTION
@@ -262,6 +308,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         outState.putBoolean(STATE_ADVANCED, advancedExpanded)
         outState.putLong(STATE_LOADED_FRONT, loadedFront)
         outState.putLong(STATE_LOADED_LANDING, loadedLanding)
+        outState.putString(STATE_LOADED_ENDPOINT, loadedEndpoint)
     }
 
     override fun onDestroy() {
@@ -377,6 +424,40 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
         store.putString(KEY_NAME_EXCLUDE, options.nameExclude)
         store.putStringSet(KEY_TYPE_EXCLUDE, options.typeExclude.toMutableSet())
         store.putString(KEY_COUNTRY_FILTER, options.countryFilter)
+        // A group's "own" source changes nothing, like Inherit, so it shows as "Profiles' own addresses".
+        val endpoint = EndpointSource.fromJsonText(group.endpointJson)
+        store.putString(
+            KEY_ENDPOINT_MODE,
+            when (endpoint.mode) {
+                EndpointSource.Mode.Address -> ENDPOINT_ADDRESS
+                EndpointSource.Mode.IpList -> ENDPOINT_LIST
+                else -> ENDPOINT_INHERIT
+            },
+        )
+        store.putString(KEY_ENDPOINT_ADDRESS, endpoint.address)
+        store.putString(KEY_ENDPOINT_LIST, endpoint.ipListId.toString())
+    }
+
+    /** DialogEditGroupAdvanced::accept's endpoint: the shown mode with its address or list. */
+    private fun shownEndpoint(): EndpointSource {
+        val store = DataStore.profileCacheStore
+        return when (store.getString(KEY_ENDPOINT_MODE)) {
+            ENDPOINT_ADDRESS -> EndpointSource(EndpointSource.Mode.Address, address = endpointHost(store.getString(KEY_ENDPOINT_ADDRESS).orEmpty()))
+            ENDPOINT_LIST -> store.getString(KEY_ENDPOINT_LIST)?.toLongOrNull()?.takeIf { it >= 0 }
+                ?.let { EndpointSource(EndpointSource.Mode.IpList, ipListId = it) } ?: EndpointSource()
+
+            else -> EndpointSource()
+        }
+    }
+
+    /** editGroupRunningProfileInherits: a profile of this group the running config uses follows the group's source. */
+    private fun runningMemberInherits(): Boolean {
+        val started = ProfileManager.runningProfileId()
+        if (started <= 0L) return false
+        val ids = (DataStore.runningProfiles.mapNotNull { it.toLongOrNull() } + started).distinct()
+        return ProfileManager.getProfiles(ids).any {
+            it.groupId == editingId && EndpointSource.fromJsonText(it.endpointJson).mode == EndpointSource.Mode.Inherit
+        }
     }
 
     /**
@@ -467,6 +548,10 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             val pickedRoute = store.getString(KEY_ROUTE) ?: initialRoute
             if (pickedRoute != initialRoute) group.routeId = pickedRoute.toLongOrNull()?.takeIf { it > 0 } ?: -1L
             group.importSubRoute = newUrl.isNotEmpty() && store.getBoolean(KEY_IMPORT_ROUTE, false)
+            val endpoint = shownEndpoint()
+            val loaded = EndpointSource.fromJsonText(loadedEndpoint).let { if (it.mode == EndpointSource.Mode.Own) EndpointSource() else it }
+            val endpointChanged = endpoint != loaded
+            if (endpointChanged) group.endpointJson = endpoint.toJsonText()
             // dialog_edit_group.cpp: the running profile of this group now resolves to another routing profile.
             val running = RouteManager.runningRouteId()
             val restart = editingId > 0 && running > 0L &&
@@ -474,7 +559,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
                 RouteManager.resolveRouteId(group.routeId) != running
             if (editingId > 0) GroupRepo.save(group) else GroupRepo.add(group)
             SubscriptionScheduler.schedule()
-            restart
+            restart || (endpointChanged && editingId > 0 && runningMemberInherits())
         }
         if (refreshNeeded) SubscriptionClient.refreshGroup(editingId, showDiff = true)
         if (restartNeeded) setResult(RESULT_OK, Intent().putExtra(EXTRA_RESTART_NEEDED, true))
@@ -590,6 +675,7 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             nameFilter(KEY_NAME_EXCLUDE, R.string.grp_filter_exclude_empty)
             typeFilter()
             countryFilter()
+            setupEndpoint()
 
             findPreference<Preference>(KEY_ADVANCED_TOGGLE)!!.setOnPreferenceClickListener {
                 host.advancedExpanded = !host.advancedExpanded
@@ -614,6 +700,11 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             validation.bind(KEY_COUNTRY_FILTER) { text ->
                 val bad = CountryRules.problems(text)
                 if (bad.isEmpty()) "" else vtr(R.string.validation_country_rules, bad.joinToString(", "))
+            }
+            validation.bind(KEY_ENDPOINT_ADDRESS) { text ->
+                Validation.host(text).ifEmpty { if (endpointHost(text).isEmpty()) getString(R.string.endpoint_fixed_address_invalid) else "" }
+            }.label(getString(R.string.endpoint_fixed_address)).onlyIf {
+                DataStore.profileCacheStore.getString(KEY_ENDPOINT_MODE) == ENDPOINT_ADDRESS
             }
             validation.addIssueSource(::advancedIssues)
             validation.revealer = { key ->
@@ -765,6 +856,78 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
             }
         }
 
+        private var endpointMenu: IpListMenu? = null
+        private var endpointHintFor = Long.MIN_VALUE
+        private var endpointHintJob: Job? = null
+
+        /** loadEndpoint: the group's server address source; "IP list" picks the first list and needs one. */
+        private fun setupEndpoint() {
+            val mode = findPreference<SimpleMenuPreference>(KEY_ENDPOINT_MODE) ?: return
+            val list = findPreference<SimpleMenuPreference>(KEY_ENDPOINT_LIST) ?: return
+            val menu = IpListMenu(list, none = false)
+            endpointMenu = menu
+            applyEndpointModes()
+            if (mode.value !in listOf(ENDPOINT_INHERIT, ENDPOINT_ADDRESS, ENDPOINT_LIST)) mode.value = ENDPOINT_INHERIT
+            mode.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> { (it.entry ?: "").toString() }
+            list.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> { (it.entry ?: "").toString() }
+            mode.setOnPreferenceChangeListener { _, newValue -> newValue != ENDPOINT_LIST || menu.selectFirstIfUnset() }
+            findPreference<EditTextPreference>(KEY_ENDPOINT_ADDRESS)?.setOnBindEditTextListener {
+                it.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+                it.setSingleLine()
+                it.hint = getString(R.string.endpoint_fixed_address_hint)
+            }
+            menu.load(this) {
+                applyEndpointModes()
+                refreshState()
+            }
+        }
+
+        /** Like the desktop's disabled entry: "IP list" is offered only while there is a list to pick, or it is the current choice. */
+        private fun applyEndpointModes() {
+            val mode = findPreference<SimpleMenuPreference>(KEY_ENDPOINT_MODE) ?: return
+            val offerList = mode.value == ENDPOINT_LIST || endpointMenu?.choices()?.isNotEmpty() == true
+            val entries = arrayListOf<CharSequence>(getString(R.string.endpoint_group_mode_own), getString(R.string.endpoint_group_mode_address))
+            val values = arrayListOf<CharSequence>(ENDPOINT_INHERIT, ENDPOINT_ADDRESS)
+            if (offerList) {
+                entries.add(getString(R.string.endpoint_mode_list))
+                values.add(ENDPOINT_LIST)
+            }
+            mode.entries = entries.toTypedArray()
+            mode.entryValues = values.toTypedArray()
+        }
+
+        /** syncEndpoint's hint: what the chosen list makes the profiles dial; hidden outside IP list mode. */
+        private fun syncEndpointHint(listId: Long) {
+            if (listId == endpointHintFor) return
+            endpointHintFor = listId
+            endpointHintJob?.cancel()
+            val hint = findPreference<Preference>(KEY_ENDPOINT_HINT) ?: return
+            if (listId < 0) {
+                hint.isVisible = false
+                return
+            }
+            endpointHintJob = lifecycleScope.launch {
+                val resolution: EndpointResolution? = withContext(Dispatchers.IO) {
+                    try {
+                        EndpointSources.resolve(EndpointSource(EndpointSource.Mode.IpList, ipListId = listId))
+                    } catch (e: Exception) {
+                        Logs.w(e)
+                        null
+                    }
+                }
+                val text = when {
+                    resolution == null -> ""
+                    resolution.address.isNotEmpty() ->
+                        getString(R.string.endpoint_group_hint_connects, resolution.displayTarget(), resolution.origin)
+
+                    resolution.problem.isNotEmpty() -> getString(R.string.endpoint_group_hint_own_used, resolution.problem)
+                    else -> ""
+                }
+                hint.summary = text
+                hint.isVisible = text.isNotEmpty()
+            }
+        }
+
         private fun proxyText(id: Long): String = when {
             id <= 0 -> getString(R.string.grp_none)
             else -> host.proxyLabels[id] ?: getString(R.string.grp_missing_profile, id)
@@ -823,6 +986,11 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
                 summary = getString(if (host.advancedExpanded) R.string.grp_advanced_hide else R.string.grp_advanced_show)
                 setIcon(if (host.advancedExpanded) R.drawable.ic_baseline_expand_less_24 else R.drawable.ic_baseline_expand_more_24)
             }
+
+            val endpoint = store.getString(KEY_ENDPOINT_MODE) ?: ENDPOINT_INHERIT
+            findPreference<Preference>(KEY_ENDPOINT_ADDRESS)?.isVisible = endpoint == ENDPOINT_ADDRESS
+            findPreference<Preference>(KEY_ENDPOINT_LIST)?.isVisible = endpoint == ENDPOINT_LIST
+            syncEndpointHint(if (endpoint == ENDPOINT_LIST) endpointMenu?.selectedId() ?: -1L else -1L)
             form?.refresh()
         }
     }

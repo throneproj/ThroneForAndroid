@@ -1,0 +1,5 @@
+# Yandex DNS and the national DNS system (NSDI), reachable under Russia's mobile whitelists; 2026-11-24.
+77.88.8.8
+77.88.8.1
+195.208.4.1
+195.208.5.1

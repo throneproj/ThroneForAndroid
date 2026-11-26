@@ -172,9 +172,6 @@ class Hysteria : Outbound("hysteria") {
     // Hysteria1
     @JvmField var auth_type: String = ""
     @JvmField var auth: String = ""
-    @JvmField var recv_window_conn: Int = 0
-    @JvmField var recv_window: Int = 0
-    @JvmField var disable_mtu_discovery: Boolean = false
 
     // Hysteria2
     @JvmField var password: String = ""
@@ -272,6 +269,22 @@ class Hysteria : Outbound("hysteria") {
         }
     }
 
+    /**
+     * hysteriaFoldV1Quic (hysteria.cpp): protocol/hysteria/quic.go reads the deprecated v1 fields only where the QUIC
+     * field is unset, ORs the MTU switch, and runs recv_window_conn as the connection window and recv_window as the
+     * stream window.
+     */
+    private fun foldV1Quic(recvWindowConn: String, recvWindow: String, disableMtuDiscovery: Boolean) {
+        val connection = v1Window(recvWindowConn)
+        if (connection.isNotEmpty() && quic.connection_receive_window.isBlank()) quic.connection_receive_window = connection
+        val stream = v1Window(recvWindow)
+        if (stream.isNotEmpty() && quic.stream_receive_window.isBlank()) quic.stream_receive_window = stream
+        if (disableMtuDiscovery) {
+            quic.disable_path_mtu_discovery = true
+            quic.disable_path_mtu_discovery_unspecified = false
+        }
+    }
+
     /** hysteriaDropBadGeckoSizes (hysteria.cpp): an import resets an unusable pair to the core defaults. */
     private fun dropBadGeckoSizes() {
         if (!ParseDiag.active()) return
@@ -354,9 +367,6 @@ class Hysteria : Outbound("hysteria") {
                 auth = q.value("auth")
                 auth_type = "STRING"
             }
-            if (q.has("recv_window_conn")) recv_window_conn = QtStrings.toInt(q.value("recv_window_conn"))
-            if (q.has("recv_window")) recv_window = QtStrings.toInt(q.value("recv_window"))
-            if (q.has("disable_mtu_discovery")) disable_mtu_discovery = q.value("disable_mtu_discovery") == "true"
         } else {
             protocol_version = "2"
             password = if (url.password.isEmpty()) url.userName else url.userName + ":" + url.password
@@ -407,6 +417,9 @@ class Hysteria : Outbound("hysteria") {
         tls.enabled = true
         if (q.has("pinSHA256")) parsePinSha256(q.valueFully("pinSHA256"))
         quic.parseFromLink(url)
+        if (protocol_version == "1") {
+            foldV1Quic(q.value("recv_window_conn"), q.value("recv_window"), q.value("disable_mtu_discovery") == "true")
+        }
         if (serverPort == 0 && server_ports.isEmpty()) serverPort = 443
         return true
     }
@@ -444,11 +457,9 @@ class Hysteria : Outbound("hysteria") {
             }
             val clashObfs = proxy.string("obfs")
             if (clashObfs.isNotEmpty()) obfs = clashObfs
-            val window = proxy.int("recv-window").takeIf { it > 0 } ?: proxy.int("recv_window")
-            if (window > 0) recv_window = window
             val windowConn = proxy.int("recv-window-conn").takeIf { it > 0 } ?: proxy.int("recv_window_conn")
-            if (windowConn > 0) recv_window_conn = windowConn
-            disable_mtu_discovery = proxy.bool("disable_mtu_discovery")
+            val window = proxy.int("recv-window").takeIf { it > 0 } ?: proxy.int("recv_window")
+            foldV1Quic(windowConn.toString(), window.toString(), proxy.bool("disable_mtu_discovery"))
         } else {
             val clashPassword = proxy.string("password")
             if (clashPassword.isNotEmpty()) password = clashPassword
@@ -514,9 +525,6 @@ class Hysteria : Outbound("hysteria") {
                 auth = obj.string("auth_str")
                 auth_type = "STRING"
             }
-            if (obj.contains("recv_window_conn")) recv_window_conn = obj.int("recv_window_conn")
-            if (obj.contains("recv_window")) recv_window = obj.int("recv_window")
-            if (obj.contains("disable_mtu_discovery")) disable_mtu_discovery = obj.bool("disable_mtu_discovery")
         } else {
             if (obj.contains("obfs")) {
                 val obfsObj = obj.obj("obfs")
@@ -571,6 +579,10 @@ class Hysteria : Outbound("hysteria") {
         dropBadBareHops("hop_interval", bareInterval, bareMax)
         if (obj.contains("tls")) tls.parseFromJson(obj.obj("tls"))
         quic.parseFromJson(obj)
+        if (protocol_version == "1") {
+            fun window(key: String) = if (obj.isNumber(key)) obj.integer(key).toString() else ""
+            foldV1Quic(window("recv_window_conn"), window("recv_window"), obj.bool("disable_mtu_discovery"))
+        }
         return true
     }
 
@@ -583,6 +595,7 @@ class Hysteria : Outbound("hysteria") {
         if (name.isNotEmpty()) url.fragment = name
         var linkUser: String? = null
         var linkPassword: String? = null
+        var quicQuery = quic.exportToLink()
         if (v1) {
             if (obfs.isNotEmpty()) url.addQueryItemPercentEncoded("obfsParam", LinkCodec.percentEncodeAll(obfs))
             if (auth.isNotEmpty()) {
@@ -590,9 +603,18 @@ class Hysteria : Outbound("hysteria") {
                 if (auth_type == "STRING") url.addQueryItem("auth", auth)
                 if (auth_type == "BASE64") url.addQueryItem("auth_base64", auth)
             }
-            if (recv_window_conn > 0) url.addQueryItem("recv_window_conn", recv_window_conn.toString())
-            if (recv_window > 0) url.addQueryItem("recv_window", recv_window.toString())
-            if (disable_mtu_discovery) url.addQueryItem("disable_mtu_discovery", "true")
+            // v1 links keep the deprecated keys that parseFromLink folds into these QUIC fields.
+            fun keepV1(key: String, quicKey: String, bytes: String) {
+                if (bytes.isEmpty()) return
+                url.addQueryItem(key, bytes)
+                quicQuery = quicQuery.filterNot { it.first == quicKey }
+            }
+            keepV1("recv_window_conn", "quic_connection_receive_window", v1Window(quic.connection_receive_window))
+            keepV1("recv_window", "quic_stream_receive_window", v1Window(quic.stream_receive_window))
+            if (quic.disable_path_mtu_discovery) {
+                url.addQueryItem("disable_mtu_discovery", "true")
+                quicQuery = quicQuery.filterNot { it.first == "quic_disable_path_mtu_discovery" }
+            }
         } else {
             if (password.contains(":")) {
                 linkUser = QtStrings.substrBefore(password, ":")
@@ -618,7 +640,7 @@ class Hysteria : Outbound("hysteria") {
         if (down_mbps > 0) url.addQueryItem("downmbps", down_mbps.toString())
         if (hop_interval.isNotEmpty()) url.addQueryItem("hop_interval", hopDuration(hop_interval))
         url.addQueryItems(tls.exportToLink())
-        url.addQueryItems(quic.exportToLink())
+        url.addQueryItems(quicQuery)
         url.addQueryItems(baseLinkQuery())
         if (server_ports.isEmpty()) {
             url.port = serverPort
@@ -649,9 +671,6 @@ class Hysteria : Outbound("hysteria") {
                 if (auth_type == "BASE64") obj["auth"] = auth
                 if (auth_type == "STRING") obj["auth_str"] = auth
             }
-            if (recv_window_conn > 0) obj["recv_window_conn"] = recv_window_conn
-            if (recv_window > 0) obj["recv_window"] = recv_window
-            if (disable_mtu_discovery) obj["disable_mtu_discovery"] = disable_mtu_discovery
         } else {
             if (obfs.isNotEmpty()) {
                 obj["obfs"] = jsonObjectOf(
@@ -709,9 +728,6 @@ class Hysteria : Outbound("hysteria") {
                 if (auth_type == "BASE64") obj["auth"] = auth
                 if (auth_type == "STRING") obj["auth_str"] = auth
             }
-            if (recv_window_conn > 0) obj["recv_window_conn"] = recv_window_conn
-            if (recv_window > 0) obj["recv_window"] = recv_window
-            if (disable_mtu_discovery) obj["disable_mtu_discovery"] = disable_mtu_discovery
         } else {
             if (obfsActive()) {
                 val obfsType = obfs_type.trim().lowercase()
@@ -802,6 +818,7 @@ class Hysteria : Outbound("hysteria") {
         // ':' '@' '[' ']' '%' '`', the sub-delims and control characters, stays percent-encoded (upper-case hex).
         private const val DECODED_IN_AUTHORITY = " -._~\"<>\\^{|}/?#"
 
+        private val V1_WINDOW = Regex("\\+?[0-9]+")
         private val CLASH_PORT_SEPARATOR = Regex("[,/]")
         private val CLASH_BANDWIDTH = Regex("^(\\d+(?:\\.\\d+)?)\\s*([KMGTkmgt]?)(?:([bB])(?:ps|/s)?|ps)?$")
         private const val SPEED_PREFIXES = "KMGTPE"
@@ -809,6 +826,14 @@ class Hysteria : Outbound("hysteria") {
         /** hysteriaKeep: without a diagnostics scope (DB loads, clones) a parse keeps every value as it always did. */
         private fun keep(field: String, value: String, rule: Rule): Boolean =
             !ParseDiag.active() || acceptOptional(field, rule(value), value)
+
+        /** hysteriaV1Window (hysteria.cpp): a deprecated v1 window as the core reads it, a positive whole number of bytes. */
+        private fun v1Window(text: String): String {
+            val t = text.trim()
+            if (!V1_WINDOW.matches(t)) return ""
+            val bytes = t.toULongOrNull() ?: return ""
+            return if (bytes > 0uL) bytes.toString() else ""
+        }
 
         /** hysteriaRejectTransport (hysteria.cpp). */
         private fun rejectTransport(field: String, transport: String) {

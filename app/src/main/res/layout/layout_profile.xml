@@ -143,7 +143,81 @@
                 tools:text="engage.cloudflareclient.com:2408"
                 tools:visibility="visible" />
 
-            <!-- Takes the height the double-column grid adds to match a taller neighbour: the type lines line up. -->
+            <io.nekohasekai.sagernet.ui.profiles.ResultLineLayout
+                android:id="@+id/result_line"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="4dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/test_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:indicatorSize="12dp"
+                    app:trackThickness="2dp" />
+
+                <TextView
+                    android:id="@+id/profile_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:breakStrategy="simple"
+                    android:hyphenationFrequency="none"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:visibility="gone"
+                    tools:text="135 ms  ↓9.86 ↑9.14 Mbps"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/profile_exit_ip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:breakStrategy="simple"
+                    android:hyphenationFrequency="none"
+                    android:textAlignment="viewEnd"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:visibility="gone"
+                    tools:text="🇩🇪 203.0.113.7"
+                    tools:visibility="visible" />
+
+            </io.nekohasekai.sagernet.ui.profiles.ResultLineLayout>
+
+            <TextView
+                android:id="@+id/profile_services"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="4dp"
+                android:textAlignment="viewStart"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?android:attr/textColorSecondary"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/profile_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="4dp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?android:attr/textColorSecondary"
+                android:visibility="gone"
+                tools:text="context deadline exceeded"
+                tools:visibility="visible" />
+
+            <!-- Takes the height the grid adds to match a taller neighbour: the type lines line up at the bottom. -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -164,27 +238,6 @@
                     android:textColor="?android:textColorSecondary"
                     tools:text="Trojan" />
 
-                <com.google.android.material.progressindicator.CircularProgressIndicator
-                    android:id="@+id/test_progress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:indeterminate="true"
-                    android:visibility="gone"
-                    app:indicatorSize="12dp"
-                    app:trackThickness="2dp" />
-
-                <TextView
-                    android:id="@+id/profile_result"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:breakStrategy="simple"
-                    android:hyphenationFrequency="none"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:visibility="gone"
-                    tools:text="🇩🇪 135 ms"
-                    tools:visibility="visible" />
-
                 <TextView
                     android:id="@+id/traffic_text"
                     android:layout_width="wrap_content"
@@ -196,21 +249,6 @@
                     tools:text="↓35 kB ↑19 kB" />
 
             </io.nekohasekai.sagernet.ui.profiles.TypeLineLayout>
-
-            <TextView
-                android:id="@+id/profile_error"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:paddingStart="12dp"
-                android:paddingTop="2dp"
-                android:paddingEnd="8dp"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorSecondary"
-                android:visibility="gone"
-                tools:text="context deadline exceeded"
-                tools:visibility="visible" />
 
         </LinearLayout>
 

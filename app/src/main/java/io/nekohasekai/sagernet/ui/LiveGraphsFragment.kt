@@ -15,7 +15,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.color.MaterialColors
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.aidl.LiveStatsBatch
-import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.LiveSeries
 import io.nekohasekai.sagernet.bg.LiveStatsRecorder
 import io.nekohasekai.sagernet.database.DataStore
@@ -32,9 +31,8 @@ import kotlinx.coroutines.withContext
 
 /**
  * The desktop's Traffic Graph tab (c3c2778b): proxy and direct speed over 1, 2, 5 or 10 minutes from the service's
- * history (bg.LiveStatsRecorder), lines and directions toggled in the legend, profile events flagged; below it the
- * runtime panel's sparklines for the service process that runs the core. The graph state is the desktop's
- * traffic_graph_* settings.
+ * history (bg.LiveStatsRecorder), lines and directions toggled in the legend; below it the runtime panel's sparklines
+ * for the service process that runs the core. The graph state is the desktop's traffic_graph_* settings.
  */
 class LiveGraphsFragment : ToolbarFragment(R.layout.layout_live_graphs), Toolbar.OnMenuItemClickListener {
 
@@ -65,9 +63,7 @@ class LiveGraphsFragment : ToolbarFragment(R.layout.layout_live_graphs), Toolbar
 
     private var savedHidden by SettingsRegistry.TRAFFIC_GRAPH_HIDDEN
     private var savedHiddenDirs by SettingsRegistry.TRAFFIC_GRAPH_HIDDEN_DIRS
-    private var savedRange by SettingsRegistry.TRAFFIC_GRAPH_RANGE
     private var savedSmooth by SettingsRegistry.TRAFFIC_GRAPH_SMOOTH
-    private var savedMarkers by SettingsRegistry.TRAFFIC_GRAPH_MARKERS
 
     private lateinit var binding: LayoutLiveGraphsBinding
     private lateinit var rateAxis: LiveChartView.Axis
@@ -79,7 +75,6 @@ class LiveGraphsFragment : ToolbarFragment(R.layout.layout_live_graphs), Toolbar
     private val hiddenColumns = LinkedHashSet<String>()
     private var range = 1
     private var smooth = true
-    private var showMarkers = true
 
     private val charts get() = listOf(binding.liveTrafficChart, binding.liveCpuChart, binding.liveRamChart, binding.liveConnectionsChart)
 
@@ -99,11 +94,10 @@ class LiveGraphsFragment : ToolbarFragment(R.layout.layout_live_graphs), Toolbar
         val dirs = savedHiddenDirs
         if (dirs and 1 != 0) hiddenColumns.add(COLUMN_DOWN)
         if (dirs and 2 != 0) hiddenColumns.add(COLUMN_UP)
-        range = savedRange.coerceIn(0, RANGES.lastIndex)
+        // Another window length shows two minutes, as on the desktop.
+        range = RANGES.indexOfFirst { it.seconds == DataStore.trafficGraphSeconds }.takeIf { it >= 0 } ?: 1
         smooth = savedSmooth
-        showMarkers = savedMarkers
         toolbar?.menu?.findItem(R.id.action_live_smooth)?.isChecked = smooth
-        toolbar?.menu?.findItem(R.id.action_live_events)?.isChecked = showMarkers
 
         rateAxis = LiveChartView.rateAxis(context)
         bytesAxis = LiveChartView.bytesAxis(context)
@@ -123,7 +117,7 @@ class LiveGraphsFragment : ToolbarFragment(R.layout.layout_live_graphs), Toolbar
                 LiveChartView.Column(COLUMN_DOWN, "↓", dashed = false, wash = true),
                 LiveChartView.Column(COLUMN_UP, "↑", dashed = true, wash = false),
             ),
-            rateAxis, events = true,
+            rateAxis,
         )
         val core = getString(R.string.live_graph_core)
         val coreColor = LiveChartView.coreColor(context)
@@ -169,7 +163,7 @@ class LiveGraphsFragment : ToolbarFragment(R.layout.layout_live_graphs), Toolbar
             val index = RANGES.indexOfFirst { it.button == id }
             if (index < 0 || index == range) return@addOnButtonCheckedListener
             range = index
-            savedRange = index
+            DataStore.trafficGraphSeconds = RANGES[index].seconds
             applyState()
         }
 
@@ -192,12 +186,6 @@ class LiveGraphsFragment : ToolbarFragment(R.layout.layout_live_graphs), Toolbar
                 smooth = !smooth
                 item.isChecked = smooth
                 savedSmooth = smooth
-            }
-
-            R.id.action_live_events -> {
-                showMarkers = !showMarkers
-                item.isChecked = showMarkers
-                savedMarkers = showMarkers
             }
 
             R.id.action_live_show_all -> {
@@ -257,7 +245,6 @@ class LiveGraphsFragment : ToolbarFragment(R.layout.layout_live_graphs), Toolbar
             windowMs = selected.seconds * 1000L
             tickMs = selected.tickSeconds * 1000L
             smooth = this@LiveGraphsFragment.smooth
-            showMarkers = this@LiveGraphsFragment.showMarkers
             hiddenRows = this@LiveGraphsFragment.hiddenRows.toSet()
             hiddenColumns = this@LiveGraphsFragment.hiddenColumns.toSet()
             invalidate()
@@ -312,13 +299,7 @@ class LiveGraphsFragment : ToolbarFragment(R.layout.layout_live_graphs), Toolbar
     }
 
     private fun render() {
-        val running = DataStore.serviceState == BaseService.State.Connected
-        val markers = LiveHistory.markers
-        for (chart in charts) {
-            chart.running = running
-            chart.markers = markers
-            chart.invalidate()
-        }
+        for (chart in charts) chart.invalidate()
         val series = LiveHistory.series
         val last = if (series.size > 0 && SystemClock.elapsedRealtime() - series.latestTime <= STALE_MS) series.size - 1 else -1
         fun show(view: TextView, field: Int, axis: LiveChartView.Axis) {
@@ -340,32 +321,22 @@ private object LiveHistory {
 
     val series = LiveSeries(LiveStatsRecorder.CAPACITY, LiveStatsBatch.FIELDS)
 
-    var markers: List<LiveChartView.Marker> = emptyList()
-        private set
     var session = 0L
         private set
     var serial = 0L
         private set
 
-    /** Clear history drops what came before; the service still has it, so its events are left out from here on. */
-    private var clearedAt = 0L
-
     fun merge(batch: LiveStatsBatch) {
         if (batch.session != session) {
             series.clear()
             session = batch.session
-            clearedAt = 0L
         }
         serial = batch.serial
         for (i in batch.times.indices) series.push(batch.times[i], batch.values, i * LiveStatsBatch.FIELDS)
-        markers = batch.markerTimes.indices.filter { batch.markerTimes[it] > clearedAt }.map {
-            LiveChartView.Marker(batch.markerTimes[it], batch.markerKinds[it], batch.markerTexts.getOrElse(it) { "" })
-        }
     }
 
+    /** Drops what came before; the serial stays, so the service's copy is not pulled again. */
     fun clear() {
         series.clear()
-        markers = emptyList()
-        clearedAt = SystemClock.elapsedRealtime()
     }
 }

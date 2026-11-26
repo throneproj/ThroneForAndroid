@@ -16,7 +16,7 @@ class TestSettingsContractTest {
         assertEquals(3000, SettingsRegistry.URL_TEST_TIMEOUT_MS.default)
         assertEquals(SpeedTestSettings.FULL, SettingsRegistry.SPEED_TEST_MODE.default)
         assertEquals(5000, SettingsRegistry.SPEED_TEST_TIMEOUT_MS.default)
-        assertEquals("http://cachefly.cachefly.net/1mb.test", SettingsRegistry.SIMPLE_DL_URL.default)
+        assertEquals("http://cachefly.cachefly.net/5mb.test", SettingsRegistry.SIMPLE_DL_URL.default)
     }
 
     @Test

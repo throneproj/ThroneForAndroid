@@ -31,7 +31,7 @@ internal class SpeedTestRunner(private val session: TestSession) {
 
     private val mode = session.options.speedMode
     private val modeName = SpeedTestSettings.modeName(mode)
-    private val traffic = TrafficCredit(session.options.creditTraffic)
+    private val traffic = TrafficCredit()
 
     suspend fun run(profiles: List<ProxyEntity>) {
         for (slice in profiles.chunked(1)) {
@@ -210,7 +210,7 @@ internal class SpeedTestRunner(private val session: TestSession) {
      * creditTraffic (TestRunner.cpp:481-498): probes dial around the core's tracker, so the bytes a speed test moves are
      * added to the tested profile here, diffed per tag (the running profile's counters are the traffic looper's).
      */
-    private class TrafficCredit(private val enabled: Boolean) {
+    private class TrafficCredit {
         private val base = HashMap<String, LongArray>()
         private val pending = HashMap<Long, LongArray>()
 
@@ -219,7 +219,6 @@ internal class SpeedTestRunner(private val session: TestSession) {
 
         @Synchronized
         fun credit(profileId: Long, tag: String?, up: Long, down: Long) {
-            if (!enabled) return
             val last = base.getOrPut(tag.orEmpty()) { LongArray(2) }
             val dUp = if (up >= last[0]) up - last[0] else up
             val dDown = if (down >= last[1]) down - last[1] else down

@@ -44,6 +44,24 @@ curl -fsSL --retry 3 https://codeload.github.com/SagerNet/sing-box-dashboard/tar
 find "$DASHBOARD" -type f -name '.*' -delete
 test -z "$(find "$DASHBOARD" -type d -name '_*')"
 test -s "$DASHBOARD/index.html"
+# Only the flags of Noto Color Emoji are kept; without fonttools (pyftsubset, or pipx to fetch it) the full font ships.
+subset_font() {
+  if command -v pyftsubset >/dev/null; then pyftsubset "$@"
+  elif command -v pipx >/dev/null; then pipx run --spec 'fonttools[woff,lxml]==4.68.0' pyftsubset "$@"
+  else return 1
+  fi
+}
+shopt -s nullglob
+for font in "$DASHBOARD"/assets/noto-color-emoji-*.woff2; do
+  if subset_font "$font" --output-file="$font.flags" --flavor=woff2 --layout-features='*' \
+      --unicodes='U+1F1E6-1F1FF,U+1F3F3,U+1F3F4,U+1F3C1,U+1F6A9,U+1F38C,U+E0020-E007F,U+200D,U+FE0F,U+2620,U+26A7,U+1F308'; then
+    mv "$font.flags" "$font"
+  else
+    rm -f "$font.flags"
+    echo "warning: cutting $font down to flags failed; the full font ships" >&2
+  fi
+done
+shopt -u nullglob
 python3 buildScript/dashboard_css.py "$DASHBOARD"
 
 # F-Droid builds stable tags: the same versionCode as the GitHub release (VERSION_CODE * 1000 + 999).

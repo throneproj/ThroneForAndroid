@@ -593,7 +593,7 @@ class Dnstt : Outbound("dnstt") {
         return obj
     }
 
-    /** dnstt::Build (dnstt.cpp): resolvers built from the lines only, Android has no resolver IP lists. */
+    /** dnstt::Build (dnstt.cpp): resolvers built from the lines and the resolver IP list. */
     override fun build(ctx: BuildContext): BuildResult {
         val obj = JsonObject()
         obj["type"] = "dnstt"
@@ -616,7 +616,7 @@ class Dnstt : Outbound("dnstt") {
 
     override fun security(): SecurityInfo = SecurityInfo("Encrypted", "", SecurityLevel.Secure)
 
-    /** dnstt::Validate (dnstt.cpp), plus the Android-only warning that a resolver IP list is never built. */
+    /** dnstt::Validate (dnstt.cpp). */
     override fun validate(issues: MutableList<Issue>, ctx: BuildContext) {
         super.validate(issues, ctx)
         issues.addIssue(Severity.Error, "mode", Validation.oneOf(mode, dnsttModes, Empty.Required), mode)
@@ -640,7 +640,6 @@ class Dnstt : Outbound("dnstt") {
                 break
             }
         }
-        if (resolvers.hasIpList()) issues.addIssue(Severity.Warning, "resolver_list", vtr(R.string.validation_resolver_list_android))
         issues.addIssue(Severity.Error, "resolver_strategy", Validation.oneOf(resolver_strategy, dnsttResolverStrategies), resolver_strategy)
         issues.addIssue(Severity.Error, "backend", Validation.oneOf(backend, dnsttBackends), backend)
         issues.addIssue(Severity.Warning, "backend", DnsttChecks.dnsttChainOnly(backend))

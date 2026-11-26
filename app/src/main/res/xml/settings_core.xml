@@ -22,10 +22,6 @@
             app:key="enable_stats"
             app:summary="@string/enable_stats_sum"
             app:title="@string/enable_stats" />
-        <SwitchPreference
-            app:key="disable_traffic_stats"
-            app:summary="@string/disable_traffic_stats_sum"
-            app:title="@string/disable_traffic_stats" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_clash_api">

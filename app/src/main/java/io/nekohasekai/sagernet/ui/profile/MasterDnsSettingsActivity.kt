@@ -9,16 +9,17 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.outbound.types.MasterDns
 import io.nekohasekai.sagernet.outbound.types.MasterDnsChecks
 import io.nekohasekai.sagernet.ui.ValidationForm
+import io.nekohasekai.sagernet.ui.iplist.ResolverListRow
+import io.nekohasekai.sagernet.ui.scan.ScannerUi
 import io.nekohasekai.sagernet.validation.Validation
 
-/**
- * MasterDNS (edit_masterdns.cpp). Resolver IP lists have no Android counterpart, so only the typed lines are edited;
- * a desktop list id survives the save untouched.
- */
+/** MasterDNS (edit_masterdns.cpp); the resolvers are the typed lines and an optional IP list (ResolverSourceWidget). */
 class MasterDnsSettingsActivity : BindingSettingsActivity<MasterDns>() {
 
     override fun createEntity() = MasterDns()
     override val preferencesResource = R.xml.masterdns_preferences
+
+    private val resolverList = ResolverListRow("resolver_list")
 
     init {
         pbm.text("name")
@@ -44,10 +45,12 @@ class MasterDnsSettingsActivity : BindingSettingsActivity<MasterDns>() {
         for (key in COUNTS) {
             if ((store.getString(key)?.toIntOrNull() ?: 0) <= 0) store.putString(key, "")
         }
+        resolverList.write(resolvers.ipListId)
     }
 
     override fun MasterDns.readUnboundFromCache() {
         mtu_test_timeout = mtu_test_timeout.trim()
+        resolvers.ipListId = resolverList.read()
     }
 
     override fun PreferenceFragmentCompat.onPreferencesCreated() {
@@ -63,11 +66,17 @@ class MasterDnsSettingsActivity : BindingSettingsActivity<MasterDns>() {
                 pref.text.orEmpty().trim().ifEmpty { pref.context.getString(R.string.setting_default_value, value) }
             }
         }
+        resolverList.attach(this) { form?.refresh() }
+        ScannerUi.bindFindResolvers(this@MasterDnsSettingsActivity, this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ScannerUi.takeResolverList(DataStore.editingId).let { if (it >= 0) resolverList.select(it) }
     }
 
     override fun issueKey(field: String): String? = when (field) {
         "domain" -> "domains"
-        "resolver_list" -> "resolvers.lines"
         else -> null
     }
 
@@ -78,6 +87,7 @@ class MasterDnsSettingsActivity : BindingSettingsActivity<MasterDns>() {
         for (key in arrayOf("mtu_min_upload", "mtu_max_upload", "mtu_min_download", "mtu_max_download", "mtu_test_retries", "mtu_test_parallelism")) {
             bind(key, Validation.Rules.int(0, Int.MAX_VALUE.toLong()))
         }
+        resolverList.bindValidation(this)
     }
 
     companion object {

@@ -158,15 +158,20 @@ internal object SubscriptionFilters {
         return CountryOutcome(untested, outcome?.deleted.orEmpty(), report.toString(), outcome?.stopped, outcome?.ok ?: true)
     }
 
-    /** removeUnavailableAndSort (GroupUpdater.cpp:266-296): the follow-ups of the subscription's URL test. */
-    suspend fun removeUnavailableAndSort(group: ProxyGroup, options: SubscriptionOptions): Outcome {
+    /**
+     * removeUnavailableAndSort (GroupUpdater.cpp:518-545): the follow-ups of the subscription's URL test. Only the
+     * profiles that failed in the run started at [testedSince] (seconds) are removed, so an inconclusive or aborted
+     * test keeps the earlier result; null removes nothing.
+     */
+    suspend fun removeUnavailableAndSort(group: ProxyGroup, options: SubscriptionOptions, testedSince: Long?): Outcome {
         var deleted: List<Long> = emptyList()
         val report = StringBuilder()
-        if (options.removeUnavailable) {
+        if (options.removeUnavailable && testedSince != null) {
             val doomed = ArrayList<Long>()
             val names = ArrayList<String>()
             for (profile in ProfileManager.members(group.id)) {
                 if (profile.type == SubscriptionRefresh.AUTOSELECTOR || !profile.isUnavailable()) continue
+                if (profile.latencyAt < testedSince) continue
                 doomed.add(profile.id)
                 names.add(profile.outbound.displayTypeAndName())
             }

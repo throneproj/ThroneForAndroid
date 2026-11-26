@@ -21,7 +21,6 @@ import android.view.ViewConfiguration
 import androidx.core.graphics.ColorUtils
 import com.google.android.material.color.MaterialColors
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.aidl.LiveStatsBatch
 import io.nekohasekai.sagernet.bg.LiveSeries
 import java.text.BreakIterator
 import java.text.NumberFormat
@@ -44,9 +43,9 @@ import kotlin.math.sqrt
 /**
  * The desktop's LiveChart (src/ui/widget/LiveChart.cpp) over one [LiveSeries]: a line per row × column across a time
  * window, each bucket at the peak of its points when the window holds more points than the plot has room for,
- * monotone smoothing, gaps as breaks, stopped stretches hatched, profile events flagged, and a crosshair with a value
- * card that follows a touch. Compact is the desktop sparkline: no time axis, events or pills, the ceiling and zero
- * inside a tinted panel. The legend and the window choice are the screen's own views.
+ * monotone smoothing, gaps and stops as breaks, and a crosshair with a value card that follows a touch. Compact is the
+ * desktop sparkline: no time axis or pills, the ceiling and zero inside a tinted panel. The legend and the window
+ * choice are the screen's own views.
  */
 class LiveChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
 
@@ -56,21 +55,11 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
     /** A measure: [dashed] lines; [wash] fills under the lines of washed rows. */
     class Column(val key: String, val arrow: String, val dashed: Boolean, val wash: Boolean)
 
-    /** A profile event; [kind] is a LiveStatsBatch.MARKER_* value. */
-    class Marker(val t: Long, val kind: Int, val text: String)
-
     class Scale(val top: Double, val step: Double, val label: (Double) -> String)
 
     interface Axis {
         fun format(value: Double): String
         fun scale(peak: Double): Scale
-    }
-
-    private class MarkerItem {
-        var x = 0f
-        var text = ""
-        var hasFlag = false
-        val flag = RectF()
     }
 
     /** [text] and [width] are for the tick at [wall] in [seconds] form. */
@@ -82,7 +71,7 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         var width = 0f
     }
 
-    private class CardLine(val kind: Int, val row: Int, val focus: Boolean, val text: String, val values: Int)
+    private class CardLine(val kind: Int, val row: Int, val focus: Boolean, val values: Int)
 
     companion object {
         /** A newer point than this is the current one: the window ends at it rather than now. */
@@ -90,7 +79,6 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         private const val MAX_GRID_LINES = 24
         private const val CARD_ROW = 0
         private const val CARD_TOTAL = 1
-        private const val CARD_NOTE = 2
 
         /** The desktop palette: ThemeTokens chartSeries[0] and chartContext, RuntimeStatsWidget's core colour. */
         private const val SERIES_BLUE = 0xFF2A78D6.toInt()
@@ -255,13 +243,10 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
     private val cAxis = withAlpha(ink, 70)
     private val cBorder = withAlpha(ink, 60)
     private val cHairline = withAlpha(ink, 92)
-    private val cStopped = withAlpha(ink, 10)
-    private val cHatch = withAlpha(ink, 56)
     private val cPanel = withAlpha(ink, 12)
     private val cFocus = withAlpha(ink, 18)
     private val cLabel = withAlpha(ink, 150)
 
-    private val medium: Typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     private fun textPaint(size: Float, face: Typeface = Typeface.DEFAULT) = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = sp(size)
         typeface = face
@@ -270,7 +255,6 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
     private val pBase = textPaint(12f)
     private val pBold = textPaint(12f, Typeface.DEFAULT_BOLD)
     private val pSmall = textPaint(11f)
-    private val pSmallMedium = textPaint(11f, medium)
     private val pSmallBold = textPaint(11f, Typeface.DEFAULT_BOLD)
     private val pLabel = textPaint(10f)
     private val pTitle = textPaint(14f, Typeface.DEFAULT_BOLD)
@@ -284,12 +268,6 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         style = Paint.Style.STROKE
         strokeJoin = Paint.Join.ROUND
         strokeCap = Paint.Cap.ROUND
-    }
-    private val events = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = dp(1f)
-        color = cHairline
-        pathEffect = DashPathEffect(floatArrayOf(dp(2f), dp(3f)), 0f)
     }
     private val border = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -308,7 +286,6 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     private val pillH = textHeight(pSmallBold) + dp(4f)
     private val axisH = max(dp(22f), pillH + dp(6f))
-    private val flagH = max(dp(17f), textHeight(pSmall) + dp(3f))
     private val cardRowH = max(dp(19f), textHeight(pBase) + dp(3f))
     private val compactRowH = max(dp(16f), textHeight(pSmall) + dp(2f))
     private val gridLabelGap = max(dp(9f), ceil(textHeight(pSmall) / 2) + dp(2f))
@@ -316,8 +293,6 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
     private val messageTitleH = max(dp(20f), textHeight(pTitle) + dp(3f))
 
     private val totalText = context.getString(R.string.live_graph_total)
-    private val stoppedText = context.getString(R.string.live_graph_stopped)
-    private val stoppedWidth = pSmallMedium.measureText(stoppedText)
     private val emptyTitle = context.getString(R.string.live_graph_waiting)
     private val emptyBody = context.getString(R.string.live_graph_waiting_body)
     private val hiddenTitle = context.getString(R.string.live_graph_all_hidden)
@@ -340,18 +315,12 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
     private var columns: List<Column> = emptyList()
     private var axis: Axis = percentAxis()
     private var compact = false
-    private var withEvents = false
 
     var data: LiveSeries? = null
-    var markers: List<Marker> = emptyList()
-
-    /** The core runs now: an open stopped stretch ends at the window's end only while it does not. */
-    var running = false
     var windowMs = 120_000L
     var tickMs = 30_000L
     var pointIntervalMs = 1000L
     var smooth = true
-    var showMarkers = true
     var hiddenRows: Set<String> = emptySet()
     var hiddenColumns: Set<String> = emptySet()
 
@@ -363,14 +332,12 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
     private var seriesOn = BooleanArray(0)
     private var drawOrder = IntArray(0)
 
-    /** [events]: stopped stretches and profile events (never in [compact]). */
-    fun setup(rows: List<Row>, columns: List<Column>, axis: Axis, compact: Boolean = false, events: Boolean = false) {
+    fun setup(rows: List<Row>, columns: List<Column>, axis: Axis, compact: Boolean = false) {
         this.rows = rows
         rowNames = Array(rows.size) { shortName(rows[it].label) }
         this.columns = columns
         this.axis = axis
         this.compact = compact
-        withEvents = events && !compact
         val nc = columns.size
         ns = rows.size * nc
         seriesRow = IntArray(ns) { it / nc }
@@ -429,13 +396,8 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
     private var tangents = FloatArray(0)
     private val linePath = Path()
     private val fillPath = Path()
-    private val markerItems = ArrayList<MarkerItem>()
-    private var markerCount = 0
     private val axisLabels = ArrayList<AxisLabel>()
     private var axisCount = 0
-    private val startedFlags = HashMap<String, String>()
-    private val switchedFlags = HashMap<String, String>()
-    private var stoppedFlag: String? = null
     private var lastScale: Scale? = null
     private var scaleAxis: Axis? = null
     private var scalePeak = Double.NaN
@@ -614,17 +576,7 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         scaleTop = drawnTop
 
         drawGrid(canvas, scale)
-        if (withEvents) drawBands(canvas)
-        val flags = withEvents && showMarkers
-        if (flags) {
-            layoutMarkers()
-            for (k in 0 until markerCount) {
-                val x = markerItems[k].x
-                canvas.drawLine(x, plot.top, x, plot.bottom, events)
-            }
-        }
         drawSeries(canvas)
-        if (flags) drawFlags(canvas)
         valid = true
         resolveAnchor()
         val crossX = if (ap >= 0 && !allHidden) bucketX[ap].roundToInt().toFloat() else Float.NaN
@@ -710,103 +662,6 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         gridLabels.fill(null)
         topLabel = null
         return scale
-    }
-
-    /** From each stop to the next start; while the core is stopped, the last one runs to the window's end. */
-    private fun drawBands(canvas: Canvas) {
-        var openAt = -1L
-        for (m in 0 until markers.size) {
-            val marker = markers[m]
-            if (marker.kind == LiveStatsBatch.MARKER_STOPPED) {
-                if (openAt < 0L) openAt = marker.t
-            } else if (openAt >= 0L) {
-                drawBand(canvas, openAt, marker.t)
-                openAt = -1L
-            }
-        }
-        if (openAt >= 0L && !running) drawBand(canvas, openAt, viewEnd)
-    }
-
-    private fun drawBand(canvas: Canvas, from: Long, to: Long) {
-        val x0 = max(plot.left, xOf(from))
-        val x1 = min(plot.right, xOf(to))
-        if (x1 <= x0) return
-        flat.color = cStopped
-        canvas.drawRect(x0, plot.top, x1, plot.bottom, flat)
-        canvas.save()
-        canvas.clipRect(x0, plot.top, x1, plot.bottom)
-        line.pathEffect = null
-        line.strokeWidth = hairline
-        line.color = cHatch
-        val step = dp(6f)
-        val h = plot.height()
-        var x = floor((x0 - h) / step) * step
-        while (x < x1) {
-            canvas.drawLine(x, plot.bottom, x + h, plot.top, line)
-            x += step
-        }
-        canvas.restore()
-        if (x1 - x0 > stoppedWidth + dp(16f)) {
-            drawHaloText(canvas, pSmallMedium, stoppedText, (x0 + x1) / 2, plot.centerY(), Paint.Align.CENTER, cInk2)
-        }
-    }
-
-    private fun layoutMarkers() {
-        markerCount = 0
-        var lastRight = Float.NEGATIVE_INFINITY
-        for (m in 0 until markers.size) {
-            val marker = markers[m]
-            if (marker.t < viewStart || marker.t > viewEnd) continue
-            val x = xOf(marker.t)
-            val text = flagText(marker)
-            val w = ceil(pSmall.measureText(text)) + dp(12f)
-            var fx = x + dp(3f)
-            if (fx + w > plot.right) fx = x - dp(3f) - w
-            if (markerCount == markerItems.size) markerItems.add(MarkerItem())
-            val item = markerItems[markerCount++]
-            item.x = x.roundToInt().toFloat()
-            item.text = text
-            item.hasFlag = fx >= plot.left && fx >= lastRight + dp(4f)
-            if (item.hasFlag) {
-                lastRight = fx + w
-                item.flag.set(fx, plot.top + dp(2f), fx + w, plot.top + dp(2f) + flagH)
-            }
-        }
-    }
-
-    /** [markerText] of a flag, kept: the flags are laid out every frame. */
-    private fun flagText(marker: Marker): String {
-        val cache = when (marker.kind) {
-            LiveStatsBatch.MARKER_STARTED -> startedFlags
-            LiveStatsBatch.MARKER_SWITCHED -> switchedFlags
-            else -> return stoppedFlag ?: markerText(marker, false).also { stoppedFlag = it }
-        }
-        cache[marker.text]?.let { return it }
-        if (cache.size >= 64) cache.clear()
-        return markerText(marker, false).also { cache[marker.text] = it }
-    }
-
-    private fun drawFlags(canvas: Canvas) {
-        for (k in 0 until markerCount) {
-            val item = markerItems[k]
-            if (!item.hasFlag) continue
-            val flag = item.flag
-            fill.color = withAlpha(surface, 240)
-            canvas.drawRoundRect(flag, dp(4f), dp(4f), fill)
-            border.color = cAxis
-            canvas.drawRoundRect(flag, dp(4f), dp(4f), border)
-            drawText(canvas, pSmall, item.text, flag.left + dp(6f), flag.centerY(), Paint.Align.LEFT, cInk2)
-        }
-    }
-
-    private fun markerText(marker: Marker, note: Boolean): String = when (marker.kind) {
-        LiveStatsBatch.MARKER_STARTED -> "▶︎ " +
-            if (note) context.getString(R.string.live_graph_started, marker.text) else shortName(marker.text)
-
-        LiveStatsBatch.MARKER_SWITCHED -> "⇄ " +
-            if (note) context.getString(R.string.live_graph_switched, marker.text) else shortName(marker.text)
-
-        else -> "■ $stoppedText"
     }
 
     private fun drawSeries(canvas: Canvas) {
@@ -1046,7 +901,7 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 val v = valueAt(ap, r * nc + c)
                 cardValues.add(if (v.isNaN()) "—" else axis.format(v.toDouble()))
             }
-            cardLines.add(CardLine(CARD_ROW, r, seriesRow[focus] == r, "", offset))
+            cardLines.add(CardLine(CARD_ROW, r, seriesRow[focus] == r, offset))
             rowCount++
         }
         if (!compact && rowCount > 1) {
@@ -1055,24 +910,12 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 val v = bucketTotal[ap * nc + c]
                 cardValues.add(axis.format(if (v.isNaN()) 0.0 else v.toDouble()))
             }
-            cardLines.add(CardLine(CARD_TOTAL, -1, false, totalText, offset))
-        }
-        if (withEvents) {
-            val reach = kms / 2 + pointIntervalMs / 2
-            val tx = bucketTx[ap]
-            for (marker in markers) {
-                if (abs(marker.t - tx) <= reach) cardLines.add(CardLine(CARD_NOTE, -1, false, markerText(marker, true), -1))
-            }
+            cardLines.add(CardLine(CARD_TOTAL, -1, false, offset))
         }
 
         var nameW = font.measureText(totalText)
-        var noteW = 0f
         for (cardLine in cardLines) {
-            if (cardLine.kind == CARD_NOTE) {
-                noteW = max(noteW, font.measureText(cardLine.text))
-            } else if (cardLine.kind == CARD_ROW) {
-                nameW = max(nameW, font.measureText(rowNames[cardLine.row]))
-            }
+            if (cardLine.kind == CARD_ROW) nameW = max(nameW, font.measureText(rowNames[cardLine.row]))
         }
         val vc = cardColumns.size
         val rights = FloatArray(vc)
@@ -1087,7 +930,7 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         }
         val headW = valueFont.measureText(head)
         val subW = if (sub.isEmpty()) 0f else dp(8f) + subFont.measureText(sub)
-        val w = ceil(maxOf(dp(14f) + nameW + colsTotal, noteW, headW + subW + dp(16f) + if (multi) colsTotal else 0f)) + padX * 2
+        val w = ceil(max(dp(14f) + nameW + colsTotal, headW + subW + dp(16f) + if (multi) colsTotal else 0f)) + padX * 2
         val h = dp(8f) + headH + dp(6f) + cardLines.size * rowH + dp(6f)
         var x = cx + dp(16f)
         if (x + w > width - dp(4f)) x = cx - dp(16f) - w
@@ -1130,8 +973,7 @@ class LiveChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                     drawText(canvas, font, rowNames[cardLine.row], lx + dp(14f), ly, Paint.Align.LEFT, ink)
                 }
 
-                CARD_TOTAL -> drawText(canvas, font, totalText, lx + dp(14f), ly, Paint.Align.LEFT, cInk2)
-                else -> drawText(canvas, font, cardLine.text, lx, ly, Paint.Align.LEFT, cInk2)
+                else -> drawText(canvas, font, totalText, lx + dp(14f), ly, Paint.Align.LEFT, cInk2)
             }
             if (cardLine.values >= 0) {
                 for (k in 0 until vc) {

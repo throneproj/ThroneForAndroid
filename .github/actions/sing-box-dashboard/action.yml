@@ -24,6 +24,22 @@ runs:
           echo "::error::the sing-box dashboard has no index.html"
           exit 1
         fi
+        # Noto Color Emoji is most of the dashboard (for flags some systems can't draw); only the flags are kept, as in
+        # Throne's build.yml. lxml is what lets pyftsubset cut the font's SVG table.
+        shopt -s nullglob
+        fonts=("$DEST"/assets/noto-color-emoji-*.woff2)
+        shopt -u nullglob
+        [ ${#fonts[@]} -gt 0 ] || echo "::warning::the sing-box dashboard no longer bundles noto-color-emoji; nothing was cut down"
+        # Regional indicators, the flag emoji, and the parts of the tag and ZWJ flag sequences.
+        for font in "${fonts[@]}"; do
+          if pipx run --spec 'fonttools[woff,lxml]==4.68.0' pyftsubset "$font" --output-file="$font.flags" --flavor=woff2 \
+              --layout-features='*' --unicodes='U+1F1E6-1F1FF,U+1F3F3,U+1F3F4,U+1F3C1,U+1F6A9,U+1F38C,U+E0020-E007F,U+200D,U+FE0F,U+2620,U+26A7,U+1F308'; then
+            mv "$font.flags" "$font"
+          else
+            rm -f "$font.flags"
+            echo "::warning::cutting $font down to flags failed; the full font ships"
+          fi
+        done
         # Media range syntax needs Chromium 104; older Android System WebViews would miss the phone layout (#97).
         python3 buildScript/dashboard_css.py "$DEST"
         du -sh "$DEST"

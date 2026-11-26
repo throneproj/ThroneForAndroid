@@ -20,6 +20,9 @@ data class MarkerEntity(
 
         /** Set once the IPv6 private ranges are in vpn_private_ranges (DatabaseManager.cpp:130-146). */
         const val TUN_PRIVATE_RANGES_IPV6 = "migration.tun_private_ranges_ipv6"
+
+        /** Set once simple_dl_url's old 1mb default has moved to 5mb (DatabaseManager.cpp applyMigrations). */
+        const val SIMPLE_DL_URL_5MB = "migration.simple_dl_url_5mb"
     }
 
     @androidx.room.Dao

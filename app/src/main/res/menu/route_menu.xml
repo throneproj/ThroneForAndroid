@@ -44,6 +44,10 @@
         android:title="@string/route_refresh_repo"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_route_ip_lists"
+        android:title="@string/iplist_manage"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_routing_settings"
         android:title="@string/route_settings"
         app:showAsAction="never" />

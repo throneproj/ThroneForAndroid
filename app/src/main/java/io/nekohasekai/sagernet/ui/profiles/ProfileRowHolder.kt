@@ -19,8 +19,8 @@ import com.google.android.material.card.MaterialCardView
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
+import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.SettingsRegistry
-import io.nekohasekai.sagernet.database.TestShowItems
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.ktx.alert
 import io.nekohasekai.sagernet.ktx.getColorAttr
@@ -35,40 +35,39 @@ import java.math.RoundingMode
 import java.util.Locale
 
 /**
- * The texts of one card, computed apart from the views so the grid can align the error lines of neighbours: the
- * result holds the desktop DisplayTestResult as separate items that wrap between each other (or the live test phase)
- * and sits beside the type when it fits ([TypeLineLayout]); the error line is the Android-only `test_error` of a
- * failed test. A [brief] row (compactProfileRows) keeps the first result item only and has no address, traffic or
- * error line: its result still opens the error.
+ * The texts of one card, computed apart from the views. The result line ([ResultLineLayout]) starts with the latency,
+ * or the live test phase, and the speeds (Profile::DisplayLatency, DisplaySpeed) and ends with the exit IP
+ * (DisplayExitIP), as far as the group's visible_columns show them; the service icons of show_services have a line of
+ * their own, and the error line is the Android-only `test_error` of a failed test. A [brief] row (compactProfileRows)
+ * shows the latency and the exit flag only, without address, services, traffic or error line: its result still opens
+ * the error.
  */
 internal class RowContent(
     val result: CharSequence,
     val resultDescription: String?,
-    val resultDimmed: Boolean,
+    val exitIp: String,
+    val exitIpDescription: String?,
+    val services: CharSequence,
+    val servicesDescription: String?,
+    /** Queued for a running test: the results are dimmed. */
+    val dimmed: Boolean,
     val testing: Boolean,
     val traffic: String,
     val trafficDescription: String?,
     val address: String,
     val error: String?,
-    /** The result ends with the service icons; a tap on it opens the service check. */
-    val services: Boolean,
-    private val brief: Boolean,
+    val brief: Boolean,
 ) {
-    /** The lines under the type line, which a grid neighbour keeps room for; the lines above align by themselves. */
-    val rows: Int
-        get() = if (error != null && !brief) ROW_ERROR else 0
-
-    /** One result item: [spoken] stands in for its symbols. */
-    private class Item(val text: String, @ColorInt val color: Int, val spoken: String)
+    /** One result item: [spoken] stands in for its symbols; [ltr] text keeps its order in a right-to-left line. */
+    private class Item(val text: String, @ColorInt val color: Int?, val spoken: String, val ltr: Boolean)
 
     companion object {
-        const val ROW_ERROR = 1
-
-        private const val LRO = "\u202D"
-        private const val NBSP = "\u00A0"
+        private const val LRO = "‭"
+        private const val PDF = "‬"
+        private const val NBSP = " "
 
         /** Between items, where the line may break. */
-        private const val GAP = "\u2002 "
+        private const val GAP = "  "
 
         /** A core rate: "34.13Mbps". */
         private val RATE = Regex("""(\d+(?:\.\d+)?)\s*([KMG]bps)""", RegexOption.IGNORE_CASE)
@@ -76,6 +75,8 @@ internal class RowContent(
         fun of(context: Context, profile: ProxyEntity, adapter: ProfileListAdapter): RowContent {
             val secondary = context.getColorAttr(android.R.attr.textColorSecondary)
             val brief = adapter.isCompactRow
+            val columns = adapter.visibleColumns
+            val showSpeed = !brief && columns and ProxyGroup.VisibleColumns.SPEED != 0
             val showTraffic = !brief && profile.rx + profile.tx != 0L
             val up = Formatter.formatShortFileSize(context, profile.tx)
             val down = Formatter.formatShortFileSize(context, profile.rx)
@@ -84,100 +85,102 @@ internal class RowContent(
             } else ""
 
             val phase = adapter.phaseOf(profile.id)
-            val latency = profile.latency
-            val color = profile.latencyColor().takeIf { it != 0 } ?: secondary
-            val result = SpannableStringBuilder()
-            var description: String? = null
-            // Profile::DisplayTestResult: a failed or connect-only test shows its verdict alone
-            when {
-                phase == RowPhase.TESTING -> result.append(context.getString(R.string.connection_test_testing))
-                latency == ProxyEntity.LATENCY_CONNECT_ONLY || latency < 0 -> result.append(
-                    context.getString(
-                        if (latency == ProxyEntity.LATENCY_CONNECT_ONLY) R.string.test_connect_ok else R.string.unavailable
-                    ),
-                    ForegroundColorSpan(color),
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
-                )
+            val items = ArrayList<Item>()
+            // a running test shows in the latency's place, whichever test it is
+            if (phase == RowPhase.TESTING) {
+                val testing = context.getString(R.string.connection_test_testing)
+                items += Item(testing, null, testing, ltr = false)
+            } else if (columns and ProxyGroup.VisibleColumns.LATENCY != 0) {
+                latency(context, profile, secondary)?.let { items += it }
+            }
+            if (showSpeed) speeds(context, profile.dlSpeed, profile.ulSpeed, secondary)?.let { items += it }
 
-                else -> {
-                    val items = testResult(context, profile, TestShowItems.of(adapter.testItemsToShow), color, secondary)
-                        .let { if (brief) it.take(1) else it }
-                    if (items.isNotEmpty()) {
-                        result.append(LRO)
-                        items.forEachIndexed { index, item ->
-                            if (index > 0) result.append(GAP)
-                            result.append(item.text, ForegroundColorSpan(item.color), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        }
-                        description = items.joinToString(", ") { it.spoken }
-                    } else if (phase == RowPhase.QUEUED) {
-                        result.append(context.getString(R.string.profiles_test_queued))
-                    }
+            var exitIp = ""
+            var exitIpDescription: String? = null
+            val country = profile.testCountry.orEmpty()
+            val ip = profile.ipOut.orEmpty()
+            if (columns and ProxyGroup.VisibleColumns.EXIT_IP != 0 && (country.isNotEmpty() || ip.isNotEmpty())) {
+                val code = country.length == 2 && country.all { it in 'A'..'Z' || it in 'a'..'z' }
+                val flag = if (code) ProxyEntity.countryFlag(country) else country
+                val spokenCountry = if (code) countryName(country) else country
+                if (brief) {
+                    if (flag.isNotEmpty()) items += Item(flag, null, spokenCountry, ltr = true)
+                } else {
+                    exitIp = LRO + listOf(flag, ip).filter { it.isNotEmpty() }.joinToString(NBSP)
+                    exitIpDescription = listOfNotNull(
+                        spokenCountry.takeIf { it.isNotEmpty() },
+                        ip.takeIf { it.isNotEmpty() }?.let { context.getString(R.string.profile_row_ip, it) },
+                    ).joinToString(", ")
                 }
             }
-            // ProfilesTableModel ServiceItemsRole: the stored check's icons beside the exit IP, the last item, as the
-            // group shows them
-            val checks = if (brief || phase == RowPhase.TESTING || !adapter.showServices) {
+            if (items.isEmpty() && phase == RowPhase.QUEUED) {
+                val queued = context.getString(R.string.profiles_test_queued)
+                items += Item(queued, null, queued, ltr = false)
+            }
+
+            val result = SpannableStringBuilder()
+            var overridden = false
+            items.forEachIndexed { index, item ->
+                if (index > 0) result.append(GAP)
+                // numbers and arrows keep their order in a right-to-left line; translated words stay out of it
+                if (item.ltr != overridden) {
+                    result.append(if (item.ltr) LRO else PDF)
+                    overridden = item.ltr
+                }
+                if (item.color == null) {
+                    result.append(item.text)
+                } else {
+                    result.append(item.text, ForegroundColorSpan(item.color), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            }
+
+            // ProfilesTableModel ServiceItemsRole: the stored check's icons, as the group shows them
+            val checks = if (brief || !adapter.showServices) {
                 emptyList<ServiceResults.Check>()
             } else {
                 ServiceResults.shown(profile.serviceChecks)
             }
-            if (checks.isNotEmpty()) {
-                if (result.isNotEmpty()) result.append(GAP)
-                result.append(ServiceResults.iconStrip(context, checks))
-                description = listOfNotNull(description, ServiceResults.spoken(context, checks)).joinToString(", ")
-            }
-            val error = if (phase == null) profile.testError?.takeIf { it.isNotBlank() } else null
             return RowContent(
                 result = result,
-                resultDescription = description,
-                resultDimmed = phase == RowPhase.QUEUED,
+                resultDescription = items.joinToString(", ") { it.spoken }.ifEmpty { null },
+                exitIp = exitIp,
+                exitIpDescription = exitIpDescription,
+                services = if (checks.isEmpty()) "" else ServiceResults.iconStrip(context, checks),
+                servicesDescription = if (checks.isEmpty()) null else ServiceResults.spoken(context, checks),
+                dimmed = phase == RowPhase.QUEUED,
                 testing = phase == RowPhase.TESTING,
                 traffic = if (showTraffic) context.getString(R.string.traffic, up, down) else "",
                 trafficDescription = if (showTraffic) context.getString(R.string.profile_row_traffic, up, down) else null,
                 address = address,
-                error = error,
-                services = checks.isNotEmpty(),
+                error = if (phase == null) profile.testError?.takeIf { it.isNotBlank() } else null,
                 brief = brief,
             )
         }
 
         /**
-         * The items of Profile::DisplayTestResult (Profile.cpp:36-56): flag and latency in the latency colour, then
-         * the speeds and the egress IP as the group's test_items_to_show allows.
+         * Profile::DisplayLatency in the latency colour: "135 ms", or the verdict of a failed or connect-only test;
+         * null while untested.
          */
-        private fun testResult(
-            context: Context,
-            profile: ProxyEntity,
-            show: TestShowItems,
-            @ColorInt color: Int,
-            @ColorInt secondary: Int,
-        ): List<Item> {
+        private fun latency(context: Context, profile: ProxyEntity, @ColorInt secondary: Int): Item? {
             val latency = profile.latency
-            val items = ArrayList<Item>()
-            val head = ArrayList<String>()
-            val headSpoken = ArrayList<String>()
-            profile.testCountry?.takeIf { it.isNotEmpty() }?.let { country ->
-                val code = country.length == 2 && country.all { it in 'A'..'Z' || it in 'a'..'z' }
-                head += if (code) ProxyEntity.countryFlag(country) else country
-                headSpoken += if (code) countryName(country) else country
+            val color = profile.latencyColor().takeIf { it != 0 } ?: secondary
+            val verdict = when {
+                latency == ProxyEntity.LATENCY_CONNECT_ONLY -> R.string.test_connect_ok
+                latency < 0 -> R.string.unavailable
+                latency > 0 -> return Item("$latency${NBSP}ms", color, "$latency ms", ltr = true)
+                else -> return null
             }
-            if (latency > 0) {
-                head += "$latency${NBSP}ms"
-                headSpoken += "$latency ms"
-            }
-            if (head.isNotEmpty()) items += Item(head.joinToString(NBSP), color, headSpoken.joinToString(", "))
-            if (show.showSpeed) speeds(context, profile.dlSpeed, profile.ulSpeed, secondary)?.let { items += it }
-            val ip = profile.ipOut.orEmpty()
-            if (show.showIp && ip.isNotEmpty()) {
-                items += Item("🌐$NBSP$ip", secondary, context.getString(R.string.profile_row_ip, ip))
-            }
-            return items
+            val text = context.getString(verdict)
+            return Item(text, color, text, ltr = false)
         }
 
-        /** "↓34.1 ↑11.6 Mbps": three significant digits, one unit when both rates share it; "N/A" is left out. */
+        /**
+         * Profile::DisplaySpeed: "↓34.1 ↑11.6 Mbps", three significant digits and one unit when both rates share it;
+         * a failed test's "N/A" stays.
+         */
         private fun speeds(context: Context, dl: String?, ul: String?, @ColorInt color: Int): Item? {
             fun parse(text: String?): Pair<String, String>? {
-                if (text.isNullOrEmpty() || text == ProxyEntity.SPEED_NA) return null
+                if (text.isNullOrEmpty()) return null
                 val match = RATE.matchEntire(text.trim()) ?: return text to ""
                 val value = BigDecimal(match.groupValues[1])
                 val decimals = when {
@@ -202,7 +205,7 @@ internal class RowContent(
                 down?.let { context.getString(R.string.profile_row_download, "${it.first} ${it.second}".trim()) },
                 up?.let { context.getString(R.string.profile_row_upload, "${it.first} ${it.second}".trim()) },
             ).joinToString(", ")
-            return Item(text, color, spoken)
+            return Item(text, color, spoken, ltr = true)
         }
 
         private fun countryName(code: String): String =
@@ -251,8 +254,13 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
     private val shareButton: View = view.findViewById(R.id.share)
     private val moreButton: View = view.findViewById(R.id.more)
     private val address: TextView = view.findViewById(R.id.profile_address)
+
+    /** The card's [ResultLineLayout]; the compact row holds its result itself. */
+    private val resultLine: View? = view.findViewById(R.id.result_line)
     private val result: TextView = view.findViewById(R.id.profile_result)
+    private val exitIp: TextView = view.findViewById(R.id.profile_exit_ip)
     private val testProgress: View = view.findViewById(R.id.test_progress)
+    private val services: TextView = view.findViewById(R.id.profile_services)
     private val type: TextView = view.findViewById(R.id.profile_type)
     private val traffic: TextView = view.findViewById(R.id.traffic_text)
     private val error: TextView = view.findViewById(R.id.profile_error)
@@ -269,11 +277,8 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
     /** The bound profile, null while [placeholder] or before the first bind. */
     val boundProfile: ProxyEntity? get() = if (placeholder || !::profile.isInitialized) null else profile
 
-    /** [RowContent.services] of the last bind: a tap on the result opens the service check, not the error. */
-    private var resultShowsServices = false
-
-    /** The optional rows of the last bind ([RowContent.rows]), null before the first. */
-    var boundRows: Int? = null
+    /** [profile]'s texts are bound, so a state change alone rebinds only the state; false after a recycle. */
+    var contentBound = false
         private set
     var boundTx = Long.MIN_VALUE
         private set
@@ -301,16 +306,16 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
             val text = boundProfile?.testError
             if (!text.isNullOrBlank()) it.context.alert(text).tryToShow()
         }
-        result.setOnClickListener {
+        result.setOnClickListener(showError)
+        exitIp.setOnClickListener(showError)
+        services.setOnClickListener {
             val profile = boundProfile ?: return@setOnClickListener
-            if (resultShowsServices) {
-                ServiceCheckDialog.show(it.context, profile.displayName(), profile.serviceChecks)
-            } else {
-                showError.onClick(it)
-            }
+            ServiceCheckDialog.show(it.context, profile.displayName(), profile.serviceChecks)
         }
         error.setOnClickListener(showError)
         result.isFocusable = false
+        exitIp.isFocusable = false
+        services.isFocusable = false
         view.findViewById<ImageView>(R.id.shareIcon).setColorFilter(Color.GRAY)
     }
 
@@ -326,33 +331,40 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
         bindState()
     }
 
-    /** The address, result, traffic and error texts. */
+    /** The address, results, service icons, traffic and error texts. */
     fun bindContent() {
         val content = RowContent.of(itemView.context, profile, adapter)
         address.text = content.address
         address.isVisible = content.address.isNotEmpty()
+        val alpha = if (content.dimmed) 0.5f else 1f
         result.text = content.result
         result.contentDescription = content.resultDescription
-        result.alpha = if (content.resultDimmed) 0.5f else 1f
+        result.alpha = alpha
         result.isVisible = content.result.isNotEmpty()
+        exitIp.text = content.exitIp
+        exitIp.contentDescription = content.exitIpDescription
+        exitIp.alpha = alpha
+        exitIp.isVisible = content.exitIp.isNotEmpty()
         testProgress.isVisible = content.testing
+        resultLine?.isVisible = content.testing || content.result.isNotEmpty() || content.exitIp.isNotEmpty()
+        services.text = content.services
+        services.contentDescription = content.servicesDescription
+        services.alpha = alpha
+        services.isVisible = content.services.isNotEmpty()
         traffic.text = content.traffic
         traffic.contentDescription = content.trafficDescription
         traffic.isVisible = content.traffic.isNotEmpty()
         error.text = content.error?.let(Protocols::genFriendlyMsg)
         error.maxLines = if (adapter.isCompact) 1 else 2
-        resultShowsServices = content.services
-        result.isClickable = content.error != null || content.services
-        error.isClickable = content.error != null
-
-        val rows = content.rows
-        val reserved = adapter.neighbourRows(bindingAdapterPosition) and rows.inv()
-        error.visibility = rowVisibility(rows, reserved, RowContent.ROW_ERROR)
-        val previous = boundRows
-        boundRows = rows
+        error.isVisible = content.error != null && !content.brief
+        val failed = content.error != null
+        result.isClickable = failed
+        exitIp.isClickable = failed
+        services.isClickable = content.services.isNotEmpty()
+        error.isClickable = failed
+        contentBound = true
         boundTx = profile.tx
         boundRx = profile.rx
-        if (previous != null && previous != rows) adapter.refreshRowNeighbours(bindingAdapterPosition)
     }
 
     /** A row whose profile is not loaded yet: an empty card of the usual height until [bind]. */
@@ -360,27 +372,21 @@ internal class ProfileRowHolder(view: View, private val adapter: ProfileListAdap
         placeholder = true
         name.text = ""
         type.text = ""
-        for (view in arrayOf(address, result, testProgress, traffic, error, selectCheck, editButton, shareButton, moreButton, pinIcon)) {
-            view.isVisible = false
+        for (view in arrayOf(
+            address, resultLine, result, exitIp, testProgress, services, traffic, error, selectCheck, editButton,
+            shareButton, moreButton, pinIcon,
+        )) {
+            view?.isVisible = false
         }
         applyCardColors(selected = false, checked = false)
         onRecycled()
-        // no optional rows: the real bind that follows lines its grid neighbours up again
-        boundRows = 0
     }
 
-    /** A recycled card belongs to no grid row yet: its next bind must not refresh neighbours. */
+    /** A recycled card shows no profile's texts until its next full bind. */
     fun onRecycled() {
-        boundRows = null
+        contentBound = false
         boundTx = Long.MIN_VALUE
         boundRx = Long.MIN_VALUE
-    }
-
-    /** A row missing here but shown by a card of the same grid row keeps its height (INVISIBLE). */
-    private fun rowVisibility(rows: Int, reserved: Int, row: Int) = when {
-        rows and row != 0 -> View.VISIBLE
-        reserved and row != 0 -> View.INVISIBLE
-        else -> View.GONE
     }
 
     /** Selection, running state, multi-select check and the row buttons. */

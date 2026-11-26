@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_ip_list_new"
+        android:icon="@drawable/ic_av_playlist_add"
+        android:title="@string/iplist_new"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_ip_list_import"
+        android:title="@string/iplist_import"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/action_ip_list_from_text"
+                android:title="@string/iplist_from_text" />
+            <item
+                android:id="@+id/action_ip_list_from_file"
+                android:title="@string/iplist_from_file" />
+            <item
+                android:id="@+id/action_ip_list_from_url"
+                android:title="@string/iplist_from_url" />
+            <item
+                android:id="@+id/action_ip_list_defaults"
+                android:title="@string/iplist_add_defaults" />
+        </menu>
+    </item>
+</menu>

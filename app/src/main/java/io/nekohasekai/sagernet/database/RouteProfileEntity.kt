@@ -40,6 +40,8 @@ data class RouteProfileEntity(
      * written before rule origins were kept, or restored from such a backup.
      */
     @ColumnInfo(name = "remote_rules") var remoteRules: String? = null,
+    /** The user's order of the profiles (cee47ebd); kept by updates, set by [RouteManager.save] and [RouteManager.setOrder]. */
+    @ColumnInfo(name = "display_order", defaultValue = "0") var displayOrder: Long = 0L,
 ) {
 
     /** custom_dns only counts when dns_json holds an object (RoutesRepo.cpp routeProfileFromJson). */

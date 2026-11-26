@@ -1,0 +1,49 @@
+package io.nekohasekai.sagernet.scan
+
+/**
+ * Scanner::WarpPresets (WarpPresets.h). The ranges seed editable IP lists, since Cloudflare changes them silently; the
+ * port lists drive WARP port discovery.
+ */
+object WarpPresets {
+
+    @JvmField
+    val WIREGUARD_RANGES: List<String> = listOf(
+        "162.159.192.0/24",
+        "162.159.193.0/24",
+        "162.159.195.0/24",
+        "188.114.96.0/22",
+        "2606:4700:d0::/64",
+        "2606:4700:d1::/64",
+    )
+
+    @JvmField
+    val WIREGUARD_PORTS: List<Int> = listOf(2408, 500, 1701, 4500)
+
+    /** The documented four plus the ports WARP clients have found answering since. */
+    @JvmField
+    val WIREGUARD_ALL_PORTS: List<Int> = listOf(
+        500, 854, 859, 864, 878, 880, 890, 891, 894, 903, 908, 928, 934, 939, 942, 943, 945, 946,
+        955, 968, 987, 988, 1002, 1010, 1014, 1018, 1070, 1074, 1180, 1387, 1701, 1843, 2371, 2408, 2506, 3138,
+        3476, 3581, 3854, 4177, 4198, 4233, 4500, 5279, 5956, 7103, 7152, 7156, 7281, 7559, 8319, 8742, 8854, 8886,
+    )
+
+    /** Every sampled address serves MASQUE over TCP and QUIC (2026-11-09), except .1 of each /24, a plain CDN edge over TCP. */
+    @JvmField
+    val MASQUE_ENDPOINTS: List<String> = listOf(
+        "162.159.198.0/24",
+        "162.159.199.0/24",
+        "2606:4700:103::1",
+        "2606:4700:103::2",
+        "2606:4700:104::1",
+        "2606:4700:104::2",
+    )
+
+    /** HTTP/3 over UDP and HTTP/2 over TCP alike. */
+    @JvmField
+    val MASQUE_PORTS: List<Int> = listOf(443, 500, 1701, 4500, 4443, 8443, 8095)
+
+    /** Throne's built-in AmneziaWG junk for WARP: Jc, Jmin and Jmax. */
+    const val JUNK_COUNT = 4
+    const val JUNK_MIN = 40
+    const val JUNK_MAX = 70
+}

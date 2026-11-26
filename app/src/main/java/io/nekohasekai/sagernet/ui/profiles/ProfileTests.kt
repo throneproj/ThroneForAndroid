@@ -5,7 +5,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.bg.test.ServiceCatalog
 import io.nekohasekai.sagernet.bg.test.TestSpec
+import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.ProfileManager
+import io.nekohasekai.sagernet.database.ProxyGroup
+import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ktx.snackbar
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
 import io.nekohasekai.sagernet.ui.test.ServiceCheckSelector
@@ -21,13 +24,54 @@ internal object ProfileTests {
 
     /** Url Test / Speedtest / Resolve out IP for the group, in list order. */
     fun startGroup(host: ConfigurationFragment, kind: Int, groupId: Long) {
-        confirmSpeed(host, kind, many = true) { TestSessionClient.startGroup(kind, groupId) }
+        confirmSpeed(host, kind, many = true) { showTested(kind, groupId, TestSessionClient.startGroup(kind, groupId)) }
     }
 
     /** Selected profiles (or one); [groupId] lets the panel offer "Sort" afterwards. */
     fun startProfiles(host: ConfigurationFragment, kind: Int, ids: List<Long>, groupId: Long) {
         if (ids.isEmpty()) return
-        confirmSpeed(host, kind, many = ids.size > 1) { TestSessionClient.startProfiles(kind, ids, groupId) }
+        confirmSpeed(host, kind, many = ids.size > 1) {
+            showTested(kind, groupId, TestSessionClient.startProfiles(kind, ids, groupId))
+        }
+    }
+
+    /**
+     * testPanelSeeded (mainwindow_view.cpp): a test that starts turns on the rows' results of its kind in group
+     * [groupId], latency, exit IP or speed; a service check turns on the exit IP (the desktop's column of the service
+     * icons) only while the group shows the icons.
+     */
+    internal fun showTestedColumn(kind: Int, groupId: Long) {
+        if (groupId <= 0L) return
+        val bit = when (kind) {
+            TestSpec.KIND_URL -> ProxyGroup.VisibleColumns.LATENCY
+            TestSpec.KIND_IP -> ProxyGroup.VisibleColumns.EXIT_IP
+            TestSpec.KIND_SPEED -> ProxyGroup.VisibleColumns.SPEED
+            // Service results have their own line, shown by show_services rather than a column bit.
+            else -> return
+        }
+        runOnDefaultDispatcher {
+            var shown = false
+            val group = GroupFields.update(groupId) {
+                if (it.visibleColumns and bit == 0) {
+                    it.updateVisibleColumns(it.visibleColumns or bit)
+                    shown = true
+                }
+            }
+            if (shown && group != null) GroupRepo.postUpdate(group)
+        }
+    }
+
+    /** [showTestedColumn] for a test of the running connection, in the running profile's group. */
+    internal fun showTestedColumnOfRunning(kind: Int) {
+        runOnDefaultDispatcher {
+            ProfileManager.getProfile(ProfileManager.runningProfileId())?.let { showTestedColumn(kind, it.groupId) }
+        }
+    }
+
+    /** [started] passed through, after [showTestedColumn] when the test started. */
+    private fun showTested(kind: Int, groupId: Long, started: Boolean): Boolean {
+        if (started) showTestedColumn(kind, groupId)
+        return started
     }
 
     /** Speed tests of more than one profile ask first: they move a lot of data. */
@@ -47,7 +91,8 @@ internal object ProfileTests {
             val count = ProfileManager.memberIds(groupId).size
             host.onUi {
                 confirmService(host.requireContext(), count, { busy(host) }) {
-                    TestSessionClient.startGroup(TestSpec.KIND_SERVICE, groupId)
+                    val started = TestSessionClient.startGroup(TestSpec.KIND_SERVICE, groupId)
+                    showTested(TestSpec.KIND_SERVICE, groupId, started)
                 }
             }
         }
@@ -57,7 +102,8 @@ internal object ProfileTests {
     fun startServiceProfiles(host: ConfigurationFragment, ids: List<Long>, groupId: Long) {
         if (ids.isEmpty()) return
         confirmService(host.requireContext(), ids.size, { busy(host) }) {
-            TestSessionClient.startProfiles(TestSpec.KIND_SERVICE, ids, groupId)
+            val started = TestSessionClient.startProfiles(TestSpec.KIND_SERVICE, ids, groupId)
+            showTested(TestSpec.KIND_SERVICE, groupId, started)
         }
     }
 
@@ -65,7 +111,11 @@ internal object ProfileTests {
     fun startServiceCurrent(host: ConfigurationFragment) = startServiceCurrent(host.requireContext()) { busy(host) }
 
     fun startServiceCurrent(context: Context, onBusy: () -> Unit) {
-        confirmService(context, 1, onBusy) { TestSessionClient.startCurrent(TestSpec.KIND_SERVICE) }
+        confirmService(context, 1, onBusy) {
+            TestSessionClient.startCurrent(TestSpec.KIND_SERVICE).also {
+                if (it) showTestedColumnOfRunning(TestSpec.KIND_SERVICE)
+            }
+        }
     }
 
     /** startServiceChecks (mainwindow_setup.cpp): refused above the runner's limit, asked first above 20 profiles. */

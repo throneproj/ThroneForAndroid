@@ -5,13 +5,17 @@ import android.content.Intent
 import android.os.IBinder
 import io.nekohasekai.sagernet.aidl.IChainStepCallback
 import io.nekohasekai.sagernet.aidl.ICoreService
+import io.nekohasekai.sagernet.aidl.IScanCallback
 import io.nekohasekai.sagernet.aidl.ISubscriptionCallback
 import io.nekohasekai.sagernet.aidl.ITestSessionCallback
+import io.nekohasekai.sagernet.bg.scan.ScanEngine
+import io.nekohasekai.sagernet.bg.scan.StartMode
 import io.nekohasekai.sagernet.bg.test.ChainStepRunner
 import io.nekohasekai.sagernet.bg.test.ServiceDefinitions
 import io.nekohasekai.sagernet.bg.test.TestEngine
 import io.nekohasekai.sagernet.bg.test.TestSpec
 import io.nekohasekai.sagernet.group.SubscriptionQueue
+import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
 
 // Always-bindable :bg host for the probe boxes, so the main process never loads the core.
 class CoreService : Service() {
@@ -77,6 +81,34 @@ class CoreService : Service() {
         override fun testRoute(requestJson: String?): String = RouteTester.test(requestJson.orEmpty())
 
         override fun describeServiceChecks(): String = ServiceDefinitions.prepare().list
+
+        override fun startScan(scanId: Long, mode: Int): String {
+            val result = ScanEngine.start(scanId, StartMode.of(mode))
+            return jsonObjectOf("error" to result.error, "targetsChanged" to result.targetsChanged).toCompact()
+        }
+
+        override fun startWarpFinder(profileId: Long, draftType: String?, draftJson: String?, gid: Long): String {
+            val (id, error) = ScanEngine.startWarpFinder(profileId, draftType.orEmpty(), draftJson.orEmpty(), gid)
+            return jsonObjectOf("id" to id, "error" to error).toCompact()
+        }
+
+        override fun pauseScan(id: Long) = ScanEngine.pause(id)
+
+        override fun stopAllScans(persist: Boolean) = ScanEngine.stopAll(persist)
+
+        override fun forgetWarpFinder(id: Long) = ScanEngine.forgetWarpFinder(id)
+
+        override fun scanState(id: Long): String = ScanEngine.stateJson(id).orEmpty()
+
+        override fun activeScans(): String = ScanEngine.activeJson()
+
+        override fun deleteScan(scanId: Long, deleteResultList: Boolean): String = ScanEngine.deleteScan(scanId, deleteResultList)
+
+        override fun ensureScanResultList(scanId: Long): Long = ScanEngine.ensureResultList(scanId)
+
+        override fun registerScanCallback(cb: IScanCallback) = ScanEngine.register(cb)
+
+        override fun unregisterScanCallback(cb: IScanCallback) = ScanEngine.unregister(cb)
     }
 
     override fun onCreate() {

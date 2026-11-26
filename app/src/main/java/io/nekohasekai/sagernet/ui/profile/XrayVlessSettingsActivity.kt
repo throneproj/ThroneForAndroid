@@ -16,7 +16,9 @@ import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.types.XrayVless
 import io.nekohasekai.sagernet.outbound.types.XrayVlessChecks
 import io.nekohasekai.sagernet.ui.ValidationForm
+import io.nekohasekai.sagernet.ui.iplist.ResolverListRow
 import io.nekohasekai.sagernet.ui.json.ProfileJson
+import io.nekohasekai.sagernet.ui.scan.ScannerUi
 import io.nekohasekai.sagernet.validation.CommonChecks
 import io.nekohasekai.sagernet.validation.Validation
 
@@ -120,6 +122,7 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         for ((name, property) in XrayKcp.VALUES) {
             if (property.get(streamSetting.kcp) == XrayKcp.DEFAULTS[name]) store.putString("$STREAM.kcp.$name", "")
         }
+        xdnsResolverList.write(streamSetting.xdnsResolvers.ipListId)
     }
 
     override fun XrayVless.readUnboundFromCache() {
@@ -127,6 +130,7 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         for ((name, property) in XrayKcp.VALUES) {
             if (cached("$STREAM.kcp.$name").isEmpty()) property.set(streamSetting.kcp, XrayKcp.DEFAULTS.getValue(name))
         }
+        streamSetting.xdnsResolvers.ipListId = xdnsResolverList.read()
         if (normalizeXrayNetwork(streamSetting.network) != "xdrive") return
         val xdrive = streamSetting.xdrive
         // saveXrayXDrive trims these: a pasted folder ID with a trailing space would find nothing on the Drive
@@ -160,9 +164,12 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
     /** Set once the screen exists: re-reads the finalmask the JSON editor may have changed. */
     private var finalmaskEdited: (() -> Unit)? = null
 
+    private val xdnsResolverList = ResolverListRow(XDNS_RESOLVER_LIST)
+
     override fun onResume() {
         finalmaskEdited?.invoke()
         super.onResume()
+        ScannerUi.takeResolverList(DataStore.editingId).let { if (it >= 0) xdnsResolverList.select(it) }
     }
 
     private fun cached(key: String) = DataStore.profileCacheStore.getString(key)?.trim().orEmpty()
@@ -194,7 +201,7 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         // dialog_edit_profile_xray.cpp updateXrayRows: the resolver lines only while finalmask has an xdns mask
         var network = ""
         var xdns = false
-        fun xdnsRow() = setVisible(network == "kcp" && xdns, XDNS_RESOLVERS)
+        fun xdnsRow() = setVisible(network == "kcp" && xdns, XDNS_RESOLVERS, XDNS_RESOLVER_LIST, ScannerUi.KEY_FIND_RESOLVERS)
         fun readFinalmask() {
             val store = DataStore.profileCacheStore
             val finalmask = JsonInput.parseObject(store.getString(FINALMASK).orEmpty())
@@ -224,6 +231,8 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
             presetTextSummary("$STREAM.kcp.$name", "", xrayDefault.toString())
         }
         multilineInput(XDNS_RESOLVERS)
+        xdnsResolverList.attach(this) { form?.refresh() }
+        ScannerUi.bindFindResolvers(this@XrayVlessSettingsActivity, this)
 
         // dialog_edit_profile_xdrive.cpp updateXrayXDriveControls
         findPreference<ListPreference>(XDRIVE_SERVICE)?.keepUnlistedValue()
@@ -285,7 +294,8 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
             "streamSettings.xdriveSettings.s3.endpoint" -> return S3_ENDPOINT
             "streamSettings.xdriveSettings.s3.region" -> return S3_REGION
             "streamSettings.xdriveSettings.s3.bucket" -> return S3_BUCKET
-            "streamSettings.xdnsResolvers", "streamSettings.xdnsResolverList" -> return XDNS_RESOLVERS
+            "streamSettings.xdnsResolvers" -> return XDNS_RESOLVERS
+            "streamSettings.xdnsResolverList" -> return XDNS_RESOLVER_LIST
         }
         // the xdns checks name paths inside the finalmask, which is edited as one JSON row
         if (field.startsWith("streamSettings.finalmask.")) return FINALMASK
@@ -340,6 +350,7 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
             XrayChecks.xrayKCPMaxSendingWindow(cached("$STREAM.kcp.maxSendingWindow"), cached("$STREAM.kcp.mtu"))
         }
         bindLines(XDNS_RESOLVERS, ResolverChecks::xdnsLine)
+        xdnsResolverList.bindValidation(this)
         addRule(listOf("encryption", "$STREAM.network")) {
             XrayVlessChecks.xrayXDriveEncryption(cached("encryption"), cached("$STREAM.network"))
         }
@@ -361,6 +372,7 @@ class XrayVlessSettingsActivity : BindingSettingsActivity<XrayVless>() {
         private const val S3_PATH_STYLE = "$STREAM.xdrive.s3PathStyle"
         private const val FINALMASK = "$STREAM.finalmask"
         private const val XDNS_RESOLVERS = "$STREAM.xdnsResolvers"
+        private const val XDNS_RESOLVER_LIST = "$STREAM.xdnsResolverList"
 
         /** No fields of their own: secrets[0..2] while the service is google-drive. */
         private val GOOGLE_DRIVE_SECRETS = arrayOf(

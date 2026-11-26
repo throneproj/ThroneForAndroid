@@ -155,8 +155,26 @@
                 </group>
                 <group android:id="@+id/group_menu_cleanup">
                     <item
-                        android:id="@+id/action_clear_test_results"
-                        android:title="@string/connection_test_clear_results" />
+                        android:id="@+id/action_clear_results"
+                        android:title="@string/profiles_clear_results">
+                        <menu>
+                            <item
+                                android:id="@+id/action_clear_results_latency"
+                                android:title="@string/profiles_show_latency" />
+                            <item
+                                android:id="@+id/action_clear_results_exit_ip"
+                                android:title="@string/profiles_show_out_ip" />
+                            <item
+                                android:id="@+id/action_clear_results_speed"
+                                android:title="@string/profiles_show_speed" />
+                            <item
+                                android:id="@+id/action_clear_results_services"
+                                android:title="@string/service_check_services" />
+                            <item
+                                android:id="@+id/action_clear_test_results"
+                                android:title="@string/profiles_clear_results_all" />
+                        </menu>
+                    </item>
                     <item
                         android:id="@+id/action_clear_traffic_statistics"
                         android:title="@string/clear_traffic_statistics" />
@@ -199,8 +217,8 @@
                                 android:id="@+id/group_sort_methods"
                                 android:checkableBehavior="single">
                                 <item
-                                    android:id="@+id/action_sort_manual"
-                                    android:title="@string/profiles_sort_manual" />
+                                    android:id="@+id/action_sort_original"
+                                    android:title="@string/profiles_sort_original" />
                                 <item
                                     android:id="@+id/action_sort_type"
                                     android:title="@string/profiles_sort_type" />
@@ -259,20 +277,24 @@
                     </item>
                     <item
                         android:id="@+id/action_show"
-                        android:title="@string/profiles_show">
+                        android:title="@string/profiles_show_in_rows">
                         <menu>
+                            <item
+                                android:id="@+id/action_show_latency"
+                                android:checkable="true"
+                                android:title="@string/profiles_show_latency" />
                             <item
                                 android:id="@+id/action_show_out_ip"
                                 android:checkable="true"
                                 android:title="@string/profiles_show_out_ip" />
                             <item
-                                android:id="@+id/action_show_services"
-                                android:checkable="true"
-                                android:title="@string/service_check_services" />
-                            <item
                                 android:id="@+id/action_show_speed"
                                 android:checkable="true"
                                 android:title="@string/profiles_show_speed" />
+                            <item
+                                android:id="@+id/action_show_services"
+                                android:checkable="true"
+                                android:title="@string/service_check_services" />
                         </menu>
                     </item>
                 </group>

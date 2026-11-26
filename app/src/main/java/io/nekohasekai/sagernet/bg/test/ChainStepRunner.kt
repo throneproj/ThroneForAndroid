@@ -144,7 +144,8 @@ internal object ChainStepRunner {
         private val tunnelsUp: MutableSet<String>,
         private val done: () -> Unit,
     ) : URLTestHandler {
-        override fun onResult(tag: String?, latencyMs: Int, error: String?) = guarded {
+        // Nothing is stored, so an inconclusive failure is shown like any other (runChainStepTest).
+        override fun onResult(tag: String?, latencyMs: Int, error: String?, inconclusive: Boolean) = guarded {
             if (tag != null) outcomes[tag] = Outcome(latencyMs, error.orEmpty())
         }
 

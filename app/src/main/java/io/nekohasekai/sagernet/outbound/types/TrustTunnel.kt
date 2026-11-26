@@ -19,6 +19,7 @@ import io.nekohasekai.sagernet.validation.Severity
 import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.validation.acceptOptional
 import io.nekohasekai.sagernet.validation.addIssue
+import io.nekohasekai.sagernet.validation.legacyComboValue
 import io.nekohasekai.sagernet.validation.vplural
 import io.nekohasekai.sagernet.validation.vtr
 
@@ -340,7 +341,7 @@ class TrustTunnel : Outbound("trusttunnel") {
 
     companion object {
         /** canonicalTrustTunnelCongestion: older builds saved translated combo text ("CUBIC", "Reno"), which sing-trusttunnel silently ran as bbr. */
-        private fun canonicalCongestion(value: String): String = value.trim().lowercase().replace(' ', '_')
+        private fun canonicalCongestion(value: String): String = legacyComboValue(value, trustTunnelCongestionControls)
 
         /** trustTunnelImportCongestion: an import drops an unknown name with a warning, since the core would run it as BBR. */
         private fun importCongestion(value: String): String {

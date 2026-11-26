@@ -66,6 +66,8 @@ data class ProxyEntity(
     @ColumnInfo(name = "test_error") var testError: String? = null,
     /** The desktop's `service_checks`: the results of the per-service reachability checks. */
     @ColumnInfo(name = "service_checks", defaultValue = "") var serviceChecks: String = "",
+    /** The desktop's `endpoint_json`: where the server address comes from (EndpointSource), `{}` = follow the group. */
+    @ColumnInfo(name = "endpoint_json", defaultValue = "{}") var endpointJson: String = "{}",
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -351,14 +353,14 @@ data class ProxyEntity(
         fun closeGap(groupId: Long, order: Long)
 
         /**
-         * The group's members without their data: `type`, `outbound_json` and `service_checks` are empty, `name`,
-         * `test_country` and `test_error` null, so only the keys that read plain columns (test results, traffic) can be
-         * taken from them.
+         * The group's members without their data: `type`, `outbound_json` and `service_checks` are empty,
+         * `endpoint_json` is `{}`, `name`, `test_country` and `test_error` null, so only the keys that read plain columns
+         * (test results, traffic) can be taken from them.
          */
         @Query(
             "SELECT `id`, '' AS `type`, NULL AS `name`, `gid`, `user_order`, `latency`, `latency_at`, `dl_speed`, " +
                 "`ul_speed`, NULL AS `test_country`, `ip_out`, '' AS `outbound_json`, `traffic_dl`, `traffic_up`, " +
-                "NULL AS `test_error`, '' AS `service_checks` FROM `profiles` WHERE `gid` = :groupId"
+                "NULL AS `test_error`, '' AS `service_checks`, '{}' AS `endpoint_json` FROM `profiles` WHERE `gid` = :groupId"
         )
         fun getWithoutDataByGroup(groupId: Long): List<ProxyEntity>
 
@@ -366,7 +368,8 @@ data class ProxyEntity(
         @Query(
             "SELECT `id`, '' AS `type`, NULL AS `name`, `gid`, `user_order`, `latency`, `latency_at`, `dl_speed`, " +
                 "`ul_speed`, NULL AS `test_country`, `ip_out`, '' AS `outbound_json`, `traffic_dl`, `traffic_up`, " +
-                "NULL AS `test_error`, '' AS `service_checks` FROM `profiles` WHERE `id` IN (:proxyIds)"
+                "NULL AS `test_error`, '' AS `service_checks`, '{}' AS `endpoint_json` FROM `profiles` " +
+                "WHERE `id` IN (:proxyIds)"
         )
         fun getWithoutData(proxyIds: List<Long>): List<ProxyEntity>
 
@@ -408,6 +411,9 @@ data class ProxyEntity(
         /** New data for a profile in place (subscription update, resolved address): test results and traffic stay. */
         @Query("UPDATE `profiles` SET `type` = :type, `name` = :name, `outbound_json` = :outboundJson WHERE `id` = :proxyId")
         fun updateOutbound(proxyId: Long, type: String, name: String?, outboundJson: String): Int
+
+        @Query("UPDATE `profiles` SET `endpoint_json` = :endpointJson WHERE `id` = :proxyId")
+        fun updateEndpointJson(proxyId: Long, endpointJson: String): Int
 
         @Query("UPDATE `profiles` SET `traffic_dl` = :rx, `traffic_up` = :tx WHERE `id` = :proxyId")
         fun updateTraffic(proxyId: Long, rx: Long, tx: Long): Int
@@ -467,6 +473,35 @@ data class ProxyEntity(
 
         @Query("DELETE FROM `profiles`")
         fun reset()
+
+        /**
+         * ClearTestResults(Latency) over a group. The error text belongs to the last test, which failed: it goes with a
+         * failed latency unless a failed speed test may own it.
+         */
+        @Query(
+            "UPDATE `profiles` SET `latency` = 0, `latency_at` = 0, `test_error` = CASE WHEN `latency` < 0 AND " +
+                "`latency` != -2 AND COALESCE(`dl_speed`, '') != 'N/A' THEN NULL ELSE `test_error` END " +
+                "WHERE `gid` = :groupId"
+        )
+        fun clearGroupLatency(groupId: Long): Int
+
+        /** ClearTestResults(Ip) over a group; the error text stays while a failed latency or speed test may own it. */
+        @Query(
+            "UPDATE `profiles` SET `ip_out` = NULL, `test_country` = NULL, `test_error` = CASE WHEN (`latency` < 0 AND " +
+                "`latency` != -2) OR `dl_speed` = 'N/A' THEN `test_error` END WHERE `gid` = :groupId"
+        )
+        fun clearGroupExitIp(groupId: Long): Int
+
+        /** ClearTestResults(Speed) over a group; the error text goes with a failed speed test unless a failed latency may own it. */
+        @Query(
+            "UPDATE `profiles` SET `dl_speed` = NULL, `ul_speed` = NULL, `test_error` = CASE WHEN `dl_speed` = 'N/A' AND " +
+                "NOT (`latency` < 0 AND `latency` != -2) THEN NULL ELSE `test_error` END WHERE `gid` = :groupId"
+        )
+        fun clearGroupSpeed(groupId: Long): Int
+
+        /** ClearTestResults(Service) over a group. */
+        @Query("UPDATE `profiles` SET `service_checks` = '' WHERE `gid` = :groupId")
+        fun clearGroupServiceChecks(groupId: Long): Int
     }
 }
 

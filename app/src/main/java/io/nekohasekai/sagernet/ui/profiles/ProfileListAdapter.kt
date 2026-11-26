@@ -8,6 +8,7 @@ import androidx.preference.PreferenceDataStore
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.aidl.TrafficData
 import io.nekohasekai.sagernet.bg.BaseService
@@ -20,7 +21,6 @@ import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.SettingsRegistry
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
-import io.nekohasekai.sagernet.ktx.FixedGridLayoutManager
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
@@ -103,7 +103,9 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
 
     var group: ProxyGroup? = null
         private set
-    val testItemsToShow: Int get() = group?.testItemsToShow ?: 0
+
+    /** groups.visible_columns: which test results the rows show (latency, exit IP, speed). */
+    val visibleColumns: Int get() = group?.visibleColumns ?: ProxyGroup.VisibleColumns.DEFAULT
 
     /** groups.show_services: the rows' service icons. */
     val showServices: Boolean get() = group?.showServices ?: true
@@ -186,6 +188,9 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         private set
     private var orderChanged = false
 
+    /** A drop waits for its confirmation: the list keeps showing it, and reloads wait as during a drag. */
+    private var confirming = false
+
     init {
         setHasStableIds(true)
     }
@@ -218,7 +223,7 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
             return
         }
         if (payloads.isNotEmpty() && payloads.all { it == PAYLOAD_STATE } &&
-            holder.boundRows != null && holder.boundProfile?.id == profile.id
+            holder.contentBound && holder.boundProfile?.id == profile.id
         ) {
             holder.bindState()
         } else {
@@ -266,7 +271,7 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
      * The running reload, null during a drag.
      */
     fun reload(): Job? {
-        if (dragging) {
+        if (dragging || confirming) {
             reloadAgain = true
             return null
         }
@@ -297,7 +302,7 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
                 }
                 // a removed group's page goes away with the tabs
                 if (loadedGroup == null) return@launch
-                if (dragging) {
+                if (dragging || confirming) {
                     reloadAgain = true
                     return@launch
                 }
@@ -357,7 +362,7 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
     /** [rows] are the re-read loaded rows; with [onlyRead] the others are dropped, their data is unknown now. */
     private fun apply(newGroup: ProxyGroup, names: List<ProfileName>, rows: List<ProxyEntity>, onlyRead: Boolean) {
         val displayChanged = group?.let {
-            it.testItemsToShow != newGroup.testItemsToShow || it.showServices != newGroup.showServices
+            it.visibleColumns != newGroup.visibleColumns || it.showServices != newGroup.showServices
         } == true
         group = newGroup
         val oldPinned = pinned
@@ -672,33 +677,6 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         return map
     }
 
-    /** The optional rows of the other cards of [position]'s grid row (an unloaded card has none yet). */
-    fun neighbourRows(position: Int): Int {
-        if (position == RecyclerView.NO_POSITION || !multiColumn) return 0
-        val layoutManager = fragment.list.layoutManager as? FixedGridLayoutManager ?: return 0
-        val span = layoutManager.spanCount
-        val start = layoutManager.rowIndexOf(position) * span
-        val end = minOf(start + span, ids.size)
-        var rows = 0
-        for (i in start until end) {
-            if (i == position) continue
-            val profile = cache[ids[i]] ?: continue
-            rows = rows or RowContent.of(fragment.requireContext(), profile, this).rows
-        }
-        return rows
-    }
-
-    fun refreshRowNeighbours(position: Int) {
-        if (position == RecyclerView.NO_POSITION || !multiColumn) return
-        val layoutManager = fragment.list.layoutManager as? FixedGridLayoutManager ?: return
-        val span = layoutManager.spanCount
-        val start = layoutManager.rowIndexOf(position) * span
-        fragment.list.post {
-            val end = minOf(start + span, ids.size)
-            for (i in start until end) if (i != position) notifyItemChanged(i, PAYLOAD_CONTENT)
-        }
-    }
-
     // ------------------------------------------------------------------------------------------------ traffic
 
     private fun applyTraffic(data: List<TrafficData>) {
@@ -776,7 +754,7 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
     /** Drag and drop follows the desktop: refused while the list is filtered (and while selecting or picking). */
     fun canDrag(): Boolean {
         val host = host ?: return false
-        if (host.select || isFiltered || !loaded) return false
+        if (host.select || isFiltered || !loaded || confirming) return false
         if (!dragging && host.selection.active) return false
         return DataStore.serviceState.let { it.canStop || it == BaseService.State.Stopped }
     }
@@ -814,7 +792,6 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun endDrag() {
         if (!dragging) return
         dragging = false
@@ -823,15 +800,9 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         val target = if (moved) dropTarget() else null
         if (target != null) {
             val id = draggedId
-            memberIds = ids.toList() + memberIds.filter { it in hidden }
-            // The pins as the drop leaves them, until the reload brings the stored ones.
             val pin = dropPinned(ids.indexOf(id))
-            if (pin != (id in pinned)) {
-                pinned = if (pin) pinned + id else pinned - id
-                notifyId(id, PAYLOAD_CONTENT)
-            }
-            runOnDefaultDispatcher { ProfileManager.moveProfile(groupId, id, target.first, target.second) }
-            if (multiColumn) notifyDataSetChanged()
+            // Only a drop among the unpinned rows of a sorted group replaces the order saved when the sort started.
+            if (!pin && group?.keepsSorted() == true) confirmDrop(id, target, pin) else drop(id, target, pin)
         } else if (moved) {
             // back where it started: the stored order still holds
             publish(emptySet(), false)
@@ -842,6 +813,37 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
         host?.selection?.onDragFinished(moved)
         host?.onDragEnded()
         if (reloadAgain) reload()
+    }
+
+    /** The shown order is the dropped one: [id] lands next to [target], pinned when [pin] (Group::MoveProfile). */
+    @SuppressLint("NotifyDataSetChanged")
+    private fun drop(id: Long, target: Pair<Long, Boolean>, pin: Boolean) {
+        memberIds = ids.toList() + memberIds.filter { it in hidden }
+        // The pins as the drop leaves them, until the reload brings the stored ones.
+        if (pin != (id in pinned)) {
+            pinned = if (pin) pinned + id else pinned - id
+            notifyId(id, PAYLOAD_CONTENT)
+        }
+        runOnDefaultDispatcher { ProfileManager.moveProfile(groupId, id, target.first, target.second) }
+        if (multiColumn) notifyDataSetChanged()
+    }
+
+    /** Asks before the drop stops the sort; declined, the rows go back to the stored order. */
+    private fun confirmDrop(id: Long, target: Pair<Long, Boolean>, pin: Boolean) {
+        val context = fragment.context ?: return publish(emptySet(), false)
+        confirming = true
+        var confirmed = false
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.profiles_order_change_title)
+            .setMessage(R.string.profiles_order_change_message)
+            .setPositiveButton(R.string.move) { _, _ -> confirmed = true }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setOnDismissListener {
+                confirming = false
+                if (confirmed && positionOf(id) >= 0) drop(id, target, pin) else publish(emptySet(), false)
+                if (reloadAgain) reload()
+            }
+            .show()
     }
 
     // ------------------------------------------------------------------------------------------------ undo delete
@@ -894,7 +896,7 @@ internal class ProfileListAdapter(private val fragment: ProfileListFragment) :
     override suspend fun groupUpdated(group: ProxyGroup) {
         if (group.id != groupId) return
         fragment.onMain {
-            val displayChanged = this.group?.testItemsToShow != group.testItemsToShow ||
+            val displayChanged = this.group?.visibleColumns != group.visibleColumns ||
                 this.group?.showServices != group.showServices
             val pinsChanged = this.group?.pinnedJson != group.pinnedJson
             this.group = group

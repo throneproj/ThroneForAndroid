@@ -567,7 +567,7 @@ class MasterDns : Outbound("masterdns") {
         "encryption_key" to encryption_key,
     )
 
-    /** masterdns::Build (masterdns.cpp): resolvers built from the lines only, Android has no resolver IP lists. */
+    /** masterdns::Build (masterdns.cpp): resolvers built from the lines and the resolver IP list. */
     override fun build(ctx: BuildContext): BuildResult {
         val obj = JsonObject()
         obj["type"] = "masterdns"
@@ -593,7 +593,7 @@ class MasterDns : Outbound("masterdns") {
         else -> SecurityInfo("Weak Cipher", "", SecurityLevel.Weak)
     }
 
-    /** masterdns::Validate (masterdns.cpp), plus the Android-only warning that a resolver IP list is never built. */
+    /** masterdns::Validate (masterdns.cpp). */
     override fun validate(issues: MutableList<Issue>, ctx: BuildContext) {
         super.validate(issues, ctx)
         if (domains.isEmpty()) issues.addIssue(Severity.Error, "domain", DnsTunnelChecks.dnsTunnelDomain(""))
@@ -632,6 +632,5 @@ class MasterDns : Outbound("masterdns") {
                 break
             }
         }
-        if (resolvers.hasIpList()) issues.addIssue(Severity.Warning, "resolver_list", vtr(R.string.validation_resolver_list_android))
     }
 }

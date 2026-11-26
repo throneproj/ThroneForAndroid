@@ -189,15 +189,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
                 val p = when {
                     id > 0L -> RouteManager.get(id)
                     json != null -> RouteJson.profileFromJson(json).apply { this.id = 0L }
-                    else -> RouteProfile().apply {
-                        is_remote = remote
-                        // RouteItem.cpp:61-67 seeds an empty profile with the DNS hijack rule.
-                        if (!remote) rules.add(RouteRule().apply {
-                            name = getString(R.string.route_rule_dns_queries)
-                            protocol = "dns"
-                            action = "hijack-dns"
-                        })
-                    }
+                    else -> RouteProfile().apply { is_remote = remote }
                 } ?: return@withContext null
                 nameRules(p)
                 Loaded(
@@ -434,7 +426,7 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
 
     /**
      * RouteItem::accept: the form's gate (name, remote URL, the custom DNS servers, every rule's errors; warnings
-     * never block), then the empty-rule filter and check, and RouteDnsEditor::applyTo.
+     * never block), then the empty-rule filter, and RouteDnsEditor::applyTo.
      */
     private fun save() {
         val p = model.profile ?: return
@@ -460,10 +452,6 @@ class RouteProfileActivity : ThemedActivity(R.layout.layout_route_profile) {
         if (p.is_remote) p.remote_url = p.remote_url.trim()
         // A turned-off custom rule is kept even without conditions; on, the form refused it as catching all traffic.
         val kept = p.rules.filterNot { it.isEmpty() && !(it.disabled && it.type == RuleType.CUSTOM.id) }
-        if (!p.is_remote && kept.isEmpty()) {
-            message(R.string.route_profile_empty_title, getString(R.string.route_profile_empty))
-            return
-        }
         val removed = p.rules.size - kept.size
         val toSave = p.copy().apply { rules = kept.toMutableList() }
         val opened = model.dnsOpened

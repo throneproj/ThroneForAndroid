@@ -16,7 +16,6 @@ object ProfileJson {
 
     /** Root keys of the stored forms (the types' exportToJson) that sing-box does not have. */
     private val THRONE_KEYS = mapOf(
-        "hysteria" to rootKeys("recv_window_conn", "recv_window", "disable_mtu_discovery"),
         "socks" to rootKeys("uot"),
         "openconnect" to rootKeys("only_advertised_routes", "otp_profile_id", "server_path", "tunnel_dns"),
         "openvpn" to rootKeys("only_advertised_routes", "otp_profile_id", "tunnel_dns"),

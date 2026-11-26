@@ -114,10 +114,13 @@ object GroupRepo {
         return group
     }
 
-    /** The stored pins stay: only ProfileManager's pin edits write them, and [group] may be an older copy. */
+    /**
+     * The stored pins and custom order stay: only their own DAO writes change them, and [group] may be an older copy.
+     */
     suspend fun save(group: ProxyGroup) {
         SagerDatabase.instance.runInTransaction {
             dao.pinnedJson(group.id)?.let { group.pinnedJson = it }
+            dao.getCustomOrderJson(group.id)?.let { group.customOrderJson = it }
             dao.update(group)
         }
         notify { groupUpdated(group) }

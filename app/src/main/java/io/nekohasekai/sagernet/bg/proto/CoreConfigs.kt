@@ -18,6 +18,7 @@ import io.nekohasekai.sagernet.outbound.config.RoutingInput
 import io.nekohasekai.sagernet.outbound.config.TestCandidate
 import io.nekohasekai.sagernet.route.RouteDns
 import io.nekohasekai.sagernet.route.RouteProfile
+import io.nekohasekai.sagernet.scan.EndpointSources
 
 /**
  * The config generator wired to the app: profiles come from the profile table, the settings and the build-time
@@ -27,14 +28,21 @@ import io.nekohasekai.sagernet.route.RouteProfile
  */
 object CoreConfigs {
 
-    /** Stored profiles by id, each row read and parsed once per generation, with their groups. */
+    /**
+     * Stored profiles by id, each row read and parsed once per generation, with their groups. A profile whose endpoint
+     * source supplies an address is handed out as a clone dialing it (generateEndpointApply).
+     */
     private class DatabaseProfiles : ProfileProvider {
         private val rows = HashMap<Long, ProxyEntity?>()
         private val groups = HashMap<Long, ProfileGroup?>()
+        private val applied = HashMap<Long, Outbound?>()
 
         private fun row(id: Long): ProxyEntity? = rows.getOrPut(id) { SagerDatabase.proxyDao.getById(id) }
 
-        override fun get(id: Long): Outbound? = row(id)?.outbound
+        override fun get(id: Long): Outbound? {
+            if (id in applied) return applied[id]
+            return row(id)?.let { EndpointSources.apply(it) }.also { applied[id] = it }
+        }
 
         override fun groupOf(id: Long): ProfileGroup? {
             val groupId = row(id)?.groupId ?: return null
@@ -65,7 +73,9 @@ object CoreConfigs {
         val routing = SettingsMapper.routingInput(route)
         val dns = routing.profile?.activeDns()
         val settings = SettingsMapper.generatorSettings(dns).copy(deferRuleSets = deferRuleSets)
-        val generated = generator(routing, settings, dns).build(profile.id, landing, front, ports, groupName)
+        val generated = EndpointSources.scope {
+            generator(routing, settings, dns).build(profile.id, landing, front, ports, groupName)
+        }
         if (!generated.ok) error(generated.error ?: "config generation failed")
         return generated
     }
@@ -82,7 +92,9 @@ object CoreConfigs {
             TestCandidate(id, landing, front, groupName)
         }
         val dns = RouteManager.customDns(DataStore.currentRouteId)
-        return generator(settings = SettingsMapper.generatorSettings(dns), dns = dns).buildTest(candidates, ports)
+        return EndpointSources.scope {
+            generator(settings = SettingsMapper.generatorSettings(dns), dns = dns).buildTest(candidates, ports)
+        }
     }
 
     /**
@@ -95,7 +107,9 @@ object CoreConfigs {
         val routing = RoutingInput(
             RoutingInput.DEFAULT.profile, RoutingInput.DEFAULT.catalog, memberCheck = SettingsMapper.memberCheck(),
         )
-        return generator(routing, SettingsMapper.generatorSettings(dns), dns).buildChainStepTest(hops, landing, front, ports)
+        return EndpointSources.scope {
+            generator(routing, SettingsMapper.generatorSettings(dns), dns).buildChainStepTest(hops, landing, front, ports)
+        }
     }
 
     /** (landing_proxy_id, front_proxy_id, name) of a group, -1 when unset (any id <= 0 is "none"). */

@@ -103,8 +103,6 @@ class RouteProfile {
     /** The number of profile ids in [endpoint_profile_ids]. */
     fun endpointCount(): Int = RULE_IDS.findAll(endpoint_profile_ids).count()
 
-    fun isEmpty(): Boolean = rules.all { it.isEmpty() }
-
     /**
      * get_used_outbounds (RouteProfile.cpp:672-685), deduplicated (D12) and limited to the rules whose JSON
      * carries an outbound, so a leftover id on a reject or sniff rule does not require that server.
@@ -242,14 +240,7 @@ class RouteProfile {
             return RouteRule.checkValue(attr, value, catalog)
         }
 
-        /** GetDefaultChain (RouteProfile.cpp:661-670). */
-        fun defaultProfile(): RouteProfile = RouteProfile().apply {
-            name = "Default"
-            rules.add(RouteRule().apply {
-                name = "Route DNS"
-                action = "hijack-dns"
-                protocol = "dns"
-            })
-        }
+        /** GetDefaultChain (RouteProfile.cpp:981-985). */
+        fun defaultProfile(): RouteProfile = RouteProfile().apply { name = "Default" }
     }
 }

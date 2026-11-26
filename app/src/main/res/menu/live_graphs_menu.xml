@@ -13,11 +13,6 @@
         android:title="@string/live_graph_smooth"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_live_events"
-        android:checkable="true"
-        android:title="@string/live_graph_events"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/action_live_show_all"
         android:title="@string/live_graph_show_all"
         app:showAsAction="never" />

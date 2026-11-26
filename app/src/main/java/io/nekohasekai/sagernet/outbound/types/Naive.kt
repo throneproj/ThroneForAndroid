@@ -25,6 +25,7 @@ import io.nekohasekai.sagernet.validation.Severity
 import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.validation.acceptOptional
 import io.nekohasekai.sagernet.validation.addIssue
+import io.nekohasekai.sagernet.validation.legacyComboValue
 import io.nekohasekai.sagernet.validation.vtr
 
 /** naive.h naiveCongestionControls. */
@@ -95,7 +96,7 @@ class Naive : Outbound("naive") {
         if (url.scheme == "naive+quic") {
             quic = true
             if (q.has("congestion_control")) {
-                val value = q.value("congestion_control").trim()
+                val value = legacyComboValue(q.value("congestion_control"), naiveCongestionControls)
                 if (keep("congestion_control", value, Validation.Rules.oneOf(naiveCongestionControls))) congestion_control = value
             }
         }
@@ -134,7 +135,7 @@ class Naive : Outbound("naive") {
         }
         if (obj.contains("quic")) quic = obj.bool("quic")
         if (obj.contains("quic_congestion_control")) {
-            val value = obj.string("quic_congestion_control")
+            val value = legacyComboValue(obj.string("quic_congestion_control"), naiveCongestionControls)
             if (keep("quic_congestion_control", value, Validation.Rules.oneOf(naiveCongestionControls))) congestion_control = value
         }
         if (obj.contains("tls")) tls.parseFromJson(naiveTls(obj.obj("tls"), keepFragment = true))

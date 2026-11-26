@@ -43,8 +43,8 @@ data class ProxyGroup(
     @ColumnInfo(name = "test_sort_by", defaultValue = "0") var testSortBy: Int = 0,
     /** [TrafficBy] */
     @ColumnInfo(name = "traffic_sort_by", defaultValue = "0") var trafficSortBy: Int = 0,
-    /** [TestShowItems] */
-    @ColumnInfo(name = "test_items_to_show", defaultValue = "0") var testItemsToShow: Int = 0,
+    /** [TestShowItems], the mirror of [visibleColumns] that older readers use; written with [updateVisibleColumns]. */
+    @ColumnInfo(name = "test_items_to_show", defaultValue = "0") var testItemsToShow: Int = TestShowItems.NONE.value,
     /** [TypeBy] */
     @ColumnInfo(name = "type_sort_by", defaultValue = "0") var typeSortBy: Int = 0,
     @ColumnInfo(name = "sub_options_json", defaultValue = "{}") var subOptions: SubscriptionOptions = SubscriptionOptions(),
@@ -65,6 +65,15 @@ data class ProxyGroup(
     @ColumnInfo(name = "pinned_json", defaultValue = "[]") var pinnedJson: String = "[]",
     /** Group::show_services: the rows show the service checks' results (1c4d920a). */
     @ColumnInfo(name = "show_services", defaultValue = "1") var showServices: Boolean = true,
+    /** Group::endpoint, the EndpointSource JSON: `{}`, `{"mode":"own"}`, an address or an IP list. */
+    @ColumnInfo(name = "endpoint_json", defaultValue = "{}") var endpointJson: String = "{}",
+    /** Group::visible_columns, bits of [VisibleColumns]; change it with [updateVisibleColumns]. */
+    @ColumnInfo(name = "visible_columns", defaultValue = "79") var visibleColumns: Int = VisibleColumns.DEFAULT,
+    /**
+     * Group::custom_order as its compact JSON array; read it through [customOrder]. Written only through
+     * [Dao.setCustomOrderJson], so [GroupRepo.save] keeps the stored value.
+     */
+    @ColumnInfo(name = "custom_order_json", defaultValue = "[]") var customOrderJson: String = "[]",
 ) : Parcelable {
 
     @get:Ignore
@@ -73,6 +82,19 @@ data class ProxyGroup(
     /** Group::pinned: always the head of the group's order, in this order; sorts only order the rows below them. */
     @get:Ignore
     val pinned: List<Long> get() = parsePinned(pinnedJson)
+
+    /**
+     * Group::custom_order: the manual arrangement of the members, pinned ones included. An unsorted group lists it
+     * first and the members it lacks after it; a kept sort saves the arrangement here to go back to.
+     */
+    @get:Ignore
+    val customOrder: List<Long> get() = parsePinned(customOrderJson)
+
+    /** Sets [visibleColumns] and keeps test_items_to_show showing the same exit IP and speed columns. */
+    fun updateVisibleColumns(bits: Int) {
+        visibleColumns = bits
+        testItemsToShow = testItemsFor(bits)
+    }
 
     /** Group::sort, the order kept as the profiles change; RAW keeps the manual order (GroupsRepo.cpp groupFromJson). */
     @get:Ignore
@@ -117,6 +139,46 @@ data class ProxyGroup(
             ids.forEach { array.add(it) }
             return array.toCompact()
         }
+
+        @JvmStatic
+        fun customOrderToJson(ids: List<Long>): String = pinnedToJson(ids)
+
+        /** The test_items_to_show that shows the exit IP and speed columns of [bits]. */
+        @JvmStatic
+        fun testItemsFor(bits: Int): Int {
+            val ip = (bits and VisibleColumns.EXIT_IP) != 0
+            val speed = (bits and VisibleColumns.SPEED) != 0
+            return when {
+                ip && speed -> TestShowItems.ALL
+                ip -> TestShowItems.IP_ONLY
+                speed -> TestShowItems.SPEED_ONLY
+                else -> TestShowItems.NONE
+            }.value
+        }
+
+        /** GroupsRepo.cpp's visible_columns migration: the columns [testItemsToShow] showed (unknown values showed all). */
+        @JvmStatic
+        fun visibleColumnsFor(testItemsToShow: Int): Int = when (TestShowItems.of(testItemsToShow)) {
+            TestShowItems.ALL -> VisibleColumns.ALL
+            TestShowItems.NONE -> VisibleColumns.DEFAULT
+            TestShowItems.IP_ONLY -> VisibleColumns.DEFAULT or VisibleColumns.EXIT_IP
+            TestShowItems.SPEED_ONLY -> VisibleColumns.DEFAULT or VisibleColumns.SPEED
+        }
+    }
+
+    /** ProfilesTableModel::Column bits of Group::visible_columns. */
+    object VisibleColumns {
+        const val TYPE = 1
+        const val ADDRESS = 2
+        const val NAME = 4
+        const val LATENCY = 8
+        const val EXIT_IP = 16
+        const val SPEED = 32
+        const val TRAFFIC = 64
+
+        /** Type, address, name, latency and traffic. */
+        const val DEFAULT = 79
+        const val ALL = 127
     }
 
     @androidx.room.Dao
@@ -139,8 +201,14 @@ data class ProxyGroup(
         @Query("SELECT COALESCE(MAX(`display_order`), 0) + 1 FROM `groups`")
         fun nextDisplayOrder(): Long
 
-        /** Configs.cpp:35-39 initDB: the Default group of an empty table, in one statement so both processes may call it. */
-        @Query("INSERT INTO `groups` (`name`, `display_order`) SELECT :name, 1 WHERE NOT EXISTS (SELECT 1 FROM `groups`)")
+        /**
+         * Configs.cpp:35-39 initDB: the Default group of an empty table, in one statement so both processes may call
+         * it; test_items_to_show 1 (NONE) mirrors the default visible_columns.
+         */
+        @Query(
+            "INSERT INTO `groups` (`name`, `display_order`, `test_items_to_show`) SELECT :name, 1, 1 " +
+                "WHERE NOT EXISTS (SELECT 1 FROM `groups`)"
+        )
         fun insertDefaultIfEmpty(name: String)
 
         @Insert
@@ -188,6 +256,13 @@ data class ProxyGroup(
 
         @Query("SELECT `id` FROM `groups` WHERE `pinned_json` != '[]'")
         fun idsWithPins(): List<Long>
+
+        @Query("SELECT `custom_order_json` FROM `groups` WHERE `id` = :groupId")
+        fun getCustomOrderJson(groupId: Long): String?
+
+        /** 0 when nothing changed. */
+        @Query("UPDATE `groups` SET `custom_order_json` = :json WHERE `id` = :groupId AND `custom_order_json` != :json")
+        fun setCustomOrderJson(groupId: Long, json: String): Int
 
         /** ClearHopReferences, only while the front proxy is still [profileId]; 0 when nothing changed. */
         @Query("UPDATE `groups` SET `front_proxy_id` = -1 WHERE `id` = :groupId AND `front_proxy_id` = :profileId")

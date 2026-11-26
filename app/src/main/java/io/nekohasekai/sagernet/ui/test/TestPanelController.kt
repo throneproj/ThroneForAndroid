@@ -124,6 +124,7 @@ class TestPanelController(
     private val connectAction: Chip = root.findViewById(R.id.test_panel_action_connect)
     private val sortAction: Chip = root.findViewById(R.id.test_panel_action_sort)
     private val removeAction: Chip = root.findViewById(R.id.test_panel_action_remove)
+    private val retestAction: Chip = root.findViewById(R.id.test_panel_action_retest)
     private val stopOtherAction: Chip = root.findViewById(R.id.test_panel_action_stop_other)
     private val body: TestPanelScrollView = root.findViewById(R.id.test_panel_body)
     private val okCount: TextView = root.findViewById(R.id.test_panel_ok_count)
@@ -305,7 +306,7 @@ class TestPanelController(
         ImageViewCompat.setImageTintList(expandButton, ColorStateList.valueOf(textSecondary))
         connectAction.chipBackgroundColor = ColorStateList.valueOf(accent)
         connectAction.setTextColor(if (ColorUtils.calculateLuminance(accent) > 0.5) Color.BLACK else Color.WHITE)
-        for (chip in listOf(sortAction, removeAction, stopOtherAction)) {
+        for (chip in listOf(sortAction, removeAction, retestAction, stopOtherAction)) {
             chip.chipBackgroundColor = ColorStateList.valueOf(Color.TRANSPARENT)
             chip.chipStrokeColor = ColorStateList.valueOf(ColorUtils.setAlphaComponent(accent, 0x80))
             chip.chipStrokeWidth = density
@@ -336,6 +337,7 @@ class TestPanelController(
         connectAction.setOnClickListener { rendered?.let(::connectFastest) }
         sortAction.setOnClickListener { rendered?.let(::sort) }
         removeAction.setOnClickListener { rendered?.let(::removeUnavailable) }
+        retestAction.setOnClickListener { rendered?.let { retest(it.inconclusiveIds(), it.groupId) } }
         stopOtherAction.setOnClickListener {
             TestSessionClient.stopBackgroundSession()
             TestSessionClient.dismiss()
@@ -371,6 +373,7 @@ class TestPanelController(
             renderActions(s)
             if (expanded) renderBody(s)
         }
+        if (rendered?.running == true && s.finished) announceInconclusive(s)
         rendered = s
         backCallback.isEnabled = shown && expanded && !side
     }
@@ -541,9 +544,12 @@ class TestPanelController(
         val removable = if (canAct && latencyKind) removableIds(s).size else 0
         removeAction.isVisible = removable > 0
         if (removable > 0) removeAction.setTextIfChanged(context.getString(R.string.test_panel_action_remove, removable))
+        val untested = if (canAct && s.kind == TestSpec.KIND_URL) s.inconclusiveIds().size else 0
+        retestAction.isVisible = untested > 0
+        if (untested > 0) retestAction.setTextIfChanged(context.getString(R.string.test_panel_action_retest, untested))
         stopOtherAction.isVisible = s.finished && s.failure == TestFailure.BUSY
         actions.isVisible = connectAction.isVisible || sortAction.isVisible || removeAction.isVisible ||
-            stopOtherAction.isVisible
+            retestAction.isVisible || stopOtherAction.isVisible
     }
 
     private fun removableIds(s: TestUiState): List<Long> = s.failedIds().filter { it != runningId }
@@ -915,6 +921,30 @@ class TestPanelController(
         }
     }
 
+    /** testsInconclusive (mainwindow_policy.cpp:419): once the run ends, with a retest of just those profiles. */
+    private fun announceInconclusive(s: TestUiState) {
+        if (s.kind != TestSpec.KIND_URL || s.testCurrent || !fragment.isAdded) return
+        val ids = s.inconclusiveIds()
+        if (ids.isEmpty()) return
+        fragment.snackbar(context.resources.getQuantityString(R.plurals.test_inconclusive, ids.size, ids.size))
+            .setDuration(ANNOUNCE_MS)
+            .setAction(R.string.test_inconclusive_retest) { retest(ids, s.groupId) }
+            .show()
+    }
+
+    /** URL-tests those of [ids] that still exist. */
+    private fun retest(ids: List<Long>, groupId: Long) {
+        if (ids.isEmpty()) return
+        runOnDefaultDispatcher {
+            val existing = ProfileManager.getProfiles(ids).mapTo(HashSet()) { it.id }
+            val present = ids.filter { it in existing }
+            if (present.isEmpty()) return@runOnDefaultDispatcher
+            if (!TestSessionClient.startProfiles(TestSpec.KIND_URL, present, groupId)) onMainDispatcher {
+                if (fragment.isAdded) fragment.snackbar(R.string.profiles_test_busy).show()
+            }
+        }
+    }
+
     // ------------------------------------------------------------------------------------------------ helpers
 
     private fun appendColored(text: SpannableStringBuilder, part: String, @ColorInt color: Int) {
@@ -936,6 +966,7 @@ class TestPanelController(
         const val SHOW_MS = 220L
         const val HIDE_MS = 160L
         const val MIN_ETA_ELAPSED_MS = 2000L
+        const val ANNOUNCE_MS = 6000
         const val BODY_MAX_FRACTION = 0.45f
         const val SEP = " · "
 

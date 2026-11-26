@@ -8,9 +8,9 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.bg.test.TestSpec
 import io.nekohasekai.sagernet.database.GroupRepo
 import io.nekohasekai.sagernet.database.GroupSortMethod
+import io.nekohasekai.sagernet.database.ProfileManager.ResultKind
 import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.TestBy
-import io.nekohasekai.sagernet.database.TestShowItems
 import io.nekohasekai.sagernet.database.TrafficBy
 import io.nekohasekai.sagernet.database.TypeBy
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
@@ -26,8 +26,9 @@ class GroupMenu(private val host: ConfigurationFragment) {
         menu.findItem(R.id.action_misc)?.subMenu?.let { MenuCompat.setGroupDividerEnabled(it, true) }
         keepOpen(menu, R.id.action_sort_ascending) { setDirection(it, false) }
         keepOpen(menu, R.id.action_sort_descending) { setDirection(it, true) }
-        keepOpen(menu, R.id.action_show_out_ip) { toggleShown(menu, it) }
-        keepOpen(menu, R.id.action_show_speed) { toggleShown(menu, it) }
+        keepOpen(menu, R.id.action_show_latency) { toggleColumn(it, ProxyGroup.VisibleColumns.LATENCY) }
+        keepOpen(menu, R.id.action_show_out_ip) { toggleColumn(it, ProxyGroup.VisibleColumns.EXIT_IP) }
+        keepOpen(menu, R.id.action_show_speed) { toggleColumn(it, ProxyGroup.VisibleColumns.SPEED) }
         keepOpen(menu, R.id.action_show_services) { toggleServices(it) }
     }
 
@@ -57,7 +58,7 @@ class GroupMenu(private val host: ConfigurationFragment) {
         if (group.keepsSorted()) GroupActions.sort(host, group.id, group.sort.method, descending)
     }
 
-    /** ProfilesTableModel::columnOfSort: the item of the kept sort, Manual order without one. */
+    /** ProfilesTableModel::columnOfSort: the item of the kept sort, Original order without one. */
     private fun sortItem(group: ProxyGroup): Int = when (group.sort.method) {
         GroupSortMethod.BY_TYPE, GroupSortMethod.BY_SECURITY ->
             if (TypeBy.of(group.typeSortBy) == TypeBy.BY_SECURITY) R.id.action_sort_security else R.id.action_sort_type
@@ -66,18 +67,14 @@ class GroupMenu(private val host: ConfigurationFragment) {
         GroupSortMethod.BY_NAME -> R.id.action_sort_name
         GroupSortMethod.BY_TEST_RESULT, GroupSortMethod.BY_LATENCY -> R.id.action_sort_test_result
         GroupSortMethod.BY_TRAFFIC -> R.id.action_sort_traffic
-        GroupSortMethod.RAW, GroupSortMethod.BY_ID -> R.id.action_sort_manual
+        GroupSortMethod.RAW, GroupSortMethod.BY_ID -> R.id.action_sort_original
     }
 
-    private fun toggleShown(menu: Menu, item: MenuItem) {
+    /** The column header menus' Show checkboxes (groups.visible_columns): what the rows show of each test. */
+    private fun toggleColumn(item: MenuItem, bit: Int) {
         item.isChecked = !item.isChecked
-        val group = host.currentGroup() ?: return
-        GroupActions.setShownItems(
-            host,
-            group.id,
-            outIp = menu.findItem(R.id.action_show_out_ip)?.isChecked == true,
-            speed = menu.findItem(R.id.action_show_speed)?.isChecked == true,
-        )
+        val groupId = host.currentGroup()?.id ?: return
+        GroupActions.setColumnShown(host, groupId, bit, item.isChecked)
     }
 
     /** The Exit IP column header menu's "Services" (groups.show_services): the rows' service icons. */
@@ -114,11 +111,14 @@ class GroupMenu(private val host: ConfigurationFragment) {
                     TrafficBy.UL -> R.id.action_sort_traffic_uploaded
                 }
             )?.isChecked = true
-            val shown = TestShowItems.of(group.testItemsToShow)
-            menu.findItem(R.id.action_show_out_ip)?.isChecked = shown.showIp
-            menu.findItem(R.id.action_show_speed)?.isChecked = shown.showSpeed
+            val columns = group.visibleColumns
+            menu.findItem(R.id.action_show_latency)?.isChecked = columns and ProxyGroup.VisibleColumns.LATENCY != 0
+            menu.findItem(R.id.action_show_out_ip)?.isChecked = columns and ProxyGroup.VisibleColumns.EXIT_IP != 0
+            menu.findItem(R.id.action_show_speed)?.isChecked = columns and ProxyGroup.VisibleColumns.SPEED != 0
             menu.findItem(R.id.action_show_services)?.isChecked = group.showServices
         }
+        // results still arriving from the running test would fill the rows again
+        menu.findItem(R.id.action_clear_results)?.isEnabled = !host.testState.running
     }
 
     fun onMenuItemClick(item: MenuItem): Boolean {
@@ -138,7 +138,11 @@ class GroupMenu(private val host: ConfigurationFragment) {
             R.id.action_test_ip -> ProfileTests.startGroup(host, TestSpec.KIND_IP, id)
             R.id.action_test_speed -> ProfileTests.startGroup(host, TestSpec.KIND_SPEED, id)
             R.id.action_test_service -> ProfileTests.startServiceGroup(host, id)
-            R.id.action_clear_test_results -> GroupActions.clearTestResults(host, group)
+            R.id.action_clear_test_results -> GroupActions.clearTestResults(host, group, null)
+            R.id.action_clear_results_latency -> GroupActions.clearTestResults(host, group, ResultKind.LATENCY)
+            R.id.action_clear_results_exit_ip -> GroupActions.clearTestResults(host, group, ResultKind.EXIT_IP)
+            R.id.action_clear_results_speed -> GroupActions.clearTestResults(host, group, ResultKind.SPEED)
+            R.id.action_clear_results_services -> GroupActions.clearTestResults(host, group, ResultKind.SERVICES)
             R.id.action_remove_duplicates -> GroupActions.removeDuplicates(host, id)
             R.id.action_remove_unavailable -> GroupActions.removeUnavailable(host, id)
             R.id.action_remove_invalid -> GroupActions.removeInvalid(host, group)
@@ -146,8 +150,8 @@ class GroupMenu(private val host: ConfigurationFragment) {
             R.id.action_resolve_domains -> GroupActions.resolveDomains(host, group)
             R.id.action_clear_traffic_statistics -> GroupActions.clearTraffic(host, group)
 
-            // the header menu's "Stop Sorting": the current order becomes the manual one
-            R.id.action_sort_manual -> GroupActions.stopSorting(host, id)
+            // the header menu's "Restore original order", offered while the group keeps a sort
+            R.id.action_sort_original -> if (group.keepsSorted()) GroupActions.restoreOriginalOrder(host, id)
 
             // the Type column's "Sort By: Type / Security" stores type_sort_by
             R.id.action_sort_type -> sort(id, GroupSortMethod.BY_TYPE) { it.typeSortBy = TypeBy.BY_TYPE.value }

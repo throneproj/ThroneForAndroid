@@ -12,7 +12,6 @@ import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.SagerDatabase
-import io.nekohasekai.sagernet.database.TestShowItems
 import io.nekohasekai.sagernet.group.SubscriptionClient
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.confirmAction
@@ -29,12 +28,28 @@ internal object GroupActions {
         if (group.isSubscription) SubscriptionClient.refreshGroup(group.id, showDiff = true)
     }
 
-    fun clearTestResults(host: ConfigurationFragment, group: ProxyGroup) {
-        host.requireContext().confirmAction(
-            host.getString(R.string.confirm_clear_test_results), group.displayName(), R.string.confirm_clear,
-        ) {
+    /**
+     * Clear results (the column header menus' ClearTestResults): the group's results of [kind], all of them when null.
+     * The exit IP takes the service checks with it while the group shows them, as they share the desktop's column.
+     */
+    fun clearTestResults(host: ConfigurationFragment, group: ProxyGroup, kind: ProfileManager.ResultKind?) {
+        val title = when (kind) {
+            null -> R.string.confirm_clear_test_results
+            ProfileManager.ResultKind.LATENCY -> R.string.confirm_clear_latency
+            ProfileManager.ResultKind.EXIT_IP -> R.string.confirm_clear_exit_ip
+            ProfileManager.ResultKind.SPEED -> R.string.confirm_clear_speed
+            ProfileManager.ResultKind.SERVICES -> R.string.confirm_clear_services
+        }
+        val kinds = kind?.let {
+            if (it == ProfileManager.ResultKind.EXIT_IP && group.showServices) {
+                listOf(it, ProfileManager.ResultKind.SERVICES)
+            } else {
+                listOf(it)
+            }
+        }
+        host.requireContext().confirmAction(host.getString(title), group.displayName(), R.string.confirm_clear) {
             host.launchIo {
-                ProfileManager.clearGroupTestResults(group.id)
+                ProfileManager.clearGroupTestResults(group.id, kinds)
                 GroupRepo.postReload(group.id)
             }
         }
@@ -208,21 +223,17 @@ internal object GroupActions {
         }
     }
 
-    /** stopSortingCurrentGroup: the order as it is becomes the manual one. */
-    fun stopSorting(host: ConfigurationFragment, groupId: Long) {
-        host.launchIo { GroupSort.setSort(groupId, GroupSortAction()) }
+    /** restoreOriginalOrder (mainwindow_view.cpp): the order from before the kept sort, which stops. */
+    fun restoreOriginalOrder(host: ConfigurationFragment, groupId: Long) {
+        host.launchIo { ProfileManager.restoreOriginalOrder(groupId) }
     }
 
-    /** The test result column's "Include: Out IP / Speed" (updateTestItemsToShow). */
-    fun setShownItems(host: ConfigurationFragment, groupId: Long, outIp: Boolean, speed: Boolean) {
-        val value = when {
-            outIp && speed -> TestShowItems.ALL
-            outIp -> TestShowItems.IP_ONLY
-            speed -> TestShowItems.SPEED_ONLY
-            else -> TestShowItems.NONE
-        }.value
+    /** The column header menus' Show checkboxes: whether the rows show the results of visible_columns [bit]. */
+    fun setColumnShown(host: ConfigurationFragment, groupId: Long, bit: Int, shown: Boolean) {
         host.launchIo {
-            GroupFields.update(groupId) { it.testItemsToShow = value }?.let { GroupRepo.postUpdate(it) }
+            GroupFields.update(groupId) {
+                it.updateVisibleColumns(if (shown) it.visibleColumns or bit else it.visibleColumns and bit.inv())
+            }?.let { GroupRepo.postUpdate(it) }
         }
     }
 

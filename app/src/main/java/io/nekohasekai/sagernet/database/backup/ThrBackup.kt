@@ -50,8 +50,10 @@ object ThrBackup {
         val settings: Boolean = false,
         val otp: Boolean = false,
         val icons: Boolean = false,
+        /** The scanner's IP lists and saved scans (meta key "ipLists"). */
+        val ipLists: Boolean = false,
     ) {
-        fun anyDb(): Boolean = profiles || routes || settings || otp
+        fun anyDb(): Boolean = profiles || routes || settings || otp || ipLists
         fun any(): Boolean = anyDb() || icons
     }
 
@@ -138,6 +140,7 @@ object ThrBackup {
                 settings = po.bool("settings") && hasDatabase,
                 otp = po.bool("otp") && hasDatabase,
                 icons = po.bool("icons") && hasIcons,
+                ipLists = po.bool("ipLists") && hasDatabase,
             )
         }
         return Parts(profiles = hasDatabase, routes = hasDatabase, settings = hasDatabase, icons = hasIcons)
@@ -188,6 +191,7 @@ object ThrBackup {
             }
             this["parts"] = JsonObject().apply {
                 this["icons"] = false
+                this["ipLists"] = parts.ipLists
                 this["otp"] = parts.otp
                 this["profiles"] = parts.profiles
                 this["routes"] = parts.routes

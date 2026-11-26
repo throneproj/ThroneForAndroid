@@ -36,9 +36,9 @@
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="congestion_control"
             app:title="@string/congestion_control"
-            app:entries="@array/trusttunnel_congestion_control"
-            app:entryValues="@array/trusttunnel_congestion_control"
-            app:defaultValue="bbr"
+            app:entries="@array/trusttunnel_congestion_control_entry"
+            app:entryValues="@array/trusttunnel_congestion_control_value"
+            app:defaultValue=""
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
             app:icon="@drawable/baseline_send_24"

@@ -36,6 +36,12 @@
             android:text="@string/backup_part_settings" />
 
         <CheckBox
+            android:id="@+id/restore_ip_lists"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/backup_part_ip_lists" />
+
+        <CheckBox
             android:id="@+id/restore_otp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

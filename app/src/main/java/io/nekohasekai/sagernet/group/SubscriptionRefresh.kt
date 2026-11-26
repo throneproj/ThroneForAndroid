@@ -224,7 +224,7 @@ internal object SubscriptionRefresh {
         }
 
         SubscriptionRouteRebind.rebind(gid, removed, snapshot.routeNames)
-        // The subscription's own order replaced the group's above.
+        // The subscription's own order replaced a sorted group's above (an unsorted one keeps its arrangement).
         if (disturbed.isNotEmpty() || ProfileManager.memberIds(gid) != snapshot.membersBefore) GroupSort.resortLater(gid)
         // Stamped only once the update went through, so an interrupted one is retried instead of counting as fresh.
         if (!urlChanged(gid, url)) {
@@ -504,14 +504,20 @@ internal object SubscriptionRefresh {
         }
     }
 
-    /** afterUrlTest (GroupUpdater.cpp:669-683). */
-    suspend fun afterUrlTest(gid: Long) {
+    /**
+     * afterUrlTest (GroupUpdater.cpp:1483-1495) of the run started at [testedSince] (seconds); a run that was stopped
+     * or failed to start (not [completed]) removes nothing.
+     */
+    suspend fun afterUrlTest(gid: Long, testedSince: Long, completed: Boolean) {
         val group = GroupRepo.get(gid) ?: return
         if (group.archive) return
         val options = group.subOptions
         if (!options.urlTest || (!options.removeUnavailable && !options.sortByLatency)) return
 
-        val result = SubscriptionFilters.removeUnavailableAndSort(group, options)
+        if (options.removeUnavailable && !completed) {
+            Logs.i("The URL test of ${group.name} did not finish; no unavailable profiles were removed.")
+        }
+        val result = SubscriptionFilters.removeUnavailableAndSort(group, options, testedSince.takeIf { completed })
         if (result.report.isNotEmpty()) {
             val heading = str(R.string.subs_after_url_test, group.name)
             Logs.i("<<<<<<<< $heading${result.report}")

@@ -5,8 +5,8 @@ import kotlinx.parcelize.Parcelize
 
 /**
  * The live graphs' points after a serial (bg.LiveStatsRecorder): [times] in elapsedRealtime ms, [values] [FIELDS] per
- * point (NaN where a point has no value), and every profile event still in the window. A [session] other than the one
- * asked for means the service process is a new one, and the batch then holds its whole history.
+ * point (NaN where a point has no value; a stop is a point without any). A [session] other than the one asked for means
+ * the service process is a new one, and the batch then holds its whole history.
  */
 @Parcelize
 class LiveStatsBatch(
@@ -14,9 +14,6 @@ class LiveStatsBatch(
     val serial: Long = 0L,
     val times: LongArray = LongArray(0),
     val values: FloatArray = FloatArray(0),
-    val markerTimes: LongArray = LongArray(0),
-    val markerKinds: IntArray = IntArray(0),
-    val markerTexts: List<String> = emptyList(),
 ) : Parcelable {
 
     companion object {
@@ -31,9 +28,5 @@ class LiveStatsBatch(
         const val MEMORY = 5
         const val CONNECTIONS = 6
         const val FIELDS = 7
-
-        const val MARKER_STARTED = 0
-        const val MARKER_SWITCHED = 1
-        const val MARKER_STOPPED = 2
     }
 }

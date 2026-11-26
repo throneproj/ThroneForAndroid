@@ -8,11 +8,22 @@ import androidx.room.Update
 @Dao
 interface RouteDao {
 
-    @Query("SELECT * FROM route_profiles ORDER BY id")
+    /** In the user's order (RoutesRepo::GetAllRouteProfileIds), which every list and menu of routing profiles follows. */
+    @Query("SELECT * FROM route_profiles ORDER BY display_order, id")
     fun allProfiles(): List<RouteProfileEntity>
 
-    @Query("SELECT id FROM route_profiles ORDER BY id")
+    @Query("SELECT id FROM route_profiles ORDER BY display_order, id")
     fun allIds(): List<Long>
+
+    /** RoutesRepo::Save: a new profile goes after every other one. */
+    @Query("SELECT COALESCE(MAX(display_order), -1) + 1 FROM route_profiles")
+    fun nextDisplayOrder(): Long
+
+    @Query("SELECT display_order FROM route_profiles WHERE id = :id")
+    fun displayOrderOf(id: Long): Long?
+
+    @Query("UPDATE route_profiles SET display_order = :order WHERE id = :id")
+    fun setDisplayOrder(id: Long, order: Long): Int
 
     @Query("SELECT * FROM route_profiles WHERE id = :id")
     fun getProfile(id: Long): RouteProfileEntity?

@@ -1,5 +1,6 @@
 package io.nekohasekai.sagernet.ui.profile
 
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import io.nekohasekai.sagernet.R
@@ -8,6 +9,7 @@ import io.nekohasekai.sagernet.outbound.types.TrustTunnel
 import io.nekohasekai.sagernet.outbound.types.TrustTunnelChecks
 import io.nekohasekai.sagernet.outbound.types.trustTunnelCongestionControls
 import io.nekohasekai.sagernet.ui.json.ProfileJson
+import io.nekohasekai.sagernet.validation.legacyComboValue
 
 class TrustTunnelSettingsActivity : BindingSettingsActivity<TrustTunnel>() {
 
@@ -38,12 +40,10 @@ class TrustTunnelSettingsActivity : BindingSettingsActivity<TrustTunnel>() {
     override fun TrustTunnel.init() {
         pbm.writeToCacheAll(this)
         DataStore.profileCacheStore.putString(KEY_RAW_JSON, ProfileJson.text(this))
-        // edit_trusttunnel.cpp: older builds saved translated item text ("CUBIC"); unknown values fall back to bbr, as in
-        // sing-trusttunnel, and the menu stores the lower-case name
-        val congestion = congestion_control.trim().replace(' ', '_')
+        // edit_trusttunnel.cpp: "" is Default and older builds' item text ("CUBIC") maps back; any other value, the
+        // aliases the menu does not list included, stays as its own entry and is saved unchanged
         DataStore.profileCacheStore.putString(
-            "congestion_control",
-            trustTunnelCongestionControls.firstOrNull { it.isNotEmpty() && it.equals(congestion, ignoreCase = true) } ?: "bbr",
+            "congestion_control", legacyComboValue(congestion_control, trustTunnelCongestionControls),
         )
     }
 
@@ -72,6 +72,7 @@ class TrustTunnelSettingsActivity : BindingSettingsActivity<TrustTunnel>() {
     override fun PreferenceFragmentCompat.onPreferencesCreated() {
         portInput("serverPort")
         passwordSummary("password")
+        findPreference<ListPreference>("congestion_control")?.keepUnlistedValue()
         TlsBlock.setup(this, mustTls = true)
         // QUIC dials through qtls, which takes no uTLS config (dialog_edit_profile.cpp:759-763); it is TLS 1.3 only,
         // where Go does not let the cipher suites be chosen

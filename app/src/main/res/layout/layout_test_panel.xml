@@ -165,6 +165,14 @@
                 tools:text="Remove unavailable (24)" />
 
             <com.google.android.material.chip.Chip
+                android:id="@+id/test_panel_action_retest"
+                style="@style/Widget.MaterialComponents.Chip.Action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipSurfaceColor="@android:color/transparent"
+                tools:text="Retest untested (5)" />
+
+            <com.google.android.material.chip.Chip
                 android:id="@+id/test_panel_action_stop_other"
                 style="@style/Widget.MaterialComponents.Chip.Action"
                 android:layout_width="wrap_content"

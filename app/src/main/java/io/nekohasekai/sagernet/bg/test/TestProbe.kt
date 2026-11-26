@@ -106,7 +106,8 @@ internal suspend fun TestSession.awaitCore(start: (done: () -> Unit) -> Unit) {
 
 /**
  * One URL, IP or service result; [measured] is false for what the core never measured (skip, stop, probe failure). A
- * URL failure is reported again with [connectOnly] once the core finds the profile's VPN tunnel up. [service] is the
+ * URL failure is reported again with [connectOnly] once the core finds the profile's VPN tunnel up; one that came while
+ * the local network was down or changed is [inconclusive] and stores nothing. [service] is the
  * `profiles.service_checks` document of a service check, "" when there is nothing to store.
  */
 internal class ProbeResult(
@@ -118,6 +119,7 @@ internal class ProbeResult(
     @JvmField val measured: Boolean = true,
     @JvmField val connectOnly: Boolean = false,
     @JvmField val service: String = "",
+    @JvmField val inconclusive: Boolean = false,
 )
 
 /** A candidate kept out of a test build: [invalid] when its config fails the core check, else it cannot be measured. */

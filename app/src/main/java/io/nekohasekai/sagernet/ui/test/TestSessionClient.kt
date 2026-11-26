@@ -392,8 +392,8 @@ object TestSessionClient {
             }
         }
 
-        override fun onUrlResult(profileId: Long, latency: Int, error: String?) =
-            event(m) { onUrlResult(profileId, latency, error.orEmpty()) }
+        override fun onUrlResult(profileId: Long, latency: Int, error: String?, inconclusive: Boolean) =
+            event(m) { onUrlResult(profileId, latency, error.orEmpty(), inconclusive) }
 
         override fun onIpResult(profileId: Long, ip: String?, country: String?, error: String?) =
             event(m) { onIpResult(profileId, ip.orEmpty(), country.orEmpty(), error.orEmpty()) }

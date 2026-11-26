@@ -46,6 +46,16 @@
             app:dialogMessage="@string/dns_tunnel_resolvers_hint"
             app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_view_list_24"
+            app:key="resolver_list"
+            app:title="@string/resolver_iplist_title" />
+        <Preference
+            app:icon="@drawable/ic_baseline_manage_search_24"
+            app:key="findResolvers"
+            app:persistent="false"
+            app:summary="@string/scan_resolver_find_sum"
+            app:title="@string/scan_resolver_title" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:icon="@drawable/ic_baseline_shuffle_24"
             app:key="balancing_strategy"
             app:title="@string/dns_tunnel_resolver_strategy"

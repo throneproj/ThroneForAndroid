@@ -22,11 +22,14 @@ import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.showAllowingStateLoss
 import io.nekohasekai.sagernet.ktx.snackbar
 import io.nekohasekai.sagernet.ktx.startFilesForResult
+import io.nekohasekai.sagernet.scan.ScanProfiles
 import io.nekohasekai.sagernet.ui.ConfigurationFragment
 import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.ui.profile.ProfileConfigExport
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import io.nekohasekai.sagernet.ui.profile.profileSettingsIntent
+import io.nekohasekai.sagernet.ui.scan.ScanClient
+import io.nekohasekai.sagernet.ui.scan.WarpFinderActivity
 import io.nekohasekai.sagernet.ui.test.ServiceCheckDialog
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 
@@ -53,6 +56,15 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         if (result.data?.getBooleanExtra(ProfileSettingsActivity.EXTRA_RESTART_NEEDED, false) == true) host.needReload()
     }
 
+    // MainWindow::applyFoundWarpEndpoint
+    private val warpFinder = host.registerForActivityResult(WarpFinderActivity.Contract()) { choice ->
+        if (choice == null) return@registerForActivityResult
+        host.launchIo {
+            val error = ScanClient.applyWarpEndpoint(choice.profileId, choice.entry, choice.junk, choice.http2)
+            if (error.isNotEmpty()) host.onUi { snackbar(error).show() }
+        }
+    }
+
     fun edit(profile: ProxyEntity, group: ProxyGroup?) {
         val context = host.context ?: return
         editor.launch(profile.profileSettingsIntent(context, group?.isSubscription == true))
@@ -66,6 +78,7 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         val noButtons = adapter.isCompact || adapter.isCompactRow
         menu.findItem(R.id.action_edit).isVisible = noButtons
         menu.findItem(R.id.action_share).isVisible = noButtons
+        menu.findItem(R.id.action_find_warp_endpoint).isVisible = ScanProfiles.isWarpScanProfile(profile.outbound)
         val pinned = adapter.isPinned(profile.id)
         menu.findItem(R.id.action_pin).setTitle(if (pinned) R.string.profiles_unpin else R.string.profiles_pin)
         // TV only, where a D-pad cannot drag; a filtered list says nothing about the stored order. Never across the pinned edge.
@@ -94,6 +107,7 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
             when (item.itemId) {
                 R.id.action_edit -> edit(profile, adapter.group)
                 R.id.action_share -> showShare(anchor, profile)
+                R.id.action_find_warp_endpoint -> findWarpEndpoint(profile)
                 R.id.action_test_url -> test(profile, TestSpec.KIND_URL)
                 R.id.action_test_ip -> test(profile, TestSpec.KIND_IP)
                 R.id.action_test_speed -> test(profile, TestSpec.KIND_SPEED)
@@ -104,8 +118,8 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
                 R.id.action_resolve_domain -> resolve(profile)
                 R.id.action_clear_test_results -> clearTestResults(profile)
                 R.id.action_clear_traffic_statistics -> clearTraffic(profile, adapter)
-                R.id.action_move_up -> move(profile, -1)
-                R.id.action_move_down -> move(profile, 1)
+                R.id.action_move_up -> move(profile, -1, adapter)
+                R.id.action_move_down -> move(profile, 1, adapter)
                 R.id.action_delete -> delete(profile, adapter)
                 else -> return@setOnMenuItemClickListener false
             }
@@ -116,6 +130,17 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
 
     private fun test(profile: ProxyEntity, kind: Int) {
         ProfileTests.startProfiles(host, kind, listOf(profile.id), profile.groupId)
+    }
+
+    /** on_menu_find_warp_endpoint_triggered: the stored profile is checked up front, not after the whole search. */
+    private fun findWarpEndpoint(profile: ProxyEntity) {
+        host.launchIo {
+            val stored = ProfileManager.getProfile(profile.id) ?: return@launchIo
+            val base = ScanProfiles.cloneWarpScanBase(stored)
+            host.onUi {
+                if (base.ok) warpFinder.launch(WarpFinderActivity.Request(stored.id)) else snackbar(base.error).show()
+            }
+        }
     }
 
     /** The stored service check (the desktop's test result tooltip), read fresh: the row may predate it. */
@@ -158,9 +183,20 @@ class ProfileItemMenu(private val host: ConfigurationFragment) {
         }
     }
 
-    /** One step in the stored order (the D-pad alternative to dragging), never across the pinned edge. */
-    private fun move(profile: ProxyEntity, step: Int) {
-        host.launchIo { ProfileManager.swapProfile(profile.groupId, profile.id, step) }
+    /**
+     * One step in the stored order (the D-pad alternative to dragging), never across the pinned edge. Like a drop, a
+     * step among the unpinned rows of a sorted group asks first: it replaces the order saved when the sort started.
+     */
+    private fun move(profile: ProxyEntity, step: Int, adapter: ProfileListAdapter) {
+        fun swap() {
+            host.launchIo { ProfileManager.swapProfile(profile.groupId, profile.id, step) }
+        }
+        if (adapter.group?.keepsSorted() != true || adapter.isPinned(profile.id)) return swap()
+        host.requireContext().confirmAction(
+            host.getString(R.string.profiles_order_change_title),
+            host.getString(R.string.profiles_order_change_message),
+            R.string.move,
+        ) { swap() }
     }
 
     private fun delete(profile: ProxyEntity, adapter: ProfileListAdapter) {

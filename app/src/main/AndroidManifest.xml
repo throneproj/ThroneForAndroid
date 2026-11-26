@@ -299,6 +299,20 @@
             android:configChanges="uiMode"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name="io.nekohasekai.sagernet.ui.iplist.IpListsActivity"
+            android:configChanges="uiMode" />
+        <activity
+            android:name="io.nekohasekai.sagernet.ui.iplist.IpListEditActivity"
+            android:configChanges="uiMode"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name="io.nekohasekai.sagernet.ui.scan.WarpFinderActivity"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden" />
+        <activity
+            android:name="io.nekohasekai.sagernet.ui.scan.ResolverScanActivity"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".QuickToggleShortcut"
             android:excludeFromRecents="true"
             android:exported="true"

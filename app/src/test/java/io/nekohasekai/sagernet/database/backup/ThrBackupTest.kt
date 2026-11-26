@@ -128,7 +128,7 @@ class ThrBackupTest {
         assertEquals(
             "{\"android\":{\"app_version\":\"2.0\",\"icons\":false},\"app_version\":\"2.0\",\"backup_version\":2," +
                 "\"created_at\":\"Fri Sep 4 03:43:00 2026\",\"device\":{\"id\":\"device-id\",\"name\":\"Pixel\"}," +
-                "\"parts\":{\"icons\":false,\"otp\":false," +
+                "\"parts\":{\"icons\":false,\"ipLists\":false,\"otp\":false," +
                 "\"profiles\":false,\"routes\":true,\"settings\":false},\"platform\":\"android\"}",
             meta.toCompact()
         )

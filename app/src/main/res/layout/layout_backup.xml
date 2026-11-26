@@ -48,6 +48,13 @@
                     android:checked="true"
                     android:text="@string/backup_part_settings" />
 
+                <CheckBox
+                    android:id="@+id/backup_ip_lists"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/backup_part_ip_lists" />
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

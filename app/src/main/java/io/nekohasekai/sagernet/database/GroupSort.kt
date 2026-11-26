@@ -53,10 +53,26 @@ object GroupSort {
         else -> input == SortInput.MEMBERSHIP || input == SortInput.CONFIG
     }
 
-    /** Group::SetSort + Save: the group keeps [action] from now on; RAW is the manual order. */
+    /**
+     * Group::SetSort + Save: the group keeps [action] from now on; RAW is the manual order. Starting a kept sort saves
+     * the arrangement it replaces (custom_order, for [ProfileManager.restoreOriginalOrder]); ending one shows that
+     * arrangement again.
+     */
     suspend fun setSort(groupId: Long, action: GroupSortAction) {
         val descending = action.method != GroupSortMethod.RAW && action.descending
-        if (SagerDatabase.groupDao.setSort(groupId, action.method.ordinal, descending) > 0) GroupRepo.postUpdate(groupId)
+        var reordered = false
+        val changed = SagerDatabase.instance.runInTransaction(Callable {
+            val group = SagerDatabase.groupDao.getById(groupId) ?: return@Callable false
+            val keeps = reads(action.method, SortInput.MEMBERSHIP)
+            if (!group.keepsSorted() && keeps) {
+                ProfileManager.saveArrangementLocked(group)
+            } else if (group.keepsSorted() && !keeps) {
+                reordered = ProfileManager.arrangeLocked(group)
+            }
+            SagerDatabase.groupDao.setSort(groupId, action.method.ordinal, descending) > 0
+        })
+        if (changed) GroupRepo.postUpdate(groupId)
+        if (reordered) GroupRepo.postReload(groupId)
     }
 
     /**
@@ -257,6 +273,30 @@ object GroupSort {
         return false
     }
 
+    /**
+     * Group::Arrangement of a kept sort, which places the pinned rows too: [ids] is the group's list order, its first
+     * [pins] the pinned rows and the rest sorted; each pinned row joins the rest where the sort puts it.
+     */
+    internal fun sortedArrangement(group: ProxyGroup, ids: List<Long>, pins: Int): List<Long> {
+        if (pins <= 0) return ids
+        val rule = SortRule(group, group.sort)
+        val keys = SortKeys(rule)
+        keys.loadGroup(group.id)
+        val order = ArrayList(ids.subList(pins, ids.size))
+        for (id in ids.subList(0, pins)) {
+            val key = keys.get(id)
+            // upper_bound, as reposition places a row
+            var low = 0
+            var high = order.size
+            while (low < high) {
+                val mid = (low + high) ushr 1
+                if (rule.less(key, keys.get(order[mid]))) high = mid else low = mid + 1
+            }
+            order.add(low, id)
+        }
+        return order
+    }
+
     /** How many rows head [snapshot] as pins: the leading run of pinned ids, which is every pin once normalized. */
     private fun pinnedHead(snapshot: List<Long>, pinnedJson: String): Int {
         val pins = ProxyGroup.parsePinned(pinnedJson).toHashSet()
@@ -276,6 +316,10 @@ object GroupSort {
             val current = SagerDatabase.proxyDao.getPositionsByGroup(groupId)
             if (current.size != snapshot.size || current.indices.any { current[it].id != snapshot[it] }) {
                 return@Callable Commit.STALE
+            }
+            // A group sorted before its arrangement was kept restores to import order.
+            if (group.customOrder.isEmpty() && order.isNotEmpty()) {
+                SagerDatabase.groupDao.setCustomOrderJson(groupId, ProxyGroup.customOrderToJson(order.sorted()))
             }
             if (order == snapshot) return@Callable Commit.UNCHANGED
             ProfileManager.writeOrder(current, order)

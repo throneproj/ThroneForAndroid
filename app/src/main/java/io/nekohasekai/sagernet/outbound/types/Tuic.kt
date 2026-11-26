@@ -18,16 +18,17 @@ import io.nekohasekai.sagernet.validation.Severity
 import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.validation.acceptOptional
 import io.nekohasekai.sagernet.validation.addIssue
+import io.nekohasekai.sagernet.validation.legacyComboValue
 import io.nekohasekai.sagernet.validation.vtr
 
 /** tuic.h */
 val ccAlgorithms = listOf("cubic", "new_reno", "bbr")
 
 /** Older builds saved translated combo text ("BBR", "New Reno", "нативный"); the core matches exact identifiers. */
-private fun canonicalTuicCongestion(value: String): String = value.trim().lowercase().replace(' ', '_')
+private fun canonicalTuicCongestion(value: String): String = legacyComboValue(value, ccAlgorithms)
 
 private fun canonicalTuicRelayMode(value: String): String {
-    val mode = value.trim().lowercase()
+    val mode = legacyComboValue(value, listOf("native", "quic"))
     return if (mode == "native" || mode == "quic") mode else ""
 }
 

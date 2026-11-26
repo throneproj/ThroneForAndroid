@@ -766,8 +766,6 @@
     <string name="log_buffer_size">Log buffer size (kb)</string>
     <string name="enable_stats">Connection statistics</string>
     <string name="enable_stats_sum">Track connections and their processes</string>
-    <string name="disable_traffic_stats">Disable traffic counters</string>
-    <string name="disable_traffic_stats_sum">Profile traffic is not counted</string>
     <string name="listen_port">Listen port</string>
     <string name="listen_address">Listen address</string>
     <string name="clash_api_secret">Secret</string>
@@ -950,8 +948,6 @@
     <string name="route_profile_rules">Rules (%d)</string>
     <string name="route_profile_add_rule">Add rule</string>
     <string name="route_profile_invalid_title">Invalid operation</string>
-    <string name="route_profile_empty_title">Empty route profile</string>
-    <string name="route_profile_empty">No valid rules are in the profile</string>
     <plurals name="route_profile_empty_rules_removed">
         <item quantity="one">%d empty rule removed</item>
         <item quantity="other">%d empty rules removed</item>
@@ -1040,7 +1036,6 @@
     <string name="route_rule_invalid_title">Invalid rule</string>
     <string name="route_rule_unknown_rule_sets">Unknown rule-sets: %s\n\nPick names from the rule-set list, or use the URL of an .srs file.</string>
     <string name="route_rule_default_name">Rule %d</string>
-    <string name="route_rule_dns_queries">DNS queries</string>
     <string name="rule_set_picker_title">Rule-sets</string>
     <string name="rule_set_search">Search rule-sets…</string>
     <string name="rule_set_add_url">Add URL</string>
@@ -1251,7 +1246,6 @@
     <string name="profiles_sort_traffic_total">Total</string>
     <string name="profiles_sort_traffic_downloaded">Downloaded</string>
     <string name="profiles_sort_traffic_uploaded">Uploaded</string>
-    <string name="profiles_show">Show</string>
     <string name="profiles_show_out_ip">Exit IP</string>
     <string name="profiles_show_speed">Speed</string>
 
@@ -2040,7 +2034,6 @@
     <string name="route_rule_tls_fragment_sum">Split the TLS handshake into several TCP segments to get past simple SNI filters</string>
     <string name="route_rule_tls_fragment_fallback_delay">TLS fragment fallback delay</string>
     <string name="route_rule_tls_fragment_fallback_delay_hint">How long to wait between segments when the wait cannot be measured, as a duration such as 500ms (the default)</string>
-    <string name="route_rule_tls_record_fragment">TLS record fragment</string>
     <string name="route_rule_tls_record_fragment_sum">Split the TLS handshake into several TLS records</string>
     <string name="outbound_domain_strategy_sum">Used to resolve the proxy server addresses and the domains the direct outbound connects to</string>
     <string name="resolve_domain_strategy_sum">Applies to connections made to domain names: with FakeIP, or HTTP/SOCKS (inbound) traffic. Without FakeIP, VPN apps resolve names themselves, so the prefer modes have no effect there. The only modes drop the other family from the DNS answers apps receive, which also overrides per-rule resolve strategies and hosts/predefined entries for that family (IPv6 only also needs Tun IPv6)</string>
@@ -2055,8 +2048,6 @@
     <string name="picker_copy_off_message">Apps VPN mode decides which apps use the VPN at all; this rule only routes their traffic. It is off, so every app uses the VPN.\n\nTurn on Proxy mode, where only the listed apps use the VPN, with these apps (%d) added to the saved list or replacing it?</string>
     <string name="picker_copy_bypass_message">Apps VPN mode decides which apps use the VPN at all; this rule only routes their traffic. It is in Bypass mode, where the listed apps skip the VPN, so adding these apps (%d) there would take them out of it.\n\nRemove them from the bypass list so they use the VPN, or switch to Proxy mode with only these apps?</string>
     <string name="picker_copy_off_bypass_message">Apps VPN mode decides which apps use the VPN at all; this rule only routes their traffic. It is off, so every app uses the VPN, and its saved list is a bypass list.\n\nTurn on Proxy mode with only these apps (%d)? The saved bypass list is replaced.</string>
-    <!-- A3b group sort -->
-    <string name="profiles_sort_manual">Manual order</string>
     <!-- A3a subscriptions -->
     <string name="sub_version_auto">Auto</string>
     <string name="sub_tls_12">TLS 1.2</string>
@@ -2135,9 +2126,6 @@
     <string name="live_graph_down">Down</string>
     <string name="live_graph_up">Up</string>
     <string name="live_graph_total">Total</string>
-    <string name="live_graph_stopped">Stopped</string>
-    <string name="live_graph_started">Started %1$s</string>
-    <string name="live_graph_switched">Switched to %1$s</string>
     <string name="live_graph_peak">peak of %1$d s</string>
     <string name="live_graph_waiting">Waiting for traffic</string>
     <string name="live_graph_waiting_body">The graph fills in once a second while a profile is running.</string>
@@ -2145,7 +2133,6 @@
     <string name="live_graph_all_hidden_body">Tap a line or a direction above the graph to show it.</string>
     <string name="live_graph_legend_hint">Tap a line or direction to hide or show it, long-press a line to show only it. Touch the graph for the values at a moment.</string>
     <string name="live_graph_smooth">Smooth lines</string>
-    <string name="live_graph_events">Profile events</string>
     <string name="live_graph_show_all">Show all lines</string>
     <string name="live_graph_clear">Clear history</string>
     <string name="live_graph_core_title">Core process</string>
@@ -2432,7 +2419,6 @@
     <string name="validation_xray_xdns_resolvers">Add a DNS resolver to send the tunnel\'s queries through, for example \"resolvers\": [{\"addrs\": [\"udp://8.8.8.8:53\"]}]; without one Xray cannot connect.</string>
     <string name="validation_xray_xdns_last">The xdns mask must be the last udp mask: it sends the DNS queries itself, so Xray skips the masks after it.</string>
     <string name="validation_xray_xdns_resolver_list">The resolver IP list belongs to another installation, so it was not imported.</string>
-    <string name="validation_xray_xdns_resolver_list_android">Resolver IP lists are not available on Android, so only the resolver lines are used.</string>
     <string name="validation_hysteria_hop_minimum">Port hopping needs at least 5s between hops, for example 30s.</string>
     <string name="validation_hysteria_hop_maximum_zero">Needs a Hop Interval above 0 as well, for example 30s with a maximum of 60s.</string>
     <string name="validation_hysteria_hop_maximum_shorter">Must not be shorter than Hop Interval.</string>
@@ -2661,7 +2647,6 @@
     <string name="validation_resolver_server_name">A TLS server name other than the resolver\'s own host is not kept.</string>
     <string name="validation_resolver_import_limit">Only the first %1$s resolvers were kept.</string>
     <string name="validation_resolver_list_foreign">The resolver IP list belongs to another installation, so it was not imported.</string>
-    <string name="validation_resolver_list_android">Resolver IP lists are not available on Android, so only the resolvers typed here are used.</string>
     <string name="validation_link_too_long">The link is too long.</string>
     <string name="validation_dnst_not_link">Not a dnst:// link.</string>
     <string name="validation_dnst_no_transport">The link does not name the tunnel type.</string>
@@ -3047,4 +3032,473 @@
     <string name="vpn_auth_submitting">Signing in…</string>
     <string name="vpn_auth_gone">This sign-in request is no longer pending.</string>
     <string name="vpn_auth_no_browser">No app can open this address.</string>
+    <plurals name="test_inconclusive">
+        <item quantity="one">%d profile could not be tested because the network was unavailable. Its earlier result was kept.</item>
+        <item quantity="other">%d profiles could not be tested because the network was unavailable. Their earlier results were kept.</item>
+    </plurals>
+    <string name="test_inconclusive_retest">Retest</string>
+    <string name="test_panel_action_retest">Retest untested (%d)</string>
+    <string name="route_rule_tls_fragment_handshake">Handshake</string>
+    <string name="route_rule_tls_fragment_records">Records</string>
+    <string name="route_rule_tls_fragment_both">Handshake + records</string>
+    <string name="backup_part_ip_lists">IP lists and scans</string>
+    <!-- profile rows and the group menu: restorable order, results per kind -->
+    <string name="profiles_sort_original">Original order</string>
+    <string name="profiles_show_in_rows">Show in rows</string>
+    <string name="profiles_show_latency">Latency</string>
+    <string name="profiles_clear_results">Clear results</string>
+    <string name="profiles_clear_results_all">All</string>
+    <string name="confirm_clear_latency">Clear latency results?</string>
+    <string name="confirm_clear_exit_ip">Clear exit IP results?</string>
+    <string name="confirm_clear_speed">Clear speed results?</string>
+    <string name="confirm_clear_services">Clear service check results?</string>
+    <string name="profiles_order_change_title">Change the order?</string>
+    <string name="profiles_order_change_message">The order from before sorting can no longer be restored.</string>
+    <string name="iplist_error_gone">The IP list no longer exists</string>
+    <string name="iplist_error_not_remote">Only lists with a URL source can be updated</string>
+    <string name="iplist_error_source_changed">The source changed during the update</string>
+    <string name="iplist_error_not_saved">The entries could not be saved</string>
+    <string name="iplist_error_no_source">The list has no source to fetch</string>
+    <string name="iplist_error_not_http">The source must be an http(s) URL</string>
+    <string name="iplist_error_web_page">The address returned a web page instead of an IP list</string>
+    <string name="iplist_error_no_addresses">No addresses found</string>
+    <string name="iplist_error_update_failed_reason">IP list update failed: %1$s</string>
+    <string name="iplist_log_updating">Updating IP list %1$s</string>
+    <string name="iplist_log_failed">Updating IP list %1$s failed: %2$s</string>
+    <string name="iplist_log_source_changed">its source changed during the update</string>
+    <plurals name="iplist_log_updated">
+        <item quantity="one">IP list %1$s updated (%2$d entry)</item>
+        <item quantity="other">IP list %1$s updated (%2$d entries)</item>
+    </plurals>
+    <string name="endpoint_origin_group_address">the group\'s fixed address</string>
+    <string name="endpoint_origin_list">IP list \"%1$s\"</string>
+    <string name="endpoint_problem_list_empty">The IP list \"%1$s\" is empty</string>
+    <string name="endpoint_blocker_missing">The profile no longer exists</string>
+    <string name="endpoint_blocker_no_server">%1$s profiles have no single server address to replace</string>
+    <string name="endpoint_blocker_realm">Hysteria2 realm profiles have no fixed server address to replace</string>
+    <string name="endpoint_log_own_address">%1$s dials its own address: %2$s</string>
+    <string name="resolver_iplist_gone">the resolver IP list no longer exists</string>
+    <string name="resolver_iplist_empty">the resolver IP list \"%1$s\" is empty</string>
+    <string name="resolver_iplist_truncated">the resolver IP list \"%1$s\" holds more than %2$s entries; the rest were skipped</string>
+    <plurals name="resolver_iplist_skipped">
+        <item quantity="one">%1$d entry of the resolver IP list \"%2$s\" was skipped: a range too large or past the resolver limit</item>
+        <item quantity="other">%1$d entries of the resolver IP list \"%2$s\" were skipped: ranges too large or past the resolver limit</item>
+    </plurals>
+    <string name="scan_base_not_warp">A WARP scan needs a WARP profile: WireGuard, AmneziaWG or MASQUE</string>
+    <string name="scan_base_warp_build">The WARP profile could not be built</string>
+    <string name="scan_base_choose_tunnel">Choose the DNS tunnel profile to find resolvers for</string>
+    <string name="scan_base_not_tunnel">Only DNSTT, MasterDNS and XDNS profiles can be used to find resolvers</string>
+    <string name="scan_base_copy_failed">The profile could not be copied for the scan</string>
+    <string name="scan_base_tunnel_unusable">The DNS tunnel profile cannot be used to find resolvers</string>
+
+    <!-- IP scanner engine: stages, logs, errors, notification -->
+    <string name="scan_blocker_no_server">%1$s profiles have no single server to scan</string>
+    <string name="scan_blocker_realm">Hysteria2 realm profiles have no fixed server to scan</string>
+    <string name="scan_error_already_running">The scan is already running</string>
+    <string name="scan_error_gone">The scan no longer exists</string>
+    <string name="scan_error_profile_unusable">The scan\'s profile cannot be used</string>
+    <string name="scan_error_choose_list">Choose the IP list to scan</string>
+    <string name="scan_error_list_empty">The IP list to scan is empty</string>
+    <string name="scan_error_result_list_empty">The result list is empty</string>
+    <string name="scan_error_pause_first">Pause the scan first</string>
+    <string name="scan_error_profile_invalid">The profile is not valid; the log has the details</string>
+    <string name="scan_error_cannot_point">The profile cannot be pointed at the scanned addresses</string>
+    <string name="scan_error_unexpected">The scan stopped on an unexpected error</string>
+    <string name="scan_error_network_down">Network appears to be down</string>
+    <string name="scan_error_network_down_paused">Network appears to be down; scan paused</string>
+    <string name="scan_error_session_ended">The core ended the scan session early</string>
+    <string name="scan_error_no_progress">The core made no progress on the scan</string>
+    <string name="scan_error_data_check_no_answer">The core did not answer the data check</string>
+    <string name="scan_error_data_check_ended">The core ended the data check early</string>
+    <string name="scan_error_result_list_create">The result list could not be created</string>
+    <string name="scan_error_base_list_gone">The base IP list no longer exists</string>
+    <string name="scan_error_base_list_empty">The base IP list is empty</string>
+    <string name="scan_error_base_list_copy">The base IP list could not be copied</string>
+    <string name="scan_error_base_list_no_target">The base IP list holds no valid target</string>
+    <string name="scan_error_result_list_copy">The result list could not be copied</string>
+    <string name="scan_error_result_list_no_target">The result list holds no valid target</string>
+    <string name="scan_error_result_copy_gone">The copy of the result list is gone; rescan the results again</string>
+    <string name="scan_error_base_copy_gone">The copy of the base IP list is gone; restart the scan</string>
+    <string name="scan_error_service_died">The scan service stopped</string>
+    <string name="scan_error_unreachable">The scan service cannot be reached</string>
+    <string name="scan_warp_error_no_range">The base IP list holds no valid range</string>
+    <string name="scan_warp_error_ipv6_only">The base IP list holds only IPv6 ranges, and this network has no IPv6</string>
+    <string name="scan_apply_gone">The profile was deleted meanwhile.</string>
+    <string name="scan_apply_not_warp">\"%1$s\" is no longer a WARP profile.</string>
+    <string name="scan_snapshot_name">%1$s snapshot</string>
+    <string name="scan_rescan_snapshot_name">%1$s rescan snapshot</string>
+    <string name="scan_stage_preparing">Preparing</string>
+    <string name="scan_stage_probing">Probing</string>
+    <string name="scan_stage_checking_network">Checking network</string>
+    <string name="scan_stage_finding_ports">Finding ports</string>
+    <string name="scan_stage_searching">Searching ranges</string>
+    <string name="scan_stage_checking_data">Checking data</string>
+    <string name="scan_stage_vpn_wait">Waiting for the VPN</string>
+    <string name="scan_log_checking_network">Checking the network</string>
+    <string name="scan_log_preparing_targets">Preparing targets…</string>
+    <string name="scan_log_interception_check">Checking for DNS interception</string>
+    <string name="scan_log_intercepted">This network answers DNS for any address; probing only the system resolvers</string>
+    <string name="scan_log_preflight_none">The tunnel answered through none of the system or profile resolvers; check the profile or the server</string>
+    <string name="scan_log_failures">Failures: %1$s</string>
+    <string name="scan_log_lower_qname">Lower Max QNAME Length in the profile to use the resolvers that pass only short names</string>
+    <string name="scan_log_vpn_wait">Waiting for the VPN to start or stop</string>
+    <string name="scan_log_line">Scan %1$s: %2$s</string>
+    <string name="scan_log_save_failed">Scan %1$s: saving its final state failed</string>
+    <string name="scan_log_network_check_failed">Scan %1$s: network check failed: %2$s</string>
+    <string name="scan_log_stopped">Scan %1$s stopped: %2$s</string>
+    <string name="scan_tally_no_answer">no answer (%1$d)</string>
+    <string name="scan_tally_error_reply">error reply (%1$d)</string>
+    <string name="scan_tally_wrong_answer">wrong answer (%1$d)</string>
+    <string name="scan_tally_name_too_long">name too long (%1$d)</string>
+    <string name="scan_tally_short_names">short names only (%1$d)</string>
+    <string name="scan_tally_other">other (%1$d)</string>
+    <string name="scan_event_start">Testing %1$s (%2$s)</string>
+    <string name="scan_event_fail">%1$s failed %2$s: %3$s</string>
+    <string name="scan_event_dns_ok">%1$s relays the DNS tunnel (%2$d ms)</string>
+    <string name="scan_phase_data_check">data check</string>
+    <string name="scan_warp_log_checking_profile">Checking the WARP profile</string>
+    <string name="scan_warp_log_no_ipv6">This network has no IPv6; skipping the IPv6 ranges</string>
+    <string name="scan_warp_log_ports">Ports answering: %1$s</string>
+    <string name="scan_warp_log_trying_junk">Trying AmneziaWG junk</string>
+    <string name="scan_warp_log_junk_mode">Endpoints answer only with AmneziaWG junk; continuing with junk packets</string>
+    <string name="scan_warp_log_trying_http2">Trying HTTP/2</string>
+    <string name="scan_warp_log_http2_mode">HTTP/3 gets no answer here; continuing over HTTP/2</string>
+    <string name="scan_warp_log_no_ipv6_route">This host has no IPv6 route; skipping the IPv6 ranges</string>
+    <string name="scan_warp_log_ipv6_unreachable">IPv6 is unreachable from this network; skipping the IPv6 ranges</string>
+    <string name="scan_warp_log_no_answer">No endpoint answered the WARP handshake; this network may block it</string>
+    <string name="scan_warp_log_junk_no_data">Endpoints answered only with AmneziaWG junk, and no data flowed through them</string>
+    <string name="scan_warp_log_no_data">Endpoints answered the handshake, but no data flowed through them</string>
+    <string name="scan_notify_finder">Finding WARP endpoints</string>
+    <string name="scan_notify_resolver">Finding resolvers</string>
+    <string name="scan_notify_title">%1$s · %2$s</string>
+    <string name="scan_notify_line">%1$s: %2$s</string>
+    <string name="scan_progress_seconds">%1$d s of %2$d s</string>
+    <string name="scan_progress_count">%1$s / %2$s (%3$d%%)</string>
+    <plurals name="scan_found">
+        <item quantity="one">%d found</item>
+        <item quantity="other">%d found</item>
+    </plurals>
+    <plurals name="scan_removed">
+        <item quantity="one">%d removed</item>
+        <item quantity="other">%d removed</item>
+    </plurals>
+    <plurals name="scan_notify_many">
+        <item quantity="one">%d scan running</item>
+        <item quantity="other">%d scans running</item>
+    </plurals>
+    <plurals name="scan_log_kept">
+        <item quantity="one">No %1$s result answered, so %2$d failed %1$s result was kept</item>
+        <item quantity="other">No %1$s result answered, so %2$d failed %1$s results were kept</item>
+    </plurals>
+    <plurals name="scan_log_preflight">
+        <item quantity="one">Probing %d system or profile resolver</item>
+        <item quantity="other">Probing %d system or profile resolvers</item>
+    </plurals>
+    <plurals name="scan_log_stop_after">
+        <item quantity="one">Found %d new result; stopping as configured</item>
+        <item quantity="other">Found %d new results; stopping as configured</item>
+    </plurals>
+    <plurals name="scan_log_rescued">
+        <item quantity="one">%d result passed only on a retry; the network fails some attempts at random</item>
+        <item quantity="other">%d results passed only on a retry; the network fails some attempts at random</item>
+    </plurals>
+    <plurals name="scan_log_retesting">
+        <item quantity="one">Re-testing %d failed result…</item>
+        <item quantity="other">Re-testing %d failed results…</item>
+    </plurals>
+    <plurals name="scan_log_heavy_loss">
+        <item quantity="one">%d passed with heavy loss</item>
+        <item quantity="other">%d passed with heavy loss</item>
+    </plurals>
+    <plurals name="scan_log_none_removed">
+        <item quantity="one">The tunnel did not answer through the %d result, so it was not removed</item>
+        <item quantity="other">The tunnel answered through none of the %d results, so none was removed</item>
+    </plurals>
+    <plurals name="scan_log_invalid_entries">
+        <item quantity="one">Skipped %d invalid entry</item>
+        <item quantity="other">Skipped %d invalid entries</item>
+    </plurals>
+    <plurals name="scan_warp_log_finding_ports">
+        <item quantity="one">Finding open ports on %d address</item>
+        <item quantity="other">Finding open ports on %d addresses</item>
+    </plurals>
+    <plurals name="scan_warp_log_more_ports">
+        <item quantity="one">None of the usual ports answered; trying %d more</item>
+        <item quantity="other">None of the usual ports answered; trying %d more</item>
+    </plurals>
+    <plurals name="scan_warp_log_round">
+        <item quantity="one">Round %1$d: probing %2$d address</item>
+        <item quantity="other">Round %1$d: probing %2$d addresses</item>
+    </plurals>
+    <plurals name="scan_warp_log_checking_data">
+        <item quantity="one">Checking data through %d endpoint</item>
+        <item quantity="other">Checking data through %d endpoints</item>
+    </plurals>
+    <plurals name="scan_warp_log_confirmed">
+        <item quantity="one">Confirmed %d endpoint</item>
+        <item quantity="other">Confirmed %d endpoints</item>
+    </plurals>
+    <plurals name="scan_warp_log_found">
+        <item quantity="one">Found %d endpoint</item>
+        <item quantity="other">Found %d endpoints</item>
+    </plurals>
+
+    <!-- IP lists manager and editor, endpoint and resolver sources -->
+    <string name="iplist_manage">Manage IP lists</string>
+    <string name="iplist_title">IP lists</string>
+    <string name="iplist_empty">No IP lists yet.</string>
+    <string name="iplist_new">New</string>
+    <string name="iplist_import">Import</string>
+    <string name="iplist_importing">Importing…</string>
+    <string name="iplist_from_text">From text</string>
+    <string name="iplist_from_file">From file</string>
+    <string name="iplist_from_url">From URL</string>
+    <string name="iplist_add_defaults">Add default lists</string>
+    <string name="iplist_defaults_present">Every default list is already present.</string>
+    <plurals name="iplist_entries">
+        <item quantity="one">%1$s entry</item>
+        <item quantity="other">%1$s entries</item>
+    </plurals>
+    <string name="iplist_result_of_scan">Result of scan %1$s</string>
+    <string name="iplist_result_of_deleted_scan">Result of a deleted scan</string>
+    <string name="iplist_source_url_host">URL %1$s</string>
+    <string name="iplist_auto_update_every">auto-update every %1$s</string>
+    <string name="iplist_interval_days">%1$d d</string>
+    <string name="iplist_interval_hours">%1$d h</string>
+    <string name="iplist_interval_minutes">%1$d min</string>
+    <string name="iplist_updated_just_now">updated just now</string>
+    <string name="iplist_updated_minutes_ago">updated %1$d min ago</string>
+    <string name="iplist_updated_hours_ago">updated %1$d h ago</string>
+    <string name="iplist_updated_days_ago">updated %1$d d ago</string>
+    <string name="iplist_never_updated">never updated</string>
+    <string name="iplist_last_update_failed">Last update failed: %1$s</string>
+    <string name="iplist_refreshing">Refreshing…</string>
+    <string name="iplist_refresh_now">Refresh now</string>
+    <string name="iplist_view">View</string>
+    <string name="iplist_duplicate">Duplicate</string>
+    <string name="iplist_export">Export</string>
+    <string name="iplist_delete">Delete</string>
+    <string name="iplist_delete_title">Delete IP list</string>
+    <string name="iplist_delete_question">Delete the IP list \"%1$s\"?</string>
+    <string name="iplist_delete_refreshing">\"%1$s\" is being refreshed. Delete it when the refresh has finished.</string>
+    <string name="iplist_delete_scan_running">Scan \"%1$s\" is running and stores its results in this list. Pause it first.</string>
+    <string name="iplist_delete_scan_result">It holds the results of scan \"%1$s\", which creates a new result list the next time it runs.</string>
+    <string name="iplist_delete_scan_targets">These scans use it as their targets: %1$s</string>
+    <string name="iplist_duplicate_title">Duplicate IP list</string>
+    <string name="iplist_duplicate_name">Name of the copy</string>
+    <string name="iplist_copy_name">%1$s copy</string>
+    <string name="iplist_duplicate_failed">Failed to copy the IP list.</string>
+    <string name="iplist_export_title">Export IP list</string>
+    <plurals name="iplist_exported">
+        <item quantity="one">Exported %1$s entry to:\n%2$s</item>
+        <item quantity="other">Exported %1$s entries to:\n%2$s</item>
+    </plurals>
+    <string name="iplist_export_failed">Cannot write to: %1$s</string>
+    <string name="iplist_import_title">Import IP lists</string>
+    <string name="iplist_import_cannot_open">%1$s: cannot be opened</string>
+    <string name="iplist_import_too_large">%1$s: larger than 50 MB, skipped</string>
+    <string name="iplist_import_no_addresses">%1$s: no addresses found</string>
+    <string name="iplist_import_not_stored">%1$s: could not be stored</string>
+    <plurals name="iplist_import_unreadable">
+        <item quantity="one">%1$s: %2$s unreadable entry skipped</item>
+        <item quantity="other">%1$s: %2$s unreadable entries skipped</item>
+    </plurals>
+    <string name="iplist_import_nothing">Nothing could be imported:</string>
+    <plurals name="iplist_imported_lists">
+        <item quantity="one">Imported %1$s list</item>
+        <item quantity="other">Imported %1$s lists</item>
+    </plurals>
+    <plurals name="iplist_imported_entries">
+        <item quantity="one">with %1$s entry.</item>
+        <item quantity="other">with %1$s entries.</item>
+    </plurals>
+    <plurals name="iplist_problems_more">
+        <item quantity="one">…and %1$s more</item>
+        <item quantity="other">…and %1$s more</item>
+    </plurals>
+    <string name="iplist_new_title">New IP list</string>
+    <string name="iplist_edit_title">Edit IP list</string>
+    <string name="iplist_view_title">IP list</string>
+    <string name="iplist_name">Name</string>
+    <string name="iplist_default_name">IP list</string>
+    <string name="iplist_source">Source</string>
+    <string name="iplist_source_manual">Manual</string>
+    <string name="iplist_source_url">URL</string>
+    <string name="iplist_url_invalid">Enter an http(s) URL.</string>
+    <string name="iplist_auto_update">Auto update</string>
+    <string name="iplist_every">Every</string>
+    <string name="iplist_minutes">minutes</string>
+    <string name="iplist_interval_range">Must be from %1$d to %2$d minutes.</string>
+    <string name="iplist_entries_title">Entries</string>
+    <string name="iplist_entries_hint">One entry per line: 1.2.3.4, 1.2.3.0/24, 1.2.3.4:443, [2606:4700::1]:443, 1.2.3.0/24 443 or 1.2.3.1-1.2.3.9</string>
+    <string name="iplist_add_entries">Add entries</string>
+    <string name="iplist_add">Add</string>
+    <string name="iplist_fetch_now">Fetch now</string>
+    <string name="iplist_fetching">Fetching…</string>
+    <string name="iplist_no_entries">No entries yet.</string>
+    <plurals name="iplist_lines">
+        <item quantity="one">%1$s line</item>
+        <item quantity="other">%1$s lines</item>
+    </plurals>
+    <plurals name="iplist_duplicates">
+        <item quantity="one">%1$s duplicate</item>
+        <item quantity="other">%1$s duplicates</item>
+    </plurals>
+    <plurals name="iplist_unreadable">
+        <item quantity="one">%1$s unreadable</item>
+        <item quantity="other">%1$s unreadable</item>
+    </plurals>
+    <plurals name="iplist_fetched">
+        <item quantity="one">Fetched %1$s entry</item>
+        <item quantity="other">Fetched %1$s entries</item>
+    </plurals>
+    <string name="iplist_fetched_on_save">The entries are fetched when you press Fetch now or Save.</string>
+    <string name="iplist_updated_at">updated %1$s</string>
+    <string name="iplist_last_update_failed_lower">last update failed: %1$s</string>
+    <string name="iplist_fetch_failed">Fetch failed: %1$s</string>
+    <string name="iplist_could_not_fetch">Could not fetch the list:\n%1$s</string>
+    <string name="iplist_missing">This list no longer exists.</string>
+    <string name="iplist_managed_by">Managed by scan %1$s</string>
+    <string name="iplist_managed_by_deleted">Managed by a scan that no longer exists.</string>
+    <plurals name="iplist_dropped">
+        <item quantity="one">%1$s entry could not be read and will be dropped.</item>
+        <item quantity="other">%1$s entries could not be read and will be dropped.</item>
+    </plurals>
+    <string name="iplist_for_example">For example: %1$s</string>
+    <string name="iplist_refresh_busy">This list is being refreshed. Save again when the refresh has finished.</string>
+    <string name="iplist_store_failed">Failed to store the IP list.</string>
+    <string name="iplist_read_only_large">Lists of more than %1$s entries are read-only.</string>
+    <string name="iplist_entry_latency">%1$d ms</string>
+    <string name="iplist_entry_loss">%1$d%% loss</string>
+    <string name="iplist_save_as">Save as IP list</string>
+    <string name="iplist_save_as_name">Name of the new IP list</string>
+    <string name="iplist_results_name">%1$s results</string>
+    <plurals name="iplist_saved">
+        <item quantity="one">Saved %1$s entry to the IP list \"%2$s\".</item>
+        <item quantity="other">Saved %1$s entries to the IP list \"%2$s\".</item>
+    </plurals>
+    <string name="iplist_missing_list">Missing list</string>
+    <string name="iplist_none">None</string>
+    <string name="endpoint_server_address">Server address</string>
+    <string name="endpoint_source">Source</string>
+    <string name="endpoint_mode_inherit">Inherit from group</string>
+    <string name="endpoint_mode_own">Own address</string>
+    <string name="endpoint_mode_list">IP list</string>
+    <string name="endpoint_group_mode_own">Profiles\' own addresses</string>
+    <string name="endpoint_group_mode_address">Fixed address</string>
+    <string name="endpoint_ip_list">IP list</string>
+    <string name="endpoint_fixed_address">Fixed address</string>
+    <string name="endpoint_fixed_address_hint">Host or IP address</string>
+    <string name="endpoint_fixed_address_invalid">Enter a host name or an IP address, without a port.</string>
+    <string name="endpoint_hint_connects">Connects to %1$s (%2$s).</string>
+    <string name="endpoint_hint_own_used">%1$s, so the profile\'s own address is used.</string>
+    <string name="endpoint_group_hint_connects">Profiles connect to %1$s (%2$s).</string>
+    <string name="endpoint_group_hint_own_used">%1$s, so profiles use their own addresses.</string>
+    <string name="resolver_iplist_title">IP list</string>
+    <string name="resolver_iplist_hint">Resolvers from this IP list, used after the lines above. Default port: 53.</string>
+    <string name="resolver_iplist_missing">This IP list no longer exists, so it adds no resolvers.</string>
+
+    <!-- WARP finder and resolver scan screens -->
+    <string name="scan_finder_title">Find WARP endpoint</string>
+    <string name="scan_finder_sum">Search for a WARP endpoint that works on this network.</string>
+    <string name="scan_finder_sum_not_warp">Only for Cloudflare WARP profiles.</string>
+    <string name="scan_finder_start_failed">The search could not be started</string>
+    <string name="scan_finder_stopping">Stopping</string>
+    <plurals name="scan_finder_found_in">
+        <item quantity="one">Found %1$d endpoint in %2$d s</item>
+        <item quantity="other">Found %1$d endpoints in %2$d s</item>
+    </plurals>
+    <string name="scan_finder_none_found">No working endpoint found</string>
+    <plurals name="scan_finder_found">
+        <item quantity="one">Found %d</item>
+        <item quantity="other">Found %d</item>
+    </plurals>
+    <string name="scan_finder_junk_notice">Plain WireGuard is blocked on this network, but it gets through with AmneziaWG junk packets. Using an endpoint turns them on.</string>
+    <string name="scan_finder_http2_notice">HTTP/3 is blocked on this network, but HTTP/2 gets through. Using an endpoint turns on the fallback to HTTP/2.</string>
+    <string name="scan_finder_origin_notice">This profile dials %1$s instead of its own address. Using an endpoint switches it back to its own address.</string>
+    <string name="scan_finder_placeholder">Working endpoints appear here</string>
+    <string name="scan_finder_search_again">Search again</string>
+    <string name="scan_finder_use">Use endpoint</string>
+    <string name="scan_column_endpoint">Endpoint</string>
+    <string name="scan_column_address">Address</string>
+    <string name="scan_column_port">Port</string>
+    <string name="scan_column_loss">Loss</string>
+    <string name="scan_column_latency">Latency</string>
+    <string name="scan_column_loss_tip">Share of probes left unanswered.</string>
+    <string name="scan_value_ms">%1$d ms</string>
+    <string name="scan_value_percent">%1$d%%</string>
+    <string name="scan_status_running">Running</string>
+    <string name="scan_status_pausing">Pausing…</string>
+    <string name="scan_status_idle">Idle</string>
+    <string name="scan_status_paused">Paused</string>
+    <string name="scan_status_completed">Completed</string>
+    <string name="scan_status_failed">Failed</string>
+    <string name="scan_confirm_discard_progress">This scan stopped partway. Starting over discards its progress. Continue?</string>
+    <plurals name="scan_confirm_keep_results">
+        <item quantity="one">Starting over keeps the %d current result until the first new one replaces it. Continue?</item>
+        <item quantity="other">Starting over keeps the %d current results until the first new one replaces them. Continue?</item>
+    </plurals>
+    <string name="scan_confirm_targets_changed">The targets changed since this scan was paused, so it cannot resume. Start over from the beginning?</string>
+    <string name="scan_start_failed">The scan could not be started.</string>
+    <string name="scan_store_failed">Failed to store the scan.</string>
+    <string name="scan_resolver_title">Find resolvers</string>
+    <string name="scan_resolver_find_sum">Scan for resolvers that relay this profile\'s tunnel, as last saved.</string>
+    <string name="scan_resolver_find_unsaved">Save the profile first; the scan tests the saved profile.</string>
+    <string name="scan_resolver_name">Resolvers for %1$s</string>
+    <string name="scan_resolver_needs_saved">Only a saved DNSTT, MasterDNS or XDNS profile can be used to find resolvers; save the profile first.</string>
+    <string name="scan_resolver_intro">Each address is tried as the only resolver of this profile; those that relay its tunnel are kept.</string>
+    <string name="scan_resolver_base_list">Base IP list</string>
+    <string name="scan_resolver_base_list_tip">Each address is tried as a resolver; the default port is 53.</string>
+    <string name="scan_resolver_select_list">Select an IP list…</string>
+    <plurals name="scan_resolver_list_entries">
+        <item quantity="one">%1$s (%2$d entry)</item>
+        <item quantity="other">%1$s (%2$d entries)</item>
+    </plurals>
+    <string name="scan_resolver_manage">Manage</string>
+    <string name="scan_resolver_stop_after">Stop after (results)</string>
+    <string name="scan_resolver_stop_after_tip">Stop after this many results. Empty: no limit.</string>
+    <string name="scan_resolver_no_limit">No limit</string>
+    <string name="scan_resolver_concurrency">Concurrency</string>
+    <string name="scan_resolver_concurrency_tip">Targets checked at the same time.</string>
+    <string name="scan_resolver_range">Must be from %1$d to %2$d.</string>
+    <string name="scan_resolver_stop_after_invalid">Stop after must be between %1$d and %2$d results; leave it empty for no limit.</string>
+    <string name="scan_resolver_concurrency_invalid">Concurrency must be between %1$d and %2$d.</string>
+    <string name="scan_resolver_pause_first">Pause the scan before changing its settings.</string>
+    <string name="scan_resolver_gone">The scan no longer exists.</string>
+    <string name="scan_resolver_not_saved">The settings could not be saved:\n%1$s\n\nClose without saving?</string>
+    <string name="scan_resolver_results">Results</string>
+    <string name="scan_resolver_no_results">No results yet.</string>
+    <string name="scan_resolver_showing_first">Showing the first %1$d of %2$d results</string>
+    <plurals name="scan_resolver_result_count">
+        <item quantity="one">%d result</item>
+        <item quantity="other">%d results</item>
+    </plurals>
+    <string name="scan_resolver_use">Use as resolvers</string>
+    <string name="scan_resolver_use_tip">Add this list to the profile\'s resolvers.</string>
+    <string name="scan_resolver_save_as">Save as IP list</string>
+    <string name="scan_resolver_save_as_name">Name of the new IP list</string>
+    <string name="scan_resolver_results_name">%1$s results</string>
+    <string name="scan_resolver_list_store_failed">Failed to store the IP list.</string>
+    <plurals name="scan_resolver_saved">
+        <item quantity="one">Saved %1$d entry to the IP list \"%2$s\".</item>
+        <item quantity="other">Saved %1$d entries to the IP list \"%2$s\".</item>
+    </plurals>
+    <string name="scan_resolver_copy">Copy</string>
+    <string name="scan_resolver_copy_tip">Copy the selected entries, or all if none are selected.</string>
+    <plurals name="scan_resolver_copied">
+        <item quantity="one">Copied %d entry</item>
+        <item quantity="other">Copied %d entries</item>
+    </plurals>
+    <string name="scan_resolver_export">Export</string>
+    <string name="scan_resolver_export_failed">Cannot write to: %1$s</string>
+    <string name="scan_resolver_remove">Remove selected</string>
+    <string name="scan_resolver_start">Start</string>
+    <string name="scan_resolver_pause">Pause</string>
+    <string name="scan_resolver_resume">Resume</string>
+    <string name="scan_resolver_from_beginning">Scan from the beginning</string>
+    <string name="scan_resolver_rescan">Rescan current results</string>
+    <string name="scan_resolver_profile_gone">The scan\'s profile was deleted or is no longer a DNS tunnel profile.</string>
+    <string name="scan_resolver_editor_takes">The open editor of \"%1$s\" now takes resolvers from the IP list \"%2$s\"; save the profile there to keep it.</string>
+    <string name="scan_resolver_profile_store_failed">Failed to store the profile.</string>
+    <string name="scan_resolver_profile_takes">\"%1$s\" now takes resolvers from the IP list \"%2$s\".</string>
 </resources>

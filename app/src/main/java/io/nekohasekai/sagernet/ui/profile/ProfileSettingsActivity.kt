@@ -44,6 +44,7 @@ import io.nekohasekai.sagernet.outbound.Outbound
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.ui.ThemedActivity
 import io.nekohasekai.sagernet.ui.ValidationForm
+import io.nekohasekai.sagernet.ui.iplist.EndpointSourceSection
 import io.nekohasekai.sagernet.ui.json.JsonEditorActivity
 import io.nekohasekai.sagernet.ui.json.ProfileJson
 import io.nekohasekai.sagernet.ui.profiles.SelectionMode
@@ -116,6 +117,7 @@ abstract class ProfileSettingsActivity<T : Outbound>(
 
     /** Set when the preference screen is rebuilt from edited JSON, so the rebuilt screen starts dirty. */
     private var dirtyAfterRebuild = false
+    private var endpointSection: EndpointSourceSection? = null
     private var rawJsonSynced: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,6 +151,7 @@ abstract class ProfileSettingsActivity<T : Outbound>(
                     editingOutbound = loaded as T
                 }
                 editingOutbound.init()
+                EndpointSourceSection.load(if (editingId == 0L) null else proxyEntity, DataStore.editingGroup, editingOutbound)
 
                 onMainDispatcher {
                     supportFragmentManager.beginTransaction()
@@ -238,8 +241,10 @@ abstract class ProfileSettingsActivity<T : Outbound>(
         outbound.serialize()
 
         val editingId = DataStore.editingId
+        val endpointJson = EndpointSourceSection.pendingJson()
         if (editingId == 0L) {
-            ProfileManager.createProfile(DataStore.editingGroup, outbound)
+            val created = ProfileManager.createProfile(DataStore.editingGroup, outbound)
+            if (endpointJson != null && EndpointSourceSection.store(created.id, endpointJson)) ProfileManager.postUpdate(created.id)
         } else {
             val entity = proxyEntity
             if (entity == null) {
@@ -252,8 +257,11 @@ abstract class ProfileSettingsActivity<T : Outbound>(
             if (stored.getAddress() != outbound.getAddress() || stored.getPort() != outbound.getPort()) {
                 ProfileManager.clearTestResults(listOf(entity.id))
             }
+            // Before updateOutbound, whose listeners then read the new source.
+            val endpointChanged = endpointJson != null && EndpointSourceSection.store(entity.id, endpointJson)
             // dialog_edit_profile.cpp:947-951: saving a profile the running config uses asks for a restart.
-            if (ProfileManager.updateOutbound(entity.putOutbound(outbound)) && ProfileManager.runningUses(entity.id)) {
+            val changed = ProfileManager.updateOutbound(entity.putOutbound(outbound))
+            if ((changed || endpointChanged) && ProfileManager.runningUses(entity.id)) {
                 setResult(RESULT_OK, Intent().putExtra(EXTRA_RESTART_NEEDED, true))
             }
         }
@@ -356,6 +364,14 @@ abstract class ProfileSettingsActivity<T : Outbound>(
         if (key != Key.PROFILE_DIRTY) {
             DataStore.dirty = true
         }
+        if (key == EndpointSourceSection.KEY_MODE || key == EndpointSourceSection.KEY_LIST) {
+            runOnUiThread { endpointSection?.refresh() }
+        }
+    }
+
+    /** The WARP finder's "use as the profile's own address": the endpoint source becomes Own. */
+    fun useOwnEndpoint() {
+        endpointSection?.useOwn()
     }
 
     abstract fun PreferenceFragmentCompat.createPreferences(
@@ -379,6 +395,7 @@ abstract class ProfileSettingsActivity<T : Outbound>(
             try {
                 activity = (requireActivity() as ProfileSettingsActivity<*>).apply {
                     createPreferences(savedInstanceState, rootKey)
+                    endpointSection = EndpointSourceSection(this@MyPreferenceFragmentCompat, DataStore.editingGroup).also { it.attach() }
                     attachValidation(this@MyPreferenceFragmentCompat)
                 }
             } catch (e: Exception) {

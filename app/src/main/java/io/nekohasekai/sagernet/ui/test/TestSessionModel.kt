@@ -138,10 +138,17 @@ internal class TestSessionModel(
         preparing = false
     }
 
-    fun onUrlResult(profileId: Long, latency: Int, error: String) {
+    /** An [inconclusive] result is untested: neither ok nor failed, and the retest offers it. */
+    fun onUrlResult(profileId: Long, latency: Int, error: String, inconclusive: Boolean) {
         val ok = ProxyEntity.isWorking(latency)
-        val aborted = !ok && (latency == 0 || ProxyEntity.isTestAborted(error))
-        put(profileId, RowState(RowPhase.DONE, latency = latency, error = error, ok = ok, failed = !ok && !aborted))
+        val aborted = !ok && (inconclusive || latency == 0 || ProxyEntity.isTestAborted(error))
+        put(
+            profileId,
+            RowState(
+                RowPhase.DONE, latency = latency, error = error, ok = ok, failed = !ok && !aborted,
+                inconclusive = inconclusive && !ok,
+            ),
+        )
     }
 
     fun onIpResult(profileId: Long, ip: String, country: String, error: String) {

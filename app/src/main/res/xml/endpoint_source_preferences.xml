@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:key="profileEndpointCategory"
+        app:title="@string/endpoint_server_address">
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_hardware_router"
+            app:key="profileEndpointMode"
+            app:title="@string/endpoint_source" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_view_list_24"
+            app:key="profileEndpointList"
+            app:title="@string/endpoint_ip_list" />
+        <Preference
+            app:key="profileEndpointHint"
+            app:persistent="false"
+            app:selectable="false"
+            app:isPreferenceVisible="false" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -11,6 +11,23 @@ import java.io.File
 /** Rows of one table as the cursor typed them (Long, Double, String, ByteArray or null), copied column by name. */
 internal class SqlTable(val columns: List<String>, val rows: MutableList<Array<Any?>> = ArrayList()) {
     fun index(column: String): Int = columns.indexOf(column)
+
+    /** This table with [names] it lacks appended as NULL columns. */
+    fun withColumns(names: List<String>): SqlTable {
+        val added = names.filter { it !in columns }.distinct()
+        if (added.isEmpty()) return this
+        val width = columns.size + added.size
+        return SqlTable(columns + added, rows.mapTo(ArrayList(rows.size)) { row -> row.copyOf(width) })
+    }
+}
+
+/** An INTEGER cell as SQLite may hand it over (Long, Double or numeric text); null for anything else. */
+internal fun sqlLong(value: Any?): Long? = when (value) {
+    is Long -> value
+    is Int -> value.toLong()
+    is Double -> value.toLong()
+    is String -> value.trim().toLongOrNull()
+    else -> null
 }
 
 /** One `PRAGMA table_info` row. */
@@ -70,6 +87,9 @@ private fun Cursor.columns(): List<SqlColumn> {
 
 internal fun SQLiteDatabase.hasTable(table: String): Boolean =
     rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", arrayOf(table)).use { it.moveToFirst() }
+
+internal fun SupportSQLiteDatabase.hasTable(table: String): Boolean =
+    query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", arrayOf<Any?>(table)).use { it.moveToFirst() }
 
 internal fun SQLiteDatabase.longQuery(sql: String, vararg args: String): Long? =
     rawQuery(sql, args).use { if (it.moveToFirst() && !it.isNull(0)) it.getLong(0) else null }

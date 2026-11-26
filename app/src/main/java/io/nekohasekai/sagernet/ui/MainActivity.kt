@@ -523,6 +523,8 @@ class MainActivity : ThemedActivity(),
                 R.id.action_test_speed_current -> {
                     if (!TestSessionClient.startCurrent(TestSpec.KIND_SPEED)) {
                         snackbar(R.string.profiles_test_busy).show()
+                    } else {
+                        ProfileTests.showTestedColumnOfRunning(TestSpec.KIND_SPEED)
                     }
                 }
                 R.id.action_test_service_current -> ProfileTests.startServiceCurrent(this) {

@@ -11,6 +11,9 @@ import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.SettingsRegistry
 import io.nekohasekai.sagernet.database.backup.DesktopSchema.GROUPS
 import io.nekohasekai.sagernet.database.backup.DesktopSchema.GROUPS_ORDER
+import io.nekohasekai.sagernet.database.backup.DesktopSchema.IP_LISTS
+import io.nekohasekai.sagernet.database.backup.DesktopSchema.IP_LIST_ENTRIES
+import io.nekohasekai.sagernet.database.backup.DesktopSchema.IP_SCANS
 import io.nekohasekai.sagernet.database.backup.DesktopSchema.MARKERS
 import io.nekohasekai.sagernet.database.backup.DesktopSchema.PROFILES
 import io.nekohasekai.sagernet.database.backup.DesktopSchema.ROUTE_PROFILES
@@ -29,13 +32,18 @@ import java.util.concurrent.Callable
  * the chosen parts copied by column name from one consistent snapshot of SagerDatabase, `profiles_json` from
  * `user_order`, `groups_order` from `display_order`, `entity_ids` from `sqlite_sequence`, the settings without the
  * device-local keys and with the selection translated (`current_group`, `current_route_id`, `remember_id`), the
- * markers, an empty `otp_profiles`; then the pre-close checks the desktop relies on.
+ * markers, the IP lists and scans, an empty `otp_profiles`; then the pre-close checks the desktop relies on.
  */
 object BackupExport {
 
     /** The parts to write. */
-    data class Selection(val profiles: Boolean, val routes: Boolean, val settings: Boolean) {
-        fun any(): Boolean = profiles || routes || settings
+    data class Selection(
+        val profiles: Boolean,
+        val routes: Boolean,
+        val settings: Boolean,
+        val ipLists: Boolean = false,
+    ) {
+        fun any(): Boolean = profiles || routes || settings || ipLists
     }
 
     /** Writes the backup to [out]: the database entry and nothing else. */
@@ -45,7 +53,10 @@ object BackupExport {
         val temp = BackupTemp.newFile(BackupTemp.EXPORT)
         try {
             buildDatabase(temp, selection)
-            val parts = ThrBackup.Parts(profiles = selection.profiles, routes = selection.routes, settings = selection.settings)
+            val parts = ThrBackup.Parts(
+                profiles = selection.profiles, routes = selection.routes, settings = selection.settings,
+                ipLists = selection.ipLists,
+            )
             val files = mapOf(ThrBackup.DATABASE to ThrBackup.Payload.FromFile(temp))
             val meta = ThrBackup.androidMeta(
                 parts, BuildConfig.VERSION_NAME, DataStore.deviceId, DataStore.effectiveDeviceName()
@@ -63,6 +74,9 @@ object BackupExport {
         var routeRules: SqlTable? = null
         var markers: SqlTable? = null
         var settings: Map<String, String>? = null
+        var ipLists: SqlTable? = null
+        var ipListEntries: SqlTable? = null
+        var ipScans: SqlTable? = null
 
         /** Group id -> member ids in list order. */
         val members = HashMap<Long, MutableList<Long>>()
@@ -81,8 +95,9 @@ object BackupExport {
             db.disableWriteAheadLogging()
             db.rawQuery("PRAGMA journal_mode=DELETE", null).use { it.moveToFirst() }
             for (sql in DesktopSchema.DDL) db.execSQL(sql)
-            val desktopColumns = listOf(PROFILES, GROUPS, ROUTE_PROFILES, ROUTE_RULES, SETTINGS, MARKERS)
-                .associateWith { table -> db.tableColumns(table).map { it.name } }
+            val desktopColumns = listOf(
+                PROFILES, GROUPS, ROUTE_PROFILES, ROUTE_RULES, SETTINGS, MARKERS, IP_LISTS, IP_LIST_ENTRIES, IP_SCANS,
+            ).associateWith { table -> db.tableColumns(table).map { it.name } }
             val snapshot = snapshot(selection, desktopColumns)
             db.beginTransaction()
             try {
@@ -106,8 +121,12 @@ object BackupExport {
             fun copy(table: String, order: String): SqlTable {
                 val android = live.tableColumns(table).mapTo(HashSet()) { it.name }
                 val columns = desktopColumns.getValue(table).filter { it in android }
+                if (columns.isEmpty()) return SqlTable(columns)
                 return live.query("SELECT ${quoted(columns)} FROM `$table` ORDER BY $order").use { it.readTable(columns) }
             }
+
+            fun maxId(table: String): Long =
+                if (live.hasTable(table)) live.longQuery("SELECT MAX(`id`) FROM `$table`") ?: 0L else 0L
 
             live.query("SELECT `id`, `display_order` FROM `groups` ORDER BY `display_order`, `id`").use { c ->
                 while (c.moveToNext()) s.tabs.add(c.getLong(0) to c.getLong(1))
@@ -131,6 +150,8 @@ object BackupExport {
             s.counters[PROFILES] = maxOf(sequences[PROFILES] ?: 0L, profileIds.maxOrNull() ?: 0L)
             s.counters[GROUPS] = maxOf(sequences[GROUPS] ?: 0L, groupIds.maxOrNull() ?: 0L)
             s.counters[ROUTE_PROFILES] = maxOf(sequences[ROUTE_PROFILES] ?: 0L, routes.maxOfOrNull { it.first } ?: 0L)
+            s.counters[IP_LISTS] = maxOf(sequences[IP_LISTS] ?: 0L, maxId(IP_LISTS))
+            s.counters[IP_SCANS] = maxOf(sequences[IP_SCANS] ?: 0L, maxId(IP_SCANS))
 
             if (selection.profiles) {
                 s.profiles = copy(PROFILES, "`id`")
@@ -159,6 +180,17 @@ object BackupExport {
                     markers.rows.add(row)
                 }
                 s.markers = markers
+            }
+            if (selection.ipLists) {
+                val lists = copy(IP_LISTS, "`id`")
+                val entries = copy(IP_LIST_ENTRIES, "`ip_list_id`, `entry_order`")
+                val listId = lists.index("id")
+                val listIds: Set<Any?> = if (listId < 0) emptySet() else lists.rows.mapTo(HashSet()) { it[listId] }
+                val entryList = entries.index("ip_list_id")
+                if (entryList >= 0) entries.rows.removeAll { it[entryList] !in listIds }
+                s.ipLists = lists
+                s.ipListEntries = entries
+                s.ipScans = copy(IP_SCANS, "`id`")
             }
             s
         })
@@ -194,9 +226,11 @@ object BackupExport {
 
     private fun fill(db: SQLiteDatabase, s: Snapshot, selection: Selection) {
         db.execSQL(
-            "INSERT INTO entity_ids (profile_last_id, group_last_id, route_profile_last_id, otp_profile_last_id) " +
-                "VALUES (?, ?, ?, 0)",
-            arrayOf<Any?>(s.counters[PROFILES], s.counters[GROUPS], s.counters[ROUTE_PROFILES])
+            "INSERT INTO entity_ids (profile_last_id, group_last_id, route_profile_last_id, otp_profile_last_id, " +
+                "ip_list_last_id, ip_scan_last_id) VALUES (?, ?, ?, 0, ?, ?)",
+            arrayOf<Any?>(
+                s.counters[PROFILES], s.counters[GROUPS], s.counters[ROUTE_PROFILES], s.counters[IP_LISTS], s.counters[IP_SCANS],
+            )
         )
         s.groups?.let { groups ->
             val id = groups.index("id")
@@ -229,6 +263,9 @@ object BackupExport {
         if (selection.settings) {
             insertRows(db, SETTINGS, listOf("key", "value"), s.settings.orEmpty().map { arrayOf(it.key, it.value) })
             s.markers?.let { insertRows(db, MARKERS, it.columns, it.rows) }
+        }
+        for ((table, data) in listOf(IP_LISTS to s.ipLists, IP_LIST_ENTRIES to s.ipListEntries, IP_SCANS to s.ipScans)) {
+            data?.let { insertRows(db, table, it.columns, it.rows) }
         }
     }
 

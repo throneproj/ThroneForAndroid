@@ -2412,9 +2412,8 @@ class XrayStreamSetting {
     fun isXdns(): Boolean = normalizeXrayNetwork(network) == "kcp" && xrayFinalmaskHasXdns(finalmask)
 
     /**
-     * xrayStreamSetting::Build: binding and DNS are wired by the core, not the config. The XDNS resolver lines replace
-     * the resolvers of the xdns masks; [owner] names the profile in their error. Android has no IP lists, so only the
-     * lines build.
+     * xrayStreamSetting::Build: binding and DNS are wired by the core, not the config. The XDNS resolver lines and the
+     * resolver IP list replace the resolvers of the xdns masks; [owner] names the profile in their error.
      */
     fun build(ctx: BuildContext, owner: String = "XDNS"): BuildResult {
         val obj = exportToJson()
@@ -2475,9 +2474,6 @@ class XrayStreamSetting {
                 if (message.isEmpty()) continue
                 issues.addIssue(Severity.Error, root + "xdnsResolvers", message, line.trim())
                 break
-            }
-            if (xdnsResolvers.hasIpList()) {
-                issues.addIssue(Severity.Warning, root + "xdnsResolverList", vtr(R.string.validation_xray_xdns_resolver_list_android))
             }
         }
         val net = normalizeXrayNetwork(network)

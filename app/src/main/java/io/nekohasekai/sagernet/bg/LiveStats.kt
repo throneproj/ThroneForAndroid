@@ -56,8 +56,8 @@ class LiveSeries(val capacity: Int, val fields: Int) {
 
 /**
  * The live graphs' history in the service process (desktop TrafficLooper -> MainWindow::add_traffic_point): a point per
- * traffic tick of the running core, so a graph opened later starts with the last [CAPACITY] seconds. Profile starts,
- * switches and stops are kept as markers, which also bound the stopped stretches the graph hatches.
+ * traffic tick of the running core, so a graph opened later starts with the last [CAPACITY] seconds. A stop breaks the
+ * lines.
  */
 object LiveStatsRecorder {
 
@@ -66,24 +66,13 @@ object LiveStatsRecorder {
     /** A tick this late follows a pause (screen off): its rates average the pause, so it only restarts the series. */
     private const val GAP_MS = 2500L
 
-    /** A start within this of a restart in place is the switch the desktop marks; later, the stop stands on its own. */
-    private const val SWITCH_MS = 30_000L
-
-    /** The longest graph window plus a minute. */
-    private const val MARKER_AGE_MS = 11 * 60_000L
-    private const val MAX_MARKERS = 100
-
-    private class Marker(val t: Long, val kind: Int, val text: String)
-
     private val session = Random.nextLong(1L, Long.MAX_VALUE)
     private val series = LiveSeries(CAPACITY, LiveStatsBatch.FIELDS)
     private val point = FloatArray(LiveStatsBatch.FIELDS)
-    private val markers = ArrayList<Marker>()
     private val cores = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
     private var serial = 0L
     private var lastTick = 0L
     private var lastCpuMs = 0L
-    private var restartedAt = 0L
 
     /** One traffic tick of the running core: rates in bytes per second. */
     @Synchronized
@@ -108,30 +97,19 @@ object LiveStatsRecorder {
         serial++
     }
 
+    /** The core stopped: a point without values breaks the lines, and the next core's first tick restarts them. */
     @Synchronized
-    fun started(name: String) {
-        val now = SystemClock.elapsedRealtime()
-        settleRestart(now)
-        val switched = restartedAt > 0L
-        restartedAt = 0L
-        addMarker(now, if (switched) LiveStatsBatch.MARKER_SWITCHED else LiveStatsBatch.MARKER_STARTED, name)
-    }
-
-    /** [restart]: the core is replaced in place (a switch or a reload), which the next start marks instead. */
-    @Synchronized
-    fun stopped(restart: Boolean) {
-        val now = SystemClock.elapsedRealtime()
-        if (restartedAt > 0L) addMarker(restartedAt, LiveStatsBatch.MARKER_STOPPED, "")
-        restartedAt = 0L
-        if (restart) restartedAt = now else addMarker(now, LiveStatsBatch.MARKER_STOPPED, "")
+    fun stopped() {
+        lastTick = 0L
+        if (series.size == 0 || series.value(LiveStatsBatch.PROXY_DOWN, series.size - 1).isNaN()) return
+        point.fill(Float.NaN)
+        series.push(SystemClock.elapsedRealtime(), point)
+        serial++
     }
 
     /** The points after [after] of [session]; all of them for another session. */
     @Synchronized
     fun batch(session: Long, after: Long): LiveStatsBatch {
-        val now = SystemClock.elapsedRealtime()
-        settleRestart(now)
-        pruneMarkers(now)
         val since = if (session == this.session) after else 0L
         val count = (serial - since).coerceIn(0L, series.size.toLong()).toInt()
         val first = series.size - count
@@ -145,33 +123,6 @@ object LiveStatsRecorder {
             serial = serial,
             times = LongArray(count) { series.time(first + it) },
             values = values,
-            markerTimes = LongArray(markers.size) { markers[it].t },
-            markerKinds = IntArray(markers.size) { markers[it].kind },
-            markerTexts = markers.map { it.text },
         )
-    }
-
-    /** A restart whose start never came (it failed) was a stop after all. */
-    private fun settleRestart(now: Long) {
-        if (restartedAt > 0L && now - restartedAt > SWITCH_MS) {
-            addMarker(restartedAt, LiveStatsBatch.MARKER_STOPPED, "")
-            restartedAt = 0L
-        }
-    }
-
-    /** A stop stays while its stopped stretch (up to the next start, or still open) reaches into the age limit. */
-    private fun pruneMarkers(now: Long) {
-        while (markers.isNotEmpty() && now - markers[0].t > MARKER_AGE_MS) {
-            if (markers[0].kind == LiveStatsBatch.MARKER_STOPPED) {
-                val end = markers.firstOrNull { it.kind != LiveStatsBatch.MARKER_STOPPED } ?: return
-                if (now - end.t <= MARKER_AGE_MS) return
-            }
-            markers.removeAt(0)
-        }
-    }
-
-    private fun addMarker(t: Long, kind: Int, text: String) {
-        markers.add(Marker(t, kind, text))
-        if (markers.size > MAX_MARKERS) markers.removeAt(0)
     }
 }

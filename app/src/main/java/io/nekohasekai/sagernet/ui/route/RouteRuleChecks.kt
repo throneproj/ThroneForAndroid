@@ -123,6 +123,6 @@ internal object RouteRuleChecks {
         "override_port" to R.string.route_rule_override_port,
         "tls_fragment" to R.string.route_rule_tls_fragment,
         "tls_fragment_fallback_delay" to R.string.route_rule_tls_fragment_fallback_delay,
-        "tls_record_fragment" to R.string.route_rule_tls_record_fragment,
+        "tls_record_fragment" to R.string.route_rule_tls_fragment,
     )
 }

@@ -1,21 +1,26 @@
 package io.nekohasekai.sagernet.bg.test
 
+import android.net.Network
+import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.bg.CoreRuntime
 import io.nekohasekai.sagernet.bg.proto.CoreConfig
 import io.nekohasekai.sagernet.bg.proto.exitsThroughVpn
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.ProxyEntity
+import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.throneproj.mobile.Mobile
 import io.throneproj.mobile.TestRequest
 import io.throneproj.mobile.URLTestHandler
 import kotlinx.coroutines.CancellationException
+import java.net.Inet6Address
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * URL latency tests (runUrlProbe, TestRunner.cpp:159-232): results stream as the core reports them, then a failed
- * OpenVPN/OpenConnect profile whose tunnel the core reports up is reported again as Connect OK.
+ * URL latency tests (runUrlProbe, TestRunner.cpp:320-418): results stream as the core reports them, then a failed
+ * OpenVPN/OpenConnect profile whose tunnel the core reports up is reported again as Connect OK. A failure while the
+ * local network was down or changed is inconclusive: the profile keeps its earlier result.
  */
 internal class UrlTestRunner(session: TestSession) : LatencySweep(session) {
 
@@ -27,7 +32,11 @@ internal class UrlTestRunner(session: TestSession) : LatencySweep(session) {
         }
         // The probe box closes with the test, so the verdict is asked for up front (TestRunner.cpp:171-176).
         probe.tagsOf(batch.filter { it.isVpnProfile() }.mapTo(HashSet()) { it.id }).forEach(request::addVPNEndpointTag)
-        Mobile.startURLTest(null, CoreRuntime.platform, request, Handler(probe::profileOf, emit, done))
+        val network = SagerNet.underlyingNetwork
+        systemResolvers(network).forEach(request::addSystemResolver)
+        // Gone or replaced since the probe started; Android's own validation is not asked, censored networks block it.
+        val lost = { SagerNet.underlyingNetwork.let { it == null || it != network } }
+        Mobile.startURLTest(null, CoreRuntime.platform, request, Handler(probe::profileOf, lost, emit, done))
     }
 
     override fun report(results: List<ProbeResult>) = session.reportUrl(results)
@@ -56,7 +65,7 @@ internal class UrlTestRunner(session: TestSession) : LatencySweep(session) {
                 session.awaitCore { done ->
                     Mobile.startURLTest(
                         running.instance, CoreRuntime.platform, request,
-                        Handler({ running.profileId }, result::set, done),
+                        Handler({ running.profileId }, null, result::set, done),
                     )
                 }
             }
@@ -70,22 +79,26 @@ internal class UrlTestRunner(session: TestSession) : LatencySweep(session) {
 
     /**
      * Emits every result; once they are in, a failed (not aborted) VPN profile whose tunnel is up is emitted again with
-     * the verdict (applyUrlResult's vpnConnected, TestRunner.cpp:127-142).
+     * the verdict (TestRunner.cpp:401-410), which wins over an inconclusive one. A failure is inconclusive when the
+     * core found the local network down or [networkLost] says so; null (the running connection's test, never stored)
+     * skips that.
      */
     private class Handler(
         private val profileOf: (String?) -> Long?,
+        private val networkLost: (() -> Boolean)?,
         private val emit: (ProbeResult) -> Unit,
         private val done: () -> Unit,
     ) : URLTestHandler {
         // Results may land on another Go thread than the verdicts.
         private val failures = ConcurrentHashMap<String, ProbeResult>()
 
-        override fun onResult(tag: String?, latencyMs: Int, error: String?) = guarded {
+        override fun onResult(tag: String?, latencyMs: Int, error: String?, inconclusive: Boolean) = guarded {
             val id = profileOf(tag) ?: return@guarded
-            val result = ProbeResult(id, latency = latencyMs, error = error.orEmpty())
-            if (tag != null && result.error.isNotEmpty() && !ProxyEntity.isTestAborted(result.error)) {
-                failures[tag] = result
-            }
+            val message = error.orEmpty()
+            val failed = message.isNotEmpty() && !ProxyEntity.isTestAborted(message)
+            val lost = failed && networkLost != null && (inconclusive || networkLost.invoke())
+            val result = ProbeResult(id, latency = latencyMs, error = message, inconclusive = lost)
+            if (tag != null && failed) failures[tag] = result
             emit(result)
         }
 
@@ -102,5 +115,19 @@ internal class UrlTestRunner(session: TestSession) : LatencySweep(session) {
     companion object {
         /** The core's errInstanceNotRunning text. */
         const val ERROR_NOT_RUNNING = "instance is not running"
+
+        /**
+         * The DNS servers of the physical [network] (never this app's VPN), which the core asks whether the local
+         * network is up when tests fail; the ones the desktop's usableResolver refuses are left out.
+         */
+        internal fun systemResolvers(network: Network?): List<String> {
+            if (network == null) return emptyList()
+            val servers = runCatching { SagerNet.connectivity.getLinkProperties(network)?.dnsServers }
+                .onFailure { Logs.w(it) }.getOrNull() ?: return emptyList()
+            return servers.filterNot {
+                it.isAnyLocalAddress || it.isLoopbackAddress || it.isLinkLocalAddress || it.isMulticastAddress ||
+                    it is Inet6Address && it.isSiteLocalAddress
+            }.mapNotNull { address -> address.hostAddress?.takeIf { '%' !in it } }.distinct()
+        }
     }
 }

@@ -29,6 +29,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
@@ -54,9 +55,9 @@ import java.io.RandomAccessFile
 import java.util.regex.PatternSyntaxException
 
 /**
- * The desktop's log browser (mainwindow_log.cpp): a live tail of core.log with a filter behind a toolbar button (case
- * and regex toggles, match count, highlighted hits) that follows new lines only while scrolled to the bottom; scrolled
- * up, new lines wait and merge on the way back down.
+ * The desktop's log browser (mainwindow_log.cpp): a live tail of core.log, coloured by [LogHighlighter], with a filter
+ * behind a toolbar button (case and regex toggles, match count, highlighted hits) that follows new lines only while
+ * scrolled to the bottom; scrolled up, new lines wait and merge on the way back down.
  */
 class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
     Toolbar.OnMenuItemClickListener {
@@ -90,6 +91,7 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
     private class LogLine(val text: String, var visible: Boolean)
 
     lateinit var binding: LayoutLogcatBinding
+    private lateinit var highlighter: LogHighlighter
 
     private val lines = ArrayDeque<LogLine>()
     private var linesChars = 0
@@ -168,6 +170,11 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
         hitBackground = if (dark) Color.rgb(150, 110, 0) else Color.rgb(255, 225, 90)
         hitForeground = if (dark) Color.WHITE else Color.BLACK
         searchTextColors = binding.logSearch.textColors
+        // The desktop's log body is the window's text colour, which the muted and level colours are measured against.
+        binding.textview.setTextColor(
+            MaterialColors.getColor(view.context, android.R.attr.textColorPrimary, binding.textview.currentTextColor)
+        )
+        highlighter = LogHighlighter(LogPalette.of(binding.textview))
 
         binding.scroolview.applyListInsets(ime = true)
         binding.logFilterBar.applyInsetPadding(horizontal = true)
@@ -228,13 +235,6 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
             isEnabled = redact
             isChecked = redact && hideDestinations
         }
-    }
-
-    private fun colorForLine(line: String): Int = when {
-        line.contains("INFO[") || line.contains(" [Info]") -> 0xFF86C166.toInt()
-        line.contains("ERROR[") || line.contains(" [Error]") -> Color.RED
-        line.contains("WARN[") || line.contains(" [Warning]") -> 0xFFFFA000.toInt()
-        else -> Color.GRAY
     }
 
     private suspend fun followLog() {
@@ -357,9 +357,9 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
         if (out.isNotEmpty()) out.append('\n')
         val start = out.length
         out.append(text)
-        out.setSpan(ForegroundColorSpan(colorForLine(text)), start, out.length, SPAN_EXCLUSIVE_EXCLUSIVE)
+        highlighter.paint(out, start, text)
         val pattern = search ?: return
-        // Last, so search hits paint over the level colour. One Matcher per line: findAll makes one per hit, and each
+        // Last, so search hits paint over the syntax colours. One Matcher per line: findAll makes one per hit, and each
         // copies the whole line.
         val matcher = pattern.toPattern().matcher(text)
         var hits = 0

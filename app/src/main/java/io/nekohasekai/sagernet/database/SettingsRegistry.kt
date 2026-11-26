@@ -98,6 +98,10 @@ object SettingsRegistry {
     @JvmField
     val DOMAIN_STRATEGIES = listOf("", "ipv4_only", "ipv6_only", "prefer_ipv4", "prefer_ipv6")
 
+    /** traffic_graph_seconds: the graph's 1, 2, 5 and 10 minute windows (mainwindow_setup.cpp). */
+    @JvmField
+    val TRAFFIC_GRAPH_WINDOWS = listOf(60, 120, 300, 600)
+
     /** Most verbose first (BS.cpp:48). */
     @JvmField
     val LOG_LEVELS = listOf("trace", "debug", "info", "warn", "error", "fatal", "panic")
@@ -279,9 +283,12 @@ object SettingsRegistry {
     /** 0 download + upload, 1 download, 2 upload, 3 simple download; the removed 4 (country) reads as 0. */
     @JvmField val SPEED_TEST_MODE = int("speed_test_mode", 0) { it in 0..3 }
     @JvmField val SPEED_TEST_TIMEOUT_MS = int("speed_test_timeout_ms", 5000) { it > 0 }
-    @JvmField val SIMPLE_DL_URL = string("simple_dl_url", "http://cachefly.cachefly.net/1mb.test") {
+    @JvmField val SIMPLE_DL_URL = string("simple_dl_url", "http://cachefly.cachefly.net/5mb.test") {
         SpeedTestSettings.isValidHttpUrl(it)
     }
+
+    /** simple_dl_url's former default, which [DataStore.migrateSettings] moves to the current one once. */
+    const val OLD_SIMPLE_DL_URL = "http://cachefly.cachefly.net/1mb.test"
 
     // ------------------------------------------------------------------------------------------------ subscriptions
 
@@ -366,16 +373,21 @@ object SettingsRegistry {
     @JvmField val LOG_LEVEL = oneOf("log_level", "warn", LOG_LEVELS)
     @JvmField val XRAY_LOG_LEVEL = oneOf("xray_log_level", "warning", XRAY_LOG_LEVELS)
     @JvmField val ENABLE_STATS = bool("enable_stats", true)
-    @JvmField val DISABLE_TRAFFIC_STATS = bool("disable_traffic_stats", false)
     /**
      * The live traffic graph (SettingsRepo.h traffic_graph_*): hidden line keys ("proxy", "direct", the desktop's
-     * "route:<id>" and "aux:<id>"), hidden directions (bit 0 download, bit 1 upload), the 1m/2m/5m/10m window.
+     * "route:<id>" and "aux:<id>"), hidden directions (bit 0 download, bit 1 upload), the window in seconds.
      */
     @JvmField val TRAFFIC_GRAPH_HIDDEN = stringList("traffic_graph_hidden", emptyList())
     @JvmField val TRAFFIC_GRAPH_HIDDEN_DIRS = int("traffic_graph_hidden_dirs", 0) { it in 0..3 }
-    @JvmField val TRAFFIC_GRAPH_RANGE = int("traffic_graph_range", 1) { it in 0..3 }
+    @JvmField val TRAFFIC_GRAPH_SECONDS = int("traffic_graph_seconds", 120) { it in TRAFFIC_GRAPH_WINDOWS }
     @JvmField val TRAFFIC_GRAPH_SMOOTH = bool("traffic_graph_smooth", true)
-    @JvmField val TRAFFIC_GRAPH_MARKERS = bool("traffic_graph_markers", true)
+
+    /** The window index traffic_graph_seconds replaced (0..3 of [TRAFFIC_GRAPH_WINDOWS]); converted once, then deleted. */
+    const val LEGACY_TRAFFIC_GRAPH_RANGE = "traffic_graph_range"
+
+    /** Deleted on load and on restore (SettingsRepo::load): settings this version no longer has. */
+    @JvmField
+    val RETIRED_KEYS = listOf("disable_traffic_stats", "traffic_graph_markers", LEGACY_TRAFFIC_GRAPH_RANGE)
     /** Sign-encoded port: at most 0 is off. */
     @JvmField val CORE_BOX_CLASH_API = int("core_box_clash_api", -9090) { it in -65535..65535 }
     @JvmField val CORE_BOX_CLASH_LISTEN_ADDR = string("core_box_clash_listen_addr", LOOPBACK_ADDRESS) { it.isNotBlank() }

@@ -21,4 +21,12 @@ object AppLocale {
         AppCompatDelegate.setApplicationLocales(localeList(tag))
     }
 
+    // Japanese, Korean and Traditional Chinese were dropped; a stored choice of one follows the system again.
+    private val RETIRED = setOf("ja", "ko", "zh-TW")
+
+    fun applyStored() {
+        if (DataStore.appLanguage in RETIRED) DataStore.appLanguage = ""
+        apply()
+    }
+
 }

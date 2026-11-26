@@ -32,9 +32,6 @@ class HysteriaSettingsActivity : BindingSettingsActivity<Hysteria>() {
         pbm.text("obfs")
         pbm.int("up_mbps")
         pbm.int("down_mbps")
-        pbm.int("recv_window_conn")
-        pbm.int("recv_window")
-        pbm.bool("disable_mtu_discovery")
         pbm.int("min_packet_size")
         pbm.int("max_packet_size")
         pbm.text("bbr_profile")
@@ -53,7 +50,7 @@ class HysteriaSettingsActivity : BindingSettingsActivity<Hysteria>() {
         DialBlock.bindQuicOpener(pbm)
     }
 
-    private val v1Only = arrayOf("auth_type", "auth", "recv_window_conn", "recv_window", "disable_mtu_discovery")
+    private val v1Only = arrayOf("auth_type", "auth")
     private val v2Only = arrayOf("password", "obfs_type", "hop_interval_max", "bbr_profile", "disable_chrome_parrot")
     private val realmFields = arrayOf(
         "realm_server_url", "realm_token", "realm_id", "realm_stun_servers", "realm_ip_version", "realm_port_mapping",
@@ -62,7 +59,7 @@ class HysteriaSettingsActivity : BindingSettingsActivity<Hysteria>() {
 
     override fun PreferenceFragmentCompat.onPreferencesCreated() {
         portInput("serverPort")
-        numberInput("up_mbps", "down_mbps", "recv_window_conn", "recv_window", "min_packet_size", "max_packet_size")
+        numberInput("up_mbps", "down_mbps", "min_packet_size", "max_packet_size")
         passwordSummary("auth", "password", "obfs", "realm_token")
         multilineInput("server_ports", "realm_stun_servers")
 
@@ -119,7 +116,7 @@ class HysteriaSettingsActivity : BindingSettingsActivity<Hysteria>() {
 
     // edit_hysteria.cpp and edit_hysteria_realm.cpp: number text the binding would read as 0, and the realm fields
     override fun ValidationForm.bindValidation() {
-        for (key in listOf("up_mbps", "down_mbps", "recv_window_conn", "recv_window")) {
+        for (key in listOf("up_mbps", "down_mbps")) {
             bind(key, Validation.Rules.int(0, Int.MAX_VALUE.toLong()))
         }
         val packetSize = Validation.Rules.int(0, 2048)

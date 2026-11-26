@@ -370,6 +370,21 @@ class ConfigGenerator @JvmOverloads constructor(
     }
 
     /**
+     * The scan probe box of BuildScanTestConfig (generate_test.cpp): candidates built under `scan-<n>` without the
+     * candidate check, since the scan validated its base once; a failed build fails the whole box. Group hops come only
+     * from [ProfileProvider.groupOf], which the scan's synthetic clones do not have.
+     */
+    @JvmOverloads
+    fun buildScanTest(candidates: List<TestCandidate>, ports: PortLease? = null): GeneratedConfig {
+        val lease = ports ?: PortLease()
+        try {
+            return buildTestLeased(candidates, lease, TestBuildOptions(chainPrefix = "scan", validate = false))
+        } finally {
+            if (ports == null) lease.close()
+        }
+    }
+
+    /**
      * BuildChainStepTestConfig (generate.cpp): the chain editor's unsaved [hops], top first, as synthetic chains behind
      * the group's [frontProxyId]: hop i alone (from the second hop on) and hops 0..i in sequence, then the group's
      * [landingProxyId] alone and after every hop. They take ids from -2000000 down and are built under `step-<n>`

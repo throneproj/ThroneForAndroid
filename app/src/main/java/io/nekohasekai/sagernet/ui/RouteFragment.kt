@@ -8,6 +8,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -39,12 +41,14 @@ import io.nekohasekai.sagernet.ktx.dp2px
 import io.nekohasekai.sagernet.ktx.needReload
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.readableMessage
+import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ktx.runOnLifecycleDispatcher
 import io.nekohasekai.sagernet.ktx.showAllowingStateLoss
 import io.nekohasekai.sagernet.ktx.snackbar
 import io.nekohasekai.sagernet.route.RouteProfile
 import io.nekohasekai.sagernet.route.RouteShare
 import io.nekohasekai.sagernet.route.RuleType
+import io.nekohasekai.sagernet.ui.iplist.IpListsActivity
 import io.nekohasekai.sagernet.ui.route.RouteImports
 import io.nekohasekai.sagernet.ui.route.RouteJson
 import io.nekohasekai.sagernet.ui.route.RouteProfileActivity
@@ -62,13 +66,15 @@ import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * The route profiles (the desktop Routes dialog): tap to make one current, per-profile edit / clone / share /
- * update / delete, and the toolbar's new, import, download, update and repository actions.
+ * The route profiles (the desktop Routes dialog): tap to make one current, long press and drag to reorder,
+ * per-profile edit / clone / share / update / delete, and the toolbar's new, import, download, update and repository
+ * actions.
  */
 class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItemClickListener {
 
     private lateinit var list: RecyclerView
     private val adapter = ProfileAdapter()
+    private val dragger = ItemTouchHelper(DragCallback())
     private val onRoutesChanged: () -> Unit = { reload() }
     private var progressDialog: AlertDialog? = null
     private var remoteUpdateJob: Job? = null
@@ -95,6 +101,7 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
         list.applyListInsets()
         list.layoutManager = FixedLinearLayoutManager(list)
         list.adapter = adapter
+        dragger.attachToRecyclerView(list)
         onServiceStateChanged()
         RouteManager.addListener(onRoutesChanged)
         reload()
@@ -137,6 +144,7 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
             R.id.action_route_update_rule_sets -> updateRuleSets()
             R.id.action_route_tester -> startActivity(Intent(requireContext(), RouteTesterActivity::class.java))
             R.id.action_route_refresh_repo -> refreshRepository()
+            R.id.action_route_ip_lists -> startActivity(Intent(requireContext(), IpListsActivity::class.java))
             R.id.action_routing_settings -> (activity as? MainActivity)?.openSettingsScreen(
                 RoutingSettingsFragment::class.java.name, getString(R.string.settings_routing)
             )
@@ -517,9 +525,45 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
 
     // ------------------------------------------------------------------------------------------------ list
 
+    /**
+     * A touch long press picks a row up (dialog_manage_routes.cpp's drag and drop): moved, it reorders the profiles;
+     * released in place, a subscription's profile says which group keeps it updated.
+     */
+    private inner class DragCallback : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+
+        override fun isLongPressDragEnabled() = false
+
+        override fun onMove(
+            recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder,
+        ): Boolean {
+            val from = viewHolder.bindingAdapterPosition
+            val to = target.bindingAdapterPosition
+            if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION) return false
+            adapter.move(from, to)
+            return true
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
+
+        override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+            super.onSelectedChanged(viewHolder, actionState)
+            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) adapter.dragging = true
+        }
+
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            if (!adapter.dragging) return
+            adapter.dragging = false
+            if (!adapter.commitMove()) (viewHolder as? ProfileHolder)?.showOwner()
+        }
+    }
+
     private inner class ProfileAdapter : RecyclerView.Adapter<ProfileHolder>() {
-        var profiles: List<RouteProfile> = emptyList()
+        val profiles = ArrayList<RouteProfile>()
         var currentId = 0L
+        var dragging = false
+        private var moved = false
+        private var reloadAfterDrag = false
 
         /** The names of the groups importing their subscription's routing profile, by id. */
         private var owners: Map<Long, String> = emptyMap()
@@ -530,10 +574,46 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
 
         @SuppressLint("NotifyDataSetChanged")
         fun submit(profiles: List<RouteProfile>, currentId: Long, owners: Map<Long, String>) {
-            this.profiles = profiles
+            if (dragging) {
+                reloadAfterDrag = true
+                return
+            }
+            this.profiles.clear()
+            this.profiles.addAll(profiles)
             this.currentId = currentId
             this.owners = owners
             notifyDataSetChanged()
+        }
+
+        fun move(from: Int, to: Int) {
+            if (from !in profiles.indices || to !in profiles.indices) return
+            profiles.add(to, profiles.removeAt(from))
+            moved = true
+            notifyItemMoved(from, to)
+        }
+
+        /** Saves the order a drag left (RoutesRepo::SetRouteProfilesOrder); false when no row moved. */
+        fun commitMove(): Boolean {
+            val changed = moved
+            if (moved) {
+                moved = false
+                val ids = profiles.map { it.id }
+                runOnDefaultDispatcher { RouteManager.setOrder(ids) }
+            }
+            if (reloadAfterDrag) {
+                reloadAfterDrag = false
+                reload()
+            }
+            return changed
+        }
+
+        /** "Move up" / "Move down" for keyboards and D-pads. */
+        fun step(id: Long, delta: Int) {
+            val from = profiles.indexOfFirst { it.id == id }
+            val to = from + delta
+            if (from < 0 || to !in profiles.indices) return
+            move(from, to)
+            commitMove()
         }
 
         /** The name of the group whose subscription keeps [profile] updated, null when none does. */
@@ -566,6 +646,14 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
 
     private inner class ProfileHolder(val binding: LayoutRouteProfileItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
+        /** The group keeping the bound profile updated, null when none does. */
+        private var owner: String? = null
+
+        fun showOwner() {
+            val owner = owner ?: return
+            if (isAdded && view != null) snackbar(getString(R.string.route_from_subscription_info, owner)).show()
+        }
+
         fun bind(profile: RouteProfile, current: Boolean) {
             val context = itemView.context
             binding.profileName.text = profile.name
@@ -575,6 +663,7 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
                 R.string.route_item_default_outbound, RouteTexts.outboundName(context, profile.default_outbound_id, emptyMap())
             ) + " · " + resources.getQuantityString(R.plurals.route_item_rules, profile.rules.size, profile.rules.size)
             val owner = adapter.ownerOf(profile)
+            this.owner = owner
             val notes = ArrayList<String>()
             if (profile.is_remote) {
                 val updated = if (profile.remote_last_update > 0) {
@@ -590,14 +679,14 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
             binding.profileRemote.text = notes.joinToString("\n")
             binding.updateProgress.isVisible = profile.id in updating
             itemView.setOnClickListener { select(profile) }
-            if (owner != null) {
-                itemView.setOnLongClickListener {
-                    snackbar(getString(R.string.route_from_subscription_info, owner)).show()
-                    true
+            // D-pad long presses cannot drag: the menu's Move up / Move down reorder there.
+            itemView.setOnLongClickListener {
+                when {
+                    it.isInTouchMode -> dragger.startDrag(this)
+                    owner != null -> showOwner()
+                    else -> return@setOnLongClickListener false
                 }
-            } else {
-                itemView.setOnLongClickListener(null)
-                itemView.isLongClickable = false
+                true
             }
             binding.edit.setOnClickListener { edit(profile.id) }
             binding.options.setOnClickListener { showMenu(it, profile) }
@@ -614,6 +703,16 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
                 // Android never builds a config from a raw profile.
                 popup.menu.removeItem(R.id.action_route_tester)
             }
+            if (SagerNet.isTv) {
+                // Before Delete, as in the group menu.
+                val index = adapter.profiles.indexOfFirst { it.id == profile.id }
+                popup.menu.removeItem(R.id.action_route_delete)
+                if (index > 0) popup.menu.add(Menu.NONE, R.id.action_move_up, Menu.NONE, R.string.grp_move_up)
+                if (index in 0 until adapter.itemCount - 1) {
+                    popup.menu.add(Menu.NONE, R.id.action_move_down, Menu.NONE, R.string.grp_move_down)
+                }
+                popup.menu.add(Menu.NONE, R.id.action_route_delete, Menu.NONE, R.string.delete)
+            }
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.action_route_edit -> edit(profile.id)
@@ -625,6 +724,8 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
                         Intent(requireContext(), RouteTesterActivity::class.java).putExtra(RouteTesterActivity.EXTRA_ROUTE_ID, profile.id)
                     )
 
+                    R.id.action_move_up -> adapter.step(profile.id, -1)
+                    R.id.action_move_down -> adapter.step(profile.id, 1)
                     R.id.action_route_delete -> delete(profile)
                     else -> return@setOnMenuItemClickListener false
                 }

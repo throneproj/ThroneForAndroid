@@ -86,6 +86,23 @@ fun acceptOptional(field: String, message: String, value: String = ""): Boolean 
     return false
 }
 
+private val LEGACY_COMBO_TEXT = mapOf(
+    "нативный" to "native",
+    "bbr v2" to "bbr2",
+    "вариант bbr" to "bbr_variant",
+    "bbr变体" to "bbr_variant",
+    "标准bbr" to "bbr_standard",
+)
+
+/** LegacyComboValue (utils.cpp): older builds stored translated menu text; maps it back to one of [identifiers], else the trimmed value. */
+fun legacyComboValue(value: String, identifiers: List<String>): String {
+    val folded = value.trim().lowercase()
+    for (candidate in listOf(LEGACY_COMBO_TEXT[folded] ?: folded, folded.replace(' ', '_'), folded.replace(" ", ""))) {
+        if (candidate in identifiers) return candidate
+    }
+    return value.trim()
+}
+
 /** ReadQueryInt (utils.cpp): the item as a whole number in [min, max], else [current] (reported when present but unusable). */
 fun readQueryInt(query: LinkQuery, key: String, current: Int, min: Int = 0, max: Int = Int.MAX_VALUE): Int {
     if (!query.has(key)) return current

@@ -296,20 +296,25 @@ object SubscriptionQueue {
     }
 
     /**
-     * requestUrlTest (GroupUpdater.cpp:658-667): the URL test waits for any running test session; the follow-up
-     * goes back through the queue, so it never races another job over the group.
+     * startUrlTest (GroupUpdater.cpp:1452-1462): the URL test waits for any running test session; the follow-up
+     * goes back through the queue, so it never races another job over the group. Only what fails from testedSince on
+     * (seconds, as latency_at) is this run's verdict.
      */
     internal fun requestUrlTest(gid: Long, profileIds: List<Long>) {
         outstanding.update { it + 1 }
         scope.launch {
             try {
-                try {
+                val testedSince = System.currentTimeMillis() / 1000
+                val completed = try {
                     TestEngine.queueUrlTests(profileIds)
                 } catch (e: Exception) {
                     if (e is CancellationException) ensureActive() else Logs.w(e)
+                    false
                 }
                 synchronized(lock) {
-                    enqueueLocked(Job(-1L, batch = false, foreground = false) { SubscriptionRefresh.afterUrlTest(gid) })
+                    enqueueLocked(Job(-1L, batch = false, foreground = false) {
+                        SubscriptionRefresh.afterUrlTest(gid, testedSince, completed)
+                    })
                 }
             } finally {
                 outstanding.update { it - 1 }

@@ -1,31 +1,31 @@
 package io.nekohasekai.sagernet.outbound.common
 
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.outbound.BuildContext
 import io.nekohasekai.sagernet.outbound.json.JsonArray
 import io.nekohasekai.sagernet.outbound.json.JsonObject
 import io.nekohasekai.sagernet.outbound.json.jsonObjectOf
 import io.nekohasekai.sagernet.outbound.link.Hosts
+import io.nekohasekai.sagernet.scan.IpListEntry
+import io.nekohasekai.sagernet.scan.IpListsRepo
 import io.nekohasekai.sagernet.validation.Family
 import io.nekohasekai.sagernet.validation.ParseDiag
 import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.validation.acceptOptional
+import io.nekohasekai.sagernet.validation.vplural
 import io.nekohasekai.sagernet.validation.vtr
 
 /**
- * Configs::ResolverSource (include/configs/common/ResolverSource.h): typed resolver lines plus the id of a desktop
- * resolver IP list. Android has no IP lists, so [ipListId] is only carried through the JSON (`resolver_list`) and
- * never built.
+ * Configs::ResolverSource (include/configs/common/ResolverSource.h): typed resolver lines plus the id of a resolver IP
+ * list (`resolver_list`). The list is read when a config is built, never stored in it.
  */
 data class ResolverSource(
     @JvmField var lines: List<String> = emptyList(),
     @JvmField var ipListId: Int = -1,
 ) {
-    /**
-     * Only blank and # lines. Unlike the desktop, [ipListId] does not count: Android never builds the list, so a
-     * source holding only a list builds exactly like an empty one.
-     */
-    fun isEmpty(): Boolean = lines.all { raw -> raw.trim().let { it.isEmpty() || it.startsWith('#') } }
+    /** Only blank and # lines, and no IP list. */
+    fun isEmpty(): Boolean = ipListId < 0 && lines.all { raw -> raw.trim().let { it.isEmpty() || it.startsWith('#') } }
 
     fun hasIpList(): Boolean = ipListId >= 0
 }
@@ -43,7 +43,7 @@ class ResolverBuild(@JvmField val resolvers: JsonArray, @JvmField val error: Str
 /** DnsttResolverObjectLine's results: [line] is "" when the object is unusable, [why] explains it (or a dropped part). */
 class DnsttResolverLine(@JvmField val line: String, @JvmField val tcpFallback: Boolean, @JvmField val why: String)
 
-/** The resolver grammar of src/configs/common/ResolverSource.cpp, without the IP list reader and its cache. */
+/** The resolver grammar of src/configs/common/ResolverSource.cpp, with its IP list reader and the reader's cache. */
 object ResolverSources {
 
     private const val DNSTT_RANGE_HOSTS = 256L
@@ -52,7 +52,56 @@ object ResolverSources {
 
     // Xray's xdns client opens a socket and a reader goroutine per resolver when it starts.
     private const val MAX_XDNS = 256
+    private const val MAX_LIST_ENTRIES = 65536
     private const val MAX_IMPORT_LINES = 4096
+
+    private class ListRead(
+        @JvmField val missing: Boolean,
+        @JvmField val truncated: Boolean,
+        @JvmField val name: String,
+        @JvmField val entries: List<IpListEntry>,
+    )
+
+    private class Cache {
+        @JvmField val lists = HashMap<Int, ListRead>()
+        @JvmField val logged = HashSet<Int>()
+    }
+
+    private val cache = ThreadLocal<Cache?>()
+
+    /**
+     * ResolverSourceScope: the builds [block] runs on this thread read each resolver IP list once and log its problems
+     * once. Nested scopes share the outermost; without one every build reads its lists afresh and logs nothing.
+     */
+    @JvmStatic
+    fun <T> scope(block: () -> T): T {
+        if (cache.get() != null) return block()
+        cache.set(Cache())
+        try {
+            return block()
+        } finally {
+            cache.remove()
+        }
+    }
+
+    private fun readList(id: Int): ListRead {
+        val scoped = cache.get()
+        scoped?.lists?.get(id)?.let { return it }
+        var list = ListRead(missing = true, truncated = false, name = "", entries = emptyList())
+        val header = IpListsRepo.getIpListHeader(id.toLong())
+        if (header != null && !header.isHidden) {
+            val entries = IpListsRepo.getEntries(id.toLong(), 0, MAX_LIST_ENTRIES + 1)
+            val truncated = entries.size > MAX_LIST_ENTRIES
+            list = ListRead(false, truncated, header.name, if (truncated) entries.subList(0, MAX_LIST_ENTRIES) else entries)
+        }
+        scoped?.lists?.put(id, list)
+        return list
+    }
+
+    private fun logOnce(listId: Int, line: String) {
+        val scoped = cache.get() ?: return
+        if (scoped.logged.add(listId)) Logs.w(line)
+    }
 
     private val URL_SCHEMES = listOf("udp", "tcp", "tls", "https")
 
@@ -277,7 +326,10 @@ object ResolverSources {
 
     private fun key(obj: JsonObject): String = "${obj.string("type")}|${obj.string("server")}|${obj.int("server_port")}|${obj.string("path")}"
 
-    /** BuildResolvers: an empty source builds as system, except for Xdns, which builds as empty. */
+    /**
+     * BuildResolvers: the lines, then the IP list's entries. An empty source builds as system, except for Xdns, which
+     * builds as empty. Blocking when the source names an IP list.
+     */
     @JvmStatic
     @JvmOverloads
     fun build(source: ResolverSource, flavor: ResolverFlavor, owner: String, ctx: BuildContext = BuildContext.DEFAULT): ResolverBuild {
@@ -288,11 +340,12 @@ object ResolverSources {
             ResolverFlavor.Xdns -> MAX_XDNS
             ResolverFlavor.Dnstt -> MAX_EXPANDED
         }
-        fun add(value: Any, key: String) {
-            if (key in seen) return
-            if (cap > 0 && resolvers.size >= cap) return
+        fun add(value: Any, key: String): Boolean {
+            if (key in seen) return true
+            if (cap > 0 && resolvers.size >= cap) return false
             seen.add(key)
             resolvers.add(value)
+            return true
         }
 
         fun masterDnsText(line: Line): String {
@@ -323,6 +376,48 @@ object ResolverSources {
                     else -> for (address in rangeAddresses(line)) udpObject(address, line.port).let { add(it, key(it)) }
                 }
             }
+        }
+
+        if (source.ipListId >= 0) {
+            val list = readList(source.ipListId)
+            var skipped = 0
+            for (entry in list.entries) {
+                val line = Line()
+                if (!target(entry.cidr.trim(), line)) {
+                    skipped++
+                    continue
+                }
+                line.port = if (entry.port in 1..65535) entry.port else 0
+                if (flavor == ResolverFlavor.MasterDns) {
+                    if (rangeLimit(line, MASTERDNS_RANGE_HOSTS).isNotEmpty()) {
+                        skipped++
+                        continue
+                    }
+                    masterDnsText(line).let { add(it, it) }
+                    continue
+                }
+                if (rangeLimit(line, DNSTT_RANGE_HOSTS).isNotEmpty()) {
+                    skipped++
+                    continue
+                }
+                val addresses = if (line.kind == Kind.Range) rangeAddresses(line) else listOf(line.host)
+                for (address in addresses) {
+                    val kept = if (flavor == ResolverFlavor.Dnstt) {
+                        udpObject(address, line.port).let { add(it, key(it)) }
+                    } else {
+                        ("udp://" + hostPort(address, line.v6, if (line.port > 0) line.port else 53)).let { add(it, it) }
+                    }
+                    if (!kept) skipped++
+                }
+            }
+            val problem = when {
+                list.missing -> vtr(R.string.resolver_iplist_gone)
+                list.entries.isEmpty() -> vtr(R.string.resolver_iplist_empty, list.name)
+                list.truncated -> vtr(R.string.resolver_iplist_truncated, list.name, MAX_LIST_ENTRIES.toString())
+                skipped > 0 -> vplural(R.plurals.resolver_iplist_skipped, skipped, skipped, list.name)
+                else -> ""
+            }
+            if (problem.isNotEmpty()) logOnce(source.ipListId, "$owner: $problem")
         }
 
         if (resolvers.isEmpty() && flavor != ResolverFlavor.Xdns) {

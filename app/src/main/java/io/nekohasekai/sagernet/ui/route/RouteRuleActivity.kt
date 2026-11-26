@@ -60,8 +60,15 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
         const val RESULT_DELETE = RESULT_FIRST_USER
 
         private const val STATE_ADVANCED = "advancedExpanded"
+        private const val STATE_FRAGMENT_DELAY = "fragmentDelay"
         private const val KEY_ADVANCED_TOGGLE = "advancedToggle"
         private const val KEY_ADVANCED_CATEGORY = "advancedCategory"
+
+        /** The Fragment TLS menu (RouteRuleEditor fragmentCombo): its value holds both flags as bits. */
+        private const val KEY_FRAGMENT = "tls_fragment"
+        private const val FRAGMENT_HANDSHAKE = 1
+        private const val FRAGMENT_RECORDS = 2
+        private const val FRAGMENT_BOTH = 3
 
         private val TEXT_KEYS = listOf(
             "name", "action", "outbound_id", "reject_method", "strategy", "network", "protocol", "ip_version",
@@ -78,20 +85,27 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
         )
         private val BOOL_KEYS = listOf(
             "sniff_override_dest", "ip_is_private", "source_ip_is_private", "invert", "no_drop", "network_is_expensive",
-            "tls_fragment", "tls_record_fragment",
         )
 
         /** The members inside the collapsed group. */
         private val ADVANCED_KEYS = listOf(
             "domain_keyword", "domain_regex", "ip_is_private", "source_ip_cidr", "source_ip_is_private", "port",
             "port_range", "source_port", "source_port_range", "network", "protocol", "ip_version", "inbound", "invert",
-            "override_address", "override_port", "tls_fragment", "tls_fragment_fallback_delay", "tls_record_fragment",
+            "override_address", "override_port", KEY_FRAGMENT, "tls_fragment_fallback_delay",
             "no_drop", "package_name_regex", "process_name", "process_path", "process_path_regex",
             "network_is_expensive", "wifi_ssid", "wifi_bssid",
         )
 
         /** Android names apps by package, never by process: these show only when a desktop rule brought a value. */
         private val DESKTOP_ONLY_KEYS = listOf("process_name", "process_path", "process_path_regex")
+
+        /** The row that shows [attr]: both fragment flags are on the Fragment TLS menu. */
+        private fun rowOf(attr: String): String = if (attr == "tls_record_fragment") KEY_FRAGMENT else attr
+
+        private fun fragmentMode(handshake: Boolean, records: Boolean): Int =
+            (if (handshake) FRAGMENT_HANDSHAKE else 0) or (if (records) FRAGMENT_RECORDS else 0)
+
+        private fun cachedFragmentMode(): Int = DataStore.profileCacheStore.getString(KEY_FRAGMENT)?.toIntOrNull() ?: 0
     }
 
     private val pbm = PreferenceBindingManager().apply {
@@ -103,6 +117,9 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
     private var index = -1
     private var loaded = false
     private var advancedExpanded = false
+
+    /** RouteRuleEditor Stash::fragmentDelay: the fallback delay a Fragment TLS choice without the handshake cleared. */
+    private var fragmentDelay = ""
 
     /** Every server profile as (id, "[group] name"). */
     private var servers: List<Pair<Long, String>> = emptyList()
@@ -138,6 +155,7 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
         rule = RouteJson.ruleFromJson(intent.getStringExtra(EXTRA_RULE))
         index = intent.getIntExtra(EXTRA_INDEX, -1)
         advancedExpanded = savedInstanceState?.getBoolean(STATE_ADVANCED) ?: false
+        fragmentDelay = savedInstanceState?.getString(STATE_FRAGMENT_DELAY).orEmpty()
         onBackPressedDispatcher.addCallback(this) { close() }
 
         val fresh = savedInstanceState == null
@@ -148,6 +166,9 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
                 PackageCache.awaitLoadSync()
                 if (fresh) {
                     pbm.writeToCacheAll(rule)
+                    DataStore.profileCacheStore.putString(
+                        KEY_FRAGMENT, fragmentMode(rule.tls_fragment, rule.tls_record_fragment).toString(),
+                    )
                     DataStore.dirty = false
                 }
             }
@@ -162,6 +183,7 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean(STATE_ADVANCED, advancedExpanded)
+        outState.putString(STATE_FRAGMENT_DELAY, fragmentDelay)
     }
 
     override fun onDestroy() {
@@ -185,6 +207,9 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
     private fun editedRule(): RouteRule = rule.copy().also {
         pbm.fromCacheAll(it)
         it.name = it.name.trim()
+        val mode = cachedFragmentMode()
+        it.tls_fragment = (mode and FRAGMENT_HANDSHAKE) != 0
+        it.tls_record_fragment = (mode and FRAGMENT_RECORDS) != 0
     }
 
     /** RouteRule::validate of [editedRule], kept until the next change in the cache store. */
@@ -313,9 +338,11 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             addPreferencesFromResource(R.xml.route_rule_preferences)
 
             setupOutbounds()
+            setupActions()
             for (key in listOf("action", "reject_method", "strategy", "network", "protocol", "ip_version")) {
                 findPreference<SimpleMenuPreference>(key)?.ensureValue()
             }
+            setupFragment()
 
             val multiline = LIST_KEYS - setOf("rule_set", "package_name", "network_type")
             multilineInput(*multiline.toTypedArray())
@@ -383,7 +410,8 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             validation.bind("action") { wholeRuleMessage(Severity.Error) }
             validation.bind("action") { wholeRuleMessage(Severity.Warning) }.warning()
             for (shape in RouteRule.crossChecks()) {
-                val keys = listOf(shape.attr, shape.related).filter { findPreference<Preference>(it) != null }
+                val keys = listOf(shape.attr, shape.related).map { rowOf(it) }.distinct()
+                    .filter { findPreference<Preference>(it) != null }
                 if (keys.isEmpty()) continue
                 validation.addRule(keys, shape.severity) {
                     val issue = host.currentIssues().firstOrNull {
@@ -411,7 +439,7 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
 
         /** The form's own notion of a row it checks: shown (or only collapsed) and enabled. */
         private fun rowActive(key: String): Boolean {
-            val pref = (if (key.isEmpty()) null else findPreference<Preference>(key)) ?: return false
+            val pref = (if (key.isEmpty()) null else findPreference<Preference>(rowOf(key))) ?: return false
             return (pref.isShown || collapsedRow(pref)) && pref.isEnabled
         }
 
@@ -426,7 +454,7 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
 
         /** The worst issue on a shown Advanced row, which the collapsed toggle reports like the desktop's tab icons. */
         private fun advancedSeverity(): Severity? {
-            fun advanced(key: String) = key in ADVANCED_KEYS && findPreference<Preference>(key)?.isVisible == true
+            fun advanced(key: String) = rowOf(key).let { it in ADVANCED_KEYS && findPreference<Preference>(it)?.isVisible == true }
             var worst: Severity? = null
             for (issue in host.currentIssues()) {
                 if (!advanced(issue.attr) && !advanced(issue.related)) continue
@@ -500,6 +528,60 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             }
         }
 
+        /**
+         * RouteThenPicker: Throne already sniffs and hijacks DNS before the profile's rules, so these are offered only
+         * to a rule that has one.
+         */
+        private fun setupActions() {
+            val pref = findPreference<SimpleMenuPreference>("action") ?: return
+            val current = host.rule.effectiveAction()
+            val actions = resources.getStringArray(R.array.route_rule_action_values)
+                .filter { (it != "hijack-dns" && it != "sniff") || it == current }
+                .toTypedArray<CharSequence>()
+            pref.entries = actions
+            pref.entryValues = actions
+            pref.value?.let { pref.value = it }
+        }
+
+        /**
+         * RouteRuleEditor::setFragment: the core reads the fallback delay only with tls_fragment, so a choice without
+         * the handshake sets the delay aside until one with it is picked.
+         */
+        private fun setupFragment() {
+            val pref = findPreference<SimpleMenuPreference>(KEY_FRAGMENT) ?: return
+            pref.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> { p ->
+                val mode = p.value?.toIntOrNull() ?: 0
+                val lines = arrayListOf(p.entry ?: "")
+                if ((mode and FRAGMENT_HANDSHAKE) != 0) lines.add(getString(R.string.route_rule_tls_fragment_sum))
+                if ((mode and FRAGMENT_RECORDS) != 0) lines.add(getString(R.string.route_rule_tls_record_fragment_sum))
+                lines.joinToString("\n")
+            }
+            pref.setOnPreferenceChangeListener { _, newValue ->
+                val handshake = (((newValue as? String)?.toIntOrNull() ?: 0) and FRAGMENT_HANDSHAKE) != 0
+                val delay = DataStore.profileCacheStore.getString("tls_fragment_fallback_delay").orEmpty()
+                val delayPref = findPreference<EditTextPreference>("tls_fragment_fallback_delay")
+                if (!handshake && delay.isNotBlank()) {
+                    host.fragmentDelay = delay
+                    delayPref?.text = ""
+                } else if (handshake && delay.isBlank() && host.fragmentDelay.isNotEmpty()) {
+                    delayPref?.text = host.fragmentDelay
+                    host.fragmentDelay = ""
+                }
+                true
+            }
+        }
+
+        /** RouteRuleEditor::loadFragment: route-options takes only one of them, so it offers both only to a rule that has both. */
+        private fun refreshFragmentEntries(effective: String, mode: Int) {
+            val pref = findPreference<SimpleMenuPreference>(KEY_FRAGMENT) ?: return
+            val count = if (mode == FRAGMENT_BOTH || effective != "route-options") 4 else 3
+            if (pref.entries?.size == count) return
+            val labels = resources.getStringArray(R.array.route_rule_tls_fragment_entries)
+            pref.entries = Array<CharSequence>(count) { labels[it] }
+            pref.entryValues = Array<CharSequence>(count) { it.toString() }
+            pref.value = mode.toString()
+        }
+
         /** A stored value the menu does not offer (e.g. from a desktop profile) is added so it is not replaced. */
         private fun SimpleMenuPreference.ensureValue() {
             val v = value ?: return
@@ -532,16 +614,22 @@ class RouteRuleActivity : ThemedActivity(R.layout.layout_config_settings), OnPre
             setVisible(effective == "resolve", "strategy")
             setVisible(effective == "sniff", "sniff_override_dest")
             val routeOptions = routes || effective == "route-options"
-            setVisible(routeOptions, "override_address", "override_port", "tls_fragment", "tls_record_fragment")
+            setVisible(routeOptions, "override_address", "override_port", KEY_FRAGMENT)
+            val mode = cachedFragmentMode()
+            refreshFragmentEntries(effective, mode)
             // A delay left without tls_fragment stays visible, so its warning can be acted on.
-            val delay = store.getBoolean("tls_fragment", false) || !store.getString("tls_fragment_fallback_delay").isNullOrBlank()
+            val delay = (mode and FRAGMENT_HANDSHAKE) != 0 || !store.getString("tls_fragment_fallback_delay").isNullOrBlank()
             setVisible(routeOptions && delay, "tls_fragment_fallback_delay")
             for (key in DESKTOP_ONLY_KEYS) findPreference<Preference>(key)?.isVisible = !store.getString(key).isNullOrBlank()
 
             val set = ADVANCED_KEYS.count { key ->
                 val pref = findPreference<Preference>(key)
-                if (pref == null || !pref.isVisible) return@count false
-                if (pref is SwitchPreference) store.getBoolean(key, false) else !store.getString(key).isNullOrBlank()
+                when {
+                    pref == null || !pref.isVisible -> false
+                    key == KEY_FRAGMENT -> mode != 0
+                    pref is SwitchPreference -> store.getBoolean(key, false)
+                    else -> !store.getString(key).isNullOrBlank()
+                }
             }
             val expanded = host.advancedExpanded
             findPreference<PreferenceCategory>(KEY_ADVANCED_CATEGORY)?.isVisible = expanded

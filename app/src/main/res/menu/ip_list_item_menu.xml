@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_ip_list_edit"
+        android:title="@string/edit" />
+    <item
+        android:id="@+id/action_ip_list_refresh"
+        android:title="@string/iplist_refresh_now" />
+    <item
+        android:id="@+id/action_ip_list_duplicate"
+        android:title="@string/iplist_duplicate" />
+    <item
+        android:id="@+id/action_ip_list_export"
+        android:title="@string/iplist_export" />
+    <item
+        android:id="@+id/action_ip_list_delete"
+        android:title="@string/iplist_delete" />
+</menu>

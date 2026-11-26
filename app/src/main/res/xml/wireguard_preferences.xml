@@ -77,6 +77,12 @@
             app:persistent="false"
             app:summary="@string/warp_generate_identity_wireguard_sum"
             app:title="@string/warp_generate_identity" />
+        <Preference
+            app:icon="@drawable/ic_baseline_manage_search_24"
+            app:key="warpFind"
+            app:persistent="false"
+            app:summary="@string/scan_finder_sum"
+            app:title="@string/scan_finder_title" />
     </PreferenceCategory>
 
     <PreferenceCategory

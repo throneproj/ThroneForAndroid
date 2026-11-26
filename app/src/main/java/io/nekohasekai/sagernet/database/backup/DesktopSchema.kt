@@ -1,16 +1,11 @@
 package io.nekohasekai.sagernet.database.backup
 
 /**
- * The tables of a fresh desktop `throne.db` (Throne @ 31a6562b, plus ccf3b459's `groups.sub_metadata_json`, 6906912f's
- * `groups.sort_method` / `sort_descending`, a6d042c2's `route_rules.tls_fragment` / `tls_fragment_fallback_delay` /
- * `tls_record_fragment`, 23b5bfcb's `route_rules.disabled`, 67261f7d's `route_profiles.dns_json` / `custom_dns` and
- * 3c7cab39's `groups.route_id` / `import_sub_route` and `route_profiles.source_gid`, 35abd923's `groups.pinned_json`,
- * 6e2063c4's `profiles.service_checks`, 1c4d920a's `groups.show_services` and 870c720b's `route_profiles.remote_rules`;
- * the later `groups.endpoint_json` of 1809cb0e is not carried), created in
- * DatabaseManager.cpp:65-128 order:
- * `entity_ids` (DatabaseManager.cpp:83-110), ProfilesRepo.cpp:17-43, GroupsRepo.cpp:19-56, RoutesRepo.cpp:13-106,
- * OtpProfilesRepo.cpp:10-29, SettingsRepo.cpp:222-229, MarkersRepo.cpp:8-15. Update together with the desktop.
- * `route_rules` ends with Android's own rule columns, which only an Android restore reads.
+ * The tables of a fresh desktop `throne.db` (Throne @ af4f1599), created in DatabaseManager.cpp order: `entity_ids`
+ * (DatabaseManager.cpp createEntityIdsTable), ProfilesRepo.cpp, GroupsRepo.cpp, RoutesRepo.cpp, OtpProfilesRepo.cpp,
+ * SettingsRepo.cpp, MarkersRepo.cpp, IpListsRepo.cpp, IpScansRepo.cpp. Update together with the desktop.
+ * `groups` keeps the `test_items_to_show` the desktop dropped, as the mirror of `visible_columns` older Android builds
+ * read; `route_rules` ends with Android's own rule columns, which only an Android restore reads.
  */
 object DesktopSchema {
 
@@ -22,6 +17,9 @@ object DesktopSchema {
     const val ROUTE_RULES = "route_rules"
     const val SETTINGS = "settings"
     const val MARKERS = "markers"
+    const val IP_LISTS = "ip_lists"
+    const val IP_LIST_ENTRIES = "ip_list_entries"
+    const val IP_SCANS = "ip_scans"
 
     /** remember_id's "no profile" (Const.hpp NoProfileId). */
     const val NO_PROFILE_ID = -1919L
@@ -32,7 +30,9 @@ object DesktopSchema {
             profile_last_id INTEGER NOT NULL DEFAULT 0,
             group_last_id INTEGER NOT NULL DEFAULT 0,
             route_profile_last_id INTEGER NOT NULL DEFAULT 0,
-            otp_profile_last_id INTEGER NOT NULL DEFAULT 0
+            otp_profile_last_id INTEGER NOT NULL DEFAULT 0,
+            ip_list_last_id INTEGER NOT NULL DEFAULT 0,
+            ip_scan_last_id INTEGER NOT NULL DEFAULT 0
         )
         """,
         """
@@ -49,6 +49,7 @@ object DesktopSchema {
             outbound_json TEXT NOT NULL,
             traffic_dl INTEGER NOT NULL DEFAULT 0,
             traffic_up INTEGER NOT NULL DEFAULT 0,
+            endpoint_json TEXT NOT NULL DEFAULT '{}',
             service_checks TEXT NOT NULL DEFAULT '',
             created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
             updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
@@ -57,6 +58,7 @@ object DesktopSchema {
         """,
         "ALTER TABLE profiles ADD COLUMN latency_at INTEGER NOT NULL DEFAULT 0",
         "CREATE INDEX IF NOT EXISTS idx_profiles_name ON profiles(name)",
+        "CREATE INDEX IF NOT EXISTS idx_profiles_type ON profiles(type)",
         """
         CREATE TABLE IF NOT EXISTS groups (
             id INTEGER PRIMARY KEY,
@@ -78,12 +80,15 @@ object DesktopSchema {
             type_sort_by INTEGER NOT NULL DEFAULT 0,
             sub_options_json TEXT NOT NULL DEFAULT '{}',
             sub_metadata_json TEXT NOT NULL DEFAULT '{}',
+            endpoint_json TEXT NOT NULL DEFAULT '{}',
             sort_method INTEGER NOT NULL DEFAULT 0,
             sort_descending INTEGER NOT NULL DEFAULT 0,
             route_id INTEGER NOT NULL DEFAULT -1,
             import_sub_route INTEGER NOT NULL DEFAULT 0,
             pinned_json TEXT NOT NULL DEFAULT '[]',
             show_services INTEGER NOT NULL DEFAULT 1,
+            visible_columns INTEGER NOT NULL DEFAULT 79,
+            custom_order_json TEXT NOT NULL DEFAULT '[]',
             created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
             updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         )
@@ -112,6 +117,7 @@ object DesktopSchema {
             custom_dns INTEGER NOT NULL DEFAULT 0,
             source_gid INTEGER NOT NULL DEFAULT -1,
             remote_rules TEXT,
+            display_order INTEGER NOT NULL DEFAULT 0,
             created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
             updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         )
@@ -194,6 +200,66 @@ object DesktopSchema {
         CREATE TABLE IF NOT EXISTS markers (
             key TEXT PRIMARY KEY,
             marked_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS ip_lists (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL DEFAULT '',
+            related_test_id INTEGER NOT NULL DEFAULT -1,
+            role INTEGER NOT NULL DEFAULT 0,
+            source_kind INTEGER NOT NULL DEFAULT 0,
+            source TEXT NOT NULL DEFAULT '',
+            auto_update INTEGER NOT NULL DEFAULT 0,
+            update_interval INTEGER NOT NULL DEFAULT 1440,
+            last_update INTEGER NOT NULL DEFAULT 0,
+            last_error TEXT NOT NULL DEFAULT '',
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            entries_generation INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+            updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS ip_list_entries (
+            ip_list_id INTEGER NOT NULL,
+            generation INTEGER NOT NULL DEFAULT 0,
+            entry_order INTEGER NOT NULL,
+            cidr TEXT NOT NULL,
+            port INTEGER NOT NULL DEFAULT 0,
+            latency_ms INTEGER NOT NULL DEFAULT 0,
+            loss_pct INTEGER,
+            PRIMARY KEY (ip_list_id, generation, entry_order),
+            FOREIGN KEY (ip_list_id) REFERENCES ip_lists(id) ON DELETE CASCADE
+        ) WITHOUT ROWID
+        """,
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_ip_list_entries_target ON ip_list_entries(ip_list_id, generation, cidr, port)",
+        """
+        CREATE TABLE IF NOT EXISTS ip_scans (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL DEFAULT '',
+            kind INTEGER NOT NULL DEFAULT 0,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            base_list_id INTEGER NOT NULL DEFAULT -1,
+            result_list_id INTEGER NOT NULL DEFAULT -1,
+            config_json TEXT NOT NULL DEFAULT '{}',
+            status INTEGER NOT NULL DEFAULT 0,
+            mode INTEGER NOT NULL DEFAULT 0,
+            snapshot_list_id INTEGER NOT NULL DEFAULT -1,
+            seed INTEGER NOT NULL DEFAULT 0,
+            cursor INTEGER NOT NULL DEFAULT 0,
+            total INTEGER NOT NULL DEFAULT 0,
+            spec_hash TEXT NOT NULL DEFAULT '',
+            rescan_snapshot_list_id INTEGER NOT NULL DEFAULT -1,
+            rescan_cursor INTEGER NOT NULL DEFAULT 0,
+            rescan_total INTEGER NOT NULL DEFAULT 0,
+            found INTEGER NOT NULL DEFAULT 0,
+            removed INTEGER NOT NULL DEFAULT 0,
+            last_error TEXT NOT NULL DEFAULT '',
+            started_at INTEGER NOT NULL DEFAULT 0,
+            finished_at INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+            updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         )
         """,
     ).map { it.trimIndent() }

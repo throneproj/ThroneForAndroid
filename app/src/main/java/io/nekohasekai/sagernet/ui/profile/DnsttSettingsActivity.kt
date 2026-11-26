@@ -14,13 +14,15 @@ import io.nekohasekai.sagernet.outbound.types.Dnstt
 import io.nekohasekai.sagernet.outbound.types.DnsttChecks
 import io.nekohasekai.sagernet.outbound.types.dnsTunnelNumberText
 import io.nekohasekai.sagernet.ui.ValidationForm
+import io.nekohasekai.sagernet.ui.iplist.ResolverListRow
+import io.nekohasekai.sagernet.ui.scan.ScannerUi
 import io.nekohasekai.sagernet.validation.Validation
 import io.nekohasekai.sagernet.validation.vtr
 
 /**
  * DNSTT and VayDNS (edit_dnstt.cpp): the mode menu folds mode and dnstt_compat into one choice and shows the VayDNS
- * rows, the backend menu the rows of the service behind the tunnel. Resolver IP lists have no Android counterpart, so
- * only the typed lines are edited; a desktop list id survives the save untouched.
+ * rows, the backend menu the rows of the service behind the tunnel. The resolvers are the typed lines and an optional
+ * IP list (ResolverSourceWidget).
  */
 class DnsttSettingsActivity : BindingSettingsActivity<Dnstt>() {
 
@@ -66,11 +68,13 @@ class DnsttSettingsActivity : BindingSettingsActivity<Dnstt>() {
     private var selectedMode = MODE_CLASSIC
     private var payloadRow: Preference? = null
     private var defaultRows: List<Preference> = emptyList()
+    private val resolverList = ResolverListRow(KEY_RESOLVER_LIST)
 
     private fun native() = selectedMode == MODE_VAYDNS
 
     override fun Dnstt.writeUnboundToCache() {
         val store = DataStore.profileCacheStore
+        resolverList.write(resolvers.ipListId)
         store.putString(KEY_MODE, if (mode != "vaydns") MODE_CLASSIC else if (dnstt_compat) MODE_COMPAT else MODE_VAYDNS)
         store.putString(KEY_RPS, if (rps > 0) dnsTunnelNumberText(rps) else "")
         for (key in arrayOf("client_id_size", "max_qname_len")) {
@@ -81,6 +85,7 @@ class DnsttSettingsActivity : BindingSettingsActivity<Dnstt>() {
     // edit_dnstt.cpp onEnd: the rows a mode hides are cleared, and a rate that is not a positive number is none.
     override fun Dnstt.readUnboundFromCache() {
         val store = DataStore.profileCacheStore
+        resolvers.ipListId = resolverList.read()
         val selected = store.getString(KEY_MODE).orEmpty()
         mode = if (selected == MODE_VAYDNS || selected == MODE_COMPAT) "vaydns" else "dnstt"
         dnstt_compat = selected == MODE_COMPAT
@@ -115,6 +120,8 @@ class DnsttSettingsActivity : BindingSettingsActivity<Dnstt>() {
         for (key in arrayOf("record_type", "resolver_strategy", "backend", "ss_method")) {
             findPreference<ListPreference>(key)?.keepUnlistedValue()
         }
+        resolverList.attach(this) { form?.refresh() }
+        ScannerUi.bindFindResolvers(this@DnsttSettingsActivity, this)
 
         // The desktop placeholders: the core's defaults for the mode.
         defaultRows = listOfNotNull(
@@ -174,11 +181,15 @@ class DnsttSettingsActivity : BindingSettingsActivity<Dnstt>() {
         if (key in PAYLOAD_INPUTS) updatePayload()
     }
 
+    override fun onResume() {
+        super.onResume()
+        ScannerUi.takeResolverList(DataStore.editingId).let { if (it >= 0) resolverList.select(it) }
+    }
+
     override fun issueKey(field: String): String? = when (field) {
         "dnstt_compat" -> KEY_MODE
         // dnstt::Validate files the missing-authentication warning under ssh_auth; edit_dnstt.cpp anchors it on the password.
         "ssh_auth" -> "ssh_password"
-        "resolver_list" -> "resolvers.lines"
         else -> null
     }
 
@@ -187,11 +198,13 @@ class DnsttSettingsActivity : BindingSettingsActivity<Dnstt>() {
         bind("client_id_size", Validation.Rules.int(0, 253))
         bind("max_qname_len", Validation.Rules.int(0, 253))
         bind(KEY_RPS) { text -> if (text.isEmpty() || RPS_TEXT.matches(text)) "" else vtr(R.string.validation_must_be_number) }
+        resolverList.bindValidation(this)
     }
 
     companion object {
         private const val KEY_MODE = "mode"
         private const val KEY_RPS = "rps"
+        private const val KEY_RESOLVER_LIST = "resolver_list"
         private const val MODE_CLASSIC = "dnstt"
         private const val MODE_VAYDNS = "vaydns"
         private const val MODE_COMPAT = "vaydns_compat"

@@ -215,4 +215,32 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        app:key="groupEndpoint"
+        app:title="@string/endpoint_server_address">
+
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_hardware_router"
+            app:key="groupEndpointMode"
+            app:title="@string/endpoint_source" />
+
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_domain_24"
+            app:key="groupEndpointAddress"
+            app:title="@string/endpoint_fixed_address"
+            app:useSimpleSummaryProvider="true" />
+
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:icon="@drawable/ic_baseline_view_list_24"
+            app:key="groupEndpointList"
+            app:title="@string/endpoint_ip_list" />
+
+        <Preference
+            app:isPreferenceVisible="false"
+            app:key="groupEndpointHint"
+            app:persistent="false"
+            app:selectable="false" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

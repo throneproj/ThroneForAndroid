@@ -1,6 +1,7 @@
 package io.nekohasekai.sagernet.aidl;
 
 import io.nekohasekai.sagernet.aidl.IChainStepCallback;
+import io.nekohasekai.sagernet.aidl.IScanCallback;
 import io.nekohasekai.sagernet.aidl.ISubscriptionCallback;
 import io.nekohasekai.sagernet.aidl.ITestSessionCallback;
 import io.nekohasekai.sagernet.bg.test.TestSpec;
@@ -47,4 +48,25 @@ interface ICoreService {
   // Service check: the categories and checks of the definitions a check would run with, downloading a newer copy when
   // due; returns the ParseServiceChecks description JSON, "" when the core cannot describe them (see ServiceDefinitions).
   String describeServiceChecks();
+
+  // IP scanner (desktop ScanManager, see ScanEngine). Saved resolver scans run under their id, WARP finder runs under
+  // ids from -1 down. startScan blocks for the checks and returns {"error","targetsChanged"}; mode is StartMode.code.
+  String startScan(long scanId, int mode);
+  // The stored profile profileId, or with draftType set an editor's unsaved outbound (draftJson) in group gid; returns
+  // {"id","error"}, id < 0 on success.
+  String startWarpFinder(long profileId, String draftType, String draftJson, long gid);
+  // Pauses a saved scan or stops a finder run; the run reports through onState when it has stopped.
+  void pauseScan(long id);
+  // persist false (a backup restore): no run writes to the database any more.
+  void stopAllScans(boolean persist);
+  void forgetWarpFinder(long id);
+  // State JSON of one run (see ScanEngine.stateJson), "" when unknown; activeScans: a JSON array of every run's state.
+  String scanState(long id);
+  String activeScans();
+  // "" or why not.
+  String deleteScan(long scanId, boolean deleteResultList);
+  long ensureScanResultList(long scanId);
+  // A registered callback first gets the state of every run.
+  void registerScanCallback(IScanCallback cb);
+  void unregisterScanCallback(IScanCallback cb);
 }

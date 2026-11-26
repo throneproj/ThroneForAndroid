@@ -121,6 +121,7 @@ class WebDavBackup private constructor(private val base: HttpUrl, private val se
                 if (parts.routes) add(PART_ROUTES)
                 if (parts.settings) add(PART_SETTINGS)
                 if (parts.otp) add(PART_OTP)
+                if (parts.ipLists) add(PART_IP_LISTS)
                 if (parts.icons) add(PART_ICONS)
             }
         }

@@ -4,6 +4,9 @@
         android:id="@+id/action_edit"
         android:title="@string/edit" />
     <item
+        android:id="@+id/action_find_warp_endpoint"
+        android:title="@string/scan_finder_title" />
+    <item
         android:id="@+id/action_share"
         android:title="@string/share" />
     <item

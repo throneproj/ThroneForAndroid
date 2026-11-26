@@ -6,7 +6,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.TwoStatePreference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -18,7 +20,10 @@ import io.nekohasekai.sagernet.ktx.dp2px
 import io.nekohasekai.sagernet.outbound.json.JsonInput
 import io.nekohasekai.sagernet.outbound.types.WireGuard
 import io.nekohasekai.sagernet.outbound.types.WireGuardChecks
+import io.nekohasekai.sagernet.scan.ScanProfiles
 import io.nekohasekai.sagernet.ui.ValidationForm
+import io.nekohasekai.sagernet.ui.scan.ScannerUi
+import io.nekohasekai.sagernet.ui.scan.WarpFinderActivity
 import io.nekohasekai.sagernet.ui.warp.WarpClient
 import io.nekohasekai.sagernet.ui.warp.WarpGenerate
 import io.nekohasekai.sagernet.ui.warp.setFieldText
@@ -99,14 +104,7 @@ class WireGuardSettingsActivity : BindingSettingsActivity<WireGuard>() {
                     .ifEmpty { getString(androidx.preference.R.string.not_set) }
             }
 
-        val amnezia = findPreference<PreferenceCategory>("amneziaCategory")
-        onSwitch("enable_amnezia") { on ->
-            if (amnezia == null) return@onSwitch
-            for (i in 0 until amnezia.preferenceCount) {
-                val child = amnezia.getPreference(i)
-                if (child.key != "enable_amnezia") child.isVisible = on
-            }
-        }
+        onSwitch("enable_amnezia") { on -> showAmnezia(this, on) }
 
         // edit_wireguard.cpp:39-51
         WarpGenerate.bindEditorRow(
@@ -128,6 +126,69 @@ class WireGuardSettingsActivity : BindingSettingsActivity<WireGuard>() {
             askSignatureDomain(this, button)
             true
         }
+
+        findPreference<Preference>(KEY_WARP_FIND)?.setOnPreferenceClickListener {
+            ScannerUi.findWarpEndpoint(this@WireGuardSettingsActivity, warpFinder) { validationOutbound() }
+            true
+        }
+        updateWarpFind(this)
+    }
+
+    private fun showAmnezia(screen: PreferenceFragmentCompat, on: Boolean) {
+        val amnezia = screen.findPreference<PreferenceCategory>("amneziaCategory") ?: return
+        for (i in 0 until amnezia.preferenceCount) {
+            val child = amnezia.getPreference(i)
+            if (child.key != "enable_amnezia") child.isVisible = on
+        }
+    }
+
+    private fun currentScreen() = supportFragmentManager.findFragmentById(R.id.settings) as? PreferenceFragmentCompat
+
+    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
+        super.onPreferenceDataStoreChanged(store, key)
+        if (key == "peer.public_key" || key == "peer.address") runOnUiThread { currentScreen()?.let { updateWarpFind(it) } }
+    }
+
+    // edit_wireguard.cpp updateWarpFind
+    private fun updateWarpFind(screen: PreferenceFragmentCompat) {
+        val row = screen.findPreference<Preference>(KEY_WARP_FIND) ?: return
+        fun text(key: String) = screen.findPreference<EditTextPreference>(key)?.text.orEmpty().trim()
+        val warp = ScanProfiles.isWarpPeerKey(text("peer.public_key")) || text("peer.address").endsWith(WARP_HOST_SUFFIX, ignoreCase = true)
+        row.isEnabled = warp
+        row.setSummary(if (warp) R.string.scan_finder_sum else R.string.scan_finder_sum_not_warp)
+    }
+
+    private val warpFinder = registerForActivityResult(WarpFinderActivity.Contract()) { choice ->
+        val screen = currentScreen()
+        if (choice != null && screen != null) applyWarpEndpoint(screen, choice)
+    }
+
+    // edit_wireguard.cpp applyWarpEndpoint
+    private fun applyWarpEndpoint(screen: PreferenceFragmentCompat, choice: WarpFinderActivity.Choice) {
+        screen.setFieldText("peer.address", choice.entry.cidr)
+        if (choice.entry.port > 0) screen.setFieldText("peer.port", choice.entry.port.toString())
+        val amnezia = screen.findPreference<TwoStatePreference>("enable_amnezia")
+        if (choice.junk && amnezia != null && !amnezia.isChecked) {
+            // The rows take the junk as Amnezia Options writes it; the rest of the AmneziaWG set is cleared.
+            val junk = WireGuard().also { ScanProfiles.applyWarpJunk(it) }
+            for ((key, value) in listOf(
+                "jc" to junk.jc, "jmin" to junk.jmin, "jmax" to junk.jmax, "s1" to junk.s1, "s2" to junk.s2, "s3" to junk.s3,
+                "s4" to junk.s4,
+            )) screen.setFieldText(key, value.toString())
+            for ((key, value) in listOf(
+                "h1" to junk.h1, "h2" to junk.h2, "h3" to junk.h3, "h4" to junk.h4, "i1" to junk.i1, "i2" to junk.i2,
+                "i3" to junk.i3, "i4" to junk.i4, "i5" to junk.i5, "header_protection_key" to junk.header_protection_key,
+                "content_padding_addition" to junk.content_padding_addition, "rekey_after_time" to junk.rekey_after_time,
+                "rekey_timeout" to junk.rekey_timeout, "reject_after_time" to junk.reject_after_time,
+                "keepalive_timeout" to junk.keepalive_timeout, "max_handshake_attempts" to junk.max_handshake_attempts,
+            )) screen.setFieldText(key, value)
+            screen.findPreference<TwoStatePreference>("random_trailers")?.isChecked = junk.random_trailers
+            screen.findPreference<TwoStatePreference>("disable_cookies")?.isChecked = junk.disable_cookies
+            amnezia.isChecked = true
+            showAmnezia(screen, true)
+            form?.refresh()
+        }
+        if (choice.ownAddress) useOwnEndpoint()
     }
 
     // edit_wireguard_amnezia.cpp generateSignature
@@ -191,6 +252,8 @@ class WireGuardSettingsActivity : BindingSettingsActivity<WireGuard>() {
 
     private companion object {
         const val KEY_QUIC_SIGNATURE = "amneziaQuicSignature"
+        const val KEY_WARP_FIND = "warpFind"
+        const val WARP_HOST_SUFFIX = ".cloudflareclient.com"
         val SIGNATURE_FIELDS = listOf("i1", "i2", "i3", "i4", "i5")
 
         // Offered again next time, like the desktop's lastSignatureDomain.

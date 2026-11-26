@@ -7,6 +7,7 @@ enum class RowPhase { QUEUED, TESTING, DONE }
 /**
  * Live state of one profile in the running (or last) session; result fields follow the desktop encodings.
  * [ok]/[failed] are the session's verdict for its kind; a DONE row with neither was aborted or never reported.
+ * [inconclusive]: a URL failure while the local network was down or changed, which kept the earlier result.
  */
 data class RowState(
     val phase: RowPhase,
@@ -18,6 +19,7 @@ data class RowState(
     val ip: String = "",
     val ok: Boolean = false,
     val failed: Boolean = false,
+    val inconclusive: Boolean = false,
 ) {
     val aborted: Boolean get() = phase == RowPhase.DONE && !ok && !failed
 }
@@ -153,6 +155,9 @@ data class TestUiState(
 
     /** Ids of the failed profiles still present. */
     fun failedIds(): List<Long> = rows.entries.filter { it.value.failed && it.key !in removed }.map { it.key }
+
+    /** Ids of the profiles left untested because the network was unavailable. */
+    fun inconclusiveIds(): List<Long> = rows.entries.filter { it.value.inconclusive }.map { it.key }
 
     companion object {
         /** `speed_test_mode` values (desktop TestConfig::SpeedTestMode). */

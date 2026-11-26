@@ -309,8 +309,7 @@ class CoreSettingsFragment : SettingsScreenFragment(R.xml.settings_core) {
         }
 
         reloadOn(
-            SettingsRegistry.XRAY_LOG_LEVEL.key, SettingsRegistry.ENABLE_STATS.key,
-            SettingsRegistry.DISABLE_TRAFFIC_STATS.key, SettingsRegistry.SKIP_CERT.key,
+            SettingsRegistry.XRAY_LOG_LEVEL.key, SettingsRegistry.ENABLE_STATS.key, SettingsRegistry.SKIP_CERT.key,
             SettingsRegistry.USE_MOZILLA_CERTS.key, SettingsRegistry.XRAY_USE_SYSTEM_CA.key,
             SettingsRegistry.NTP_OUTBOUND.key,
         )

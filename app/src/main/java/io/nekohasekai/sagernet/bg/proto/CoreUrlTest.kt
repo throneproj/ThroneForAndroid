@@ -35,7 +35,8 @@ suspend fun urlTestCurrent(instance: Instance, core: CoreConfig, url: String, ti
     TestTags.holding(listOf(TestTags.ofCurrent(core.coreConfig), TestTags.CURRENT)) {
         suspendCancellableCoroutine<Unit> { continuation ->
             Mobile.startURLTest(instance, CoreRuntime.platform, request, object : URLTestHandler {
-                override fun onResult(tag: String?, latencyMs: Int, error: String?) {
+                // Shown, never stored: an inconclusive failure is reported like any other (url_test_current).
+                override fun onResult(tag: String?, latencyMs: Int, error: String?, inconclusive: Boolean) {
                     if (error.isNullOrEmpty()) latency.set(latencyMs) else failure.set(error)
                 }
 
