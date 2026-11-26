@@ -16,7 +16,6 @@
             app:title="@string/grp_sub_auto_update_interval" />
         <SwitchPreference
             app:key="sub_respect_server_interval"
-            app:summary="@string/sub_respect_server_interval_tip"
             app:title="@string/sub_respect_server_interval_title" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:entries="@array/sub_tls_version_entries"
@@ -34,7 +33,6 @@
             app:title="@string/grp_sub_clear" />
         <SwitchPreference
             app:key="sub_show_change_popup"
-            app:summary="@string/grp_sub_show_change_popup_tip"
             app:title="@string/grp_sub_show_change_popup" />
         <SwitchPreference
             app:icon="@drawable/ic_baseline_fingerprint_24"

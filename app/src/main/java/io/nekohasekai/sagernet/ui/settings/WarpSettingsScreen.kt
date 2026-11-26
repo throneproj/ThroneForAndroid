@@ -2,7 +2,6 @@ package io.nekohasekai.sagernet.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.annotation.StringRes
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
@@ -45,8 +44,7 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         exit.entries = ExitThrough.entries.map { exitLabel(requireContext(), it) }.toTypedArray()
         exit.entryValues = ExitThrough.entries.map { it.value }.toTypedArray()
         exit.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
-            val chosen = ExitThrough.of(it.value)
-            exitLabel(requireContext(), chosen) + "\n" + getString(exitHint(chosen))
+            exitLabel(requireContext(), ExitThrough.of(it.value))
         }
         exit.setOnPreferenceChangeListener { _, newValue ->
             val chosen = ExitThrough.of(newValue as String)
@@ -62,9 +60,6 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         val wireGuard = pref<PreferenceCategory>(KEY_WIREGUARD)
         val masque = pref<PreferenceCategory>(KEY_MASQUE)
         val mode = pref<SimpleMenuPreference>(SettingsRegistry.WARP_MODE.key)
-        mode.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
-            getString(R.string.warp_mode_sum, it.entry ?: "")
-        }
         fun showMode(value: String?) {
             masque.isVisible = value == WarpClient.TUNNEL_MASQUE
             wireGuard.isVisible = !masque.isVisible
@@ -98,9 +93,6 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         )) itemList(setting.key)
 
         val httpMode = pref<SimpleMenuPreference>(SettingsRegistry.WARP_MASQUE_HTTP_MODE.key)
-        httpMode.summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
-            getString(R.string.warp_http_version_sum, it.entry ?: "")
-        }
         httpMode.setOnPreferenceChangeListener { _, _ ->
             reloadIfEnabled()
             true
@@ -237,12 +229,6 @@ class WarpSettingsFragment : SettingsScreenFragment(R.xml.settings_warp) {
         fun exitLabel(context: Context, exit: ExitThrough): String = when (exit) {
             ExitThrough.SERVER -> context.getString(R.string.exit_server)
             ExitThrough.WARP -> exit.displayName
-        }
-
-        @StringRes
-        fun exitHint(exit: ExitThrough): Int = when (exit) {
-            ExitThrough.SERVER -> R.string.exit_server_hint
-            ExitThrough.WARP -> R.string.warp_enable_sum
         }
     }
 }

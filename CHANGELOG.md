@@ -1,3 +1,40 @@
+#### 2.1.0
+
+* Add WARP endpoint finder **1**
+* Add resolver scan for DNS tunnels **2**
+* Add IP lists as a server address source **3**
+* Add sign-in prompt for OpenVPN and OpenConnect **4**
+* Add country filter to subscriptions **5**
+* Rework the subscription card **6**
+* Choose which test results a group shows and clear them by kind
+* Add a list editor for DNS servers
+* Simplify Auto Selector settings
+* Reduce battery usage while the screen is off
+* Remove Juicity
+* Keep only the Persian, Russian and Simplified Chinese translations
+* Update sing-box and Go
+* Fix Use proxy requests going direct when the mixed inbound is disabled
+* Fix WARP through an Xray VLESS profile dropping connections
+* Fixes and Improvements
+
+**1**:
+In a WARP profile's editor, searches for an endpoint that works on your network.
+
+**2**:
+In a DNSTT, MasterDNS or XDNS profile's editor, scans an IP list for resolvers that relay the tunnel.
+
+**3**:
+IP lists are managed from the Routing menu. A profile can take its server address from one, e.g. a scan's results.
+
+**4**:
+A notification asks for the one-time password or other answer the server requests while connecting.
+
+**5**:
+Set Countries in the group's settings, e.g. HK,JP to keep only those or !RU to remove one.
+
+**6**:
+The card shows only the group name. Provider info and announcements moved to Subscription details, with a dot for a new announcement.
+
 #### 2.0.7
 
 * Add Service check **1**

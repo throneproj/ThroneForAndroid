@@ -679,7 +679,7 @@
     <string name="direct_test_url_empty">состояние сети системы</string>
     <string name="cag_exit_country">Страна выхода</string>
     <string name="exit_country_lookup">Определять страну выхода</string>
-    <string name="exit_country_lookup_sum">После подключения запрашивать у сервиса определения IP (через прокси), с какого IP-адреса и из какой страны выходит соединение. Если выключено, такие сервисы автоматически не опрашиваются.</string>
+    <string name="exit_country_lookup_sum">После подключения узнавать выходной IP и страну через прокси</string>
     <string name="exit_lookup_provider">Сервис определения IP</string>
     <string name="exit_lookup_provider_auto">Автоматически</string>
     <string name="direct_test_url_sum">Запрашивается без какого-либо прокси, чтобы отличать обрыв связи от отказа серверов. Пусто — используется состояние сети системы.</string>
@@ -732,7 +732,7 @@
     <string name="grp_advanced_show">Показать параметры запроса и обновления этой подписки</string>
     <string name="grp_after_each_update">После каждого обновления:</string>
     <string name="grp_allow_stopping_active_profile">Разрешить остановку активного профиля</string>
-    <string name="grp_allow_stopping_active_profile_tip">Если включено, активный профиль, подлежащий удалению, сначала останавливается, затем удаляется. Иначе он не удаляется вовсе.</string>
+    <string name="grp_allow_stopping_active_profile_tip">Иначе обновление никогда не удаляет запущенный профиль</string>
     <string name="grp_auto_clear_unavailable">Автоочистка недоступных профилей</string>
     <string name="grp_auto_update">Автообновление</string>
     <string name="grp_change_of">Изменения: %1$s</string>
@@ -765,7 +765,7 @@
     <string name="grp_route_profile">Маршрутизирующий профиль</string>
     <string name="grp_route_profile_default">По умолчанию (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (из этой подписки)</string>
-    <string name="grp_route_profile_tip">Маршрутизирующий профиль, с которым подключаются профили этой группы. «По умолчанию» следует маршрутизирующему профилю, выбранному в меню «Маршруты».</string>
+    <string name="grp_route_profile_tip">«По умолчанию» следует меню «Маршруты»</string>
     <string name="grp_more_options">Другие параметры</string>
     <string name="grp_move_down">Переместить вниз</string>
     <string name="grp_move_up">Переместить вверх</string>
@@ -786,13 +786,12 @@
     <string name="grp_request">Запрос</string>
     <string name="grp_running_kept">Работающий профиль сохранён.</string>
     <string name="grp_send_hwid">Отправлять HWID</string>
-    <string name="grp_send_hwid_tip">Отправлять заголовки HWID, ОС, версии ОС и модели устройства с запросами этой подписки. «Оставить по умолчанию» следует Настройки › Подписки.</string>
     <string name="grp_settings_subscription">Подписка</string>
     <string name="grp_settings_user_agent">UserAgent</string>
     <string name="grp_share_subscription">Поделиться ссылкой подписки</string>
     <string name="grp_skip_auto_update">Пропустить автообновление</string>
     <string name="grp_import_sub_route">Использовать маршрутизирующий профиль подписки</string>
-    <string name="grp_import_sub_route_tip">При каждом обновлении маршрутизирующий профиль из подписки (формат Happ) сохраняется как собственный маршрутизирующий профиль этой группы. Настройки DNS из подписки никогда не используются.</string>
+    <string name="grp_import_sub_route_tip">Сохраняет маршрутизацию подписки (Happ) как маршрутизирующий профиль этой группы; DNS игнорируется</string>
     <string name="grp_sort_by_latency">Сортировать по задержке</string>
     <string name="grp_state_queued">В очереди</string>
     <string name="grp_state_running">Обновление…</string>
@@ -801,13 +800,12 @@
     <string name="grp_sub_clear">Очищать профили перед обновлением подписки</string>
     <string name="grp_sub_custom_hwid_params">Пользовательские параметры HWID (необязательно)</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
-    <string name="grp_sub_custom_hwid_params_tip">Формат: hwid=value,os=value,osVersion=value,model=value\nПусто — значения по умолчанию. Указывайте только параметры, которые хотите переопределить.</string>
+    <string name="grp_sub_custom_hwid_params_tip">Формат: hwid=value,os=value,osVersion=value,model=value\nНеуказанные параметры остаются по умолчанию.</string>
     <string name="grp_sub_info">Использовано %1$s · осталось %2$s · истекает %3$s</string>
     <string name="grp_sub_info_no_expire">Использовано %1$s · осталось %2$s</string>
     <string name="grp_sub_send_hwid">Отправлять HWID, модель устройства и версию ОС при обновлении подписки</string>
     <string name="grp_sub_send_hwid_values">HWID=%1$s\nОС=%2$s\nВерсия ОС=%3$s\nМодель=%4$s</string>
     <string name="grp_sub_show_change_popup">Показывать окно изменений после ручного обновления подписки</string>
-    <string name="grp_sub_show_change_popup_tip">Если включено, после ручного обновления подписки показывается окно со списком добавленных/обновлённых/удалённых профилей. Та же информация всегда пишется в журнал.</string>
     <string name="grp_type">Тип</string>
     <string name="grp_unknown_deeplink">Проигнорирован deep link с неизвестной командой: %1$s</string>
     <string name="grp_update">Обновить</string>
@@ -1454,7 +1452,6 @@
     <string name="warp_disable">Отключить WARP</string>
     <string name="warp_disabled">WARP отключён</string>
     <string name="warp_enable">Включить WARP</string>
-    <string name="warp_enable_sum">Позволяет использовать конфигурацию ниже как выход, полезно для обхода сервисов, ограничивающих не-WARP VPN</string>
     <string name="warp_enabled">WARP включён</string>
     <string name="warp_endpoint">Конечная точка</string>
     <string name="warp_generate_failed">Не удалось создать конфигурацию WARP</string>
@@ -1462,16 +1459,12 @@
     <string name="warp_generate_identity_masque_sum">Зарегистрировать новое устройство Cloudflare WARP для MASQUE и заполните поля ключа, адреса и сервера выше</string>
     <string name="warp_generate_identity_wireguard_sum">Создать учётную запись Cloudflare WARP и заполните поля ключа, адреса и конечной точки выше</string>
     <string name="warp_generate_success">Успешно!</string>
-    <string name="warp_generate_sum">Получает новую конфигурацию выбранного режима из API Cloudflare</string>
     <string name="warp_http3_fallback">HTTP/3 (с откатом на HTTP/2)</string>
     <string name="warp_http3_only">Только HTTP/3</string>
     <string name="warp_http_version">Версия HTTP</string>
-    <string name="warp_http_version_sum">%s\nHTTP/3 работает поверх UDP; HTTP/2 — поверх TLS на TCP и работает там, где UDP заблокирован.</string>
     <string name="warp_identity_failed">Не удалось создать идентификатор WARP</string>
     <string name="warp_interface_addresses">Адреса интерфейса</string>
-    <string name="warp_masque_note">WARP едет поверх вашего прокси: MASQUE через HTTP/3 требует прокси, пересылающего UDP, через HTTP/2 достаточно только TCP.</string>
-    <string name="warp_mode">Режим</string>
-    <string name="warp_mode_sum">%s\nWireGuard работает поверх UDP. AmneziaWG добавляет совместимые с WARP мусорные и маскирующие пакеты. MASQUE туннелирует через HTTP/3 или HTTP/2.</string>
+    <string name="warp_mode">Режим WARP</string>
     <string name="warp_amnezia_generating">Создание подписи QUIC для AmneziaWG…</string>
     <string name="warp_amnezia_missing">У AmneziaWG ещё нет подписи QUIC: нажмите «Создать конфигурацию».</string>
     <string name="warp_not_generated">WARP включён, но его конфигурация не создана. Создайте её в Настройки › Маршрутизация › WARP.</string>
@@ -1485,9 +1478,7 @@
     <string name="warp_settings">Выход</string>
     <string name="exit_through">Выход через</string>
     <string name="exit_server">Выбранный профиль</string>
-    <string name="exit_server_hint">Трафик выходит через запущенный профиль.</string>
     <string name="warp_tos_message"><![CDATA[Создание идентификатора WARP регистрирует новое устройство в Cloudflare.<br><br>Принимаете ли вы <a href="%1$s">условия использования Cloudflare WARP</a>?]]></string>
-    <string name="warp_wireguard_note">WARP едет поверх вашего прокси: WireGuard требует прокси, пересылающего UDP.</string>
     <string name="webdav_choose_backup">Выбрать резервную копию</string>
     <string name="webdav_downloading">Загрузка из WebDAV…</string>
     <string name="webdav_deleting">Удаление из WebDAV…</string>
@@ -1913,8 +1904,6 @@
     <string name="route_rule_tls_fragment_fallback_delay">Резервная задержка фрагментации TLS</string>
     <string name="route_rule_tls_fragment_fallback_delay_hint">Сколько ждать между сегментами, когда ожидание нельзя измерить; длительность вида 500ms (по умолчанию)</string>
     <string name="route_rule_tls_record_fragment_sum">Разбивать TLS-хэндшейк на несколько записей TLS</string>
-    <string name="outbound_domain_strategy_sum">Используется для разрешения адресов прокси-серверов и доменов, к которым подключается прямой исходящий</string>
-    <string name="resolve_domain_strategy_sum">Применяется к подключениям по доменным именам: с FakeIP или для трафика HTTP/SOCKS (входящий). Без FakeIP VPN-приложения разрешают имена сами, поэтому режимы prefer там не действуют. Режимы only убирают другое семейство адресов из ответов DNS, которые получают приложения; это также переопределяет стратегии разрешения отдельных правил и записи hosts/предопределённых ответов для этого семейства (для режима только IPv6 дополнительно нужен Tun IPv6)</string>
     <string name="picker_copy_to_proxied_apps">Скопировать в режим VPN для приложений</string>
     <string name="picker_copy_none">Нечего копировать: неизвестные приложения нельзя перечислить в режиме VPN для приложений</string>
     <string name="picker_copy_done">Режим VPN для приложений обновлён. Перезагрузите службу, чтобы применить изменения.</string>
@@ -1931,22 +1920,19 @@
     <string name="sub_tls_13">TLS 1.3</string>
     <string name="sub_http_11">HTTP/1.1</string>
     <string name="grp_tls_version">Версия TLS</string>
-    <string name="grp_tls_version_tip">Версии TLS, предлагаемые при загрузке этой подписки. Некоторые серверы отвечают на стандартный хэндшейк CAPTCHA или страницей блокировки; с TLS 1.2 это часто удаётся обойти. «Оставить по умолчанию» следует значению из Настройки › Подписки.</string>
     <string name="grp_http_version">Версия HTTP</string>
-    <string name="grp_http_version_tip">Авто использует HTTP/2, если сервер его предлагает. «Оставить по умолчанию» следует значению из Настройки › Подписки.</string>
     <string name="grp_update_interval">Интервал обновления (минуты)</string>
-    <string name="grp_update_interval_tip">Минут между автоматическими обновлениями этой подписки, не менее 30, даже если автообновление выключено в Настройки › Подписки. Пусто — используется значение оттуда.</string>
+    <string name="grp_update_interval_tip">Не менее 30 минут, действует, даже если автообновление выключено</string>
     <string name="grp_server_interval">Интервал от сервера</string>
-    <string name="grp_server_interval_tip">Использовать интервал обновления, присланный сервером подписки, даже если автообновление выключено в Настройки › Подписки; если сервер его не присылает, действует интервал выше. «Оставить по умолчанию» следует значению оттуда.</string>
+    <string name="grp_server_interval_tip">Использовать интервал от сервера, даже если автообновление выключено</string>
     <string name="grp_server_interval_use">Использовать</string>
     <string name="grp_server_interval_ignore">Игнорировать</string>
     <string name="grp_server_interval_last">Последнее значение от сервера: %1$d ч.</string>
     <string name="sub_tls_version_title">Версия TLS для подписок</string>
-    <string name="sub_tls_version_tip">Версии TLS, предлагаемые при загрузке подписок. Некоторые серверы отвечают на стандартный хэндшейк CAPTCHA или страницей блокировки; с TLS 1.2 это часто удаётся обойти.</string>
+    <string name="sub_tls_version_tip">TLS 1.2 часто помогает обойти CAPTCHA или страницу блокировки</string>
     <string name="sub_http_version_title">Версия HTTP для подписок</string>
     <string name="sub_http_version_tip">Авто использует HTTP/2, если сервер его предлагает.</string>
     <string name="sub_respect_server_interval_title">Использовать интервал обновления от сервера</string>
-    <string name="sub_respect_server_interval_tip">Подписки, сервер которых присылает интервал обновления (profile-update-interval), следуют ему; если сервер его не присылает, действует интервал выше. Группы могут переопределить это в своих дополнительных настройках.</string>
     <string name="subs_url_changed">URL подписки %1$s изменился во время обновления, поэтому результат отброшен.</string>
     <string name="subs_web_page">Сервер вернул веб-страницу вместо подписки. Если это CAPTCHA или проверка на бота, попробуйте другую версию TLS, версию HTTP или User-Agent в дополнительных настройках группы.</string>
     <string name="subs_tls_unsupported">Выбранная версия TLS не поддерживается в этой системе.</string>
@@ -2893,12 +2879,12 @@
     <string name="grp_filter_countries_keeps">Оставляет: %1$s.</string>
     <string name="grp_filter_countries_removes">Удаляет: %1$s.</string>
     <plurals name="grp_filter_countries_test_count">
-        <item quantity="one">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP, поэтому следующее обновление может проверить до %1$d профиля. Для большой группы это займёт некоторое время.</item>
-        <item quantity="few">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP, поэтому следующее обновление может проверить до %1$d профилей. Для большой группы это займёт некоторое время.</item>
-        <item quantity="many">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP, поэтому следующее обновление может проверить до %1$d профилей. Для большой группы это займёт некоторое время.</item>
-        <item quantity="other">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP, поэтому следующее обновление может проверить до %1$d профиля. Для большой группы это займёт некоторое время.</item>
+        <item quantity="one">Каждое обновление проверяет до %1$d профиля с неизвестной страной выхода</item>
+        <item quantity="few">Каждое обновление проверяет до %1$d профилей с неизвестной страной выхода</item>
+        <item quantity="many">Каждое обновление проверяет до %1$d профилей с неизвестной страной выхода</item>
+        <item quantity="other">Каждое обновление проверяет до %1$d профиля с неизвестной страной выхода</item>
     </plurals>
-    <string name="grp_filter_countries_test">После каждого обновления профили с неизвестной страной выхода проходят тест выходного IP. Для большой подписки это займёт некоторое время.</string>
+    <string name="grp_filter_countries_test">Каждое обновление проверяет профили с неизвестной страной выхода</string>
     <string name="validation_country_rules">Не двухбуквенный код страны: %1$s. Укажите коды вроде HK,JP, чтобы оставить только эти страны, или !RU, чтобы убрать одну.</string>
     <string name="subs_filter_bad_countries">Пропущено (не двухбуквенный код страны): %1$s</string>
     <string name="subs_country_none_accepted">Правила стран не пропускают ни один из проверенных профилей (%1$d), поэтому ничего не удалено.</string>

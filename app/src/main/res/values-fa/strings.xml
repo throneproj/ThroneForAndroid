@@ -703,7 +703,7 @@
     <string name="direct_test_url_empty">وضعیت شبکه سیستم</string>
     <string name="cag_exit_country">کشور خروجی</string>
     <string name="exit_country_lookup">استعلام کشور خروجی</string>
-    <string name="exit_country_lookup_sum">پس از اتصال، از یک سرویس استعلام IP (از طریق پراکسی) پرسیده می‌شود که اتصال از کدام آدرس IP و کدام کشور خارج می‌شود. وقتی خاموش است، با هیچ سرویسی از این نوع به‌طور خودکار ارتباط گرفته نمی‌شود.</string>
+    <string name="exit_country_lookup_sum">پس از اتصال، IP و کشور خروجی از طریق پراکسی استعلام می‌شود</string>
     <string name="exit_lookup_provider">سرویس استعلام</string>
     <string name="exit_lookup_provider_auto">خودکار</string>
     <string name="direct_test_url_sum">بدون هیچ پراکسی واکشی می‌شود تا اتصال مرده از سرور مرده تمیز داده شود. خالی بگذارید تا از وضعیت شبکه سیستم استفاده شود.</string>
@@ -756,7 +756,7 @@
     <string name="grp_advanced_show">نمایش گزینه‌های درخواست و به‌روزرسانی این اشتراک</string>
     <string name="grp_after_each_update">پس از هر به‌روزرسانی:</string>
     <string name="grp_allow_stopping_active_profile">اجازه توقف پروفایل فعال</string>
-    <string name="grp_allow_stopping_active_profile_tip">در حالت فعال، پروفایل فعالی که باید حذف شود متوقف و حذف می‌شود. در غیر این صورت اصلاً حذف نمی‌شود.</string>
+    <string name="grp_allow_stopping_active_profile_tip">در غیر این صورت به‌روزرسانی هرگز پروفایل در حال اجرا را حذف نمی‌کند</string>
     <string name="grp_auto_clear_unavailable">پاک‌سازی خودکار پروفایل‌های در دسترس نبوده</string>
     <string name="grp_auto_update">به‌روزرسانی خودکار</string>
     <string name="grp_change_of">تغییر %1$s</string>
@@ -789,7 +789,7 @@
     <string name="grp_route_profile">پروفایل مسیریابی</string>
     <string name="grp_route_profile_default">پیش‌فرض (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (از این اشتراک)</string>
-    <string name="grp_route_profile_tip">پروفایل مسیریابی‌ای که پروفایل‌های این گروه هنگام اتصال از آن استفاده می‌کنند. \"پیش‌فرض\" از پروفایل مسیریابی انتخاب‌شده در منوی \"مسیریابی\" پیروی می‌کند.</string>
+    <string name="grp_route_profile_tip">\"پیش‌فرض\" از منوی \"مسیریابی\" پیروی می‌کند</string>
     <string name="grp_more_options">گزینه‌های بیشتر</string>
     <string name="grp_move_down">انتقال به پایین</string>
     <string name="grp_move_up">انتقال به بالا</string>
@@ -810,13 +810,12 @@
     <string name="grp_request">درخواست</string>
     <string name="grp_running_kept">پروفایل در حال اجرا نگه داشته شد.</string>
     <string name="grp_send_hwid">ارسال شناسه سخت‌افزار</string>
-    <string name="grp_send_hwid_tip">ارسال سرآیندهای شناسه سخت‌افزار، سیستم‌عامل، نسخه سیستم‌عامل و مدل دستگاه با درخواست‌های این اشتراک. «حفظ پیش‌فرض» از تنظیمات › اشتراک‌ها پیروی می‌کند.</string>
     <string name="grp_settings_subscription">اشتراک</string>
     <string name="grp_settings_user_agent">عامل کاربر</string>
     <string name="grp_share_subscription">اشتراک‌گذاری پیوند اشتراک</string>
     <string name="grp_skip_auto_update">رد کردن به‌روزرسانی خودکار</string>
     <string name="grp_import_sub_route">استفاده از پروفایل مسیریابی اشتراک</string>
-    <string name="grp_import_sub_route_tip">هر به‌روزرسانی، پروفایل مسیریابی ارائه‌شده توسط اشتراک (قالب Happ) را به‌عنوان پروفایل مسیریابی خود این گروه ذخیره می‌کند. تنظیمات DNS اشتراک هرگز استفاده نمی‌شوند.</string>
+    <string name="grp_import_sub_route_tip">مسیریابی Happ اشتراک را به‌عنوان پروفایل مسیریابی این گروه ذخیره می‌کند؛ DNS آن نادیده گرفته می‌شود</string>
     <string name="grp_sort_by_latency">مرتب‌سازی بر اساس تأخیر</string>
     <string name="grp_state_queued">در صف</string>
     <string name="grp_state_running">در حال به‌روزرسانی…</string>
@@ -825,13 +824,12 @@
     <string name="grp_sub_clear">پاک‌کردن پروفایل‌ها پیش از به‌روزرسانی اشتراک</string>
     <string name="grp_sub_custom_hwid_params">پارامترهای سفارشی شناسه سخت‌افزار (اختیاری)</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
-    <string name="grp_sub_custom_hwid_params_tip">قالب: hwid=value,os=value,osVersion=value,model=value\nبرای استفاده از مقادیر پیش‌فرض خالی بگذارید. فقط پارامترهایی را که می‌خواهید بازنویسی کنید مشخص کنید.</string>
+    <string name="grp_sub_custom_hwid_params_tip">قالب: hwid=value,os=value,osVersion=value,model=value\nپارامترهای ذکرنشده مقدار پیش‌فرض خود را نگه می‌دارند.</string>
     <string name="grp_sub_info">مصرف‌شده %1$s · باقی‌مانده %2$s · انقضا %3$s</string>
     <string name="grp_sub_info_no_expire">مصرف‌شده %1$s · باقی‌مانده %2$s</string>
     <string name="grp_sub_send_hwid">فعال‌سازی ارسال شناسه سخت‌افزار، مدل دستگاه و نسخه سیستم‌عامل هنگام به‌روزرسانی اشتراک</string>
     <string name="grp_sub_send_hwid_values">HWID=%1$s\nOS=%2$s\nOS Version=%3$s\nModel=%4$s</string>
     <string name="grp_sub_show_change_popup">نمایش پنجره تغییرات پس از به‌روزرسانی دستی اشتراک</string>
-    <string name="grp_sub_show_change_popup_tip">در حالت فعال، پنجره‌ای فهرست‌کننده پروفایل‌های اضافه/به‌روزرسانی/حذف‌شده پس از به‌روزرسانی دستی اشتراک نمایش داده می‌شود. همین اطلاعات همیشه در گزارش ثبت می‌شود.</string>
     <string name="grp_type">نوع</string>
     <string name="grp_unknown_deeplink">پیوند عمیق با فرمان ناشناخته نادیده گرفته شد: %1$s</string>
     <string name="grp_update">به‌روزرسانی</string>
@@ -1478,7 +1476,6 @@
     <string name="warp_disable">غیرفعال‌سازی WARP</string>
     <string name="warp_disabled">WARP غیرفعال شد</string>
     <string name="warp_enable">فعال‌سازی WARP</string>
-    <string name="warp_enable_sum">پیکربندی زیر را می‌توان به‌عنوان خروجی استفاده کرد، برای دور زدن سرویس‌هایی که VPN غیر WARP را محدود می‌کنند مفید است</string>
     <string name="warp_enabled">WARP فعال شد</string>
     <string name="warp_endpoint">نقطه پایانی</string>
     <string name="warp_generate_failed">ایجاد پیکربندی WARP شکست خورد</string>
@@ -1486,16 +1483,12 @@
     <string name="warp_generate_identity_masque_sum">ثبت یک دستگاه جدید Cloudflare WARP برای MASQUE و پر کردن فیلدهای کلید، آدرس و سرور در بالا</string>
     <string name="warp_generate_identity_wireguard_sum">ایجاد یک حساب Cloudflare WARP و پر کردن فیلدهای کلید، آدرس و نقطه پایانی در بالا</string>
     <string name="warp_generate_success">موفق!</string>
-    <string name="warp_generate_sum">دریافت یک پیکربندی جدید از حالت انتخاب‌شده از API Cloudflare</string>
     <string name="warp_http3_fallback">HTTP/3 (بازگشت به HTTP/2)</string>
     <string name="warp_http3_only">فقط HTTP/3</string>
     <string name="warp_http_version">نسخه HTTP</string>
-    <string name="warp_http_version_sum">%s\nHTTP/3 روی UDP اجرا می‌شود؛ HTTP/2 روی TLS روی TCP اجرا می‌شود و جایی که UDP مسدود است کار می‌کند.</string>
     <string name="warp_identity_failed">ایجاد هویت WARP شکست خورد</string>
     <string name="warp_interface_addresses">آدرس‌های واسط</string>
-    <string name="warp_masque_note">WARP روی پراکسی شما سوار می‌شود: MASQUE روی HTTP/3 به پراکسی‌ای نیاز دارد که UDP را منتقل کند، روی HTTP/2 فقط TCP کافی است.</string>
-    <string name="warp_mode">حالت</string>
-    <string name="warp_mode_sum">%s\nWireGuard روی UDP اجرا می‌شود. AmneziaWG بسته‌های junk و استتار سازگار با WARP اضافه می‌کند. MASQUE روی HTTP/3 یا HTTP/2 تونل می‌زند.</string>
+    <string name="warp_mode">حالت WARP</string>
     <string name="warp_amnezia_generating">در حال ایجاد امضای QUIC برای AmneziaWG…</string>
     <string name="warp_amnezia_missing">AmneziaWG هنوز امضای QUIC ندارد: روی «ایجاد پیکربندی» بزنید.</string>
     <string name="warp_not_generated">WARP فعال است اما پیکربندی آن ایجاد نشده. آن را در تنظیمات › مسیریابی › WARP ایجاد کنید.</string>
@@ -1505,7 +1498,6 @@
     <string name="warp_registration">ثبت</string>
     <string name="warp_reserved">رزروشده</string>
     <string name="warp_tos_message"><![CDATA[ایجاد هویت WARP یک دستگاه جدید در Cloudflare ثبت می‌کند.<br><br>آیا <a href="%1$s">شرایط خدمات Cloudflare WARP</a> را می‌پذیرید؟]]></string>
-    <string name="warp_wireguard_note">WARP روی پراکسی شما سوار می‌شود: WireGuard به پراکسی‌ای نیاز دارد که UDP را منتقل کند.</string>
     <string name="webdav_choose_backup">انتخاب پشتیبان</string>
     <string name="webdav_downloading">در حال دانلود از WebDAV…</string>
     <string name="webdav_deleting">در حال حذف از WebDAV…</string>
@@ -1754,7 +1746,6 @@
     <string name="warp_settings">خروجی</string>
     <string name="exit_through">خروج از طریق</string>
     <string name="exit_server">پروفایل انتخاب‌شده</string>
-    <string name="exit_server_hint">ترافیک از پروفایلی که اجرا کرده‌اید خارج می‌شود.</string>
 
     <string name="ech_query_target_hint">دامنه، یا دامنه+حل‌کننده (مثلاً cloudflare-ech.com+https://1.1.1.1/dns-query)</string>
     <string name="certificate_sha256">SHA256 گواهی</string>
@@ -1883,8 +1874,6 @@
     <string name="route_rule_tls_fragment_fallback_delay">تأخیر بازگشت قطعه‌بندی TLS</string>
     <string name="route_rule_tls_fragment_fallback_delay_hint">مدت انتظار بین بخش‌ها وقتی زمان انتظار قابل اندازه‌گیری نیست، به‌صورت یک مدت‌زمان مانند 500ms (پیش‌فرض)</string>
     <string name="route_rule_tls_record_fragment_sum">handshake TLS را به چند رکورد TLS تقسیم می‌کند</string>
-    <string name="outbound_domain_strategy_sum">برای حل آدرس سرورهای پراکسی و دامنه‌هایی که خروجی مستقیم به آن‌ها وصل می‌شود استفاده می‌شود</string>
-    <string name="resolve_domain_strategy_sum">برای اتصال‌هایی که به نام دامنه برقرار می‌شوند اعمال می‌شود: با FakeIP، یا ترافیک (ورودی) HTTP/SOCKS. بدون FakeIP برنامه‌های VPN نام‌ها را خودشان حل می‌کنند، بنابراین حالت‌های prefer در آنجا اثری ندارند. حالت‌های only خانواده دیگر را از پاسخ‌های DNS که برنامه‌ها دریافت می‌کنند حذف می‌کنند، که استراتژی‌های حل هر قانون و ورودی‌های hosts/از پیش تعریف‌شده آن خانواده را نیز بازنویسی می‌کند (حالت فقط IPv6 به Tun IPv6 هم نیاز دارد)</string>
     <string name="picker_copy_to_proxied_apps">کپی به حالت VPN برنامه‌ها</string>
     <string name="picker_copy_none">برنامه‌ای برای کپی نیست: برنامه‌های ناشناخته را نمی‌توان در حالت VPN برنامه‌ها فهرست کرد</string>
     <string name="picker_copy_done">حالت VPN برنامه‌ها به‌روزرسانی شد. برای اعمال آن، سرویس را دوباره راه‌اندازی کنید.</string>
@@ -1901,22 +1890,19 @@
     <string name="sub_tls_13">TLS 1.3</string>
     <string name="sub_http_11">HTTP/1.1</string>
     <string name="grp_tls_version">نسخه TLS</string>
-    <string name="grp_tls_version_tip">نسخه‌های TLS که هنگام دریافت این اشتراک ارائه می‌شوند. برخی سرورها به handshake پیش‌فرض با CAPTCHA یا صفحه مسدودسازی پاسخ می‌دهند؛ TLS 1.2 اغلب عبور می‌کند. «حفظ پیش‌فرض» از تنظیمات › اشتراک‌ها پیروی می‌کند.</string>
     <string name="grp_http_version">نسخه HTTP</string>
-    <string name="grp_http_version_tip">حالت خودکار در صورت پشتیبانی سرور از HTTP/2 از آن استفاده می‌کند. «حفظ پیش‌فرض» از تنظیمات › اشتراک‌ها پیروی می‌کند.</string>
     <string name="grp_update_interval">بازه به‌روزرسانی (دقیقه)</string>
-    <string name="grp_update_interval_tip">تعداد دقیقه‌های بین به‌روزرسانی‌های خودکار این اشتراک، حداقل 30، حتی وقتی به‌روزرسانی خودکار در تنظیمات › اشتراک‌ها خاموش است. خالی از همان تنظیم پیروی می‌کند.</string>
+    <string name="grp_update_interval_tip">حداقل 30 دقیقه، حتی وقتی به‌روزرسانی خودکار خاموش است اعمال می‌شود</string>
     <string name="grp_server_interval">بازه سرور</string>
-    <string name="grp_server_interval_tip">از بازه به‌روزرسانی‌ای که سرور اشتراک می‌فرستد استفاده کن، حتی وقتی به‌روزرسانی خودکار در تنظیمات › اشتراک‌ها خاموش است؛ اگر سرور چیزی نفرستد بازه بالا اعمال می‌شود. «حفظ پیش‌فرض» از همان تنظیم پیروی می‌کند.</string>
+    <string name="grp_server_interval_tip">از بازه‌ای که سرور می‌فرستد استفاده کن، حتی وقتی به‌روزرسانی خودکار خاموش است</string>
     <string name="grp_server_interval_use">استفاده</string>
     <string name="grp_server_interval_ignore">نادیده گرفتن</string>
     <string name="grp_server_interval_last">این سرور آخرین بار %1$d ساعت فرستاد.</string>
     <string name="sub_tls_version_title">نسخه TLS اشتراک</string>
-    <string name="sub_tls_version_tip">نسخه‌های TLS که هنگام دریافت اشتراک‌ها ارائه می‌شوند. برخی سرورها به handshake پیش‌فرض با CAPTCHA یا صفحه مسدودسازی پاسخ می‌دهند؛ TLS 1.2 اغلب عبور می‌کند.</string>
+    <string name="sub_tls_version_tip">TLS 1.2 اغلب از CAPTCHA یا صفحه مسدودسازی عبور می‌کند</string>
     <string name="sub_http_version_title">نسخه HTTP اشتراک</string>
     <string name="sub_http_version_tip">حالت خودکار در صورت پشتیبانی سرور از HTTP/2 از آن استفاده می‌کند.</string>
     <string name="sub_respect_server_interval_title">استفاده از بازه به‌روزرسانی ارسالی سرور</string>
-    <string name="sub_respect_server_interval_tip">اشتراک‌هایی که سرورشان بازه به‌روزرسانی (profile-update-interval) می‌فرستد از آن پیروی می‌کنند؛ اگر سروری چیزی نفرستد بازه بالا اعمال می‌شود. گروه‌ها می‌توانند این را در تنظیمات پیشرفته خود بازنویسی کنند.</string>
     <string name="subs_url_changed">URL مربوط به %1$s در طول به‌روزرسانی تغییر کرد، بنابراین نتیجه کنار گذاشته شد.</string>
     <string name="subs_web_page">سرور به‌جای اشتراک یک صفحه وب برگرداند. اگر CAPTCHA یا بررسی ربات است، در تنظیمات پیشرفته گروه نسخه TLS، نسخه HTTP یا عامل کاربر دیگری را امتحان کنید.</string>
     <string name="subs_tls_unsupported">نسخه TLS انتخاب‌شده در این سیستم پشتیبانی نمی‌شود.</string>
@@ -2839,10 +2825,10 @@
     <string name="grp_filter_countries_keeps">%1$s را نگه می‌دارد.</string>
     <string name="grp_filter_countries_removes">%1$s را حذف می‌کند.</string>
     <plurals name="grp_filter_countries_test_count">
-        <item quantity="one">پس از هر به‌روزرسانی، پروفایل‌هایی که کشور خروجی‌شان نامعلوم است آزمایش IP خروجی می‌شوند، بنابراین به‌روزرسانی بعدی ممکن است تا %1$d پروفایل را آزمایش کند. در یک گروه بزرگ این کار مدتی طول می‌کشد.</item>
-        <item quantity="other">پس از هر به‌روزرسانی، پروفایل‌هایی که کشور خروجی‌شان نامعلوم است آزمایش IP خروجی می‌شوند، بنابراین به‌روزرسانی بعدی ممکن است تا %1$d پروفایل را آزمایش کند. در یک گروه بزرگ این کار مدتی طول می‌کشد.</item>
+        <item quantity="one">هر به‌روزرسانی تا %1$d پروفایل با کشور خروجی نامعلوم را آزمایش می‌کند</item>
+        <item quantity="other">هر به‌روزرسانی تا %1$d پروفایل با کشور خروجی نامعلوم را آزمایش می‌کند</item>
     </plurals>
-    <string name="grp_filter_countries_test">پس از هر به‌روزرسانی، پروفایل‌هایی که کشور خروجی‌شان نامعلوم است آزمایش IP خروجی می‌شوند. در یک اشتراک بزرگ این کار مدتی طول می‌کشد.</string>
+    <string name="grp_filter_countries_test">هر به‌روزرسانی پروفایل‌های با کشور خروجی نامعلوم را آزمایش می‌کند</string>
     <string name="validation_country_rules">کد دوحرفی کشور نیست: %1$s. برای نگه داشتن فقط همان کشورها از کدهایی مانند HK,JP، یا برای حذف یک کشور از !RU استفاده کنید.</string>
     <string name="subs_filter_bad_countries">کد دوحرفی کشور نیست، نادیده گرفته شد: %1$s</string>
     <string name="subs_country_none_accepted">قوانین کشور هیچ‌یک از %1$d پروفایل آزمایش‌شده را نمی‌پذیرند، بنابراین هیچ پروفایلی حذف نشد.</string>

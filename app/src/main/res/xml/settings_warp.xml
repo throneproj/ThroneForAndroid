@@ -9,11 +9,11 @@
         app:entryValues="@array/warp_mode_values"
         app:icon="@drawable/ic_baseline_compare_arrows_24"
         app:key="warp_mode"
-        app:title="@string/warp_mode" />
+        app:title="@string/warp_mode"
+        app:useSimpleSummaryProvider="true" />
 
     <PreferenceCategory
         app:key="warpWireGuard"
-        app:summary="@string/warp_wireguard_note"
         app:title="@string/warp_mode_wireguard">
         <EditTextPreference
             app:icon="@drawable/ic_hardware_router"
@@ -44,7 +44,6 @@
 
     <PreferenceCategory
         app:key="warpMasque"
-        app:summary="@string/warp_masque_note"
         app:title="@string/warp_mode_masque">
         <EditTextPreference
             app:icon="@drawable/ic_hardware_router"
@@ -77,7 +76,8 @@
             app:entryValues="@array/int_array_3"
             app:icon="@drawable/ic_baseline_http_24"
             app:key="warp_masque_http_mode"
-            app:title="@string/warp_http_version" />
+            app:title="@string/warp_http_version"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/warp_registration">
@@ -85,7 +85,6 @@
             app:icon="@drawable/ic_baseline_refresh_24"
             app:key="warpGenerate"
             app:persistent="false"
-            app:summary="@string/warp_generate_sum"
             app:title="@string/warp_generate" />
         <io.nekohasekai.sagernet.ui.settings.StringListPreference
             app:icon="@drawable/baseline_public_24"

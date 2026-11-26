@@ -640,22 +640,20 @@ class GroupSettingsActivity : ThemedActivity(R.layout.layout_config_settings), O
                 val state = getString(if (host.globalSendHwid) R.string.on else R.string.off)
                 entries = arrayOf(getString(R.string.grp_keep_default_state, state), getString(R.string.on), getString(R.string.off))
                 if (value !in listOf("0", "1", "2")) value = SendHwid.KEEP_DEFAULT.value.toString()
-                summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> {
-                    (it.entry ?: "").toString() + "\n" + getString(R.string.grp_send_hwid_tip)
-                }
+                summaryProvider = Preference.SummaryProvider<SimpleMenuPreference> { it.entry ?: "" }
             }
 
             overrideMenu(
                 KEY_TLS_VERSION,
                 listOf(getString(R.string.sub_version_auto), getString(R.string.sub_tls_12), getString(R.string.sub_tls_13)),
                 host.defaultTlsVersion.value,
-                getString(R.string.grp_tls_version_tip),
+                getString(R.string.sub_tls_version_tip),
             )
             overrideMenu(
                 KEY_HTTP_VERSION,
                 listOf(getString(R.string.sub_version_auto), getString(R.string.sub_http_11)),
                 host.defaultHttpVersion.value,
-                getString(R.string.grp_http_version_tip),
+                getString(R.string.sub_http_version_tip),
             )
             var serverTip = getString(R.string.grp_server_interval_tip)
             if (host.serverIntervalHours > 0) {

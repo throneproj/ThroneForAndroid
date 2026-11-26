@@ -755,7 +755,7 @@
     <string name="direct_test_url_empty">system network state</string>
     <string name="cag_exit_country">Exit country</string>
     <string name="exit_country_lookup">Look up exit country</string>
-    <string name="exit_country_lookup_sum">After connecting, ask an IP lookup service (through the proxy) which IP address and country the connection exits from. When off, no such service is contacted automatically.</string>
+    <string name="exit_country_lookup_sum">Find the exit IP and country through the proxy after connecting</string>
     <string name="exit_lookup_provider">Lookup service</string>
     <string name="exit_lookup_provider_auto">Automatic</string>
     <string name="net_use_proxy">Use proxy</string>
@@ -1090,12 +1090,12 @@
     <string name="grp_route_profile">Routing profile</string>
     <string name="grp_route_profile_default">Default (%1$s)</string>
     <string name="grp_route_profile_from_subscription">%1$s (from this subscription)</string>
-    <string name="grp_route_profile_tip">The routing profile this group\'s profiles connect with. Default follows the routing profile chosen in the Routing menu.</string>
+    <string name="grp_route_profile_tip">Default follows the Routing menu</string>
     <string name="grp_auto_clear_unavailable">Auto clear unavailable profiles</string>
     <string name="grp_url">URL</string>
     <string name="grp_skip_auto_update">Skip automatic update</string>
     <string name="grp_import_sub_route">Use the subscription\'s routing profile</string>
-    <string name="grp_import_sub_route_tip">Each update saves the routing profile the subscription provides (Happ format) as this group\'s own routing profile. DNS settings from the subscription are never used.</string>
+    <string name="grp_import_sub_route_tip">Saves the subscription\'s Happ routing as this group\'s routing profile; its DNS is ignored</string>
     <string name="grp_no_auto_selector">An auto selector moves server on its own, so it cannot hold a fixed front/landing slot.</string>
 
     <!-- Advanced Subscription Settings (dialog_edit_group_advanced) -->
@@ -1107,7 +1107,6 @@
     <string name="grp_user_agent">User agent</string>
     <string name="grp_user_agent_tip">Empty uses the user agent from Settings › Subscriptions.</string>
     <string name="grp_send_hwid">Send HWID</string>
-    <string name="grp_send_hwid_tip">Send the HWID, OS, OS version and device model headers with this subscription\'s requests. \"Keep default\" follows Settings › Subscriptions.</string>
     <string name="grp_keep_default_state">Keep default (%1$s)</string>
     <string name="grp_hwid">HWID</string>
     <string name="grp_os">OS</string>
@@ -1134,14 +1133,13 @@
     <string name="grp_sub_auto_update_interval">Interval (minute, invalid if less than 30)</string>
     <string name="grp_sub_clear">Clear profiles before updating subscription</string>
     <string name="grp_sub_show_change_popup">Show the changes window after a manual subscription update</string>
-    <string name="grp_sub_show_change_popup_tip">When enabled, a window listing added / updated / deleted profiles is shown after a manual subscription update. The same information is always written to the log.</string>
     <string name="grp_sub_send_hwid">Enable sending HWID, device model, and OS version when updating subscription</string>
     <string name="grp_sub_send_hwid_values">HWID=%1$s\nOS=%2$s\nOS Version=%3$s\nModel=%4$s</string>
     <string name="grp_sub_custom_hwid_params">Custom HWID parameters (optional)</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
-    <string name="grp_sub_custom_hwid_params_tip">Format: hwid=value,os=value,osVersion=value,model=value\nLeave empty to use default values. Only specify the parameters you want to override.</string>
+    <string name="grp_sub_custom_hwid_params_tip">Format: hwid=value,os=value,osVersion=value,model=value\nOmitted parameters keep their defaults.</string>
     <string name="grp_allow_stopping_active_profile">Allow stopping the active profile</string>
-    <string name="grp_allow_stopping_active_profile_tip">When enabled, an active profile that needs to be removed is stopped and removed. Otherwise it is not removed at all.</string>
+    <string name="grp_allow_stopping_active_profile_tip">Otherwise an update never removes the running profile</string>
     <string name="grp_not_available">N/A</string>
 
     <!-- Change report (GroupUpdater refresh) -->
@@ -1617,18 +1615,13 @@
     <string name="warp_settings">Exit</string>
     <string name="exit_through">Exit through</string>
     <string name="exit_server">Selected profile</string>
-    <string name="exit_server_hint">Traffic leaves through the profile you started.</string>
     <string name="warp_enable">Enable WARP</string>
-    <string name="warp_enable_sum">Enables the config below to be used as exit, useful for bypassing services restricting non-WARP VPNs</string>
-    <string name="warp_mode">Mode</string>
-    <string name="warp_mode_sum">%s\nWireGuard runs over UDP. AmneziaWG adds WARP-compatible junk and camouflage packets. MASQUE tunnels over HTTP/3 or HTTP/2.</string>
+    <string name="warp_mode">WARP mode</string>
     <string name="warp_mode_wireguard" translatable="false">WireGuard</string>
     <string name="warp_mode_masque" translatable="false">MASQUE</string>
     <string name="warp_mode_amnezia" translatable="false">AmneziaWG</string>
     <string name="warp_amnezia_generating">Generating the AmneziaWG QUIC signature…</string>
     <string name="warp_amnezia_missing">AmneziaWG has no QUIC signature yet: tap Generate WARP config.</string>
-    <string name="warp_wireguard_note">WARP rides on your proxy: WireGuard needs a proxy that forwards UDP.</string>
-    <string name="warp_masque_note">WARP rides on your proxy: MASQUE over HTTP/3 needs a proxy that forwards UDP, over HTTP/2 it needs only TCP.</string>
     <string name="warp_endpoint">Endpoint</string>
     <string name="warp_private_key">Private key</string>
     <string name="warp_public_key">Public key</string>
@@ -1637,12 +1630,10 @@
     <string name="warp_interface_addresses">Interface addresses</string>
     <string name="warp_reserved">Reserved</string>
     <string name="warp_http_version">HTTP version</string>
-    <string name="warp_http_version_sum">%s\nHTTP/3 runs over UDP; HTTP/2 runs over TLS on TCP and works where UDP is blocked.</string>
     <string name="warp_http3_fallback">HTTP/3 (fallback to HTTP/2)</string>
     <string name="warp_http3_only">HTTP/3 only</string>
     <string name="warp_registration">Registration</string>
     <string name="warp_generate">Generate WARP config</string>
-    <string name="warp_generate_sum">Gets a new config of the chosen mode from the Cloudflare API</string>
     <string name="generating">Generating…</string>
     <string name="warp_generate_success">Success!</string>
     <string name="warp_generate_failed">Failed to generate WARP config</string>
@@ -2035,8 +2026,6 @@
     <string name="route_rule_tls_fragment_fallback_delay">TLS fragment fallback delay</string>
     <string name="route_rule_tls_fragment_fallback_delay_hint">How long to wait between segments when the wait cannot be measured, as a duration such as 500ms (the default)</string>
     <string name="route_rule_tls_record_fragment_sum">Split the TLS handshake into several TLS records</string>
-    <string name="outbound_domain_strategy_sum">Used to resolve the proxy server addresses and the domains the direct outbound connects to</string>
-    <string name="resolve_domain_strategy_sum">Applies to connections made to domain names: with FakeIP, or HTTP/SOCKS (inbound) traffic. Without FakeIP, VPN apps resolve names themselves, so the prefer modes have no effect there. The only modes drop the other family from the DNS answers apps receive, which also overrides per-rule resolve strategies and hosts/predefined entries for that family (IPv6 only also needs Tun IPv6)</string>
     <string name="picker_copy_to_proxied_apps">Copy to Apps VPN mode</string>
     <string name="picker_copy_none">No apps to copy: Unknown apps cannot be listed in Apps VPN mode</string>
     <string name="picker_copy_done">Apps VPN mode updated. Reload the service to apply it.</string>
@@ -2054,22 +2043,19 @@
     <string name="sub_tls_13">TLS 1.3</string>
     <string name="sub_http_11">HTTP/1.1</string>
     <string name="grp_tls_version">TLS version</string>
-    <string name="grp_tls_version_tip">TLS versions offered when fetching this subscription. Some servers answer the default handshake with a CAPTCHA or a block page; TLS 1.2 often gets through. \"Keep default\" follows Settings › Subscriptions.</string>
     <string name="grp_http_version">HTTP version</string>
-    <string name="grp_http_version_tip">Auto uses HTTP/2 when the server offers it. \"Keep default\" follows Settings › Subscriptions.</string>
     <string name="grp_update_interval">Update interval (minutes)</string>
-    <string name="grp_update_interval_tip">Minutes between automatic updates of this subscription, at least 30, even while automatic updates are off in Settings › Subscriptions. Empty follows that setting.</string>
+    <string name="grp_update_interval_tip">At least 30 minutes, applies even while auto update is off</string>
     <string name="grp_server_interval">Server interval</string>
-    <string name="grp_server_interval_tip">Use the update interval sent by the subscription server, even while automatic updates are off in Settings › Subscriptions; the interval above applies when it sends none. \"Keep default\" follows that setting.</string>
+    <string name="grp_server_interval_tip">Use the interval the server sends, even while auto update is off</string>
     <string name="grp_server_interval_use">Use</string>
     <string name="grp_server_interval_ignore">Ignore</string>
     <string name="grp_server_interval_last">This server last sent %1$d h.</string>
     <string name="sub_tls_version_title">Subscription TLS version</string>
-    <string name="sub_tls_version_tip">TLS versions offered when fetching subscriptions. Some servers answer the default handshake with a CAPTCHA or a block page; TLS 1.2 often gets through.</string>
+    <string name="sub_tls_version_tip">TLS 1.2 often gets past a CAPTCHA or block page</string>
     <string name="sub_http_version_title">Subscription HTTP version</string>
     <string name="sub_http_version_tip">Auto uses HTTP/2 when the server offers it.</string>
     <string name="sub_respect_server_interval_title">Use the update interval sent by the server</string>
-    <string name="sub_respect_server_interval_tip">Subscriptions whose server sends an update interval (profile-update-interval) follow it; the interval above applies when a server sends none. Groups can override this in their Advanced settings.</string>
     <string name="subs_url_changed">The URL of %1$s changed during the update, so the result was discarded.</string>
     <string name="subs_web_page">The server returned a web page instead of a subscription. If it is a CAPTCHA or a bot check, try another TLS version, HTTP version or user agent in the group\'s Advanced settings.</string>
     <string name="subs_tls_unsupported">The selected TLS version is not supported on this system.</string>
@@ -2997,10 +2983,10 @@
     <string name="grp_filter_countries_keeps">Keeps %1$s.</string>
     <string name="grp_filter_countries_removes">Removes %1$s.</string>
     <plurals name="grp_filter_countries_test_count">
-        <item quantity="one">After each update, profiles whose exit country is unknown get an exit IP test, so the next update can test up to %1$d profile. On a large group this takes a while.</item>
-        <item quantity="other">After each update, profiles whose exit country is unknown get an exit IP test, so the next update can test up to %1$d profiles. On a large group this takes a while.</item>
+        <item quantity="one">Each update tests up to %1$d profile of unknown exit country</item>
+        <item quantity="other">Each update tests up to %1$d profiles of unknown exit country</item>
     </plurals>
-    <string name="grp_filter_countries_test">After each update, profiles whose exit country is unknown get an exit IP test. On a large subscription this takes a while.</string>
+    <string name="grp_filter_countries_test">Each update tests the profiles of unknown exit country</string>
     <string name="validation_country_rules">Not a two-letter country code: %1$s. Use codes such as HK,JP to keep only those countries, or !RU to remove one.</string>
     <string name="subs_filter_bad_countries">Not a two-letter country code, ignored: %1$s</string>
     <string name="subs_country_none_accepted">The country rules accept none of the %1$d tested profiles, so none were removed.</string>

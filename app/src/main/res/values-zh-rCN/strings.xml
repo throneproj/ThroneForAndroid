@@ -698,7 +698,7 @@
     <string name="direct_test_url_empty">系统网络状态</string>
     <string name="cag_exit_country">出口国家/地区</string>
     <string name="exit_country_lookup">查询出口国家/地区</string>
-    <string name="exit_country_lookup_sum">连接后，通过代理向 IP 查询服务询问连接的出口 IP 地址和国家/地区。关闭时不会自动连接此类服务。</string>
+    <string name="exit_country_lookup_sum">连接后通过代理查询出口 IP 和国家/地区</string>
     <string name="exit_lookup_provider">查询服务</string>
     <string name="exit_lookup_provider_auto">自动</string>
     <string name="direct_test_url_sum">不经任何代理获取，用于区分断网与服务器故障。留空则使用系统网络状态。</string>
@@ -750,7 +750,7 @@
     <string name="grp_advanced_show">显示此订阅的请求与更新选项</string>
     <string name="grp_after_each_update">每次更新后：</string>
     <string name="grp_allow_stopping_active_profile">允许停止活动配置</string>
-    <string name="grp_allow_stopping_active_profile_tip">启用后，需要删除的活动配置会先停止再删除。否则完全不删除。</string>
+    <string name="grp_allow_stopping_active_profile_tip">否则更新不会删除正在运行的配置</string>
     <string name="grp_auto_clear_unavailable">自动清除不可用配置</string>
     <string name="grp_auto_update">自动更新</string>
     <string name="grp_change_of">%1$s 的变更</string>
@@ -783,7 +783,7 @@
     <string name="grp_route_profile">路由配置</string>
     <string name="grp_route_profile_default">默认（%1$s）</string>
     <string name="grp_route_profile_from_subscription">%1$s（来自此订阅）</string>
-    <string name="grp_route_profile_tip">此分组中的配置连接时使用的路由配置。「默认」跟随在「路由」菜单中选择的路由配置。</string>
+    <string name="grp_route_profile_tip">「默认」跟随「路由」菜单</string>
     <string name="grp_more_options">更多选项</string>
     <string name="grp_move_down">下移</string>
     <string name="grp_move_up">上移</string>
@@ -804,13 +804,12 @@
     <string name="grp_request">请求</string>
     <string name="grp_running_kept">已保留正在运行的配置。</string>
     <string name="grp_send_hwid">发送 HWID</string>
-    <string name="grp_send_hwid_tip">随此订阅的请求发送 HWID、操作系统、系统版本与设备型号请求头。「保持默认」遵循「设置 › 订阅」。</string>
     <string name="grp_settings_subscription">订阅</string>
     <string name="grp_settings_user_agent">UserAgent</string>
     <string name="grp_share_subscription">分享订阅链接</string>
     <string name="grp_skip_auto_update">跳过自动更新</string>
     <string name="grp_import_sub_route">使用订阅提供的路由配置</string>
-    <string name="grp_import_sub_route_tip">每次更新都会将订阅提供的路由配置（Happ 格式）保存为此分组自己的路由配置。从不使用订阅中的 DNS 设置。</string>
+    <string name="grp_import_sub_route_tip">将订阅的 Happ 路由保存为此分组的路由配置，忽略其 DNS</string>
     <string name="grp_sort_by_latency">按延迟排序</string>
     <string name="grp_state_queued">排队中</string>
     <string name="grp_state_running">更新中…</string>
@@ -819,13 +818,12 @@
     <string name="grp_sub_clear">更新订阅前清除配置</string>
     <string name="grp_sub_custom_hwid_params">自定义 HWID 参数（可选）</string>
     <string name="grp_sub_custom_hwid_params_hint">hwid=custom_value,os=custom_os,osVersion=custom_version,model=custom_model</string>
-    <string name="grp_sub_custom_hwid_params_tip">格式：hwid=value,os=value,osVersion=value,model=value\n留空使用默认值。只填写要覆盖的参数。</string>
+    <string name="grp_sub_custom_hwid_params_tip">格式：hwid=value,os=value,osVersion=value,model=value\n未填写的参数保持默认值。</string>
     <string name="grp_sub_info">已用 %1$s · 剩余 %2$s · 到期 %3$s</string>
     <string name="grp_sub_info_no_expire">已用 %1$s · 剩余 %2$s</string>
     <string name="grp_sub_send_hwid">更新订阅时发送 HWID、设备型号与系统版本</string>
     <string name="grp_sub_send_hwid_values">HWID=%1$s\nOS=%2$s\n系统版本=%3$s\n型号=%4$s</string>
     <string name="grp_sub_show_change_popup">手动更新订阅后显示变更窗口</string>
-    <string name="grp_sub_show_change_popup_tip">启用后，手动更新订阅会显示列出新增/更新/删除配置的窗口。相同信息始终写入日志。</string>
     <string name="grp_type">类型</string>
     <string name="grp_unknown_deeplink">忽略含未知命令的深度链接：%1$s</string>
     <string name="grp_update">更新</string>
@@ -1472,7 +1470,6 @@
     <string name="warp_disable">禁用 WARP</string>
     <string name="warp_disabled">WARP 已禁用</string>
     <string name="warp_enable">启用 WARP</string>
-    <string name="warp_enable_sum">允许将下方配置用作出口，便于绕过限制非 WARP VPN 的服务</string>
     <string name="warp_enabled">WARP 已启用</string>
     <string name="warp_endpoint">端点</string>
     <string name="warp_generate_failed">生成 WARP 配置失败</string>
@@ -1480,16 +1477,12 @@
     <string name="warp_generate_identity_masque_sum">为 MASQUE 注册新的 Cloudflare WARP 设备，并填写上方的密钥、地址与服务器字段</string>
     <string name="warp_generate_identity_wireguard_sum">生成 Cloudflare WARP 账户，并填写上方的密钥、地址与端点字段</string>
     <string name="warp_generate_success">成功！</string>
-    <string name="warp_generate_sum">从 Cloudflare API 获取所选模式的新配置</string>
     <string name="warp_http3_fallback">HTTP/3（回退到 HTTP/2）</string>
     <string name="warp_http3_only">仅 HTTP/3</string>
     <string name="warp_http_version">HTTP 版本</string>
-    <string name="warp_http_version_sum">%s\nHTTP/3 基于 UDP；HTTP/2 基于 TCP 上的 TLS，在 UDP 被封锁时可用。</string>
     <string name="warp_identity_failed">生成 WARP 身份失败</string>
     <string name="warp_interface_addresses">接口地址</string>
-    <string name="warp_masque_note">WARP 依托你的代理：HTTP/3 上的 MASQUE 需要转发 UDP 的代理，HTTP/2 上只需 TCP。</string>
-    <string name="warp_mode">模式</string>
-    <string name="warp_mode_sum">%s\nWireGuard 基于 UDP。AmneziaWG 会添加兼容 WARP 的垃圾包和伪装包。MASQUE 通过 HTTP/3 或 HTTP/2 隧道传输。</string>
+    <string name="warp_mode">WARP 模式</string>
     <string name="warp_amnezia_generating">正在生成 AmneziaWG 的 QUIC 签名…</string>
     <string name="warp_amnezia_missing">AmneziaWG 尚无 QUIC 签名：请点按「生成配置」。</string>
     <string name="warp_not_generated">WARP 已启用但尚未生成配置。请在「设置 › 路由 › WARP」中生成。</string>
@@ -1503,9 +1496,7 @@
     <string name="warp_settings">出口</string>
     <string name="exit_through">出口方式</string>
     <string name="exit_server">所选配置</string>
-    <string name="exit_server_hint">流量从你启动的配置出去。</string>
     <string name="warp_tos_message"><![CDATA[生成 WARP 身份会向 Cloudflare 注册新设备。<br><br>你是否接受 <a href="%1$s">Cloudflare WARP 服务条款</a>？]]></string>
-    <string name="warp_wireguard_note">WARP 依托你的代理：WireGuard 需要转发 UDP 的代理。</string>
     <string name="webdav_choose_backup">选择备份</string>
     <string name="webdav_downloading">正在从 WebDAV 下载…</string>
     <string name="webdav_deleting">正在从 WebDAV 删除…</string>
@@ -1853,8 +1844,6 @@
     <string name="route_rule_tls_fragment_fallback_delay">TLS 分片回退延迟</string>
     <string name="route_rule_tls_fragment_fallback_delay_hint">无法测量等待时间时，各报文段之间等待多久，格式为时长，如 500ms（默认值）</string>
     <string name="route_rule_tls_record_fragment_sum">将 TLS 握手拆分为多个 TLS 记录</string>
-    <string name="outbound_domain_strategy_sum">用于解析代理服务器地址，以及直连出站所连接的域名</string>
-    <string name="resolve_domain_strategy_sum">适用于对域名发起的连接：使用 FakeIP 时，或 HTTP/SOCKS（入站）流量。未使用 FakeIP 时，VPN 应用会自行解析域名，因此 prefer_* 模式在那里不起作用。*_only 模式会从应用收到的 DNS 应答中丢弃另一种地址族，这也会覆盖各规则的解析策略以及该地址族的 hosts/预定义条目（仅 IPv6 还需要开启 Tun IPv6）</string>
     <string name="picker_copy_to_proxied_apps">复制到分应用代理</string>
     <string name="picker_copy_none">没有可复制的应用：「未知应用」无法列入分应用代理</string>
     <string name="picker_copy_done">分应用代理已更新。重载服务后生效。</string>
@@ -1871,22 +1860,19 @@
     <string name="sub_tls_13">TLS 1.3</string>
     <string name="sub_http_11">HTTP/1.1</string>
     <string name="grp_tls_version">TLS 版本</string>
-    <string name="grp_tls_version_tip">获取此订阅时提供的 TLS 版本。有些服务器会对默认握手返回验证码或拦截页面；使用 TLS 1.2 通常可以通过。「保持默认」遵循「设置 › 订阅」。</string>
     <string name="grp_http_version">HTTP 版本</string>
-    <string name="grp_http_version_tip">「自动」会在服务器支持时使用 HTTP/2。「保持默认」遵循「设置 › 订阅」。</string>
     <string name="grp_update_interval">更新间隔（分钟）</string>
-    <string name="grp_update_interval_tip">此订阅两次自动更新之间的分钟数，至少为 30；即使「设置 › 订阅」中关闭了自动更新也会生效。留空则遵循该设置。</string>
+    <string name="grp_update_interval_tip">至少 30 分钟，即使已关闭自动更新也会生效</string>
     <string name="grp_server_interval">服务器间隔</string>
-    <string name="grp_server_interval_tip">使用订阅服务器下发的更新间隔；即使「设置 › 订阅」中关闭了自动更新也会生效。服务器未下发时采用上方的间隔。「保持默认」遵循该设置。</string>
+    <string name="grp_server_interval_tip">使用服务器下发的间隔，即使已关闭自动更新</string>
     <string name="grp_server_interval_use">使用</string>
     <string name="grp_server_interval_ignore">忽略</string>
     <string name="grp_server_interval_last">该服务器上次下发 %1$d 小时。</string>
     <string name="sub_tls_version_title">订阅 TLS 版本</string>
-    <string name="sub_tls_version_tip">获取订阅时提供的 TLS 版本。有些服务器会对默认握手返回验证码或拦截页面；使用 TLS 1.2 通常可以通过。</string>
+    <string name="sub_tls_version_tip">TLS 1.2 通常可以绕过验证码或拦截页面</string>
     <string name="sub_http_version_title">订阅 HTTP 版本</string>
     <string name="sub_http_version_tip">「自动」会在服务器支持时使用 HTTP/2。</string>
     <string name="sub_respect_server_interval_title">使用服务器下发的更新间隔</string>
-    <string name="sub_respect_server_interval_tip">服务器下发了更新间隔（profile-update-interval）的订阅会遵循它；服务器未下发时采用上方的间隔。分组可在其「高级」设置中覆盖此项。</string>
     <string name="subs_url_changed">%1$s 的 URL 在更新期间发生了变化，因此结果已被丢弃。</string>
     <string name="subs_web_page">服务器返回的是网页而不是订阅。如果是验证码或机器人检查，请在分组的「高级」设置中尝试其他 TLS 版本、HTTP 版本或 UserAgent。</string>
     <string name="subs_tls_unsupported">此系统不支持所选的 TLS 版本。</string>
@@ -2797,9 +2783,9 @@
     <string name="grp_filter_countries_keeps">保留 %1$s。</string>
     <string name="grp_filter_countries_removes">移除 %1$s。</string>
     <plurals name="grp_filter_countries_test_count">
-        <item quantity="other">每次更新后，出口国家/地区未知的配置会进行出口 IP 测试，因此下次更新最多可能测试 %1$d 个配置。分组较大时需要一段时间。</item>
+        <item quantity="other">每次更新最多测试 %1$d 个出口国家/地区未知的配置</item>
     </plurals>
-    <string name="grp_filter_countries_test">每次更新后，出口国家/地区未知的配置会进行出口 IP 测试。订阅较大时需要一段时间。</string>
+    <string name="grp_filter_countries_test">每次更新都会测试出口国家/地区未知的配置</string>
     <string name="validation_country_rules">不是两字母国家/地区代码：%1$s。使用 HK,JP 之类的代码仅保留这些国家/地区，或使用 !RU 移除一个。</string>
     <string name="subs_filter_bad_countries">不是两字母国家/地区代码，已忽略：%1$s</string>
     <string name="subs_country_none_accepted">国家/地区规则不接受已测试的 %1$d 个配置中的任何一个，因此未移除任何配置。</string>
